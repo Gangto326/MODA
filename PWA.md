@@ -14,7 +14,7 @@ Service Worker, Web App Manifest 등을 활용하여 모바일의 어플리케�
 
 브라우저와 네트워크 사이의 Proxy(대리인, 중계자) 역할을 함.
 
-중간 과정의 존재로 얻을 수 있는 이점?
+번외) 중간 과정의 존재로 얻을 수 있는 이점
 
 1. IP주소 은폐 등의 보안상의 이점
 2. 데이터를 중간 단계에 모아뒀다가 한 번에 보낼 수 있음
@@ -22,6 +22,7 @@ Service Worker, Web App Manifest 등을 활용하여 모바일의 어플리케�
 4. 부하 분산 가능
 5. 한 쪽의 부재 시 중간 과정에서 데이터를 처리 & 전송 예약
 
+<br>
 
 브라우저 --> Service Worker --> 네트워크
 
@@ -71,7 +72,7 @@ const RESOURCES_TO_CACHE = [
 
 ## Cache Storage에 저장된 로직이 삭제된다면 어떻게 되나요?
 
-Service Worker는 페이지에 접속 시 Cache Storage에 저장되어야 하는 로직이 있는지 확인합니다.
+Service Worker는 페이지에 접속 시 Cache Storage에 저장되어야 하는 데이터가 있는지 확인합니다. (activate | fetch)
 확인 후 존재하지 않으면 사용자의 동의 없이 데이터를 캐싱할 수 있습니다. (PWA의 Update 로직과 유사합니다.)
 
 <br>
