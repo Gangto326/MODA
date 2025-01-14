@@ -118,8 +118,6 @@ Maven Wrapper 스크립트인 mvnw에 실행 권한을 부여한 뒤, 프로젝�
 
 #### Gradle 프로젝트인 경우
 
-더보기
-
 Gradle 프로젝트인 경우 아래 내용으로 수정하여 실행시키면 된다.
 
 ```
@@ -195,7 +193,8 @@ Intellij를 기준으로 다음과 같다.
 
 실행 버튼 옆 더보기 → Edit... → Active profiles에 local 작성 → Apply
 
-[##_Image|kage@CTM9C/btsLDU0LCuW/TXzWXySRpaJKMbsyouLLx1/img.png|CDM|1.3|{"originWidth":934,"originHeight":286,"style":"alignCenter","width":400,"height":122}_##][##_Image|kage@ybJ0r/btsLEqZr0d3/7xDELY3fKfmtkvbrR1LO71/img.png|CDM|1.3|{"originWidth":1196,"originHeight":1084,"style":"alignCenter","width":400,"height":363}_##]
+<img src="./resources/14-1.png">
+<img src="./resources/14-2.png">
 
 ---
 
@@ -331,15 +330,9 @@ docker-compose down -v
 
 이제 마지막으로 생성한 image를 repository에 푸시하는 방법이다.
 
-먼저 Docker Hub에서 repository를 만든다.
+먼저 [Docker Hub](https://hub.docker.com/)에서 repository를 만든다.
 
 Docker Hub에서 repository명은 이미지명이라고 생각해도 무방하다.
-
- [Docker Hub Container Image Library | App Containerization
-
-Increase your reach and adoption on Docker Hub With a Docker Verified Publisher subscription, you'll increase trust, boost discoverability, get exclusive data insights, and much more.
-
-hub.docker.com](https://hub.docker.com/)
 
 기본적으로 docker hub에는 1서비스 1레포지토리를 권장하고 있다.
 
