@@ -6,7 +6,7 @@ Progressive == 점진적인
 
 2. 기존의 일반적인 웹사이트에서 시작하여 점진적으로 앱과 같은 경험으로 발전할 수 있다는 뜻.
 
-Service Worker, Web App Manifest 등을 활용하여 모바일의 어플리케이션 (네이티브 앱)과 유사한 경험을 제공.
+Service Worker, Web App Manifest 등을 활용하여 모바일의 어플리케이션 (네이티브 앱)과 유사한 경험을 제공합니다.
 
 <br>
 
@@ -40,9 +40,241 @@ Service Worker에서 네트워크의 상황에 따라 맞춰 요청을 처리합
 
 결론부터 말하자면, Service Worker는 서버가 아니라 특정 요청에 반응하는 이벤트 핸들러에 더 가깝습니다.
 
-그러면 Service Worker가 각 요청에 대한 로직을 어떻게 알고 처리할 수 있는 걸까요?
+## Service Worker의 생명주기
 
-그 비밀은 바로 브라우저 내의 저장소에 있습니다.
+#### Registration(등록)
+
+``` js
+export const register = async () => {
+  // Service Worker가 지원되는 브라우저인지 확인합니다.
+  if ('serviceWorker' in navigator) {
+    try {
+      // Service Worker 등록 시도
+      // 여기서 service-worker.js 파일의 위치는 public 폴더의 루트여야 함
+      const registration = await navigator.serviceWorker.register('/service-worker.js');
+      
+      /**
+       * 브라우저는 주기적으로(보통 24시간마다) Service Worker 파일의 변경여부를 확인합니다
+       * 
+       * service-worker.js 파일의 내용이 변경되거나,
+       * Service Worker 내부에서 importScripts()로 가져오는 파일이 변경된 경우
+       * "새로운 버전"으로 감지하고 Update 합니다.
+      **/
+      registration.addEventListener('updatefound', () => {
+
+        // 설치 시작, 설치 완료, 활서화 시작, 활성화 완료, 업데이트 여부 등을 감지하기 위한 참조입니다.
+        const installingWorker = registration.installing;
+        
+        // Service Worker의 상태 변경 감지
+        installingWorker.addEventListener('statechange', () => {
+          console.log('Service Worker 상태 변경:', installingWorker.state);
+        });
+      });
+      
+      console.log('Service Worker 등록 성공');
+    } catch (error) {
+      console.error('Service Worker 등록 실패:', error);
+    }
+  }
+};
+```
+
+브라우저에 Service Worker를 등록하는 첫 단계로 Scope를 지정하며 HTTPS 환경에서만 등록할 수 있습니다.
+
+React 앱에서는 보통 앱의 진입점에서 수행합니다.
+
+<br>
+
+#### Install (설치)
+
+``` js
+self.addEventListener('install', (event) => {
+  console.log('Service Worker: 설치 중...');
+  
+  // waitUntil()을 사용하여 비동기 작업이 완료될 때까지 설치 단계 연장
+  event.waitUntil(
+    // 지정된 이름으로 캐시 스토리지 열기. 후술할 service-worker.js 의 설정정
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        console.log('Service Worker: 파일 캐싱 중');
+        // 미리 정의된 리소스들을 캐시에 저장
+        return cache.addAll(urlsToCache);
+      })
+      .then(() => {
+        // skipWaiting()을 호출하여 대기 단계를 건너뛰고 즉시 활성화
+        console.log('Service Worker: 대기 단계 건너뛰기');
+        return self.skipWaiting();
+      })
+  );
+});
+```
+
+Service Worker에서 설정한 정적 리소스를 캐시에 저장합니다.
+
+<br>
+
+#### Activation (활성화)
+
+``` js
+self.addEventListener('activate', (event) => {
+  console.log('Service Worker: 활성화 중...');
+  
+  event.waitUntil(
+    // 모든 캐시 키를 가져와서 현재 버전과 다른 캐시를 삭제합니다.
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cache => {
+          if (cache !== CACHE_NAME) {
+            console.log('Service Worker: 이전 캐시 삭제 중');
+            return caches.delete(cache);
+          }
+        })
+      );
+    })
+    .then(() => {
+      // clients.claim()을 호출하여 활성화 즉시 모든 클라이언트의 제어권 획득
+      console.log('Service Worker: 클라이언트 제어권 획득');
+      return clients.claim();
+    })
+  );
+});
+```
+
+새로운 Service Worker로 교체하고, 이전 버전의 캐시 데이터가 존재한다면 삭제합니다.
+
+<br>
+
+#### Fetch (동작)
+
+``` js
+self.addEventListener('fetch', (event) => {
+  console.log('Service Worker: 리소스 요청 감지', event.request.url);
+  
+  event.respondWith(
+    // 요청된 리소스가 캐시에 있는지 확인
+    caches.match(event.request)
+      .then(response => {
+        // 캐시에서 찾았으면 캐시된 응답 반환
+        if (response) {
+          console.log('Service Worker: 캐시에서 리소스 찾음', event.request.url);
+          return response;
+        }
+        
+        // 캐시에 없으면 네트워크로 요청
+        console.log('Service Worker: 네트워크 요청 시작', event.request.url);
+        return fetch(event.request)
+          .then(response => {
+            // 유효한 응답인지 확인
+            // 기본적으로 같은 도메인의 응답만 캐시 --> 보안상의 위험 방지!
+            if (!response || response.status !== 200 || response.type !== 'basic') {
+              return response;
+            }
+            
+            /**
+             * 응답을 캐시에 저장하기 위해 복제합니다.
+             * 
+             * Response 객체는 Stream을 사용합니다.
+             * Stream은 물의 흐름으로 비유할 수 있는데 쉬운 예시로는 100MB의 파일을 1MB씩 받으며 순차적으로 처리하는 방식입니다.
+             * 
+             * 메모리의 효율성이 좋고, 초기 응답을 빠르게 처리할 수 있다는 장점이 있으나,
+             * 한 번 지나간 데이터는 다시 읽을 수 없다는 치명적인 단점이 존재합니다.
+             * 
+             * 따라서 응답 스트림은 복제가 필요합니다.
+            **/
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME)
+              .then(cache => {
+                cache.put(event.request, responseToCache);
+                console.log('Service Worker: 새로운 리소스를 캐시에 저장', event.request.url);
+              });
+            
+            return response;
+          });
+          // 오프라인의 경우 예외 처리를 진행할 수 있습니다.
+          .catch(error => {
+            console.log('Service Worker: 네트워크 요청 실패 (오프라인)', error);
+          });
+      })
+  );
+});
+```
+
+브라우저의 모든 네트워크 요청을 가로채서 처리하며,
+캐시 리소스 유무 및 네트워크의 온 오프라인 상황에 따른 로직을 구현합니다.
+
+<br>
+
+#### Update (업데이트)
+
+```js
+// src/components/ServiceWorkerManager.js
+import React, { useEffect, useState } from 'react';
+
+const ServiceWorkerManager = () => {
+  // 새 버전 존재 여부 상태
+  const [newVersionAvailable, setNewVersionAvailable] = useState(false);
+  // Service Worker 등록 객체 참조 저장
+  const [registration, setRegistration] = useState(null);
+
+  useEffect(() => {
+    // Service Worker 등록 함수
+    const registerSW = async () => {
+      if ('serviceWorker' in navigator) {
+        try {
+          // 브라우저가 서버에서 service-worker.js 파일을 다시 다운로드하여 Update 여부를 확인합니다.
+          const reg = await navigator.serviceWorker.register('/service-worker.js');
+          setRegistration(reg);
+          
+          // 새로운 Service Worker 감지
+          reg.addEventListener('updatefound', () => {
+            // 이 시점에서 새로운 Service Worker가 설치를 시작!
+            const installingWorker = reg.installing;
+            
+            // 설치 상태 변경 감지 과정 (모니터링)
+            installingWorker.addEventListener('statechange', () => {
+              // 새 버전이 설치 완료되고 && 이전 버전이 활성화된 상태일 때
+              if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                setNewVersionAvailable(true);
+              }
+            });
+          });
+          
+        } catch (error) {
+          console.error('Service Worker 등록 실패:', error);
+        }
+      }
+    };
+
+    registerSW();
+  }, []);
+
+  // 새 버전 Service Worker 활성화 함수
+  const updateServiceWorker = () => {
+    if (registration && registration.waiting) {
+      // waiting 상태의 Service Worker에게 활성화 메시지 전송
+      registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+      
+      // 새로운 Service Worker 활성화를 위해 페이지 새로고침
+      window.location.reload();
+    }
+  };
+
+  return (
+    <div>
+      업데이트에 관한 사용자 알림 및 업데이트 설치 수락 버튼 표시.
+    </div>
+  );
+};
+
+export default ServiceWorkerManager;
+```
+
+Service Worker는 자동 업데이트가 가능하지만 사용자가 작성중인 데이터가 있거나 진행 중인 작업 등을 보호 등의 이유로
+사용자의 수락을 받고 업데이트를 진행하는 것을 권장합니다.
+
+<br>
+
+### Service Worker가 네트워크와의 통신 없이 각 요청에 대한 로직을 백그라운드에서 처리할 수 있는 이유는 Fetch 과정의 캐시를 확인하는 과정에 있습니다.
 
 <br>
 
