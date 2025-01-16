@@ -1,0 +1,95 @@
+pipeline {
+    agent any
+
+    triggers {
+        gitlab {
+            branchFilterType: 'NameBasedFilter'
+            includeBranchesSpec: 'springtest'
+            serverName: 'A805'
+            secretToken: credentials('gitlab-secret-token')
+            triggerOnPush: true
+        }
+    }
+
+    environment {
+        DOCKER_IMAGE = "dreamingj98/springtest"
+        DOCKER_CONTAINER = "springtest"
+    }
+
+    stages {
+        stage('Build and Push Docker Image') {
+            steps {
+                dir('backend') {
+                    withCredentials([usernamePassword(
+                        credentialsId: 'dockerhub-credential',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASSWORD'
+                    )]) {
+                        script {
+                            sh """
+                                echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USER} --password-stdin
+                                docker build -t ${DOCKER_IMAGE}:latest .
+                                docker push ${DOCKER_IMAGE}:latest
+                            """
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to EC2') {
+            steps {
+                script {
+                    withCredentials([
+                        usernamePassword(
+                            credentialsId: 'dockerhub-credential',
+                            usernameVariable: 'DOCKER_USER',
+                            passwordVariable: 'DOCKER_PASSWORD'
+                        ),
+                        string(
+                            credentialsId: 'ec2-server',
+                            variable: 'EC2_SERVER'
+                        ),
+                        sshUserPrivateKey(
+                            credentialsId: 'ec2-ssh-key',
+                            keyFileVariable: 'SSH_KEY'
+                        )
+                    ]) {
+                        sh """
+                            ssh-keyscan -H \$(echo \${EC2_SERVER} | cut -d@ -f2) >> ~/.ssh/known_hosts
+                            ssh -i \${SSH_KEY} \${EC2_SERVER} '
+                                echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USER} --password-stdin
+
+                                docker stop ${DOCKER_CONTAINER} || true
+                                docker rm ${DOCKER_CONTAINER} || true
+
+                                docker pull ${DOCKER_IMAGE}:latest
+                                docker run -d \
+                                    --name ${DOCKER_CONTAINER} \
+                                    -p 8080:8080 \
+                                    --restart unless-stopped \
+                                    ${DOCKER_IMAGE}:latest
+
+                                docker logout
+                            '
+                        """
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            sh 'docker logout'
+            cleanWs()
+        }
+        success {
+            echo 'Build successful!'
+        }
+        failure {
+            echo 'Build failed!'
+        }
+
+    }
+}
