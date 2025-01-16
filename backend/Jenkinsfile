@@ -2,13 +2,13 @@ pipeline {
     agent any
 
     triggers {
-        gitlab {
-            branchFilterType: 'NameBasedFilter'
-            includeBranchesSpec: 'springtest'
-            serverName: 'A805'
-            secretToken: credentials('gitlab-secret-token')
+        gitlab(
+            branchFilterType: 'NameBasedFilter',
+            includeBranchesSpec: 'springtest',
+            serverName: 'A805',
+            secretToken: credentials('gitlab-secret-token'),
             triggerOnPush: true
-        }
+        )
     }
 
     environment {
