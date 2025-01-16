@@ -6,7 +6,7 @@ pipeline {
             triggerOnPush: true,
             triggerOnMergeRequest: false,
             branchFilterType: 'NameBasedFilter',
-            includeBranchesSpec: 'test',
+            includeBranchesSpec: 'springtest',
             secretToken: 'f8963042e5ea4955c9cf51f34002518d'
         )
     }
