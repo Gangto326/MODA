@@ -13,19 +13,6 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
-            steps {
-                checkout([
-                    $class: 'GitSCM',
-                    branches: [[name: '*/test']],
-                    userRemoteConfigs: [[
-                        url: 'https://lab.ssafy.com/s12-webmobile2-sub1/S12P11A805.git',
-                        credentialsId: 'GITLAB_ACCESS_TOKEN'
-                    ]]
-                ])
-            }
-        }
-
         stage('Create Test Directory') {
             steps {
                 script {
