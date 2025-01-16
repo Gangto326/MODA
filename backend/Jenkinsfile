@@ -2,75 +2,42 @@ pipeline {
     agent any
 
     triggers {
-        gitlab {
-            branchFilterType: 'NameBasedFilter'
-            includeBranchesSpec: 'springtest'
-            serverName: 'A805'
-            secretToken: credentials('gitlab-secret-token')
-            triggerOnPush: true
-        }
-    }
-
-    environment {
-        DOCKER_IMAGE = "dreamingj98/springtest"
-        DOCKER_CONTAINER = "springtest"
+        gitlab(
+            triggerOnPush: true,
+            triggerOnMergeRequest: false,
+            branchFilterType: 'NameBasedFilter',
+            includeBranchesSpec: 'test',
+            secretToken: 'f8963042e5ea4955c9cf51f34002518d'
+        )
     }
 
     stages {
-        stage('Build and Push Docker Image') {
+
+        stage('Checkout') {
             steps {
-                dir('backend') {
-                    withCredentials([usernamePassword(
-                        credentialsId: 'dockerhub-credential',
-                        usernameVariable: 'DOCKER_USER',
-                        passwordVariable: 'DOCKER_PASSWORD'
-                    )]) {
-                        script {
-                            sh """
-                                echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USER} --password-stdin
-                                docker build -t ${DOCKER_IMAGE}:latest .
-                                docker push ${DOCKER_IMAGE}:latest
-                            """
-                        }
-                    }
-                }
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*/test']],
+                    userRemoteConfigs: [[
+                        url: 'https://lab.ssafy.com/s12-webmobile2-sub1/S12P11A805.git',
+                        credentialsId: 'GITLAB_ACCESS_TOKEN'
+                    ]]
+                ])
             }
         }
 
-        stage('Deploy to EC2') {
+        stage('Create Test Directory') {
             steps {
                 script {
-                    withCredentials([
-                        usernamePassword(
-                            credentialsId: 'dockerhub-credential',
-                            usernameVariable: 'DOCKER_USER',
-                            passwordVariable: 'DOCKER_PASSWORD'
-                        ),
-                        string(
-                            credentialsId: 'ec2-server',
-                            variable: 'EC2_SERVER'
-                        ),
-                        sshUserPrivateKey(
-                            credentialsId: 'ec2-ssh-key',
-                            keyFileVariable: 'SSH_KEY'
-                        )
-                    ]) {
+                    // 현재 시간을 포함한 디렉토리 이름 생성
+                    def timestamp = new Date().format('yyyyMMdd_HHmmss')
+                    def dirName = "test_${timestamp}"
+
+                    // EC2에 SSH로 접속하여 디렉토리 생성
+                    sshagent(['ec2-server']) {
                         sh """
-                            ssh-keyscan -H \$(echo \${EC2_SERVER} | cut -d@ -f2) >> ~/.ssh/known_hosts
-                            ssh -i \${SSH_KEY} \${EC2_SERVER} '
-                                echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USER} --password-stdin
-
-                                docker stop ${DOCKER_CONTAINER} || true
-                                docker rm ${DOCKER_CONTAINER} || true
-
-                                docker pull ${DOCKER_IMAGE}:latest
-                                docker run -d \
-                                    --name ${DOCKER_CONTAINER} \
-                                    -p 8080:8080 \
-                                    --restart unless-stopped \
-                                    ${DOCKER_IMAGE}:latest
-
-                                docker logout
+                            ssh -o StrictHostKeyChecking=no ec2-user@52.79.239.182 '
+                                sudo mkdir -p /home/ec2-user/${dirName}
                             '
                         """
                     }
@@ -80,16 +47,11 @@ pipeline {
     }
 
     post {
-        always {
-            sh 'docker logout'
-            cleanWs()
-        }
         success {
-            echo 'Build successful!'
+            echo 'Directory creation successful!'
         }
         failure {
-            echo 'Build failed!'
+            echo 'Directory creation failed!'
         }
-
     }
 }
