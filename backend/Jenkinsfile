@@ -7,10 +7,13 @@ pipeline {
             triggerOnPush: true
         )
     }
+
+    
     environment {
         DOCKER_IMAGE = "dreamingj98/springtest"
         DOCKER_CONTAINER = "springtest"
     }
+
     stages {
         stage('Build && Push Docker Image') {
             steps {
