@@ -1,5 +1,6 @@
 pipeline {
     agent any
+    
     triggers {
         gitlab(
             branchFilterType: 'NameBasedFilter',
@@ -15,7 +16,7 @@ pipeline {
     }
 
     stages {
-        stage('Build gogo Push Docker Image maker!@') {
+        stage('Build gogo Push Docker Image maker') {
             steps {
                 dir('backend') {
                     withCredentials([usernamePassword(
@@ -35,7 +36,7 @@ pipeline {
             }
         }
 
-        stage('Deploy to EC22222') {
+        stage('Deploy to EC2') {
             steps {
                 script {
                     withCredentials([
