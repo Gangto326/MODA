@@ -50,7 +50,7 @@ export const register = async () => {
   if ('serviceWorker' in navigator) {
     try {
       // Service Worker 등록 시도
-      // 여기서 service-worker.js 파일의 위치는 public 폴더의 루트여야 함
+      // 여기서 service-worker.js 파일의 위치는 반드시 도메인의 루트에 위치해야 함 (Service Worker가 제어할 수 있는 페이지 Scope 설정)
       const registration = await navigator.serviceWorker.register('/service-worker.js');
       
       /**
@@ -62,7 +62,17 @@ export const register = async () => {
       **/
       registration.addEventListener('updatefound', () => {
 
-        // 설치 시작, 설치 완료, 활서화 시작, 활성화 완료, 업데이트 여부 등을 감지하기 위한 참조입니다.
+        /**
+         * 새로운 Service Worker가 설치를 시작할 때 생성되는 참조.
+         * 
+         * installingWorker.state는 설치 진행상황에 따라 상태 변경을 값으로 가짐.
+         *  - installing: 설치 시작
+         *  - installed: 설치 완료
+         *  - activating: 활성화 시작
+         *  - activated: 활성화 완료
+         * 
+         * Service Worker의 업데이트 과정을 모니터링하고 각 단계에서 필요한 작업을 수행할 수 있음.
+         */
         const installingWorker = registration.installing;
         
         // Service Worker의 상태 변경 감지
@@ -93,7 +103,7 @@ self.addEventListener('install', (event) => {
   
   // waitUntil()을 사용하여 비동기 작업이 완료될 때까지 설치 단계 연장
   event.waitUntil(
-    // 지정된 이름으로 캐시 스토리지 열기. 후술할 service-worker.js 의 설정정
+    // 지정된 이름으로 캐시 스토리지 열기. 후술할 service-worker.js 의 설정
     caches.open(CACHE_NAME)
       .then(cache => {
         console.log('Service Worker: 파일 캐싱 중');
@@ -173,8 +183,8 @@ self.addEventListener('fetch', (event) => {
             /**
              * 응답을 캐시에 저장하기 위해 복제합니다.
              * 
-             * Response 객체는 Stream을 사용합니다.
-             * Stream은 물의 흐름으로 비유할 수 있는데 쉬운 예시로는 100MB의 파일을 1MB씩 받으며 순차적으로 처리하는 방식입니다.
+             * Fetch API는 Response 객체를 Stream형식으로 반환환합니다.
+             * Stream은 물의 흐름으로 비유할 수 있는데, 쉬운 예시로 100MB의 파일을 1MB씩 받으며 순차적으로 처리하는 방식을 들 수 있습니다.
              * 
              * 메모리의 효율성이 좋고, 초기 응답을 빠르게 처리할 수 있다는 장점이 있으나,
              * 한 번 지나간 데이터는 다시 읽을 수 없다는 치명적인 단점이 존재합니다.
@@ -274,7 +284,7 @@ Service Worker는 자동 업데이트가 가능하지만 사용자가 작성중�
 
 <br>
 
-### Service Worker가 네트워크와의 통신 없이 각 요청에 대한 로직을 백그라운드에서 처리할 수 있는 이유는 Fetch 과정의 캐시를 확인하는 과정에 있습니다.
+### Service Worker가 네트워크와의 통신 없이 각 요청에 대한 로직을 백그라운드에서 처리할 수 있는 이유는 Install 과정의 캐시 저장과, Fetch 과정의 캐시를 확인하는 과정에 있습니다.
 
 <br>
 
@@ -342,6 +352,164 @@ But, IndexedDB는 경우도 저장소는 독립적이지만 전체 용량은 공
 
 <br>
 
+## 그러면 백그라운드 로직 코드를 전부 Cache Storage에 저장하나요?
+
+### Cache Storage와 Service Worker에는 절대로 민감한 로직이나 정보가 저장되면 안됩니다!
+
+<br>
+
+Chrome 개발자 도구 등의 간단한 접근으로도 코드가 전부 노출되는 위험이 있습니다.
+
+저희 서비스는 AI 처리를 백그라운드에서 할 계획이므로 AI API KEY가 노출이 됩니다.
+
+따라서, Background Sync를 활용하려합니다.
+
+<br>
+
+## Background Sync
+
+### Background Sync 동작 방식
+
+- 서비스에 접속하지 않아도 백그라운드에서 동작 가능
+
+- 단, PWA가 최근에 사용되지 않거나, Android 시스템의 배터리 최적화 정책 등에 의한 제한이 있을 수 있음
+
+- Background Sync의 실행 시점은 Android 시스템이 결정한다는 점에 유의
+
+``` js
+// Service Worker
+self.addEventListener('fetch', async event => {
+  if (event.request.url.endsWith('/share-target')) {
+    event.respondWith(
+      (async () => {
+        try {
+          const token = await getTokenFromIndexedDB(); // PWA에 저장된 인증 토큰 확인.
+          
+          if (!token) {
+            // 로그인이 필요한 경우 로그인 페이지로 redirect
+            return Response.redirect('/login');
+          }
+
+          const formData = await event.request.formData();
+          const url = formData.get('url');
+
+          // IndexedDB에 저장
+          await saveToIndexedDB({
+            url,
+            token,
+            status: 'pending',
+            timestamp: Date.now()
+          });
+
+          // Background Sync 등록
+          const registration = await navigator.serviceWorker.ready;
+          await registration.sync.register('process-url');
+
+        } catch (error) {
+          console.error('Error processing share:', error);
+        }
+      })()
+    );
+  }
+});
+
+
+// Background Sync 실행 - 사용자 접속 없이도 실행됨
+// self == Service Worker의 전역 Scope
+self.addEventListener('sync', event => {
+
+  // 발생한 sync 이벤트의 태그가 'process-url'인지 확인하는 과정
+  if (event.tag === 'process-url') {
+    event.waitUntil(processPendingUrls());
+  }
+});
+
+async function processPendingUrls() {
+  try {
+    // pending 상태인 데이터 가져오기
+    const pendingData = await getPendingUrl();
+    if (!pendingData) return;
+
+    // 서버로 요청
+    const response = await fetch('https://우리서비스.com/api/RequestUrl', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${pendingData.token}`
+      },
+      body: JSON.stringify({ url: pendingData.url })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to process URL');
+    }
+
+    // 결과 저장
+    const result = await response.json();
+    await updateUrlStatus(pendingData.url, 'completed', result);
+
+  } catch (error) {
+    console.error('Sync failed:', error);
+    // 에러를 throw하면 시스템이 나중에 재시도
+    throw error;
+  }
+}
+
+
+
+
+// Background Sync 실행 - 사용자 접속 없이도 실행됨
+// self == Service Worker의 전역 Scope
+self.addEventListener('sync', event => {
+
+  // 발생한 sync 이벤트의 태그가 'process-url'인지 확인하는 과정
+  if (event.tag === 'process-url') {
+    event.waitUntil(
+      (async () => {
+        // 1. IndexedDB에서 pending 상태인 데이터와 토큰 가져오기
+        const { url, token } = await getPendingUrl();
+        
+        // 2. 서버로 요청
+        const response = await fetch('https://우리서비스.com/api/처리URL', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`  // 토큰으로 사용자 식별
+          },
+          body: JSON.stringify({ url })
+        });
+        
+        // 3. 서버 응답 처리
+        if (response.ok) {
+          const result = await response.json();
+          // IndexedDB 상태 업데이트
+          await updateUrlStatus(url, 'completed', result);
+        } else {
+          // 실패 시 재시도를 위해 에러 throw
+          throw new Error('Failed to process URL');
+        }
+      })()
+    );
+  }
+});
+
+async function processPendingUrls() {
+  // 1. IndexedDB에서 처리할 URL 가져오기 (getPendingUrl(): status가 'pending'인 데이터 탐색. pending 데이터가 여러개일 경우를 고려하여 로직 보완해야 함)
+  const pendingUrl = await getPendingUrl();
+  
+  // 2. 서버에 요청 (API 키는 서버에서 관리)
+  const response = await fetch('https://우리서비스.com/요청URL', {
+    method: 'POST',
+    body: JSON.stringify({ url: pendingUrl.url })
+  });
+  
+  // 3. 처리 결과를 IndexedDB에 저장
+  await updateUrlStatus(pendingUrl.id, 'completed', await response.json());
+}
+```
+
+<br>
+
 ## 여담이지만... 사용자의 동의 없이 Service Worker를 설치하는 것이 합법인가요?
 
 Service Worker 설치는 웹 표준의 일부이며 다양한 제약이 있습니다.
@@ -357,7 +525,7 @@ Service Worker 설치는 웹 표준의 일부이며 다양한 제약이 있습�
 
 ## 우리 서비스의 백그라운드 처리 로직 예상
 
-URL 공유 -> IndexedDB에 URL 임시 저장 -> Service Worker에서 Background Sync API (fetch API) 활용 -> AI API 호출 -> 파싱된 데이터를 IndexedDB 저장 -> 서비스 접속 시 IndexedDB의 데이터 바로 사용 (RDBMS에 데이터 전송 및 IndexedDB의 데이터 제거)
+URL 공유 -> IndexedDB에 URL 임시 저장 -> Service Worker에서 Background Sync API 활용 -> 서버에 Request -> AI API 호출 -> 결과 저장 -> 서비스 접속 시 IndexedDB의 데이터 바로 사용 (RDBMS에 데이터 전송 및 IndexedDB의 데이터 제거)
 
 Service Worker를 사용하여 시간이 오래 걸리는 AI API 호출 및 정보 가공을 마치 오프라인 상태의 서버에서 처리하는 듯한 느낌을 전합니다.
 
