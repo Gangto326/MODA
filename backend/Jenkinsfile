@@ -15,7 +15,7 @@ pipeline {
     }
 
     stages {
-        stage('Build gogo Push Docker Image') {
+        stage('Build gogo Push Docker Image maker!@') {
             steps {
                 dir('backend') {
                     withCredentials([usernamePassword(
