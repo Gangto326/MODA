@@ -64,14 +64,14 @@ pipeline {
                             ssh -i \${SSH_KEY} \${EC2_SERVER} '
                                 echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USER} --password-stdin
                                 
-                                # 이전 컨테이너 정리
-                                docker-compose down --remove-orphans
+                                # 특정 프로젝트의 컨테이너만 중지하고 제거
+                                docker-compose down
                                 
-                                # 새 이미지 가져오기 및 실행
+                                # 해당 프로젝트의 컨테이너만 재시작
                                 docker-compose pull
                                 docker-compose up -d
                                 
-                                # Docker 이미지 정리 (선택사항)
+                                # 사용하지 않는 이미지만 정리 (강제성 제거)
                                 docker image prune -f
                                 
                                 docker logout
@@ -82,7 +82,6 @@ pipeline {
             }
         }
     }
-
     post {
         always {
             sh 'docker logout'
