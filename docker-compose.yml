@@ -1,4 +1,3 @@
-# docker-compose.yml
 services:
   backend:
     build: ./backend
@@ -10,7 +9,9 @@ services:
       - app-network
 
   nginx:
-    build: ./nginx
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
     image: ${DOCKER_USER}/springtest-nginx:latest
     container_name: nginx
     ports:
