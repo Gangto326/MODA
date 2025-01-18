@@ -1,4 +1,11 @@
 services:
+  frontend:
+    build: ./my-pwa-app
+    image: dreamingj98/springtest-frontend:latest
+    container_name: frontend
+    networks:
+      - app-network
+
   backend:
     build: ./backend
     image: dreamingj98/springtest-backend:latest
@@ -18,9 +25,11 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - /etc/nginx/ssl:/etc/nginx/ssl  # EC2의 실제 SSL 인증서 경로
+      - /etc/nginx/ssl:/etc/nginx/ssl # SSL 인증서 경로
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf # Nginx 설정 파일
     depends_on:
       - backend
+      - frontend
     networks:
       - app-network
 
