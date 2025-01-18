@@ -17,20 +17,24 @@ pipeline {
     stages {
         stage('Build and Push with Docker Compose') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-credential',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASSWORD'
-                )]) {
-                    script {
-                        // Docker Hub 로그인
-                        sh "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USER} --password-stdin"
-                        
-                        // Docker Compose로 빌드 및 푸시
-                        sh """
-                            docker-compose build
-                            docker-compose push
-                        """
+                dir('.') {
+                    withCredentials([usernamePassword(
+                        credentialsId: 'dockerhub-credential',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASSWORD'
+                    )]) {
+                        script {
+                            try {
+                                sh "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USER} --password-stdin"
+                                sh """
+                                    docker-compose build
+                                    docker-compose push
+                                """
+                            } catch (Exception e) {
+                                echo "Build failed: ${e.message}"
+                                throw e
+                            }
+                        }
                     }
                 }
             }
