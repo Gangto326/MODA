@@ -1,7 +1,7 @@
 services:
   backend:
     build: ./backend
-    image: ${DOCKER_USER}/springtest-backend:latest
+    image: dreamingj98/springtest-backend:latest
     container_name: backend
     ports:
       - "8080:8080"
@@ -12,7 +12,7 @@ services:
     build:
       context: ./nginx
       dockerfile: Dockerfile
-    image: ${DOCKER_USER}/springtest-nginx:latest
+    image: dreamingj98/springtest-nginx:latest
     container_name: nginx
     ports:
       - "80:80"
