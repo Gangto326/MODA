@@ -1,8 +1,8 @@
-version: "3"
+# docker-compose.yml
 services:
   backend:
-    build:
-      context: ./backend
+    build: ./backend
+    image: ${DOCKER_USER}/springtest-backend:latest
     container_name: backend
     ports:
       - "8080:8080"
@@ -10,8 +10,8 @@ services:
       - app-network
 
   nginx:
-    build:
-      context: ./nginx
+    build: ./nginx
+    image: ${DOCKER_USER}/springtest-nginx:latest
     container_name: nginx
     ports:
       - "80:80"
