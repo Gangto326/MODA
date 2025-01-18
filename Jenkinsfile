@@ -24,11 +24,12 @@ pipeline {
                         passwordVariable: 'DOCKER_PASSWORD'
                     )]) {
                         script {
-                            try {
-                                sh "echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USER} --password-stdin"
+                           try {
                                 sh """
-                                    docker-compose build
-                                    docker-compose push
+                                    echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USER} --password-stdin
+                                    pwd && ls -la  # 현재 디렉토리와 파일 목록 확인
+                                    docker-compose -f docker-compose.yml build
+                                    docker-compose -f docker-compose.yml push
                                 """
                             } catch (Exception e) {
                                 echo "Build failed: ${e.message}"
