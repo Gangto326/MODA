@@ -1,0 +1,15 @@
+{
+    "short_name": "MyApp",
+    "name": "My Shared Links App",
+    "start_url": "/",
+    "display": "standalone",
+    "share_target": {
+      "action": "/share",
+      "method": "POST",
+      "enctype": "application/x-www-form-urlencoded",
+      "params": {
+        "url": "url"
+      }
+    }
+  }
+  
