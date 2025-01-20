@@ -6,22 +6,21 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: "autoUpdate", // 서비스 워커 자동 업데이트
+      registerType: "autoUpdate", // PWA 자동 업데이트
+      // includeAssets: ["favicon.svg", "favicon.ico", "robots.txt", "apple-touch-icon.png"],
       manifest: {
         name: "My PWA App",
         short_name: "PWA App",
-        start_url: "/",
-        display: "standalone",
-        background_color: "#ffffff",
-        theme_color: "#000000",
+        description: "A React PWA using Vite",
+        theme_color: "#ffffff",
         icons: [
           {
-            src: "/icon-192x192.png",
+            src: "/android-chrome-192x192.png",
             sizes: "192x192",
             type: "image/png",
           },
           {
-            src: "/icon-512x512.png",
+            src: "/android-chrome-512x512.png",
             sizes: "512x512",
             type: "image/png",
           },
@@ -30,3 +29,4 @@ export default defineConfig({
     }),
   ],
 });
+
