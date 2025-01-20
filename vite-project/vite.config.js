@@ -5,8 +5,9 @@ import react from '@vitejs/plugin-react'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react(), VitePWA({
-    registerType: 'prompt',
-    injectRegister: false,
+    registerType: 'prompt', // 서비스 워커 설치 요청을 사용자에게 묻는 프롬프트
+    injectRegister: true,   // 자동 등록 활성화
+    
 
     pwaAssets: {
       disabled: false,

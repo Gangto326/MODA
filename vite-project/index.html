@@ -2,15 +2,32 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- 아래 코드 추가 -->
+    
+    <!-- Manifest 추가 -->
     <link rel="manifest" href="manifest.json">
 
     <title>vite-project</title>
   </head>
   <body>
     <div id="root"></div>
+
+    <!-- React 앱을 로드하는 스크립트 -->
     <script type="module" src="/src/main.jsx"></script>
+
+    <!-- 서비스 워커 등록 코드 추가 -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')  // sw.js 경로
+            .then((registration) => {
+              console.log('Service Worker 등록 성공:', registration);
+            })
+            .catch((error) => {
+              console.error('Service Worker 등록 실패:', error);
+            });
+        });
+      }
+    </script>
   </body>
 </html>
