@@ -1,0 +1,7 @@
+services:
+  moda-api:
+    build: .
+    image: ${DOCKER_USER}/moda-api:latest
+    ports:
+      - "8080:8080"
+   

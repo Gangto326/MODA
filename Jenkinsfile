@@ -1,98 +1,88 @@
 pipeline {
     agent any
-    
+       
     environment {
-        DOCKER_IMAGE = 'backend'
-        DOCKER_TAG = "${BUILD_NUMBER}"
+        COMPOSE_PROJECT_NAME = "backend"
+        DOCKER_USER = ""
     }
     
     stages {
-        stage('Checkout') {
+        stage('Build and Push with Docker Compose') {
             steps {
-                checkout scm
-            }
-        }
-        
-        stage('Build') {
-            steps {
-                sh 'mvn clean package'
-            }
-        }
-        
-        stage('Unit Test') {
-            steps {
-                sh 'mvn test'
-            }
-            post {
-                always {
-                    junit '**/target/surefire-reports/*.xml'
-                }
-            }
-        }
-        
-        stage('Code Analysis') {
-            steps {
-                withSonarQubeEnv('SonarQube') {
-                    sh 'mvn sonar:sonar'
-                }
-            }
-        }
-        
-        stage('Docker Build') {
-            steps {
-                script {
-                    docker.build("${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG}")
-                }
-            }
-        }
-        
-        stage('Docker Push') {
-            steps {
-                script {
-                    docker.withRegistry("https://${DOCKER_REGISTRY}", 'docker-credentials') {
-                        docker.image("${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG}").push()
-                        docker.image("${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG}").push('latest')
+                dir('.') {
+                    withCredentials([usernamePassword(
+                        credentialsId: 'dockerhub-credential',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASSWORD'
+                    )]) {
+                        script {
+                           try {
+                                sh """
+                                    echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USER} --password-stdin
+                                    pwd && ls -la  # 현재 디렉토리와 파일 목록 확인
+                                    docker-compose -f docker-compose.yml build
+                                    docker-compose -f docker-compose.yml push
+                                """
+                            } catch (Exception e) {
+                                echo "Build failed: ${e.message}"
+                                throw e
+                            }
+                        }
                     }
                 }
             }
         }
-        
-        stage('Deploy to Development') {
-            when {
-                branch 'develop'
-            }
+
+        stage('Deploy to EC2') {
             steps {
-                sh """
-                    kubectl apply -f k8s/deployment.yaml
-                    kubectl set image deployment/your-app your-container=${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG}
-                """
-            }
-        }
-        
-        stage('Deploy to Production') {
-            when {
-                branch 'main'
-            }
-            steps {
-                input message: 'Deploy to production?'
-                sh """
-                    kubectl apply -f k8s/deployment.yaml
-                    kubectl set image deployment/your-app your-container=${DOCKER_REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG}
-                """
+                script {
+                    withCredentials([
+                        usernamePassword(
+                            credentialsId: 'dockerhub-credential',
+                            usernameVariable: 'DOCKER_USER',
+                            passwordVariable: 'DOCKER_PASSWORD'
+                        ),
+                        string(
+                            credentialsId: 'ec2-server',
+                            variable: 'EC2_SERVER'
+                        ),
+                        sshUserPrivateKey(
+                            credentialsId: 'ec2-ssh-key',
+                            keyFileVariable: 'SSH_KEY'
+                        )
+                    ]) {
+                        sh """
+                            scp -i \${SSH_KEY} docker-compose.yml \${EC2_SERVER}:~/
+                            ssh -i \${SSH_KEY} \${EC2_SERVER} '
+                                echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USER} --password-stdin
+                                
+                                # 특정 프로젝트의 컨테이너만 중지하고 제거
+                                docker-compose down
+                                
+                                # 해당 프로젝트의 컨테이너만 재시작
+                                docker-compose pull
+                                docker-compose up -d
+                                
+                                # 사용하지 않는 이미지만 정리 (강제성 제거)
+                                docker image prune -f
+                                
+                                docker logout
+                            '
+                        """
+                    }
+                }
             }
         }
     }
-    
     post {
+        always {
+            sh 'docker logout'
+        }
         success {
-            slackSend channel: '#jenkins',
-                      color: 'good',
-                      message: "Success: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})"
+            echo 'Build and deployment successful!'
         }
         failure {
-            slackSend channel: '#jenkins',
-                      color: 'danger',
-                      message: "Failed: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})"
+            echo 'Build or deployment failed!'
         }
     }
 }
