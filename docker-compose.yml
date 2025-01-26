@@ -2,7 +2,7 @@ version: '3'
 
 services:
   moda-api:
-    build: .
+    build: ./moda-api
     image: jongwon990806/moda-api:latest
     ports:
       - "8080:8080"
