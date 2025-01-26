@@ -1,5 +1,8 @@
+FROM eclipse-temurin:17-jdk as builder
+WORKDIR /build
+COPY . .
+RUN ./gradlew build
+
 FROM eclipse-temurin:17-jdk
-WORKDIR /app
-COPY build/libs/*.jar app.jar
-EXPOSE 8080
+COPY --from=builder /build/build/libs/*.jar app.jar
 ENTRYPOINT ["java", "-jar", "app.jar"]
