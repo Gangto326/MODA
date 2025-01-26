@@ -1,11 +1,11 @@
 pipeline {
     agent any
-       
+
     environment {
         COMPOSE_PROJECT_NAME = "backend"
         DOCKER_USER = ""
     }
-    
+
     stages {
         stage('Build and Push with Docker Compose') {
             steps {
@@ -46,14 +46,15 @@ pipeline {
                             credentialsId: 'ec2-server',
                             variable: 'EC2_SERVER'
                         ),
-                        sshUserPrivateKey(
-                            credentialsId: 'ec2-ssh-key',
-                            keyFileVariable: 'SSH_KEY'
+                        file(
+                            credentialsId: 'ec2-ssh-key-file',
+                            variable: 'SSH_KEY_FILE'
                         )
                     ]) {
                         sh """
-                            scp -i \${SSH_KEY} docker-compose.yml \${EC2_SERVER}:~/
-                            ssh -i \${SSH_KEY} \${EC2_SERVER} '
+                            chmod 600 \${SSH_KEY_FILE}  # PEM 파일 권한 설정
+                            scp -i \${SSH_KEY_FILE} docker-compose.yml \${EC2_SERVER}:~/
+                            ssh -i \${SSH_KEY_FILE} \${EC2_SERVER} '
                                 echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USER} --password-stdin
                                 
                                 # 특정 프로젝트의 컨테이너만 중지하고 제거
@@ -74,6 +75,7 @@ pipeline {
             }
         }
     }
+
     post {
         always {
             sh 'docker logout'
