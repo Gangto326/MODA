@@ -3,6 +3,8 @@ package com.moda.moda_api.board.domain;
 import com.moda.moda_api.board.exception.InvalidPositionException;
 import lombok.Getter;
 
+import java.util.List;
+
 @Getter
 public class Position {
     private final Integer value;
@@ -25,6 +27,16 @@ public class Position {
      */
     public static Position of(int value) {
         return new Position(value);
+    }
+
+    /**
+     * standardPosition 이후 보드들의 position을 1씩 감소시킴
+     * @param boards 재조정할 보드 리스트
+     */
+    public static void decreasePositions(List<Board> boards, Position standardPosition) {
+        boards.stream()
+                .filter(board -> board.getPosition().getValue() > standardPosition.getValue())
+                .forEach(board -> board.movePosition(board.getPosition().before()));
     }
 
     /**
