@@ -1,0 +1,14 @@
+{
+  "properties": [
+    {
+      "name": "lilys.ai.api.url",
+      "type": "java.lang.String",
+      "description": "Base URL for the Lilys AI API service."
+    },
+    {
+      "name": "lilys.ai.api.key",
+      "type": "java.lang.String",
+      "description": "Authentication API key for the Lilys AI service."
+    }
+  ]
+}
