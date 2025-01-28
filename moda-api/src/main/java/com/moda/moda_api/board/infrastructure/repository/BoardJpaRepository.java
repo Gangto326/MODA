@@ -12,5 +12,5 @@ public interface BoardJpaRepository extends JpaRepository<BoardEntity, String> {
 
     boolean existsByBoardIdAndUserId(String boardId, String userId);
 
-    List<BoardEntity> findByUserIdOrderByPosition(String userId, Integer position);
+    List<BoardEntity> findByUserIdOrderByPosition(String userId);
 }

@@ -1,6 +1,7 @@
 package com.moda.moda_api.board.application.service;
 
 import com.moda.moda_api.board.domain.Board;
+import com.moda.moda_api.board.domain.BoardId;
 import com.moda.moda_api.board.domain.BoardRepository;
 import com.moda.moda_api.board.domain.UserId;
 import com.moda.moda_api.board.exception.BoardNotFoundException;
@@ -15,8 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthorizationService {
     private final BoardRepository boardRepository;
 
-    public void isBoardOwner(UserId userId, String boardId) {
-        if (!boardRepository.existsByBoardIdAndUserId(userId.getValue(), boardId)) {
+    public void isBoardOwner(UserId userId, BoardId boardId) {
+        if (!boardRepository.existsByBoardIdAndUserId(userId.getValue(), boardId.getValue())) {
             throw new UnauthorizedException("권한이 존재하지 않습니다.");
         }
     }
