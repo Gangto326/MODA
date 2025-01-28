@@ -7,6 +7,8 @@ import java.util.List;
 
 @Getter
 public class Position {
+    public static final int MIN_POSITION = 0;
+    public static final int MAX_POSITION = Integer.MAX_VALUE;
     private final Integer value;
 
     public Position(int value) {
@@ -15,11 +17,19 @@ public class Position {
     }
 
     /**
+     * 최소 Position 값을 가진 Position 객체 반환
      * position 값이 null인 경우 == 보드가 하나도 없는 경우
      * 보드 index의 시작은 0
      */
     public static Position first() {
-        return new Position(0);
+        return new Position(MIN_POSITION);
+    }
+
+    /**
+     * 최대 Position 값을 가진 Position 객체 반환
+     */
+    public static Position max() {
+        return new Position(MAX_POSITION);
     }
 
     /**
@@ -30,13 +40,27 @@ public class Position {
     }
 
     /**
-     * standardPosition 이후 보드들의 position을 1씩 감소시킴
-     * @param boards 재조정할 보드 리스트
+     * sourcePosition과 targetPosition의 대소관계를 비교하여
+     * 변경 대상인 보드의 position을 +1 또는 -1 처리
+     *
+     * @param boardList 재조정할 보드 리스트
      */
-    public static void decreasePositions(List<Board> boards, Position standardPosition) {
-        boards.stream()
-                .filter(board -> board.getPosition().getValue() > standardPosition.getValue())
-                .forEach(board -> board.movePosition(board.getPosition().before()));
+    public static void adjustPositions(List<Board> boardList, Position source, Position target) {
+        // 범위 내 보드의 움직임을 나타내는 Boolean
+        boolean isMovingDown = source.getValue() < target.getValue();
+
+        boardList.forEach(board -> {
+            int position = board.getPosition().getValue();
+
+            // source가 target보다 크면 범위 내의 모든 보드를 위로 이동
+            if (!isMovingDown && position >= target.getValue() && position < source.getValue()) {
+                board.movePosition(board.getPosition().next());
+            }
+            // source가 target보다 작으면 범위 내의 모든 보드를 아래로 이동
+            else if (isMovingDown && position > source.getValue() && position <= target.getValue()) {
+                board.movePosition(board.getPosition().before());
+            }
+        });
     }
 
     /**

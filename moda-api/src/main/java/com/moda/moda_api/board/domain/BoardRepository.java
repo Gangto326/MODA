@@ -14,7 +14,7 @@ public interface BoardRepository {
 
     Optional<Board> findByBoardId(String boardId);
 
-    List<Board> findByUserIdOrderByPosition(String userId, Integer position);
+    List<Board> findByUserIdOrderByPosition(String userId);
 
     void saveAll(List<Board> boardList);
 }

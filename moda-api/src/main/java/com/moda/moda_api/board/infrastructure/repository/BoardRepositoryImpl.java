@@ -48,8 +48,8 @@ public class BoardRepositoryImpl implements BoardRepository {
     }
 
     @Override
-    public List<Board> findByUserIdOrderByPosition(String userId, Integer position) {
-        return boardJpaRepository.findByUserIdOrderByPosition(userId, position)
+    public List<Board> findByUserIdOrderByPosition(String userId) {
+        return boardJpaRepository.findByUserIdOrderByPosition(userId)
                 .stream().map(boardEntityMapper::toDomain)
                 .collect(Collectors.toList());
     }
