@@ -1,4 +1,4 @@
-package com.moda.moda_api.summary.application.dto;
+package com.moda.moda_api.summary.presentation.dto;
 
 
 public class SummaryResponse {

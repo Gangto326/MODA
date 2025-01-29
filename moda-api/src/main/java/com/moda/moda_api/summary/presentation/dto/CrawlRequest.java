@@ -1,4 +1,4 @@
-package com.moda.moda_api.summary.presentation;
+package com.moda.moda_api.summary.presentation.dto;
 
 import lombok.Getter;
 import lombok.Setter;

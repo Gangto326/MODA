@@ -9,10 +9,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.moda.moda_api.summary.application.LilysSummaryService;
-import com.moda.moda_api.summary.application.dto.SummaryResponse;
+import com.moda.moda_api.summary.application.dto.CreateSummaryCommand;
 import com.moda.moda_api.summary.domain.CrawlingService;
 import com.moda.moda_api.summary.domain.model.CrawledContent;
-import com.moda.moda_api.summary.domain.model.Url;
+import com.moda.moda_api.summary.presentation.dto.CrawlRequest;
+import com.moda.moda_api.summary.presentation.dto.SummaryResponse;
+import com.moda.moda_api.summary.presentation.dto.UrlRequest;
 
 @RestController
 @RequestMapping("/api/summary")
@@ -27,10 +29,8 @@ public class UrlController {
 	}
 
 	@PostMapping("/lilys/process")
-	public CompletableFuture<ResponseEntity<SummaryResponse>> processWithLilys(
-		@RequestBody UrlRequest request
-	) {
-		return lilysSummaryService.summarize(new Url(request.getUrl()), request.getResultType())
+	public CompletableFuture<ResponseEntity<SummaryResponse>> processWithLilys( @RequestBody UrlRequest request) {
+		return lilysSummaryService.summarize(request.getUrl())
 			.thenApply(summary -> ResponseEntity.ok(new SummaryResponse(summary.toString())));
 	}
 

@@ -6,9 +6,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Component;
 
-import com.moda.moda_api.summary.domain.model.Content;
 import com.moda.moda_api.summary.domain.model.CrawledContent;
-import com.moda.moda_api.summary.domain.model.Url;
 
 @Component
 public class JsoupWebCrawler implements WebCrawler {

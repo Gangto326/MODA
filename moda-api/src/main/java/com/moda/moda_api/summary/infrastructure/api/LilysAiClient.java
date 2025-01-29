@@ -4,25 +4,26 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import com.moda.moda_api.summary.infrastructure.dto.LilysAiResponse;
-import com.moda.moda_api.summary.infrastructure.dto.SummaryResult;
+import com.moda.moda_api.summary.infrastructure.dto.summaryResult.BlogPostResult;
+import com.moda.moda_api.summary.infrastructure.dto.summaryResult.RawScriptResult;
+import com.moda.moda_api.summary.infrastructure.dto.summaryResult.ShortSummaryResult;
+import com.moda.moda_api.summary.infrastructure.dto.summaryResult.SummaryNoteResult;
+import com.moda.moda_api.summary.infrastructure.dto.summaryResult.TimestampResult;
 import com.moda.moda_api.util.exception.SummaryProcessingException;
 
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
 
 @Component
 @Slf4j
 public class LilysAiClient {
-	private final RestTemplate restTemplate;
+	private WebClient webClient;
+	private static final Map<String, Class<?>> TYPE_MAP = new HashMap<>();
 
 	@Value("${lilys.ai.api.url}")
 	private String apiUrl;
@@ -30,105 +31,70 @@ public class LilysAiClient {
 	@Value("${lilys.ai.api.key}")
 	private String apiKey;
 
-	public LilysAiClient(RestTemplate restTemplate) {
-		this.restTemplate = restTemplate;
+	static {
+		TYPE_MAP.put("blogPost", BlogPostResult.class);
+		TYPE_MAP.put("summaryNote", SummaryNoteResult.class);
+		TYPE_MAP.put("rawScript", RawScriptResult.class);
+		TYPE_MAP.put("shortSummary", ShortSummaryResult.class);
+		TYPE_MAP.put("timestamp", TimestampResult.class);
 	}
 
-	public LilysAiResponse callAi(String url) {
-		try {
-			HttpHeaders headers = createHeaders();
-			Map<String, Object> requestMap = createRequestBody(url);
+	@PostConstruct  // 왜인지 모르겠지만 defaultHeader를 2번 사용하려면 PostConstruct로 해야한다.
+	public void init() {
+		this.webClient = WebClient.builder()
+			.baseUrl(apiUrl)
+			.defaultHeader("Content-Type", "application/json") // 타입 지정
+			.defaultHeader("Authorization", "Bearer " + apiKey) // apiKey 넣기
+			.build();
+	}
 
-			HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestMap, headers);
-			ResponseEntity<LilysAiResponse> response = restTemplate.exchange(
-				apiUrl,
-				HttpMethod.POST,
-				requestEntity,
-				LilysAiResponse.class
-			);
+	public Mono<LilysAiResponse> getRequestId(String url) { // Mono를 사용하면 비동기 처리가 가능해집니다.
+		return webClient.post()
+			.bodyValue(createRequestBody(url))// Http메세지 Body를 만든다.
+			.retrieve()// 받을 준비가 되었습니다.
+			.bodyToMono(LilysAiResponse.class)// 응답 본문을 LilysAiResponse 클래스의 객체로 변환
+			.doOnError(e -> { // 에러 처리
+				log.error("RequestId를 받는데 실패함 ", e);
+				throw new SummaryProcessingException("릴리스 AI를 통해 RequestId를 받아오는 과정에서 예외", e);
+			})
+			.switchIfEmpty(Mono.error(
+				new SummaryProcessingException("Received null response body from AI service")
+			));
+	}
 
-			if (response.getBody() == null) {
-				throw new SummaryProcessingException("Received null response body from AI service");
-			}
+	public <T> Mono<T> getSummaryResult(String requestId, String resultType) {
+		Class<?> resultClass = TYPE_MAP.get(resultType); // class 받아오기
 
-			return response.getBody();
-		} catch (Exception e) {
-			log.error("Error calling Lilys AI API", e);
-			throw new SummaryProcessingException("Failed to call AI service", e);
+		if (resultClass == null) { // 해당 class 없으면 에러 처리
+			return Mono.error(new IllegalArgumentException("Unsupported result type: " + resultType));
 		}
-	}
-	public <T> SummaryResult<T> getSummaryResult(String requestId, String resultType) {
-		try {
-			HttpHeaders headers = createHeaders();
-			String url = UriComponentsBuilder.fromUriString(apiUrl)
-				.pathSegment(requestId)
+
+		return webClient.get()
+			.uri(uriBuilder -> uriBuilder
+				.path("/{requestId}")
 				.queryParam("resultType", resultType)
-				.toUriString();
-
-			HttpEntity<?> entity = new HttpEntity<>(headers);
-
-			ParameterizedTypeReference<SummaryResult<T>> typeReference =
-				(ParameterizedTypeReference<SummaryResult<T>>)getTypeReference(resultType);
-
-			ResponseEntity<SummaryResult<T>> response = restTemplate.exchange(
-				url,
-				HttpMethod.GET,
-				entity,
-				typeReference
-			);
-
-			SummaryResult<T> result = response.getBody();
-			if (result == null) {
-				throw new SummaryProcessingException("Received null response body");
-			}
-			return result;
-		} catch (Exception e) {
-			log.error("Error getting summary result for requestId: {}, resultType: {}", requestId, resultType, e);
-			throw new SummaryProcessingException("Failed to get summary result", e);
-		}
-	}
-
-	private ParameterizedTypeReference<?> getTypeReference(String resultType) {
-		switch (resultType) {
-			case "blogPost":
-				return new ParameterizedTypeReference<SummaryResult<SummaryResult.BlogPostType>>() {};
-			case "summaryNote":
-				return new ParameterizedTypeReference<SummaryResult<SummaryResult.SummaryNoteType>>() {};
-			case "rawScript":
-				return new ParameterizedTypeReference<SummaryResult<SummaryResult.RawScriptType>>() {};
-			case "shortSummary":
-				return new ParameterizedTypeReference<SummaryResult<SummaryResult.ShortSummaryType>>() {};
-			case "timestamp":
-				return new ParameterizedTypeReference<SummaryResult<SummaryResult.TimestampType>>() {};
-			default:
-				throw new IllegalArgumentException("Unsupported resultType: " + resultType);
-		}
-	}
-
-	private HttpHeaders createHeaders() {
-		HttpHeaders headers = new HttpHeaders();
-		headers.set("Content-Type", "application/json");
-		headers.set("Authorization", "Bearer " + apiKey);
-		return headers;
+				.build(requestId))
+			.retrieve()
+			.bodyToMono((Class<T>) resultClass)// Type별로 클래스 받기.
+			.doOnError(e -> {
+				log.error("Error getting summary result for requestId: {}, resultType: {}",
+					requestId, resultType, e);
+				throw new SummaryProcessingException("Failed to get summary result", e);
+			});
 	}
 
 	private Map<String, Object> createRequestBody(String url) {
 		Map<String, Object> source = new HashMap<>();
-
 		if(url.contains("youtube.com")) {
 			source.put("sourceType", "youtube_video");
 		}else{
 			source.put("sourceType", "webPage");
 		}
-
 		source.put("sourceUrl", url);
-
 		Map<String, Object> requestMap = new HashMap<>();
 		requestMap.put("source", source);
 		requestMap.put("resultLanguage", "ko");
 		requestMap.put("modelType", "gpt-3.5");
-
 		return requestMap;
 	}
-
 }
