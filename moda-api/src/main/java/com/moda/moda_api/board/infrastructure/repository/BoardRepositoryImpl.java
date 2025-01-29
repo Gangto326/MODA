@@ -56,7 +56,6 @@ public class BoardRepositoryImpl implements BoardRepository {
 
     @Override
     public void saveAll(List<Board> boardList) {
-
         boardJpaRepository.saveAll(boardList.stream()
                 .map(boardEntityMapper::toEntity)
                 .collect(Collectors.toList()));

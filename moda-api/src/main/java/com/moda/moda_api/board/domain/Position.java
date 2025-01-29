@@ -1,9 +1,12 @@
 package com.moda.moda_api.board.domain;
 
 import com.moda.moda_api.board.exception.InvalidPositionException;
+import com.moda.moda_api.board.exception.PositionUpdateException;
 import lombok.Getter;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 public class Position {
@@ -46,6 +49,10 @@ public class Position {
      * @param boardList 재조정할 보드 리스트
      */
     public static void adjustPositions(List<Board> boardList, Position source, Position target) {
+        if (source.getValue().equals(target.getValue())) {
+            throw new PositionUpdateException("같은 위치로는 이동할 수 없습니다.");
+        }
+
         // 범위 내 보드의 움직임을 나타내는 Boolean
         boolean isMovingDown = source.getValue() < target.getValue();
 
@@ -61,6 +68,17 @@ public class Position {
                 board.movePosition(board.getPosition().before());
             }
         });
+    }
+
+    /**
+     * Board 리스트를 Position 값 기준으로 정렬
+     * @param boardList 정렬할 보드 리스트
+     * @return 정렬된 보드 리스트
+     */
+    public static List<Board> sortByPosition(List<Board> boardList) {
+        return boardList.stream()
+                .sorted(Comparator.comparing(board -> board.getPosition().getValue()))
+                .collect(Collectors.toList());
     }
 
     /**
