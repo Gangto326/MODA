@@ -22,15 +22,11 @@ class Embedding:
         self.model.to(self.device)
 
     def embed_documents(self,
-                        documents: Union[str, List[str]],
+                        document: str,
                         batch_size: int = 32) -> np.ndarray:
-        # 단일 문서인 경우 리스트로 변환
-        if isinstance(documents, str):
-            documents = [documents]
-
         # 임베딩 생성
         embeddings = self.model.encode(
-            documents,
+            document,
             batch_size=batch_size,
             convert_to_numpy=True
         )
