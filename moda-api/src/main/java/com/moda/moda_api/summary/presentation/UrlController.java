@@ -2,7 +2,6 @@ package com.moda.moda_api.summary.presentation;
 
 import java.util.concurrent.CompletableFuture;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -10,10 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.moda.moda_api.summary.application.LilysSummaryService;
-import com.moda.moda_api.summary.domain.crawler.ContentType;
 import com.moda.moda_api.summary.domain.crawler.CrawledContent;
 import com.moda.moda_api.summary.domain.service.CrawlingService;
-import com.moda.moda_api.summary.domain.service.UrlAnalyzerService;
 import com.moda.moda_api.summary.presentation.dto.CrawlRequest;
 import com.moda.moda_api.summary.presentation.dto.CrawlingResponse;
 import com.moda.moda_api.summary.presentation.dto.SummaryResponse;
@@ -29,7 +26,6 @@ import lombok.extern.slf4j.Slf4j;
 public class UrlController {
 	private final LilysSummaryService lilysSummaryService;
 	private final CrawlingService crawlingService;
-	private final UrlAnalyzerService urlAnalyzerService;
 
 	@PostMapping("/lilys/process")
 	public CompletableFuture<ResponseEntity<SummaryResponse>> processWithLilys( @RequestBody UrlRequest request) {
@@ -40,7 +36,6 @@ public class UrlController {
 	@PostMapping("/crawl")
 	public ResponseEntity<CrawlingResponse> crawl(@RequestBody CrawlRequest request) {
 		try {
-			ContentType contentType = urlAnalyzerService.analyzeUrlType(request.getUrl());
 			CrawledContent content = crawlingService.crawl(request.getUrl());
 
 			return ResponseEntity.ok(new CrawlingResponse(
