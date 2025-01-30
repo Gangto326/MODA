@@ -19,7 +19,7 @@ public class User {
      * createdAt은 객체 생성 시점에 자동으로 설정되며,
      * deletedAt은 비즈니스 메서드인 delete()를 통해서만 설정됩니다.
      *
-     * @param id 사용자 식별자
+     * @param userId 사용자 식별자
      * @param email 사용자 이메일
      * @param password 암호화된 비밀번호
      * @param profileImage 프로필 이미지 URL
@@ -59,7 +59,8 @@ public class User {
                 .nickname(nickname)
                 .status(status)
                 .build();
-        user.deletedAt = deletedAt;  // 직접 설정
+        user.createdAt = createdAt;
+        user.deletedAt = deletedAt;
         return user;
     }
     /**

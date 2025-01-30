@@ -1,6 +1,5 @@
 package com.moda.moda_api.user.domain;
 
-import java.util.Optional;
 
 /**
  * 사용자 도메인을 위한 리포지토리 인터페이스입니다.
