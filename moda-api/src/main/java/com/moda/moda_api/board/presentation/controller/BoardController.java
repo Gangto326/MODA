@@ -9,7 +9,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -35,15 +37,15 @@ public class BoardController {
     /**
      * 보드 삭제
      * @param userId
-     * @param boardId
+     * @param boardIds
      * @return
      */
-    @DeleteMapping("/{boardId}")
+    @DeleteMapping("/{boardIds}")
     public ResponseEntity<List<BoardResponse>> deleteBoard(
             String userId,
-            @PathVariable String boardId
+            @PathVariable String boardIds
     ) {
-        List<BoardResponse> responseList = boardService.deleteBoard(userId, boardId);
+        List<BoardResponse> responseList = boardService.deleteBoard(userId, boardIds);
         return ResponseEntity.ok(responseList);
     }
 
