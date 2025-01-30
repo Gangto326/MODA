@@ -12,10 +12,18 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class BlogPostResult {
-	private String type = "blogPost";
-	private String resultLanguage;
-	private BlogPostData data;
-	private String status;  // 추가된 부분
+	private OuterData data;  // 최상위 data 객체 추가
+	private String status;
+
+	@Data
+	@NoArgsConstructor
+	@AllArgsConstructor
+	@Builder
+	public static class OuterData {
+		private String type;
+		private String resultLanguage;
+		private BlogPostData data;
+	}
 
 	@Data
 	@NoArgsConstructor

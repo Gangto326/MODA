@@ -3,6 +3,7 @@ package com.moda.moda_api.summary.domain;
 import org.springframework.stereotype.Service;
 
 import com.moda.moda_api.summary.domain.model.CrawledContent;
+import com.moda.moda_api.summary.domain.model.Url;
 import com.moda.moda_api.summary.infrastructure.WebCrawler;
 
 @Service
