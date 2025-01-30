@@ -14,9 +14,9 @@ public class BoardPositionService {
      * sourcePosition과 targetPosition의 대소관계를 비교하여
      * 변경 대상인 보드의 position을 +1 또는 -1 처리
      *
-     * @param boardList 재조정할 보드 리스트
+     * @param items 재조정할 보드 리스트
      */
-    public void adjustPositions(List<Board> boardList, Position source, Position target) {
+    public void adjustPositions(List<? extends Positionable> items, Position source, Position target) {
         if (source.getValue().equals(target.getValue())) {
             throw new PositionUpdateException("같은 위치로는 이동할 수 없습니다.");
         }
@@ -24,28 +24,28 @@ public class BoardPositionService {
         // 범위 내 보드의 움직임을 나타내는 Boolean
         boolean isMovingDown = source.getValue() < target.getValue();
 
-        boardList.forEach(board -> {
-            int position = board.getPosition().getValue();
+        items.forEach(item -> {
+            int position = item.getPosition().getValue();
 
             // source가 target보다 크면 범위 내의 모든 보드를 위로 이동
             if (!isMovingDown && position >= target.getValue() && position < source.getValue()) {
-                board.movePosition(board.getPosition().next());
+                item.movePosition(item.getPosition().next());
             }
             // source가 target보다 작으면 범위 내의 모든 보드를 아래로 이동
             else if (isMovingDown && position > source.getValue() && position <= target.getValue()) {
-                board.movePosition(board.getPosition().before());
+                item.movePosition(item.getPosition().before());
             }
         });
     }
 
     /**
      * Board 리스트를 Position 값 기준으로 정렬
-     * @param boardList 정렬할 보드 리스트
+     * @param items 정렬할 보드 리스트
      * @return 정렬된 보드 리스트
      */
-    public List<Board> sortByPosition(List<Board> boardList) {
-        return boardList.stream()
-                .sorted(Comparator.comparing(board -> board.getPosition().getValue()))
+    public <T extends Positionable> List<T> sortByPosition(List<T> items) {
+        return items.stream()
+                .sorted(Comparator.comparing(item -> item.getPosition().getValue()))
                 .collect(Collectors.toList());
     }
 
