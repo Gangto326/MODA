@@ -9,7 +9,7 @@ public class BoardDtoMapper {
     // Domain객체를 Response객체로 매핑
     public BoardResponse toResponse(Board board) {
         return BoardResponse.builder()
-                .id(board.getId().getValue())
+                .boardId(board.getId().getValue())
                 .userId(board.getUserId().getValue())
                 .title(board.getTitle())
                 .isPublic(board.isPublic())

@@ -11,11 +11,12 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BoardResponse {
+public class BoardBookmarkResponse {
     private String boardId;
     private String userId;
+    private String ownerId;
     private String title;
     private Integer position;
-    private boolean isPublic;
+    private boolean isBookmarked;
     private LocalDateTime createdAt;
 }
