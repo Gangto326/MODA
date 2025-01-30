@@ -21,7 +21,6 @@ import com.moda.moda_api.util.exception.SummaryProcessingException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Mono;
 
 @Service
 @Slf4j
@@ -82,10 +81,10 @@ public class LilysSummaryService {
 			if (status != null && "done".equals(status)) {
 				return;
 			}
-
 			try {
-				Thread.sleep(Duration.ofSeconds(50).toMillis());
 				log.info("요약이 완성이 될 때까지 기다려야 합니다.. ");
+				Thread.sleep(Duration.ofSeconds(30).toMillis());
+
 				attempts++;
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
@@ -96,14 +95,13 @@ public class LilysSummaryService {
 	}
 	private List<String> getResultTypes(String url) {
 		List<String> types = new ArrayList<>(Arrays.asList(
-			"blogPost", "summaryNote", "rawScript", "shortSummary"
+			"blogPost", "summaryNote", "shortSummary"
 		));
 
 		if (url.contains("youtube.com")) {
 			types.add("timestamp");
+			types.add("rawScript");
 		}
-
 		return types;
 	}
-
 }

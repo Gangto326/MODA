@@ -46,9 +46,4 @@ public class UrlController {
 		return ResponseEntity.ok(content);
 	}
 
-	@GetMapping("/liys/test")
-	public CompletableFuture<ResponseEntity<SummaryResponse>> test(@RequestBody UrlRequest request){
-		return lilysSummaryService.test(request.getUrl())
-			.thenApply(summary -> ResponseEntity.ok(new SummaryResponse(summary.toString())));
-	}
 }

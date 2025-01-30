@@ -83,6 +83,7 @@ public class LilysAiClient {
 			});
 	}
 
+	//요청 body만드는 과정
 	private Map<String, Object> createRequestBody(String url) {
 		Map<String, Object> source = new HashMap<>();
 		if(url.contains("youtube.com")) {
@@ -90,6 +91,7 @@ public class LilysAiClient {
 		}else{
 			source.put("sourceType", "webPage");
 		}
+
 		source.put("sourceUrl", url);
 		Map<String, Object> requestMap = new HashMap<>();
 		requestMap.put("source", source);
