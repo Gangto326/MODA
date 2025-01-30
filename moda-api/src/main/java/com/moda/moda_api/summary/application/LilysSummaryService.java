@@ -1,6 +1,7 @@
 package com.moda.moda_api.summary.application;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -31,22 +32,23 @@ public class LilysSummaryService {
 	private final PostRepository postRepository;
 	private final SummaryRepository summaryRepository;
 
-	private static final List<String> RESULT_TYPES = Arrays.asList(
-		"blogPost", "summaryNote", "rawScript", "shortSummary", "timestamp"
-	);
 
 	@Transactional
 	public CompletableFuture<List<Summary>> summarize(String url) {
 		return CompletableFuture.supplyAsync(() -> {
+			List<String> resultTypes = getResultTypes(url); //0. 만약 url에 youtube.com이 없으면 timeStamp가 안찍혀야한다.
+
 			log.info("requestId 받기전");
-			String requestId = lilysAiClient.getRequestId(url).block().getRequestId(); // requestId를 요청 받는다.
+			// 1. requestId를 요청 받는다.
+			String requestId = lilysAiClient.getRequestId(url).block().getRequestId();
 			log.info("requestId : {}", requestId);
 
-			waitForCompletion(requestId); // 결과가 완성이 될때까지 기다린다.
+			// 2. 결과가 완성이 될때까지 기다린다.
+			waitForCompletion(requestId);
 			log.info("받을 준비가 완료되었습니다. ");
 
 			// 3. 모든 타입의 결과를 가져오기
-			List<Object> results = RESULT_TYPES.stream()
+			List<Object> results = resultTypes.stream()
 				.map(type -> lilysAiClient.getSummaryResult(requestId, type)
 					.doOnError(e -> log.error("Error getting {} result: {}", type, e.getMessage()))
 					.block())
@@ -60,38 +62,11 @@ public class LilysSummaryService {
 				results.toArray()
 			);
 
-			// 5. Post 먼저 저장
+			// 5. Post 먼저 저장 -> 원본!!
 			Post post = summaries.get(0).getPost();
 			postRepository.save(post);
 
-			// 6. Summaries 저장
-			return summaryRepository.saveAll(summaries);
-		});
-	}
-
-	@Transactional
-	public CompletableFuture<List<Summary>> test(String requestId) {
-		return CompletableFuture.supplyAsync(() -> {
-
-			List<Object> results = RESULT_TYPES.stream()
-				.map(type -> lilysAiClient.getSummaryResult(requestId, type)
-					.doOnError(e -> log.error("Error getting {} result: {}", type, e.getMessage()))
-					.block())
-				.filter(result -> result != null)
-				.collect(Collectors.toList());
-
-			// 4. Post와 Summary 엔티티 생성 및 저장
-			List<Summary> summaries = summaryMapper.createSummaries(
-				requestId,
-				"https:",
-				results.toArray()
-			);
-
-			// 5. Post 먼저 저장
-			Post post = summaries.get(0).getPost();
-			postRepository.save(post);
-
-			// 6. Summaries 저장
+			// 6. Summaries 저장 -> 원본에서 파생되는 요약 5개 저장.
 			return summaryRepository.saveAll(summaries);
 		});
 	}
@@ -99,7 +74,7 @@ public class LilysSummaryService {
 	private void waitForCompletion(String requestId) {
 		int attempts = 0;
 		while (attempts < 10) {
-			BlogPostResult result = (BlogPostResult)lilysAiClient.getSummaryResult(requestId, RESULT_TYPES.get(0))
+			BlogPostResult result = (BlogPostResult)lilysAiClient.getSummaryResult(requestId, "blogPost")
 				.block();
 
 			String status = result.getStatus();
@@ -118,6 +93,17 @@ public class LilysSummaryService {
 			}
 		}
 		throw new SummaryProcessingException("Processing timed out after " + (10 * 30) + " seconds");
+	}
+	private List<String> getResultTypes(String url) {
+		List<String> types = new ArrayList<>(Arrays.asList(
+			"blogPost", "summaryNote", "rawScript", "shortSummary"
+		));
+
+		if (url.contains("youtube.com")) {
+			types.add("timestamp");
+		}
+
+		return types;
 	}
 
 }
