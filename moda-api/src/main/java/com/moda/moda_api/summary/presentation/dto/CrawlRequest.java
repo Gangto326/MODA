@@ -1,10 +1,8 @@
 package com.moda.moda_api.summary.presentation.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 public class CrawlRequest {
 	private String url;
 }

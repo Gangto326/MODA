@@ -23,16 +23,14 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
-    implementation 'org.jsoup:jsoup:1.17.2'
     implementation group: 'org.postgresql', name: 'postgresql', version: '42.7.4'
-    implementation 'org.seleniumhq.selenium:selenium-java:4.16.1'
+
+    implementation 'org.seleniumhq.selenium:selenium-java'
     implementation 'io.github.bonigarcia:webdrivermanager:5.6.2'
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
-
     runtimeOnly 'com.mysql:mysql-connector-j'
-
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
