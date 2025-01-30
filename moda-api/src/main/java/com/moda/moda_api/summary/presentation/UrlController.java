@@ -39,7 +39,7 @@ public class UrlController {
 			.thenApply(summary -> ResponseEntity.ok(new SummaryResponse(summary.toString())));
 	}
 
-	@PostMapping
+	@PostMapping("/crawl")
 	public ResponseEntity<CrawledContent> crawl(@RequestBody CrawlRequest request) throws Exception {
 		Url url = new Url(request.getUrl());
 		CrawledContent content = crawlingService.crawl(url);
