@@ -25,8 +25,8 @@ import java.time.LocalDateTime;
 public class UserEntity {
 
     @Id
-    @Column(name = "id")
-    private String id;
+    @Column(name = "user_id")
+    private String userId;
 
     @Column(name = "email", length = 100, nullable = false)
     private String email;
@@ -57,14 +57,16 @@ public class UserEntity {
      * @return 변환된 User 도메인 객체
      */
     public User toDomain() {
-        return User.builder()
-                .id(this.id)
-                .email(this.email)
-                .password(this.password)
-                .profileImage(this.profileImage)
-                .nickname(this.nickname)
-                .status(this.status)
-                .build();
+        return User.withId(
+                this.userId,
+                this.email,
+                this.password,
+                this.profileImage,
+                this.nickname,
+                this.status,
+                this.createdAt,
+                this.deletedAt
+        );
     }
 
     // Domain -> Entity
@@ -77,7 +79,7 @@ public class UserEntity {
      */
     public static UserEntity fromDomain(User user) {
         UserEntity entity = new UserEntity();
-        entity.id = user.getId();
+        entity.userId = user.getUserId();
         entity.email = user.getEmail();
         entity.password = user.getPassword();
         entity.profileImage = user.getProfileImage();

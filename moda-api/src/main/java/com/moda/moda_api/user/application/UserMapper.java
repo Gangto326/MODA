@@ -25,7 +25,7 @@ public class UserMapper {
      */
     public UserResponse toUserResponse(User user) {
         return UserResponse.builder()
-                .id(user.getId())
+                .userId(user.getUserId())
                 .email(user.getEmail())
                 .nickname(user.getNickname())
                 .profileImage(user.getProfileImage())
@@ -41,7 +41,7 @@ public class UserMapper {
      */
     public UserProfileResponse toUserProfileResponse(User user) {
         return UserProfileResponse.builder()
-                .id(user.getId())
+                .userId(user.getUserId())
                 .email(user.getEmail())
                 .nickname(user.getNickname())
                 .profileImage(user.getProfileImage())
@@ -59,7 +59,7 @@ public class UserMapper {
      */
     public User toUser(SignupRequest request) {
         return User.builder()
-                .id(UUID.randomUUID().toString())
+                .userId(UUID.randomUUID().toString())
                 .email(request.getEmail())
                 .password(request.getPassword())
                 .status("ACTIVE")
@@ -90,7 +90,7 @@ public class UserMapper {
      * @return 이메일 정보
      */
     public String getEmailFromLoginRequest(LoginRequest request) {
-        return request.getUseremail();  // email -> useremail로 변경됨에 따라 메서드명 수정
+        return request.getEmail();
     }
 
 

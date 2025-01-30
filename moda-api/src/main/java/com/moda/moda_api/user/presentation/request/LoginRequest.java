@@ -1,5 +1,7 @@
 package com.moda.moda_api.user.presentation.request;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -8,7 +10,9 @@ import lombok.NoArgsConstructor;
  */
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class LoginRequest {
-    private String useremail;
+    private String email;
     private String password;
 }

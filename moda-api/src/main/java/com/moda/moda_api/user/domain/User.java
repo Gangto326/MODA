@@ -26,7 +26,7 @@ public class User {
      * @param nickname 사용자 닉네임
      * @param status 사용자 상태
      */
-    private String id;
+    private String userId;
     private String email;
     private String password;
     private String profileImage;
@@ -36,9 +36,9 @@ public class User {
     private LocalDateTime deletedAt;
 
     @Builder
-    public User(String id, String email, String password, String profileImage,
+    public User(String userId, String email, String password, String profileImage,
                 String nickname, String status) {
-        this.id = id;
+        this.userId = userId;
         this.email = email;
         this.password = password;
         this.profileImage = profileImage;
@@ -47,6 +47,21 @@ public class User {
         this.createdAt = LocalDateTime.now();
     }
 
+    // Entity -> Domain 변환 시 사용할 별도의 정적 메서드
+    public static User withId(String userId, String email, String password,
+                              String profileImage, String nickname, String status,
+                              LocalDateTime createdAt, LocalDateTime deletedAt) {
+        User user = User.builder()
+                .userId(userId)
+                .email(email)
+                .password(password)
+                .profileImage(profileImage)
+                .nickname(nickname)
+                .status(status)
+                .build();
+        user.deletedAt = deletedAt;  // 직접 설정
+        return user;
+    }
     /**
      * 사용자의 프로필 정보(닉네임, 이미지)를 수정합니다.
      * 프로필 수정 시에만 사용되어야 합니다.
@@ -83,4 +98,5 @@ public class User {
     public boolean isDeleted() {
         return this.deletedAt != null;
     }
+
 }

@@ -1,5 +1,7 @@
 package com.moda.moda_api.user.presentation.request;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -8,6 +10,8 @@ import lombok.NoArgsConstructor;
  */
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class UpdateProfileRequest {
     private String nickname;
     private String profileImage;

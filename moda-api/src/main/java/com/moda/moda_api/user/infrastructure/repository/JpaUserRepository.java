@@ -28,8 +28,8 @@ public class JpaUserRepository implements UserRepository {
      * UserEntity를 도메인 모델로 변환하여 반환합니다.
      */
     @Override
-    public User findById(String id) {
-        UserEntity entity = repository.findById(id).orElse(null);
+    public User findById(String userId) {
+        UserEntity entity = repository.findById(userId).orElse(null);
         return entity != null ? entity.toDomain() : null;
     }
 
