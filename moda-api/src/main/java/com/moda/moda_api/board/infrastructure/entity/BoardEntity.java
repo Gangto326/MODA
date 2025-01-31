@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 public class BoardEntity {
     @Id
     @Column(name = "board_id")
-    private String id;
+    private String boardId;
 
     @Column(name = "user_id", nullable = false)
     private String userId;

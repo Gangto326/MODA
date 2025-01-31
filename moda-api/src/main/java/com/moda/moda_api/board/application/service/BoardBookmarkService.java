@@ -3,6 +3,7 @@ package com.moda.moda_api.board.application.service;
 import com.moda.moda_api.board.application.mapper.BoardBookmarkDtoMapper;
 import com.moda.moda_api.board.application.response.ToggleBookmarkResponse;
 import com.moda.moda_api.board.domain.*;
+import com.moda.moda_api.user.domain.UserId;
 import com.moda.moda_api.board.exception.BoardNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

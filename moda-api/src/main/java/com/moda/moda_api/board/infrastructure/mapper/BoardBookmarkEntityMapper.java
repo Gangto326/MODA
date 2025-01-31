@@ -1,9 +1,8 @@
 package com.moda.moda_api.board.infrastructure.mapper;
 
-import com.moda.moda_api.board.domain.Board;
 import com.moda.moda_api.board.domain.BoardBookmark;
+import com.moda.moda_api.user.domain.UserId;
 import com.moda.moda_api.board.domain.Position;
-import com.moda.moda_api.board.domain.UserId;
 import com.moda.moda_api.board.infrastructure.entity.BoardBookmarkEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

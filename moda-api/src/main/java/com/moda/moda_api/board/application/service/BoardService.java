@@ -3,6 +3,7 @@ package com.moda.moda_api.board.application.service;
 import com.moda.moda_api.board.application.mapper.BoardDtoMapper;
 import com.moda.moda_api.board.application.response.BoardResponse;
 import com.moda.moda_api.board.domain.*;
+import com.moda.moda_api.user.domain.UserId;
 import com.moda.moda_api.board.exception.BoardNotFoundException;
 import com.moda.moda_api.board.presentation.request.CreateBoardRequest;
 import com.moda.moda_api.board.presentation.request.UpdateBoardPositionRequest;

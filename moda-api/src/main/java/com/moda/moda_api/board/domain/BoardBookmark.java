@@ -3,6 +3,7 @@ package com.moda.moda_api.board.domain;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import com.moda.moda_api.user.domain.UserId;
 
 @Getter
 @Builder
@@ -14,7 +15,7 @@ public class BoardBookmark implements Positionable {
     private Position position;
 
     public BoardId getBoardId() {
-        return board.getId();
+        return board.getBoardId();
     }
 
     public UserId getBoardOwnerId() {

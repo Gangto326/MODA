@@ -3,7 +3,7 @@ package com.moda.moda_api.board.infrastructure.mapper;
 import com.moda.moda_api.board.domain.Board;
 import com.moda.moda_api.board.domain.BoardId;
 import com.moda.moda_api.board.domain.Position;
-import com.moda.moda_api.board.domain.UserId;
+import com.moda.moda_api.user.domain.UserId;
 import com.moda.moda_api.board.infrastructure.entity.BoardEntity;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +12,7 @@ public class BoardEntityMapper {
 
     public BoardEntity toEntity(Board board) {
         return BoardEntity.builder()
-                .id(board.getId().getValue())
+                .boardId(board.getBoardId().getValue())
                 .userId(board.getUserId().getValue())
                 .title(board.getTitle())
                 .isPublic(board.isPublic())
@@ -23,7 +23,7 @@ public class BoardEntityMapper {
 
     public Board toDomain(BoardEntity entity) {
         return Board.builder()
-                .id(new BoardId(entity.getId()))
+                .boardId(new BoardId(entity.getBoardId()))
                 .userId(new UserId(entity.getUserId()))
                 .title(entity.getTitle())
                 .isPublic(entity.isPublic())
