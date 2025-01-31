@@ -13,3 +13,4 @@
 | :white_check_mark: | white_check_mark | Test | 테스트 추가/수정 |
 | :lipstick: | lipstick | Design | 사용자 UI 디자인 변경 |
 | :speech_balloon: | speech_balloon | Comment | 주석 추가/ 수정 |
+| :fire: | fire | Remove | 코드/파일 삭제 |
