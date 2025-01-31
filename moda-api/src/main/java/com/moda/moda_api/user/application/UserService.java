@@ -4,6 +4,7 @@ import com.moda.moda_api.user.application.response.UserProfileResponse;
 import com.moda.moda_api.user.application.response.UserResponse;
 import com.moda.moda_api.user.domain.User;
 import com.moda.moda_api.user.domain.UserRepository;
+import com.moda.moda_api.user.exception.*;
 import com.moda.moda_api.user.presentation.request.DeleteUserRequest;
 import com.moda.moda_api.user.presentation.request.LoginRequest;
 import com.moda.moda_api.user.presentation.request.SignupRequest;
@@ -29,7 +30,7 @@ public class UserService {
      */
     public UserResponse signup(SignupRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+            throw new EmailAlreadyInUseException("이미 사용 중인 이메일입니다.");
         }
 
         User user = userMapper.toUser(request);
@@ -42,7 +43,8 @@ public class UserService {
      *
      * @param request 로그인 요청 정보
      * @return 로그인된 사용자의 정보
-     * @throws IllegalArgumentException 이메일이나 비밀번호가 일치하지 않는 경우
+     * @throws UserNotFoundException 이메일이 존재하지 않는 경우
+     * @throws InvalidPasswordException 비밀번호가 일치하지 않는 경우
      */
     public UserResponse login(LoginRequest request) {
         User user = userRepository.findByEmailAndStatus(
@@ -51,11 +53,11 @@ public class UserService {
         );
 
         if (user == null) {
-            throw new IllegalArgumentException("존재하지 않는 이메일입니다.");
+            throw new UserNotFoundException("존재하지 않는 이메일입니다.");
         }
 
         if (!user.getPassword().equals(request.getPassword())) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            throw new InvalidPasswordException("비밀번호가 일치하지 않습니다.");
         }
 
         return userMapper.toUserResponse(user);
@@ -72,14 +74,14 @@ public class UserService {
     public UserResponse updateProfile(String userId, UpdateProfileRequest request) {
         User user = userRepository.findById(userId);
         if (user == null) {
-            throw new IllegalArgumentException("존재하지 않는 사용자입니다.");
+            throw new UserNotFoundException("존재하지 않는 사용자입니다.");
         }
 
         // 닉네임 변경 시 중복 체크
         if (request.getNickname() != null &&
                 !user.getNickname().equals(request.getNickname()) &&
                 userRepository.existsByNickname(request.getNickname())) {
-            throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
+            throw new NicknameAlreadyInUseException("이미 사용 중인 닉네임입니다.");
         }
 
         userMapper.updateUser(user, request);
@@ -105,17 +107,17 @@ public class UserService {
     public boolean deleteUser(DeleteUserRequest request) {
         User user = userRepository.findByEmail(request.getEmail());
         if (user == null) {
-            throw new IllegalArgumentException("존재하지 않는 사용자입니다.");
+            throw new UserNotFoundException("존재하지 않는 사용자입니다.");
         }
 
         // 비밀번호 확인
         if (!user.getPassword().equals(request.getPassword())) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            throw new InvalidPasswordException("비밀번호가 일치하지 않습니다.");
         }
 
         // 인증 코드 확인
         if (!isValidVerificationCode(request.getVerificationCode())) {
-            throw new IllegalArgumentException("인증 코드가 유효하지 않습니다.");
+            throw new InvalidVerificationCodeException("인증 코드가 유효하지 않습니다.");
         }
 
         user.delete();  // soft delete
@@ -173,7 +175,7 @@ public class UserService {
     public UserProfileResponse getUserProfile(String userId) {
         User user = userRepository.findById(userId);
         if (user == null) {
-            throw new IllegalArgumentException("존재하지 않는 사용자입니다.");
+            throw new UserNotFoundException("존재하지 않는 사용자입니다.");
         }
         return userMapper.toUserProfileResponse(user);
     }
