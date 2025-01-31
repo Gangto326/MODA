@@ -1,0 +1,28 @@
+package com.moda.moda_api.card.domain;
+
+import com.moda.moda_api.card.exception.InvalidVectorException;
+import lombok.Value;
+
+@Value
+public class EmbeddingVector {
+    public static final int DIMENSION = 768;
+    private final float[] values;
+
+    public EmbeddingVector(float[] values) {
+        validateVector(values);
+        this.values = values.clone();
+    }
+
+    public float[] getValues() {
+        return values.clone();
+    }
+
+    private void validateVector(float[] values) {
+        if (values == null) {
+            throw new InvalidVectorException("벡터 배열은 null일 수 없습니다.");
+        }
+        if (values.length != DIMENSION) {
+            throw new InvalidVectorException("백터 배열의 길이는 " + DIMENSION + "이어야 합니다.");
+        }
+    }
+}

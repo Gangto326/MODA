@@ -40,12 +40,12 @@ public class Board implements Positionable {
         this.position = position;
     }
 
-    private void validateTitle(String title) {
+    protected static void validateTitle(String title) {
         if (title == null || title.trim().isEmpty()) {
             throw new InvalidTitleException("보드명은 빈 문자열일 수 없습니다.");
         }
-        if (title.length() > 100) {
-            throw new InvalidTitleException("보드명은 100자 이하여야 합니다.");
+        if (title.length() > 10) {
+            throw new InvalidTitleException("보드명은 10자 이하여야 합니다.");
         }
     }
 

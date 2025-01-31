@@ -11,6 +11,7 @@ import java.util.UUID;
 @Component
 public class BoardFactory {
     public Board create(UserId userId, String title, Position position, Boolean isPublic) {
+        Board.validateTitle(title);
         return Board.builder()
                 .boardId(generateBoardId())
                 .userId(userId)
