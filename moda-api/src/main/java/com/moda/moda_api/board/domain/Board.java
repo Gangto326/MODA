@@ -1,8 +1,10 @@
 package com.moda.moda_api.board.domain;
 
+
 import com.moda.moda_api.board.exception.InvalidBookmarkException;
 import com.moda.moda_api.board.exception.InvalidTitleException;
 import com.moda.moda_api.board.exception.UnauthorizedException;
+import com.moda.moda_api.user.domain.UserId;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -12,7 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Board implements Positionable {
-    private BoardId id;
+    private BoardId boardId;
     private UserId userId;
     private String title;
     private Position position;

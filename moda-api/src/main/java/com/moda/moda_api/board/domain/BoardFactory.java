@@ -1,7 +1,7 @@
 package com.moda.moda_api.board.domain;
 
 import org.springframework.stereotype.Component;
-
+import com.moda.moda_api.user.domain.UserId;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -12,7 +12,7 @@ import java.util.UUID;
 public class BoardFactory {
     public Board create(UserId userId, String title, Position position, Boolean isPublic) {
         return Board.builder()
-                .id(generateBoardId())
+                .boardId(generateBoardId())
                 .userId(userId)
                 .title(title)
                 .position(position)

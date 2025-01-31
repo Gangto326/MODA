@@ -1,6 +1,7 @@
 package com.moda.moda_api.board.domain;
 
 import com.moda.moda_api.board.exception.SelfBookmarkNotAllowedException;
+import com.moda.moda_api.user.domain.UserId;
 import org.springframework.stereotype.Component;
 
 @Component
