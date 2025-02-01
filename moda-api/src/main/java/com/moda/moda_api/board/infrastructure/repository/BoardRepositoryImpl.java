@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Repository
@@ -59,5 +60,20 @@ public class BoardRepositoryImpl implements BoardRepository {
         boardJpaRepository.saveAll(boardList.stream()
                 .map(boardEntityMapper::toEntity)
                 .collect(Collectors.toList()));
+    }
+
+    @Override
+    public boolean existsByUserIdAndBoardIdIn(String userId, Set<String> boardIds) {
+        return boardJpaRepository.existsByUserIdAndBoardIdIn(userId, boardIds);
+    }
+
+    @Override
+    public boolean deleteAll(List<Board> boardsToDelete) {
+        List<BoardEntity> boardEntities = boardsToDelete.stream()
+                .map(boardEntityMapper::toEntity)
+                .collect(Collectors.toList());
+
+        boardJpaRepository.deleteAll(boardEntities);
+        return true;
     }
 }

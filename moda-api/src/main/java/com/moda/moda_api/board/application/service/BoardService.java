@@ -3,6 +3,7 @@ package com.moda.moda_api.board.application.service;
 import com.moda.moda_api.board.application.mapper.BoardDtoMapper;
 import com.moda.moda_api.board.application.response.BoardResponse;
 import com.moda.moda_api.board.domain.*;
+import com.moda.moda_api.board.exception.UnauthorizedException;
 import com.moda.moda_api.user.domain.UserId;
 import com.moda.moda_api.board.exception.BoardNotFoundException;
 import com.moda.moda_api.board.presentation.request.CreateBoardRequest;
@@ -12,10 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,6 +24,7 @@ public class BoardService {
     private final BoardRepository boardRepository;
     private final BoardDtoMapper boardDtoMapper;
     private final BoardPositionService boardPositionService;
+    private final ReadBoardRepository readBoardRepository;
 
     /**
      * 새로운 Board를 생성합니다.
@@ -81,7 +80,7 @@ public class BoardService {
                 .collect(Collectors.toList());
 
         // Board 삭제
-        boardsToDelete.forEach(boardRepository::delete);
+        boardRepository.deleteAll(boardsToDelete);
 
         // 해당 User의 모든 보드를 position 정렬에 맞게 조회
         List<Board> afterBoardList = boardRepository.findByUserIdOrderByPosition(userIdObj.getValue());
@@ -185,5 +184,38 @@ public class BoardService {
 
         // 보드 저장
         boardRepository.saveAll(boardList);
+    }
+
+    /**
+     * ReadBoard 테이블에서 해당 보드를 읽었다는 데이터 삭제
+     * 모든 유저가 해당 보드를 읽지 않은 상태가 됩니다.
+     * @param boardId
+     */
+    @Transactional
+    public void resetBoardReadStatus(BoardId boardId) {
+        readBoardRepository.deleteByBoardId(boardId.getValue());
+    }
+
+    /**
+     * 여러 보드의 User 권한을 동시에 검사하는 메서드
+     * @param userId
+     * @param boardIds
+     */
+    private void validateOwnership(UserId userId, Set<BoardId> boardIds) {
+        if (!boardRepository.existsByUserIdAndBoardIdIn(
+                userId.getValue(),
+                boardIds.stream().map(BoardId::getValue)
+                        .collect(Collectors.toSet()))) {
+            throw new UnauthorizedException("권한이 존재하지 않습니다.");
+        }
+    }
+
+    /**
+     * Card 도메인에서 보드의 권한 확인을 사용할 때 활용
+     * @param userId
+     * @param boardIds
+     */
+    public void someOtherBoardOperation(UserId userId, Set<BoardId> boardIds) {
+        validateOwnership(userId, boardIds);
     }
 }
