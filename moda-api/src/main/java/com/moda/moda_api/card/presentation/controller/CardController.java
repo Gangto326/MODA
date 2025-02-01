@@ -36,4 +36,13 @@ public class CardController {
         );
         return ResponseEntity.ok(responseList);
     }
+
+    @DeleteMapping("/{cardIds}")
+    public ResponseEntity<Boolean> deleteCard(
+            String userId,
+            @PathVariable String cardIds
+    ) {
+        Boolean result = cardService.deleteCard(userId, cardIds);
+        return ResponseEntity.ok(result);
+    }
 }

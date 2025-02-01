@@ -1,7 +1,9 @@
 package com.moda.moda_api.card.domain;
 
 import com.moda.moda_api.board.domain.BoardId;
+import com.moda.moda_api.board.exception.UnauthorizedException;
 import com.moda.moda_api.card.exception.InvalidCardTitleException;
+import com.moda.moda_api.user.domain.UserId;
 import lombok.*;
 
 import java.time.LocalDateTime;
