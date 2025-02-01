@@ -2,6 +2,8 @@ package com.moda.moda_api.card.presentation.controller;
 
 import com.moda.moda_api.card.application.response.CardDetailResponse;
 import com.moda.moda_api.card.application.service.CardService;
+import com.moda.moda_api.card.presentation.request.MoveCardRequest;
+import com.moda.moda_api.card.presentation.request.UpdateCardRequest;
 import com.moda.moda_api.common.pagination.SliceResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -43,6 +45,24 @@ public class CardController {
             @PathVariable String cardIds
     ) {
         Boolean result = cardService.deleteCard(userId, cardIds);
+        return ResponseEntity.ok(result);
+    }
+
+    @PatchMapping("")
+    public ResponseEntity<CardDetailResponse> updateCardContent(
+            String userId,
+            UpdateCardRequest request
+    ){
+        CardDetailResponse response = cardService.updateCardContent(userId, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/board")
+    public ResponseEntity<Boolean> updateCardBoard(
+            String userId,
+            MoveCardRequest request
+    ){
+        Boolean result = cardService.updateCardBoard(userId, request);
         return ResponseEntity.ok(result);
     }
 }

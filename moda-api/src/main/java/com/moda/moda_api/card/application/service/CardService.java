@@ -6,6 +6,8 @@ import com.moda.moda_api.card.application.mapper.CardDtoMapper;
 import com.moda.moda_api.card.application.response.CardDetailResponse;
 import com.moda.moda_api.card.domain.*;
 import com.moda.moda_api.card.exception.CardNotFoundException;
+import com.moda.moda_api.card.presentation.request.MoveCardRequest;
+import com.moda.moda_api.card.presentation.request.UpdateCardRequest;
 import com.moda.moda_api.common.pagination.SliceRequestDto;
 import com.moda.moda_api.common.pagination.SliceResponseDto;
 import com.moda.moda_api.user.domain.UserId;
@@ -116,25 +118,110 @@ public class CardService {
         UserId userIdObj = new UserId(userId);
 
         // ,로 구분된 cardId들을 Value Object로 매핑하며 id 검증
-        List<CardId> cardIdList = Arrays.stream(cardIds.split(","))
-                .map(cardId -> new CardId(cardId))
-                .collect(Collectors.toList());
+        List<CardId> cardIdList = toCardIds(Arrays.asList(cardIds.split(",")));
 
         // 제거할 CardId별 Card 가져오기
-        List<Card> cardsToDelete = cardIdList.stream()
-                .map(cardId -> cardRepository.findByCardId(cardId.getValue())
-                    .orElseThrow(() -> new CardNotFoundException("카드를 찾을 수 없습니다: " + cardId.getValue())))
-                .collect(Collectors.toList());
+        List<Card> cardsToDelete = findCardList(cardIdList);
 
-        // 각 Card 객체가 존재하는 BoardId를 가져오기. Set로 중복 제거
-        Set<BoardId> boardIds = cardsToDelete.stream()
-                .map(Card::getBoardId)
-                .collect(Collectors.toSet());
-
-        // 보드에 존재하는 UserId로 삭제 권한 검증 (해당 Card가 User의 카드인지 검증)
-        boardService.someOtherBoardOperation(userIdObj, boardIds);
+        // Card 삭제 권한 검증
+        validateOwnership(userIdObj, cardsToDelete);
         
         // 카드 삭제
         return cardRepository.deleteAll(cardsToDelete);
+    }
+
+    /**
+     * 카드의 Content를 변경합니다.
+     * @param userId
+     * @param request
+     * @return
+     */
+    @Transactional
+    public CardDetailResponse updateCardContent(String userId, UpdateCardRequest request) {
+        UserId userIdObj = new UserId(userId);
+        CardId cardIdObj = new CardId(request.getCardId());
+        
+        // Content를 변경할 카드 탐색
+        Card card = findCard(cardIdObj);
+
+        // Content 변경 권한 검증
+        validateOwnership(userIdObj, List.of(card));
+        
+        // Card의 콘텐츠 변경
+        card.changeContent(request.getContent());
+
+        return cardDtoMapper.toResponse(card);
+    }
+
+    /**
+     * 입력으로 들어온 모든 카드를 BordId에 해당하는 보드로 옮깁니다.
+     * @param userId
+     * @param request
+     * @return
+     */
+    @Transactional
+    public Boolean updateCardBoard(String userId, MoveCardRequest request) {
+        UserId userIdObj = new UserId(userId);
+        BoardId boardIdObj = new BoardId(request.getBoardId());
+        
+        // 입력의 모든 CardId를 Value Object로 매핑
+        List<CardId> cardIdList = toCardIds(request.getCardIdList());
+        
+        // CardId에 해당하는 모든 카드를 가져옴
+        List<Card> cardsToMove = findCardList(cardIdList);
+
+        // 각 카드의 변경 권한 검증
+        validateOwnership(userIdObj, cardsToMove);
+
+        // 모든 카드를 입력으로 들어온 BoardId로 이동 후 저장
+        cardsToMove.stream().forEach(card -> card.moveBoard(boardIdObj));
+        return true;
+    }
+
+    /**
+     * String으로 들어오는 모든 CardId 입력을 CardId Value Object로 변환하여 반환합니다.
+     * @param cardIds
+     * @return
+     */
+    private List<CardId> toCardIds(List<String> cardIds) {
+        return cardIds.stream()
+                .map(CardId::new)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * CardId로 Card를 찾습니다.
+     * @param cardId
+     * @return
+     */
+    private Card findCard(CardId cardId) {
+        return cardRepository.findByCardId(cardId.getValue())
+                .orElseThrow(() -> new CardNotFoundException("카드를 찾을 수 없습니다."));
+    }
+
+    /**
+     * CardIdList에 존재하는 모든 Card를 찾습니다.
+     * @param cardIdList
+     * @return
+     */
+    private List<Card> findCardList(List<CardId> cardIdList) {
+        return cardIdList.stream()
+                .map(this::findCard)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Card별 User의 소유권 권한 검증 로직
+     * @param userId
+     * @param cardList
+     */
+    private void validateOwnership(UserId userId, List<Card> cardList) {
+        // 각 Card 객체가 존재하는 BoardId를 가져오기. Set로 중복 제거
+        Set<BoardId> boardIds = cardList.stream()
+                .map(Card::getBoardId)
+                .collect(Collectors.toSet());
+
+        // 보드에 존재하는 UserId로 권한 검증 (해당 Card가 User의 카드인지 검증)
+        boardService.someOtherBoardOperation(userId, boardIds);
     }
 }
