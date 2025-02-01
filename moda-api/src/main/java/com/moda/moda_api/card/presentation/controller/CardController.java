@@ -4,6 +4,7 @@ import com.moda.moda_api.card.application.response.CardDetailResponse;
 import com.moda.moda_api.card.application.service.CardService;
 import com.moda.moda_api.card.presentation.request.MoveCardRequest;
 import com.moda.moda_api.card.presentation.request.UpdateCardRequest;
+import com.moda.moda_api.common.annotation.UserId;
 import com.moda.moda_api.common.pagination.SliceResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,8 +18,8 @@ public class CardController {
 
     @PostMapping("")
     public ResponseEntity<Boolean> createCard(
-            String userId,
-            String url
+            @UserId String userId,
+            @RequestBody String url
     ) {
         Boolean result = cardService.createCard(userId, url);
         return ResponseEntity.ok(result);
@@ -26,14 +27,14 @@ public class CardController {
 
     @GetMapping("")
     public ResponseEntity<SliceResponseDto<CardDetailResponse>> getCardList(
-            String userId,
-            String boardId,
+            @UserId String userId,
+            @RequestParam String boardId,
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "15") Integer size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "DESC") String sortDirection
     ) {
-        SliceResponseDto<CardDetailResponse> responseList = cardService.getCardDetailList(
+        SliceResponseDto<CardDetailResponse> responseList = cardService.getCardList(
                 userId, boardId, page, size, sortBy, sortDirection
         );
         return ResponseEntity.ok(responseList);
@@ -41,7 +42,7 @@ public class CardController {
 
     @DeleteMapping("/{cardIds}")
     public ResponseEntity<Boolean> deleteCard(
-            String userId,
+            @UserId String userId,
             @PathVariable String cardIds
     ) {
         Boolean result = cardService.deleteCard(userId, cardIds);
@@ -50,8 +51,8 @@ public class CardController {
 
     @PatchMapping("")
     public ResponseEntity<CardDetailResponse> updateCardContent(
-            String userId,
-            UpdateCardRequest request
+            @UserId String userId,
+            @RequestBody UpdateCardRequest request
     ){
         CardDetailResponse response = cardService.updateCardContent(userId, request);
         return ResponseEntity.ok(response);
@@ -59,8 +60,8 @@ public class CardController {
 
     @PatchMapping("/board")
     public ResponseEntity<Boolean> updateCardBoard(
-            String userId,
-            MoveCardRequest request
+            @UserId String userId,
+            @RequestBody MoveCardRequest request
     ){
         Boolean result = cardService.updateCardBoard(userId, request);
         return ResponseEntity.ok(result);

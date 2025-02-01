@@ -80,7 +80,7 @@ public class CardService {
      * @param sortDirection
      * @return
      */
-    public SliceResponseDto<CardDetailResponse> getCardDetailList(
+    public SliceResponseDto<CardDetailResponse> getCardList(
             String userId, String boardId, Integer page, Integer size, String sortBy, String sortDirection
     ) {
         UserId userIdObj = new UserId(userId);

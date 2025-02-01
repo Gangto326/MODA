@@ -109,15 +109,17 @@ public class BoardService {
         Position sourcePosition = new Position(request.getSourcePosition());
         Position targetPosition = new Position(request.getTargetPosition());
 
+        // 해당 User의 모든 보드를 조회
+        List<Board> boardList = boardRepository.findByUserIdOrderByPosition(userIdObj.getValue());
+
         // 위치를 변경할 보드 가져오기
-        Board targetBoard = boardRepository.findByBoardId(boardIdObj.getValue())
+        Board targetBoard = boardList.stream()
+                .filter(board -> board.getBoardId().equals(boardIdObj))
+                .findFirst()
                 .orElseThrow(() -> new BoardNotFoundException("보드를 찾을 수 없습니다"));
 
         // 권한 확인
         targetBoard.validateOwnership(userIdObj);
-
-        // 해당 User의 모든 보드를 조회
-        List<Board> boardList = boardRepository.findByUserIdOrderByPosition(userIdObj.getValue());
 
         // 변경되는 범위의 보드 위치 변경
         adjustPositions(boardList, sourcePosition, targetPosition);

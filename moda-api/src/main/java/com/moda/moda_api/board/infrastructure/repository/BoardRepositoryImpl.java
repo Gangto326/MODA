@@ -27,7 +27,8 @@ public class BoardRepositoryImpl implements BoardRepository {
 
     @Override
     public Optional<Integer> findLastPosition(String userId) {
-        return boardJpaRepository.findTopByUserIdOrderByPositionDesc(userId);
+        return boardJpaRepository.findTopByUserIdOrderByPositionDesc(userId)
+                .map(BoardEntity::getPosition);
     }
 
     @Override

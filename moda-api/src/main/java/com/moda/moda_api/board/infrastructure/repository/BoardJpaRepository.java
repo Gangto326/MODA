@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 
 public interface BoardJpaRepository extends JpaRepository<BoardEntity, String> {
-    Optional<Integer> findTopByUserIdOrderByPositionDesc(String userId);
+    Optional<BoardEntity> findTopByUserIdOrderByPositionDesc(String userId);
 
     boolean existsByBoardIdAndUserId(String boardId, String userId);
 
