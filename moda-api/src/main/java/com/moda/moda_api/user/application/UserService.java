@@ -47,10 +47,7 @@ public class UserService {
      * @throws InvalidPasswordException 비밀번호가 일치하지 않는 경우
      */
     public UserResponse login(LoginRequest request) {
-        User user = userRepository.findByEmailAndStatus(
-                userMapper.getEmailFromLoginRequest(request),
-                "ACTIVE"
-        );
+        User user = userRepository.findByEmail(request.getEmail());
 
         if (user == null) {
             throw new UserNotFoundException("존재하지 않는 이메일입니다.");
@@ -58,6 +55,10 @@ public class UserService {
 
         if (!user.getPassword().equals(request.getPassword())) {
             throw new InvalidPasswordException("비밀번호가 일치하지 않습니다.");
+        }
+
+        if (user.isDeleted()) {
+            throw new UserNotFoundException("탈퇴한 사용자입니다.");
         }
 
         return userMapper.toUserResponse(user);

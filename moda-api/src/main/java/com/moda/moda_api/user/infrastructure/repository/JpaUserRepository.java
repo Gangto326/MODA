@@ -97,12 +97,12 @@ public class JpaUserRepository implements UserRepository {
      * 주로 로그인 시 활성 상태의 사용자만 조회하는 용도로 사용됩니다.
      *
      * @param email 조회할 사용자의 이메일
-     * @param status 조회할 사용자의 상태
+     * @param role 조회할 사용자의 상태
      * @return 조회된 사용자, 없으면 null
      */
     @Override
-    public User findByEmailAndStatus(String email, String status) {
-        UserEntity entity = repository.findByEmailAndStatus(email, status);
+    public User findByEmailAndRole(String email, String role) {
+        UserEntity entity = repository.findByEmailAndRole(email, role);
         return entity != null ? entity.toDomain() : null;
     }
 }

@@ -18,7 +18,7 @@ public class UserProfileResponse {
     private String email;
     private String nickname;
     private String profileImage;
-    private String status;
+    private String role;
     private LocalDateTime createdAt;
     private boolean isDeleted;
 }

@@ -31,7 +31,7 @@ public interface UserRepository {
     // 반환값: 닉네임이 존재하면 true, 없으면 false
     boolean existsByNickname(String nickname);
 
-    // 이메일과 상태로 사용자 찾기 (예: 활성 상태인 사용자만 찾기)
+    // 이메일과 상태로 사용자 찾기 (예: 일반 user 사용자만 찾기)
     // 반환값: 조건에 맞는 사용자가 있으면 User 객체, 없으면 null
-    User findByEmailAndStatus(String email, String status);
+    User findByEmailAndRole(String email, String role);
 }

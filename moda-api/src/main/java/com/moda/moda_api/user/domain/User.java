@@ -31,25 +31,25 @@ public class User {
     private String password;
     private String profileImage;
     private String nickname;
-    private String status;
+    private String role;
     private LocalDateTime createdAt;
     private LocalDateTime deletedAt;
 
     @Builder
     public User(String userId, String email, String password, String profileImage,
-                String nickname, String status) {
+                String nickname, String role) {
         this.userId = userId;
         this.email = email;
         this.password = password;
         this.profileImage = profileImage;
         this.nickname = nickname;
-        this.status = status;
+        this.role = role;
         this.createdAt = LocalDateTime.now();
     }
 
     // Entity -> Domain 변환 시 사용할 별도의 정적 메서드
     public static User withId(String userId, String email, String password,
-                              String profileImage, String nickname, String status,
+                              String profileImage, String nickname, String role,
                               LocalDateTime createdAt, LocalDateTime deletedAt) {
         User user = User.builder()
                 .userId(userId)
@@ -57,7 +57,7 @@ public class User {
                 .password(password)
                 .profileImage(profileImage)
                 .nickname(nickname)
-                .status(status)
+                .role(role)
                 .build();
         user.createdAt = createdAt;
         user.deletedAt = deletedAt;

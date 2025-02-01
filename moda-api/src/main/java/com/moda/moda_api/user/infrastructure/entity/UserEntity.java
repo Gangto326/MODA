@@ -40,8 +40,8 @@ public class UserEntity {
     @Column(name = "nickname", length = 100, nullable = false)
     private String nickname;
 
-    @Column(name = "status", length = 10, nullable = false)
-    private String status;
+    @Column(name = "role", length = 10, nullable = false)
+    private String role;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -63,7 +63,7 @@ public class UserEntity {
                 this.password,
                 this.profileImage,
                 this.nickname,
-                this.status,
+                this.role,
                 this.createdAt,
                 this.deletedAt
         );
@@ -84,7 +84,7 @@ public class UserEntity {
         entity.password = user.getPassword();
         entity.profileImage = user.getProfileImage();
         entity.nickname = user.getNickname();
-        entity.status = user.getStatus();
+        entity.role = user.getRole();
         entity.createdAt = user.getCreatedAt();
         entity.deletedAt = user.getDeletedAt();
         return entity;

@@ -29,7 +29,7 @@ public class UserMapper {
                 .email(user.getEmail())
                 .nickname(user.getNickname())
                 .profileImage(user.getProfileImage())
-                .status(user.getStatus())
+                .role(user.getRole())
                 .createdAt(user.getCreatedAt())
                 .build();
     }
@@ -45,7 +45,7 @@ public class UserMapper {
                 .email(user.getEmail())
                 .nickname(user.getNickname())
                 .profileImage(user.getProfileImage())
-                .status(user.getStatus())
+                .role(user.getRole())
                 .createdAt(user.getCreatedAt())
                 .isDeleted(user.isDeleted())
                 .build();
@@ -62,7 +62,7 @@ public class UserMapper {
                 .userId(UUID.randomUUID().toString())
                 .email(request.getEmail())
                 .password(request.getPassword())
-                .status("ACTIVE")
+                .role("USER") //이곳에서 기본 role을 USER로 설정
                 .build();
     }
 

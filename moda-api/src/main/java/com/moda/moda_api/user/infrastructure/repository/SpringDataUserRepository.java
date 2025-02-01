@@ -53,8 +53,8 @@ public interface SpringDataUserRepository extends JpaRepository<UserEntity, Stri
      * 로그인 시 활성 상태인 사용자만 조회하는 등의 용도로 사용됩니다.
      *
      * @param email 찾고자 하는 사용자의 이메일
-     * @param status 사용자의 상태값 (예: "ACTIVE", "INACTIVE")
+     * @param role 사용자의 상태값 (예: "ACTIVE", "INACTIVE")
      * @return 조건에 맞는 UserEntity, 없으면 null
      */
-    UserEntity findByEmailAndStatus(String email, String status);
+    UserEntity findByEmailAndRole(String email, String role);
 }
