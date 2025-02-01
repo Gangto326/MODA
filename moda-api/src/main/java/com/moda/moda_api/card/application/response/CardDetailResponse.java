@@ -16,10 +16,7 @@ public class CardDetailResponse {
     private String cardId;
     private String boardId;
     private Integer typeId;
-
-    @Builder.Default
-    private ContentType type = ContentType.from(typeId);
-
+    private ContentType type;
     private String thumbnailContent;
     private String thumbnailUrl;
     private LocalDateTime createdAt;
