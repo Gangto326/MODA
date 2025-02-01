@@ -5,6 +5,8 @@ import com.moda.moda_api.card.domain.CardRepository;
 import com.moda.moda_api.card.infrastructure.entity.CardEntity;
 import com.moda.moda_api.card.infrastructure.mapper.CardEntityMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -18,5 +20,11 @@ public class CardRepositoryImpl implements CardRepository {
         CardEntity entity = cardEntityMapper.toEntity(card);
         CardEntity savedEntity = cardJpaRepository.save(entity);
         return cardEntityMapper.toDomain(savedEntity);
+    }
+
+    @Override
+    public Slice<Card> findByBoardUserIdAndBoardId(String userId, String boardId, Pageable pageable) {
+        Slice<CardEntity> cardEntities = cardJpaRepository.findByBoardUserIdAndBoardId(userId, boardId, pageable);
+        return cardEntities.map(cardEntityMapper::toDomain);
     }
 }
