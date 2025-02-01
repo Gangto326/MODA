@@ -1,4 +1,4 @@
-package com.moda.moda_api.board.application.response;
+package com.moda.moda_api.card.application.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,11 +11,11 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BoardResponse {
+public class CardDetailResponse {
+    private String cardId;
     private String boardId;
-    private String userId;
-    private String title;
-    private Integer position;
-    private Boolean isPublic;
+    private Integer typeId;
+    private String thumbnailContent;
+    private String thumbnailUrl;
     private LocalDateTime createdAt;
 }

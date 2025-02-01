@@ -19,11 +19,15 @@ public class Card {
     private String content;
     private String thumbnailContent;
     private String thumbnailUrl;
-    private Integer viewCount;
     private EmbeddingVector embedding;
-    private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
+
+    @Builder.Default
+    private Integer viewCount = 0;
+
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     private void validateTitle(String title) {
         if (title == null || title.trim().isEmpty()) {

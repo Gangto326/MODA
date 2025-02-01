@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ToggleBookmarkResponse {
-    String boardId;
-    private boolean isBookmarked;
+    private String boardId;
+    private Boolean isBookmarked;
 }

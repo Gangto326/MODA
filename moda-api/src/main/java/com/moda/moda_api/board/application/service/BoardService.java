@@ -86,27 +86,9 @@ public class BoardService {
         // 해당 User의 모든 보드를 position 정렬에 맞게 조회
         List<Board> afterBoardList = boardRepository.findByUserIdOrderByPosition(userIdObj.getValue());
 
-        // 포지션 재조정 후 전체 리스트 반환 -> Lazy 처리로 로직 변경 예정
-//        adjustPositions(boardList, board.getPosition(), Position.max());
-
         return afterBoardList.stream()
                 .map(boardDtoMapper::toResponse)
                 .collect(Collectors.toList());
-    }
-
-    /**
-     * private 메소드로 선언하여 별도의 트랜잭션을 생성하지 않음
-     * 보드 리스트를 조건에 맞게 정렬합니다.
-     * @param boardList
-     * @param source
-     * @param target
-     */
-    private void adjustPositions(List<Board> boardList, Position source, Position target) {
-        // 움직이는 범위 내의 보드들의 position 값 변경
-        boardPositionService.adjustPositions(boardList, source, target);
-
-        // 보드 저장
-        boardRepository.saveAll(boardList);
     }
 
     /**
@@ -188,5 +170,20 @@ public class BoardService {
                 ? boardRepository.findByUserIdOrderByPosition(userId.getValue())
                 : Collections.emptyList();
         return boardPositionService.getNextPosition(lastPosition, boards);
+    }
+
+    /**
+     * private 메소드로 선언하여 별도의 트랜잭션을 생성하지 않음
+     * 보드 리스트를 조건에 맞게 정렬합니다.
+     * @param boardList
+     * @param source
+     * @param target
+     */
+    private void adjustPositions(List<Board> boardList, Position source, Position target) {
+        // 움직이는 범위 내의 보드들의 position 값 변경
+        boardPositionService.adjustPositions(boardList, source, target);
+
+        // 보드 저장
+        boardRepository.saveAll(boardList);
     }
 }

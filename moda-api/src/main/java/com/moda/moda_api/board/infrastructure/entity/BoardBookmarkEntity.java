@@ -1,5 +1,6 @@
 package com.moda.moda_api.board.infrastructure.entity;
 
+import com.moda.moda_api.user.infrastructure.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,11 +24,13 @@ public class BoardBookmarkEntity {
     @Column(name = "position")
     private Integer position;
 
+    @MapsId("userId")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "board_id", insertable = false, updatable = false)
-    private BoardEntity board;
+    @JoinColumn(name = "user_id")
+    private UserEntity user;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "user_id", insertable = false, updatable = false)
-//    private UserEntity user;
+    @MapsId("boardId")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "board_id")
+    private BoardEntity board;
 }
