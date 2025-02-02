@@ -48,7 +48,7 @@ class FollowRepositoryTest {
                 .password("password123")
                 .profileImage("profile1.jpg")
                 .nickname("user1")
-                .status("ACTIVE")
+                .role("USER")
                 .build();
 
         user2 = User.builder()
@@ -57,7 +57,7 @@ class FollowRepositoryTest {
                 .password("password123")
                 .profileImage("profile2.jpg")
                 .nickname("user2")
-                .status("ACTIVE")
+                .role("USER")
                 .build();
 
         user3 = User.builder()
@@ -66,7 +66,7 @@ class FollowRepositoryTest {
                 .password("password123")
                 .profileImage("profile3.jpg")
                 .nickname("user3")
-                .status("ACTIVE")
+                .role("USER")
                 .build();
 
         user1 = userRepository.save(user1);
