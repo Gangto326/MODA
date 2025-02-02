@@ -1,12 +1,17 @@
 package com.moda.moda_api.summary.infrastructure.api;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.moda.moda_api.summary.domain.model.CardSummaryResponse;
 import com.moda.moda_api.summary.infrastructure.dto.LilysAiResponse;
 import com.moda.moda_api.summary.infrastructure.dto.summaryResult.BlogPostResult;
 import com.moda.moda_api.summary.infrastructure.dto.summaryResult.RawScriptResult;
@@ -31,13 +36,13 @@ public class LilysAiClient {
 	@Value("${lilys.ai.api.key}")
 	private String apiKey;
 
-	static {
-		TYPE_MAP.put("blogPost", BlogPostResult.class);
-		TYPE_MAP.put("summaryNote", SummaryNoteResult.class);
-		TYPE_MAP.put("rawScript", RawScriptResult.class);
-		TYPE_MAP.put("shortSummary", ShortSummaryResult.class);
-		TYPE_MAP.put("timestamp", TimestampResult.class);
-	}
+	// static {
+	// 	TYPE_MAP.put("blogPost", BlogPostResult.class);
+	// 	TYPE_MAP.put("summaryNote", SummaryNoteResult.class);
+	// 	TYPE_MAP.put("rawScript", RawScriptResult.class);
+	// 	TYPE_MAP.put("shortSummary", ShortSummaryResult.class);
+	// 	TYPE_MAP.put("timestamp", TimestampResult.class);
+	// }
 
 	@PostConstruct  // 왜인지 모르겠지만 defaultHeader를 2번 사용하려면 PostConstruct로 해야한다.
 	public void init() {
@@ -48,48 +53,76 @@ public class LilysAiClient {
 			.build();
 	}
 
-	public LilysAiResponse getRequestId(String url) { // Mono를 사용하면 비동기 처리가 가능해집니다.
+	public CompletableFuture<LilysAiResponse> getRequestId(String url) {
 		return webClient.post()
-			.bodyValue(createRequestBody(url))// Http메세지 Body를 만든다.
-			.retrieve()// 받을 준비가 되었습니다.
-			.bodyToMono(LilysAiResponse.class)// 응답 본문을 LilysAiResponse 클래스의 객체로 변환
-			.doOnError(e -> { // 에러 처리
-				log.error("RequestId를 받는데 실패함 ", e);
-				throw new SummaryProcessingException("릴리스 AI를 통해 RequestId를 받아오는 과정에서 예외", e);
+			.bodyValue(createRequestBody(url))  // Http메세지 Body를 만든다.
+			.retrieve()  // 받을 준비가 됨.
+			.bodyToMono(LilysAiResponse.class)  // 응답 본문을 LilysAiResponse 클래스의 객체로 변환
+			.doOnError(e -> {  // 에러 처리 실패시
+				log.error("Failed to get RequestId for url: {}", url, e);
+				throw new SummaryProcessingException("Failed to get RequestId from Lilys AI", e);
 			})
-			.switchIfEmpty(Mono.error(
-				new SummaryProcessingException("Received null response body from AI service")
+			.switchIfEmpty(Mono.error(  // 아무것도 없을 시
+				new SummaryProcessingException("Received empty response from Lilys AI service")
 			))
-			.block();
+			.toFuture();
 	}
 
-	public <T> Mono<T> getSummaryResult(String requestId, String resultType) {
-		Class<?> resultClass = TYPE_MAP.get(resultType); // class 받아오기
+	public CompletableFuture<CardSummaryResponse> getSummaryResults(String requestId, String url) {
+		// blogPost 결과를 가져오는 Future (본문 Content입니다요)
+		CompletableFuture<JsonNode> contentFuture =
+			getResult(requestId, "blogPost");
 
-		if (resultClass == null) { // 해당 class 없으면 에러 처리
-			return Mono.error(new IllegalArgumentException("Unsupported result type: " + resultType));
-		}
+		// thumbnailContent를 위한 Future (youtube면 timestamp, 아니면 shortSummary)
+		String thumbnailType = url.contains("youtube.com") ? "timestamp" : "shortSummary";
+		CompletableFuture<JsonNode> thumbnailFuture = getResult(requestId, thumbnailType);
 
+		// 두 Future를 조합하여 하나의 CardSummaryResponse 생성
+		return CompletableFuture.allOf(contentFuture, thumbnailFuture)
+			.thenApply(v -> {
+				JsonNode jsonBlogPost = contentFuture.join();
+				JsonNode jsonThumbnailResult = thumbnailFuture.join();
+
+				return CardSummaryResponse.builder()
+					.typeId(url.contains("youtube.com") ? 1 : 2)
+					.content(jsonBlogPost.path("data").path("data").asText())
+					.thumbnailContent(jsonThumbnailResult.path("data").path("data").asText())
+					.thumbnailUrl(url)
+					.build();
+			})
+			.exceptionally(e -> {
+				log.error("Error combining summary results for requestId: {}", requestId, e);
+				throw new SummaryProcessingException("Failed to combine summary results", e);
+			});
+
+	}
+
+	public CompletableFuture<String> checkStatus(String requestId) {
+		return getResult(requestId, "blogPost")
+			.thenApply(jsonNode -> jsonNode.path("status").asText());
+	}
+
+	private CompletableFuture<JsonNode> getResult(String requestId, String resultType) {
 		return webClient.get()
 			.uri(uriBuilder -> uriBuilder
-				.path("/{requestId}")
+				.path("/summaries/{requestId}")
 				.queryParam("resultType", resultType)
 				.build(requestId))
 			.retrieve()
-			.bodyToMono((Class<T>) resultClass)// Type별로 클래스 받기.
-			.doOnError(e -> {
-				log.error("Error getting summary result for requestId: {}, resultType: {}",
-					requestId, resultType, e);
-				throw new SummaryProcessingException("Failed to get summary result", e);
+			.bodyToMono(JsonNode.class)
+			.toFuture()
+			.exceptionally(e -> {
+				log.error("Error getting {} result for requestId: {}", resultType, requestId, e);
+				throw new SummaryProcessingException("Failed to get " + resultType + " result", e);
 			});
 	}
 
 	//요청 body만드는 과정
 	private Map<String, Object> createRequestBody(String url) {
 		Map<String, Object> source = new HashMap<>();
-		if(url.contains("youtube.com")) {
+		if (url.contains("youtube.com")) {
 			source.put("sourceType", "youtube_video");
-		}else{
+		} else {
 			source.put("sourceType", "webPage");
 		}
 
@@ -100,4 +133,5 @@ public class LilysAiClient {
 		requestMap.put("modelType", "gpt-3.5");
 		return requestMap;
 	}
+
 }
