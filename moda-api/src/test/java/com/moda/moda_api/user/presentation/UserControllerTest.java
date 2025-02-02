@@ -46,7 +46,7 @@ class UserControllerTest {
                 .email("test@example.com")
                 .nickname("testUser")
                 .profileImage("profile.jpg")
-                .status("ACTIVE")
+                .role("USER")
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -71,7 +71,7 @@ class UserControllerTest {
                 .email("test@example.com")
                 .nickname("testUser")
                 .profileImage("profile.jpg")
-                .status("ACTIVE")
+                .role("USER")
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -93,7 +93,7 @@ class UserControllerTest {
                 .email("test@example.com")
                 .nickname("testUser")
                 .profileImage("profile.jpg")
-                .status("ACTIVE")
+                .role("USER")
                 .createdAt(LocalDateTime.now())
                 .isDeleted(false)
                 .build();
@@ -117,7 +117,7 @@ class UserControllerTest {
                 .email("test@example.com")
                 .nickname("newNickname")
                 .profileImage("new-image.jpg")
-                .status("ACTIVE")
+                .role("USER")
                 .createdAt(LocalDateTime.now())
                 .build();
 

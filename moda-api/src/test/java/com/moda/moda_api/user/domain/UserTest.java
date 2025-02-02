@@ -16,7 +16,7 @@ class UserTest {
                 .password("password123")
                 .profileImage("profile.jpg")
                 .nickname("testUser")
-                .status("ACTIVE")
+                .role("USER")
                 .build();
     }
 

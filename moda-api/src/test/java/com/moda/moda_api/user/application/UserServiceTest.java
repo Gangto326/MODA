@@ -41,14 +41,14 @@ class UserServiceTest {
                 .email("test@example.com")
                 .password("password123")
                 .nickname("testUser")
-                .status("ACTIVE")
+                 .role("ACTIVE")
                 .build();
 
         testUserResponse = UserResponse.builder()
                 .userId(testUser.getUserId())
                 .email(testUser.getEmail())
                 .nickname(testUser.getNickname())
-                .status(testUser.getStatus())
+                .role(testUser.getRole())
                 .build();
     }
 
@@ -91,7 +91,7 @@ class UserServiceTest {
                 .build();
 
         given(userMapper.getEmailFromLoginRequest(any())).willReturn("test@example.com");
-        given(userRepository.findByEmailAndStatus(any(), any())).willReturn(testUser);
+        given(userRepository.findByEmailAndRole(any(), any())).willReturn(testUser);
         given(userMapper.toUserResponse(any())).willReturn(testUserResponse);
 
         // When
