@@ -1,6 +1,7 @@
 package com.moda.moda_api.board.application.service;
 
 import com.moda.moda_api.board.application.mapper.BoardDtoMapper;
+import com.moda.moda_api.board.application.response.BoardListResponse;
 import com.moda.moda_api.board.application.response.BoardResponse;
 import com.moda.moda_api.board.domain.*;
 import com.moda.moda_api.board.exception.UnauthorizedException;
@@ -10,6 +11,7 @@ import com.moda.moda_api.board.presentation.request.CreateBoardRequest;
 import com.moda.moda_api.board.presentation.request.UpdateBoardPositionRequest;
 import com.moda.moda_api.board.presentation.request.UpdateBoardTitleRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +19,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class BoardService {
@@ -96,7 +99,7 @@ public class BoardService {
      *
      * return 값은 position을 기준으로 정렬됩니다.
      * @param userId
-     * @param request
+     * @param request targetPosition은 변경될 위치에 존재하는 보드의 Position이어야 합니다.
      * @return
      */
     @Transactional
@@ -118,14 +121,23 @@ public class BoardService {
                 .findFirst()
                 .orElseThrow(() -> new BoardNotFoundException("보드를 찾을 수 없습니다"));
 
+        // 보드 내의 가장 큰 Position 탐색 -> targetPosition은 해당 Position보다 클 수 없음
+        Position maxPosition = findMaxPosition(boardList);
+
         // 권한 확인
         targetBoard.validateOwnership(userIdObj);
+        // 위치 확인
+        targetBoard.validateCurrentPosition(sourcePosition);
 
+        log.info("위치 변경 로직 전 - targetBoard: {}", targetBoard.getPosition().getValue());
         // 변경되는 범위의 보드 위치 변경
         adjustPositions(boardList, sourcePosition, targetPosition);
+        log.info("위치 변경 로직 후 - targetBoard: {}", targetBoard.getPosition().getValue());
 
-        // 타겟 보드의 위치 변경 후 JPA Dirty Checking
-        targetBoard.movePosition(targetPosition);
+        // 타겟 보드의 위치 변경 후 저장
+        targetBoard.movePosition(targetPosition, maxPosition);
+        boardRepository.save(targetBoard);
+        log.info("타겟 보드의 위치 할당 후 - targetBoard: {}", targetBoard.getPosition().getValue());
         
         // Position에 맞게 정렬 후 BoardResponse로 변경하여 반환
         return boardPositionService.sortByPosition(boardList).stream()
@@ -151,10 +163,51 @@ public class BoardService {
         // 권한 확인
         board.validateOwnership(userIdObj);
 
-        // 보드 이름 변경
+        // 보드 이름 변경 후 저장
+        log.info("이름 변경 전 - boardTitle: {}", board.getTitle());
         board.changeTitle(request.getTitle());
+        boardRepository.save(board);
+        log.info("이름 변경 후 - boardTitle: {}", board.getTitle());
         
         return boardDtoMapper.toResponse(board);
+    }
+
+    /**
+     * 해당 유저의 보드 리스트를 반환합니다.
+     * 각 보드에는 가장 최신 Card가 최대 세 장 들어있습니다.
+     * @param userId
+     * @return
+     */
+    public List<BoardListResponse> getBoardList(String userId) {
+        UserId userIdObj = new UserId(userId);
+
+        // 보드 리스트 조회
+        List<BoardWithCards> boardsWithCards = boardRepository.findByUserIdWithRecentCards(userIdObj.getValue(), 3);
+
+        // 읽음 상태 조회
+        List<BoardId> readBoardIds = readBoardRepository.findReadBoardIds(userIdObj);
+
+        // 각 보드 리스트에 읽음 상태 반영
+        List<BoardWithCards> boardsWithReadStatus = getBoardWithCardsWithReadStatus(boardsWithCards, readBoardIds);
+
+        return boardsWithReadStatus.stream()
+                .map(boardDtoMapper::toBoardListResponse)
+                .collect(Collectors.toList());
+    }
+
+
+    /**
+     * 보드 리스트를 위한 모든 보드별 읽음 여부 상태를 반영합니다.
+     * @param boardsWithCards
+     * @param readBoardIds
+     * @return
+     */
+    private List<BoardWithCards> getBoardWithCardsWithReadStatus(List<BoardWithCards> boardsWithCards, List<BoardId> readBoardIds) {
+        return boardsWithCards.stream()
+                .map(boardsWithCard -> boardsWithCard.withReadStatus(
+                        readBoardIds.contains(boardsWithCard.getBoard().getBoardId())
+                ))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -195,7 +248,7 @@ public class BoardService {
      */
     @Transactional
     public void resetBoardReadStatus(BoardId boardId) {
-        readBoardRepository.deleteByBoardId(boardId.getValue());
+        readBoardRepository.deleteByBoardId(boardId);
     }
 
     /**
@@ -210,6 +263,18 @@ public class BoardService {
                         .collect(Collectors.toSet()))) {
             throw new UnauthorizedException("권한이 존재하지 않습니다.");
         }
+    }
+
+    /**
+     * 입력으로 들어오는 보드의 리스트 중 가장 큰 Position을 반환합니다.
+     * @param boards
+     * @return
+     */
+    private Position findMaxPosition(List<Board> boards) {
+        return boards.stream()
+                .map(Board::getPosition)
+                .max(Comparator.comparing(Position::getValue))
+                .orElse(Position.first());
     }
 
     /**

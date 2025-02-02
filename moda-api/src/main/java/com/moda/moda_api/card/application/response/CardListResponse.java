@@ -12,12 +12,12 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CardDetailResponse {
+public class CardListResponse {
     private String cardId;
     private String boardId;
     private Integer typeId;
     private ContentType type;
-    private String title;
-    private String content;
+    private String thumbnailContent;
+    private String thumbnailUrl;
     private LocalDateTime createdAt;
 }

@@ -1,6 +1,7 @@
 package com.moda.moda_api.card.presentation.controller;
 
 import com.moda.moda_api.card.application.response.CardDetailResponse;
+import com.moda.moda_api.card.application.response.CardListResponse;
 import com.moda.moda_api.card.application.service.CardService;
 import com.moda.moda_api.card.presentation.request.MoveCardRequest;
 import com.moda.moda_api.card.presentation.request.UpdateCardRequest;
@@ -26,7 +27,7 @@ public class CardController {
     }
 
     @GetMapping("")
-    public ResponseEntity<SliceResponseDto<CardDetailResponse>> getCardList(
+    public ResponseEntity<SliceResponseDto<CardListResponse>> getCardList(
             @UserId String userId,
             @RequestParam String boardId,
             @RequestParam(defaultValue = "1") Integer page,
@@ -34,10 +35,19 @@ public class CardController {
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "DESC") String sortDirection
     ) {
-        SliceResponseDto<CardDetailResponse> responseList = cardService.getCardList(
+        SliceResponseDto<CardListResponse> responseList = cardService.getCardList(
                 userId, boardId, page, size, sortBy, sortDirection
         );
         return ResponseEntity.ok(responseList);
+    }
+
+    @GetMapping("/{cardId}")
+    public ResponseEntity<CardDetailResponse> getCardDetail(
+            @UserId String userId,
+            @PathVariable String cardId
+    ) {
+        CardDetailResponse response = cardService.getCardDetail(userId, cardId);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{cardIds}")

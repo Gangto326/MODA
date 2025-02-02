@@ -12,6 +12,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MoveCardRequest {
-    String BoardId;
+    String boardId;
     List<String> cardIdList;
 }

@@ -54,4 +54,13 @@ public class CardRepositoryImpl implements CardRepository {
         cardJpaRepository.deleteAll(cardEntities);
         return true;
     }
+
+    @Override
+    public void saveAll(List<Card> cards) {
+        List<CardEntity> cardEntities = cards.stream()
+                .map(cardEntityMapper::toEntity)
+                .collect(Collectors.toList());
+
+        cardJpaRepository.saveAll(cardEntities);
+    }
 }

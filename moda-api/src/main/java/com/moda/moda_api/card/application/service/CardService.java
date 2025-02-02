@@ -4,6 +4,7 @@ import com.moda.moda_api.board.application.service.BoardService;
 import com.moda.moda_api.board.domain.BoardId;
 import com.moda.moda_api.card.application.mapper.CardDtoMapper;
 import com.moda.moda_api.card.application.response.CardDetailResponse;
+import com.moda.moda_api.card.application.response.CardListResponse;
 import com.moda.moda_api.card.domain.*;
 import com.moda.moda_api.card.exception.CardNotFoundException;
 import com.moda.moda_api.card.presentation.request.MoveCardRequest;
@@ -47,18 +48,22 @@ public class CardService {
         // TODO: (종원) url로 AI API 메서드 호출
 
         // TODO: (종헌) 임베딩 메서드 호출
-        BoardId boardIdObj = new BoardId("");
+        BoardId boardIdObj = new BoardId("18e7e5bc-fd34-41c3-9097-8992925e0048");
+
+        float[] embedding = new float[768];
+        for (int i = 0; i < 768; i++) {
+            embedding[i] = (float) (Math.random() * 2 - 1);  // -1.0 ~ 1.0 사이의 랜덤값
+        }
 
         Card card = cardFactory.create(userIdObj,
                 boardIdObj,
-                0,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null);
-
+                1,
+                "asdasdasdasd",
+                "임시 제목",
+                "{JSON 형식입니다.}",
+                "qweqweqweqwe",
+                "urlurlurlurlurl",
+                new EmbeddingVector(embedding));
 
         Card savedCard = cardRepository.save(card);
 
@@ -80,7 +85,7 @@ public class CardService {
      * @param sortDirection
      * @return
      */
-    public SliceResponseDto<CardDetailResponse> getCardList(
+    public SliceResponseDto<CardListResponse> getCardList(
             String userId, String boardId, Integer page, Integer size, String sortBy, String sortDirection
     ) {
         UserId userIdObj = new UserId(userId);
@@ -105,6 +110,21 @@ public class CardService {
         return SliceResponseDto.of(
                 cards.map(cardDtoMapper::toResponse)
         );
+    }
+
+    /**
+     * 카드의 Detail 정보 반환
+     * @param userId
+     * @param cardId
+     * @return
+     */
+    public CardDetailResponse getCardDetail(String userId, String cardId) {
+        UserId userIdObj = new UserId(userId);
+        CardId cardIdObj = new CardId(cardId);
+        
+        // 카드 탐색
+        Card card = findCard(cardIdObj);
+        return cardDtoMapper.toDetailResponse(card);
     }
 
     /**
@@ -147,10 +167,11 @@ public class CardService {
         // Content 변경 권한 검증
         validateOwnership(userIdObj, List.of(card));
         
-        // Card의 콘텐츠 변경
+        // Card의 콘텐츠 변경 후 저장
         card.changeContent(request.getContent());
+        cardRepository.save(card);
 
-        return cardDtoMapper.toResponse(card);
+        return cardDtoMapper.toDetailResponse(card);
     }
 
     /**
@@ -175,6 +196,8 @@ public class CardService {
 
         // 모든 카드를 입력으로 들어온 BoardId로 이동 후 저장
         cardsToMove.stream().forEach(card -> card.moveBoard(boardIdObj));
+        cardRepository.saveAll(cardsToMove);
+
         return true;
     }
 

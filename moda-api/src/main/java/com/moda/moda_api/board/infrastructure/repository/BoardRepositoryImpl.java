@@ -2,8 +2,11 @@ package com.moda.moda_api.board.infrastructure.repository;
 
 import com.moda.moda_api.board.domain.Board;
 import com.moda.moda_api.board.domain.BoardRepository;
+import com.moda.moda_api.board.domain.BoardWithCards;
+import com.moda.moda_api.board.infrastructure.entity.BoardWithCardsProjection;
 import com.moda.moda_api.board.infrastructure.mapper.BoardEntityMapper;
 import com.moda.moda_api.board.infrastructure.entity.BoardEntity;
+import com.moda.moda_api.card.infrastructure.mapper.CardEntityMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -17,6 +20,7 @@ import java.util.stream.Collectors;
 public class BoardRepositoryImpl implements BoardRepository {
     private final BoardJpaRepository boardJpaRepository;
     private final BoardEntityMapper boardEntityMapper;
+    private final CardEntityMapper cardEntityMapper;
 
     @Override
     public Board save(Board board) {
@@ -76,5 +80,20 @@ public class BoardRepositoryImpl implements BoardRepository {
 
         boardJpaRepository.deleteAll(boardEntities);
         return true;
+    }
+
+    @Override
+    public List<BoardWithCards> findByUserIdWithRecentCards(String userId, int cardLimit) {
+        List<BoardWithCardsProjection> projections = boardJpaRepository.findByUserIdWithRecentCards(userId, cardLimit);
+
+        return projections.stream()
+                .map(projection -> new BoardWithCards(
+                        boardEntityMapper.toDomain(projection.getBoard()),
+                        projection.getCards().stream()
+                                .map(cardEntityMapper::toDomain)
+                                .collect(Collectors.toList()),
+                        false
+                ))
+                .collect(Collectors.toList());
     }
 }

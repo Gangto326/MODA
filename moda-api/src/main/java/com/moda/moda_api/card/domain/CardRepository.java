@@ -16,4 +16,6 @@ public interface CardRepository {
     boolean delete(Card card);
 
     boolean deleteAll(List<Card> cardsToDelete);
+
+    void saveAll(List<Card> cards);
 }

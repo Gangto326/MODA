@@ -6,9 +6,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
+
 public interface ReadBoardJpaRepository extends JpaRepository<ReadBoardEntity, ReadBoardId> {
 
     @Modifying
     @Query("DELETE FROM ReadBoardEntity r WHERE r.boardId = :boardId")
     void deleteByBoardId(String boardId);
+
+    List<ReadBoardEntity> findByUserId(String userId);
 }

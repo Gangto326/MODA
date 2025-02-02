@@ -1,5 +1,6 @@
 package com.moda.moda_api.board.presentation.controller;
 
+import com.moda.moda_api.board.application.response.BoardListResponse;
 import com.moda.moda_api.board.application.response.BoardResponse;
 import com.moda.moda_api.board.application.service.BoardService;
 import com.moda.moda_api.board.presentation.request.CreateBoardRequest;
@@ -54,6 +55,8 @@ public class BoardController {
 
     /**
      * 보드 위치 변경
+     * sourcePosition은 변경할 보드의 Position이어야 합니다.
+     * targetPosition은 변경될 위치에 존재하는 보드의 Position이어야 합니다.
      * @param userId
      * @param request
      * @return
@@ -80,5 +83,18 @@ public class BoardController {
     ) {
         BoardResponse boardResponse = boardService.updateBoardTitle(userId, request);
         return ResponseEntity.ok(boardResponse);
+    }
+
+    /**
+     * 보드 리스트 반환
+     * @param userId
+     * @return
+     */
+    @GetMapping("")
+    public ResponseEntity<List<BoardListResponse>> getBoardList(
+            @UserId String userId
+    ) {
+        List<BoardListResponse> responseList = boardService.getBoardList(userId);
+        return ResponseEntity.ok(responseList);
     }
 }
