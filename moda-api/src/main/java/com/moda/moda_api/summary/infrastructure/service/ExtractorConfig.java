@@ -1,4 +1,4 @@
-package com.moda.moda_api.summary.infrastructure.service.platformStartegy;
+package com.moda.moda_api.summary.infrastructure.service;
 
 import com.moda.moda_api.summary.domain.crawler.CrawledContentType;
 

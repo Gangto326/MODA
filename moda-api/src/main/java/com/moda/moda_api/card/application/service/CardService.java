@@ -10,9 +10,8 @@ import com.moda.moda_api.card.presentation.request.MoveCardRequest;
 import com.moda.moda_api.card.presentation.request.UpdateCardRequest;
 import com.moda.moda_api.common.pagination.SliceRequestDto;
 import com.moda.moda_api.common.pagination.SliceResponseDto;
-import com.moda.moda_api.summary.application.LilysSummaryService;
+import com.moda.moda_api.summary.application.service.LilysSummaryService;
 import com.moda.moda_api.summary.domain.model.CardSummaryResponse;
-import com.moda.moda_api.summary.domain.model.Summary;
 import com.moda.moda_api.user.domain.UserId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -50,8 +49,8 @@ public class CardService {
 
         // TODO: (종원) url로 AI API 메서드 호출
         CompletableFuture<CardSummaryResponse> cardSummaryResponse = lilysSummaryService.summarize(url);
-        // 비동기적으로 createCard를 처리해야하지만.
-        // 종원 AI API 메서드 호출후 종헌의 임베딩 메서드 호출은 순차적으로 진행이되어합니다.
+        // 비동기적으로 createCard를 처리해야함
+        // 종원 AI API 메서드 호출후 종헌의 임베딩 메서드 호출은 순차적으로 진행이되어야함.
         // lilysSummaryService.summarize(url).thenCompose를 써서 확실히 요약이 끝나고 임베딩을 진행해야함.
 
         // TODO: (종헌) 임베딩 메서드 호출

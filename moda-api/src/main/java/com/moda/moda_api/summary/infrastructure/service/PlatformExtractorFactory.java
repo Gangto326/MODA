@@ -6,7 +6,7 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 import com.moda.moda_api.summary.domain.crawler.CrawledContentType;
-import com.moda.moda_api.summary.infrastructure.service.platformStartegy.ExtractorConfig;
+import com.moda.moda_api.summary.infrastructure.service.ExtractorConfig;
 
 @Component
 public class PlatformExtractorFactory {
@@ -67,8 +67,6 @@ public class PlatformExtractorFactory {
 			.requiresFrame(false)
 			.crawledContentType(CrawledContentType.DAUM_NEWS)
 			.build());
-
-
 	}
 
 	// 하나씩 꺼내보면서 맞는 사이트가 있는지 찾아보는 과정
@@ -79,4 +77,5 @@ public class PlatformExtractorFactory {
 			.findFirst()
 			.orElse(CONFIGS.get("default")); // 선택되지 않았다면 defalut 방법으로 크롤링
 	}
+
 }

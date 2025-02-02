@@ -1,4 +1,4 @@
-package com.moda.moda_api.summary.application;
+package com.moda.moda_api.summary.application.service;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -11,17 +11,8 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.moda.moda_api.card.domain.ContentType;
 import com.moda.moda_api.summary.domain.model.CardSummaryResponse;
-import com.moda.moda_api.summary.domain.model.Post;
-import com.moda.moda_api.summary.domain.model.Summary;
-import com.moda.moda_api.summary.domain.repository.PostRepository;
-import com.moda.moda_api.summary.domain.repository.SummaryRepository;
-import com.moda.moda_api.summary.domain.service.ContentTypeResolver;
 import com.moda.moda_api.summary.infrastructure.api.LilysAiClient;
-import com.moda.moda_api.summary.infrastructure.dto.summaryResult.BlogPostResult;
-import com.moda.moda_api.summary.infrastructure.mapper.SummaryMapper;
 import com.moda.moda_api.util.exception.SummaryProcessingException;
 
 import lombok.RequiredArgsConstructor;
@@ -45,6 +36,7 @@ public class LilysSummaryService {
 				}));
 	}
 
+	//진짜 큰일이다 title을 못가져오고 있어 이러면 의미가 없자나 ㅠㅠㅠㅠㅠ
 	private CompletableFuture<String> waitForCompletion(String requestId) {
 		return checkStatusWithRetry(requestId, 0);
 	}

@@ -1,8 +1,6 @@
 package com.moda.moda_api.summary.infrastructure.api;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -13,22 +11,20 @@ import org.springframework.web.reactive.function.client.WebClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.moda.moda_api.summary.domain.model.CardSummaryResponse;
 import com.moda.moda_api.summary.infrastructure.dto.LilysAiResponse;
-import com.moda.moda_api.summary.infrastructure.dto.summaryResult.BlogPostResult;
-import com.moda.moda_api.summary.infrastructure.dto.summaryResult.RawScriptResult;
-import com.moda.moda_api.summary.infrastructure.dto.summaryResult.ShortSummaryResult;
-import com.moda.moda_api.summary.infrastructure.dto.summaryResult.SummaryNoteResult;
-import com.moda.moda_api.summary.infrastructure.dto.summaryResult.TimestampResult;
+import com.moda.moda_api.summary.infrastructure.service.TitleAndImageExtractor;
 import com.moda.moda_api.util.exception.SummaryProcessingException;
 
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 @Component
+@RequiredArgsConstructor
 @Slf4j
 public class LilysAiClient {
 	private WebClient webClient;
-	private static final Map<String, Class<?>> TYPE_MAP = new HashMap<>();
+	private final TitleAndImageExtractor titleAndImageExtractor;
 
 	@Value("${lilys.ai.api.url}")
 	private String apiUrl;
@@ -36,6 +32,8 @@ public class LilysAiClient {
 	@Value("${lilys.ai.api.key}")
 	private String apiKey;
 
+
+	// private static final Map<String, Class<?>> TYPE_MAP = new HashMap<>();
 	// static {
 	// 	TYPE_MAP.put("blogPost", BlogPostResult.class);
 	// 	TYPE_MAP.put("summaryNote", SummaryNoteResult.class);
@@ -69,34 +67,47 @@ public class LilysAiClient {
 	}
 
 	public CompletableFuture<CardSummaryResponse> getSummaryResults(String requestId, String url) {
+		// 1. 첫번째 Future
 		// blogPost 결과를 가져오는 Future (본문 Content입니다요)
 		CompletableFuture<JsonNode> contentFuture =
 			getResult(requestId, "blogPost");
 
+		// 2. 두번째 Future
 		// thumbnailContent를 위한 Future (youtube면 timestamp, 아니면 shortSummary)
 		String thumbnailType = url.contains("youtube.com") ? "timestamp" : "shortSummary";
 		CompletableFuture<JsonNode> thumbnailFuture = getResult(requestId, thumbnailType);
 
-		// 두 Future를 조합하여 하나의 CardSummaryResponse 생성
-		return CompletableFuture.allOf(contentFuture, thumbnailFuture)
+		// 3. 세번째 Future
+		CompletableFuture<String> titleFuture = titleAndImageExtractor.extractTitleAsync(url);
+
+		// 4. 네번째 Future thumbNail-Url은 어떻게 저장할건데??
+		CompletableFuture<String> imageUrlFuture = titleAndImageExtractor.extractImageAsync(url);
+
+		// 모든 Future를 조합하여 하나의 CardSummaryResponse 생성
+		return CompletableFuture.allOf(contentFuture, thumbnailFuture, titleFuture, imageUrlFuture)
 			.thenApply(v -> {
 				JsonNode jsonBlogPost = contentFuture.join();
 				JsonNode jsonThumbnailResult = thumbnailFuture.join();
+				String title = titleFuture.join();
+				String thumbnailUrl = imageUrlFuture.join();
+
+				//3개의 값이 완료될 때까지 기다리는 블록킹작업입니다~!
 
 				return CardSummaryResponse.builder()
-					.typeId(url.contains("youtube.com") ? 1 : 2)
+					.typeId(url.contains("youtube.com") ? 1 : 2) //youtube있으면 1번 아니면 2번
 					.content(jsonBlogPost.path("data").path("data").asText())
 					.thumbnailContent(jsonThumbnailResult.path("data").path("data").asText())
-					.thumbnailUrl(url)
+					.thumbnailUrl(thumbnailUrl) // 이미지도 가져올거야..?
+					.title(title)
 					.build();
 			})
 			.exceptionally(e -> {
-				log.error("Error combining summary results for requestId: {}", requestId, e);
+				log.error("조합하는 과정에서 에러가 발생, requestId: {}", requestId, e);
 				throw new SummaryProcessingException("Failed to combine summary results", e);
 			});
-
 	}
 
+	// 일단 blogPost를 던져놓고 status가 뭔지 파악하는 함수
 	public CompletableFuture<String> checkStatus(String requestId) {
 		return getResult(requestId, "blogPost")
 			.thenApply(jsonNode -> jsonNode.path("status").asText());
@@ -133,5 +144,4 @@ public class LilysAiClient {
 		requestMap.put("modelType", "gpt-3.5");
 		return requestMap;
 	}
-
 }
