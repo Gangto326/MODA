@@ -11,7 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class CrawlTarget {
 	private String domainPattern;
-	private ContentType contentType;
+	private CrawledContentType crawledContentType;
 	private String contentSelector;  // 각 사이트별 본문 선택자
 
 }

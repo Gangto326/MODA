@@ -9,7 +9,6 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Service;
 
-import com.moda.moda_api.summary.domain.crawler.ContentType;
 import com.moda.moda_api.summary.domain.crawler.CrawledContent;
 import com.moda.moda_api.summary.domain.service.ContentExtractorStrategy;
 import com.moda.moda_api.summary.infrastructure.service.PlatformExtractorFactory;
@@ -48,7 +47,7 @@ public class AbstractExtractor implements ContentExtractorStrategy {
 
 			CrawledContent content = new CrawledContent();
 			content.setUrl(url);
-			content.setContentType(config.getContentType());
+			content.setCrawledContentType(config.getCrawledContentType());
 			content.setTitle(extractTitle());
 			content.setContent(extractContent(wait, config));
 			content.setImageUrls(extractImages(wait, config));

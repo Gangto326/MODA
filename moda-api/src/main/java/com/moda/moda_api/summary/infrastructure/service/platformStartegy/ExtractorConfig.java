@@ -1,6 +1,6 @@
 package com.moda.moda_api.summary.infrastructure.service.platformStartegy;
 
-import com.moda.moda_api.summary.domain.crawler.ContentType;
+import com.moda.moda_api.summary.domain.crawler.CrawledContentType;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -13,5 +13,5 @@ public class ExtractorConfig {
 	private String imageSelector;
 	private boolean requiresFrame;
 	private String frameId;
-	private ContentType contentType;
+	private CrawledContentType crawledContentType;
 }

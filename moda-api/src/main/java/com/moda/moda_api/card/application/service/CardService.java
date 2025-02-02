@@ -10,6 +10,9 @@ import com.moda.moda_api.card.presentation.request.MoveCardRequest;
 import com.moda.moda_api.card.presentation.request.UpdateCardRequest;
 import com.moda.moda_api.common.pagination.SliceRequestDto;
 import com.moda.moda_api.common.pagination.SliceResponseDto;
+import com.moda.moda_api.summary.application.LilysSummaryService;
+import com.moda.moda_api.summary.domain.model.CardSummaryResponse;
+import com.moda.moda_api.summary.domain.model.Summary;
 import com.moda.moda_api.user.domain.UserId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -20,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,10 +33,9 @@ public class CardService {
     private final CardRepository cardRepository;
     private final CardFactory cardFactory;
     private final CardDtoMapper cardDtoMapper;
-
     private final BoardService boardService;
-
     private final ApplicationEventPublisher eventPublisher;
+    private final LilysSummaryService lilysSummaryService;
 
     /**
      * URL을 입력 받고 새로운 카드 생성 후 알맞은 보드로 이동합니다.
@@ -45,6 +48,7 @@ public class CardService {
         UserId userIdObj = new UserId(userId);
 
         // TODO: (종원) url로 AI API 메서드 호출
+        CompletableFuture<CardSummaryResponse> cardSummaryResponse = lilysSummaryService.summarize(url);
 
         // TODO: (종헌) 임베딩 메서드 호출
         BoardId boardIdObj = new BoardId("");

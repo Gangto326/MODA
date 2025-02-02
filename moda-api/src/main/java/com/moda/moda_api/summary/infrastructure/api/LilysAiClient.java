@@ -48,7 +48,7 @@ public class LilysAiClient {
 			.build();
 	}
 
-	public Mono<LilysAiResponse> getRequestId(String url) { // Mono를 사용하면 비동기 처리가 가능해집니다.
+	public LilysAiResponse getRequestId(String url) { // Mono를 사용하면 비동기 처리가 가능해집니다.
 		return webClient.post()
 			.bodyValue(createRequestBody(url))// Http메세지 Body를 만든다.
 			.retrieve()// 받을 준비가 되었습니다.
@@ -59,7 +59,8 @@ public class LilysAiClient {
 			})
 			.switchIfEmpty(Mono.error(
 				new SummaryProcessingException("Received null response body from AI service")
-			));
+			))
+			.block();
 	}
 
 	public <T> Mono<T> getSummaryResult(String requestId, String resultType) {

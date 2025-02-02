@@ -26,4 +26,13 @@ public enum ContentType {
         }
         throw new InvalidContentTypeException("유효하지 않은 컨텐츠 타입입니다.");
     }
+
+    public static Integer fromString(ContentType contentType) {
+        try {
+            ContentType contentType = ContentType.valueOf(contentTypeStr.toUpperCase());
+            return contentType.getTypeId();
+        } catch (IllegalArgumentException e) {
+            throw new InvalidContentTypeException("유효하지 않은 컨텐츠 타입 문자열입니다: " + contentTypeStr);
+        }
+    }
 }

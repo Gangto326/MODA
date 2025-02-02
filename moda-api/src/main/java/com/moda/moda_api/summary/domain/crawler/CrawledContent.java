@@ -18,6 +18,6 @@ public class CrawledContent {
 	private String content;
 	private List<String> imageUrls;
 	private LocalDateTime crawledAt;
-	private ContentType contentType;
+	private CrawledContentType crawledContentType;
 
 }

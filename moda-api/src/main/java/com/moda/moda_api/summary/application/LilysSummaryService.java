@@ -10,10 +10,13 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.moda.moda_api.card.domain.ContentType;
+import com.moda.moda_api.summary.domain.model.CardSummaryResponse;
 import com.moda.moda_api.summary.domain.model.Post;
 import com.moda.moda_api.summary.domain.model.Summary;
 import com.moda.moda_api.summary.domain.repository.PostRepository;
 import com.moda.moda_api.summary.domain.repository.SummaryRepository;
+import com.moda.moda_api.summary.domain.service.ContentTypeResolver;
 import com.moda.moda_api.summary.infrastructure.api.LilysAiClient;
 import com.moda.moda_api.summary.infrastructure.dto.summaryResult.BlogPostResult;
 import com.moda.moda_api.summary.infrastructure.mapper.SummaryMapper;
@@ -28,23 +31,23 @@ import lombok.extern.slf4j.Slf4j;
 public class LilysSummaryService {
 	private final LilysAiClient lilysAiClient;
 	private final SummaryMapper summaryMapper;
-	private final PostRepository postRepository;
-	private final SummaryRepository summaryRepository;
-
 
 	@Transactional
-	public CompletableFuture<List<Summary>> summarize(String url) {
+	public CompletableFuture<CardSummaryResponse> summarize(String url) {
 		return CompletableFuture.supplyAsync(() -> {
-			List<String> resultTypes = getResultTypes(url); //0. 만약 url에 youtube.com이 없으면 timeStamp가 안찍혀야한다.
+			ContentType contentType = ContentTypeResolver.resolve(url);
 
-			log.info("requestId 받기전");
+			List<String> resultTypes = getResultTypes(url);
+
 			// 1. requestId를 요청 받는다.
-			String requestId = lilysAiClient.getRequestId(url).block().getRequestId();
+			String requestId = lilysAiClient.getRequestId(url).getRequestId();
 			log.info("requestId : {}", requestId);
 
 			// 2. 결과가 완성이 될때까지 기다린다.
 			waitForCompletion(requestId);
 			log.info("받을 준비가 완료되었습니다. ");
+
+
 
 			// 3. 모든 타입의 결과를 가져오기
 			List<Object> results = resultTypes.stream()
@@ -54,28 +57,22 @@ public class LilysSummaryService {
 				.filter(result -> result != null)
 				.collect(Collectors.toList());
 
-			// 4. Post와 Summary 엔티티 생성 및 저장
-			List<Summary> summaries = summaryMapper.createSummaries(
-				requestId,
-				url,
-				results.toArray()
-			);
 
-			// 5. Post 먼저 저장 -> 원본!!
-			Post post = summaries.get(0).getPost();
-			postRepository.save(post);
-
-			// 6. Summaries 저장 -> 원본에서 파생되는 요약 5개 저장.
-			return summaryRepository.saveAll(summaries);
+			return CardSummaryResponse.builder()
+				.typeId(contentType.getTypeId())
+				.build();
 		});
 	}
+
 
 	private void waitForCompletion(String requestId) {
 		int attempts = 0;
 		while (attempts < 10) {
+			//아무 post요청이나 보내본다.
 			BlogPostResult result = (BlogPostResult)lilysAiClient.getSummaryResult(requestId, "blogPost")
 				.block();
 
+			//결과의 status확인
 			String status = result.getStatus();
 
 			if (status != null && "done".equals(status)) {
@@ -93,15 +90,16 @@ public class LilysSummaryService {
 		}
 		throw new SummaryProcessingException("Processing timed out after " + (10 * 30) + " seconds");
 	}
-	private List<String> getResultTypes(String url) {
-		List<String> types = new ArrayList<>(Arrays.asList(
-			"blogPost", "summaryNote", "shortSummary"
-		));
 
+	private List<String> getResultTypes(String url) {
+		List<String> types = new ArrayList<>();
 		if (url.contains("youtube.com")) {
 			types.add("timestamp");
-			types.add("rawScript");
 		}
+		else{
+			types.add("shortSummary");
+		}
+		types.add("blogPost");
 		return types;
 	}
 }
