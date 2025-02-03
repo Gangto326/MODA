@@ -17,6 +17,7 @@ public class CardListResponse {
     private String boardId;
     private Integer typeId;
     private ContentType type;
+    private String title;
     private String thumbnailContent;
     private String thumbnailUrl;
     private LocalDateTime createdAt;

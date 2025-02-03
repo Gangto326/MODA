@@ -44,6 +44,7 @@ public class BoardDtoMapper {
                 .boardId(card.getBoardId().getValue())
                 .typeId(card.getTypeId())
                 .type(ContentType.from(card.getTypeId()))
+                .title(card.getTitle())
                 .thumbnailContent(card.getThumbnailContent())
                 .thumbnailUrl(card.getThumbnailUrl())
                 .createdAt(card.getCreatedAt())
