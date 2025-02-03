@@ -1,5 +1,3 @@
-# uvicorn app.main:app --reload --host 0.0.0.0 --port 8000 --workers 4
-
 from fastapi import FastAPI, APIRouter
 from app.routers import embedding
 

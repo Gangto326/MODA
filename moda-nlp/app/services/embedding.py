@@ -3,8 +3,8 @@ import numpy as np
 import torch
 
 class Embedding:
-    def __init__(self, model_name: str = 'jhgan/ko-sroberta-multitask'):
-        self.model = SentenceTransformer(model_name)
+    def __init__(self, model_name: str = 'jhgan/ko-sroberta-multitask', cache_folder: str = './models'):
+        self.model = SentenceTransformer(model_name, cache_folder=cache_folder)
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.model.to(self.device)
 

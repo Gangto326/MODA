@@ -7,3 +7,6 @@ __pycache__/
 
 # FastAPI specific
 .env
+
+# AI model
+models/
