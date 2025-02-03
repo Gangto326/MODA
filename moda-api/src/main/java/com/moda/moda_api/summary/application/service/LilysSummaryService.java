@@ -33,7 +33,6 @@ public class LilysSummaryService {
 				}));
 	}
 
-	//진짜 큰일이다 title을 못가져오고 있어 이러면 의미가 없자나 ㅠㅠㅠㅠㅠ
 	private CompletableFuture<String> waitForCompletion(String requestId) {
 		return checkStatusWithRetry(requestId, 0);
 	}
