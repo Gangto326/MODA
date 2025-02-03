@@ -5,6 +5,7 @@ import com.moda.moda_api.board.application.response.BoardListResponse;
 import com.moda.moda_api.board.application.response.BoardResponse;
 import com.moda.moda_api.board.domain.*;
 import com.moda.moda_api.board.exception.UnauthorizedException;
+import com.moda.moda_api.card.domain.CardRepository;
 import com.moda.moda_api.user.domain.UserId;
 import com.moda.moda_api.board.exception.BoardNotFoundException;
 import com.moda.moda_api.board.presentation.request.CreateBoardRequest;
@@ -28,6 +29,7 @@ public class BoardService {
     private final BoardDtoMapper boardDtoMapper;
     private final BoardPositionService boardPositionService;
     private final ReadBoardRepository readBoardRepository;
+    private final CardRepository cardRepository;
 
     /**
      * 새로운 Board를 생성합니다.
@@ -182,30 +184,31 @@ public class BoardService {
         UserId userIdObj = new UserId(userId);
 
         // 보드 리스트 조회
-        List<BoardWithCards> boardsWithCards = boardRepository.findByUserIdWithRecentCards(userIdObj.getValue(), 3);
+        List<Board> boards = boardRepository.findByUserIdOrderByPosition(userIdObj.getValue());
 
         // 읽음 상태 조회
         List<BoardId> readBoardIds = readBoardRepository.findReadBoardIds(userIdObj);
 
         // 각 보드 리스트에 읽음 상태 반영
-        List<BoardWithCards> boardsWithReadStatus = getBoardWithCardsWithReadStatus(boardsWithCards, readBoardIds);
+        List<BoardWithCards> boardsWithReadStatus = getBoardWithCardsWithReadStatus(boards, readBoardIds);
 
         return boardsWithReadStatus.stream()
                 .map(boardDtoMapper::toBoardListResponse)
                 .collect(Collectors.toList());
     }
 
-
     /**
      * 보드 리스트를 위한 모든 보드별 읽음 여부 상태를 반영합니다.
-     * @param boardsWithCards
+     * @param boards
      * @param readBoardIds
      * @return
      */
-    private List<BoardWithCards> getBoardWithCardsWithReadStatus(List<BoardWithCards> boardsWithCards, List<BoardId> readBoardIds) {
-        return boardsWithCards.stream()
-                .map(boardsWithCard -> boardsWithCard.withReadStatus(
-                        readBoardIds.contains(boardsWithCard.getBoard().getBoardId())
+    private List<BoardWithCards> getBoardWithCardsWithReadStatus(List<Board> boards, List<BoardId> readBoardIds) {
+        return boards.stream()
+                .map(board -> new BoardWithCards(
+                        board,
+                        cardRepository.findCardsByBoardIdOrderByCreatedAtDesc(board.getBoardId(), 3),
+                        readBoardIds.contains(board.getBoardId())
                 ))
                 .collect(Collectors.toList());
     }
@@ -242,16 +245,6 @@ public class BoardService {
     }
 
     /**
-     * ReadBoard 테이블에서 해당 보드를 읽었다는 데이터 삭제
-     * 모든 유저가 해당 보드를 읽지 않은 상태가 됩니다.
-     * @param boardId
-     */
-    @Transactional
-    public void resetBoardReadStatus(BoardId boardId) {
-        readBoardRepository.deleteByBoardId(boardId);
-    }
-
-    /**
      * 여러 보드의 User 권한을 동시에 검사하는 메서드
      * @param userId
      * @param boardIds
@@ -284,5 +277,27 @@ public class BoardService {
      */
     public void someOtherBoardOperation(UserId userId, Set<BoardId> boardIds) {
         validateOwnership(userId, boardIds);
+    }
+
+    /**
+     * ReadBoard 테이블에서 해당 보드를 읽었다는 데이터 삽입
+     * 해당 보드를 읽은 상태가 됩니다.
+     * @param userId
+     * @param boardId
+     */
+    @Transactional
+    public void markBoardReadStatus(UserId userId, BoardId boardId) {
+        log.info("markBoardReadStatus 메서드 호출");
+        readBoardRepository.save(userId, boardId);
+    }
+
+    /**
+     * ReadBoard 테이블에서 해당 보드를 읽었다는 데이터 삭제
+     * 모든 유저가 해당 보드를 읽지 않은 상태가 됩니다.
+     * @param boardId
+     */
+    @Transactional
+    public void resetBoardReadStatus(BoardId boardId) {
+        readBoardRepository.deleteByBoardId(boardId);
     }
 }

@@ -106,6 +106,9 @@ public class CardService {
                 sliceRequestDto.toPageable()
         );
 
+        // 보드를 확인했다는 이벤트 발생
+        eventPublisher.publishEvent(BoardReadEvent.from(userIdObj, boardIdObj));
+
         // 페이지네이션 메타 데이터와 함께 반환합니다.
         return SliceResponseDto.of(
                 cards.map(cardDtoMapper::toResponse)

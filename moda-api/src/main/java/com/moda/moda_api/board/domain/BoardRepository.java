@@ -24,6 +24,4 @@ public interface BoardRepository {
     boolean existsByUserIdAndBoardIdIn(String userId, Set<String> boardIds);
 
     boolean deleteAll(List<Board> boardsToDelete);
-
-    List<BoardWithCards> findByUserIdWithRecentCards(String userId, int cardLimit);
 }

@@ -8,4 +8,6 @@ public interface ReadBoardRepository {
     void deleteByBoardId(BoardId boardId);
 
     List<BoardId> findReadBoardIds(UserId userId);
+
+    void save(UserId userId, BoardId boardId);
 }

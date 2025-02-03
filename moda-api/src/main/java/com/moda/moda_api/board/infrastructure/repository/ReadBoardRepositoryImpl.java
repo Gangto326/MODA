@@ -2,12 +2,12 @@ package com.moda.moda_api.board.infrastructure.repository;
 
 import com.moda.moda_api.board.domain.BoardId;
 import com.moda.moda_api.board.domain.ReadBoardRepository;
+import com.moda.moda_api.board.infrastructure.entity.ReadBoardEntity;
 import com.moda.moda_api.user.domain.UserId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Repository
@@ -26,5 +26,15 @@ public class ReadBoardRepositoryImpl implements ReadBoardRepository {
                 .stream()
                 .map(entity -> new BoardId(entity.getBoardId()))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void save(UserId userId, BoardId boardId) {
+        ReadBoardEntity entity = ReadBoardEntity.builder()
+                .userId(userId.getValue())
+                .boardId(boardId.getValue())
+                .build();
+
+        readBoardJpaRepository.save(entity);
     }
 }

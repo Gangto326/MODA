@@ -1,5 +1,6 @@
 package com.moda.moda_api.card.domain;
 
+import com.moda.moda_api.board.domain.BoardId;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
@@ -18,4 +19,6 @@ public interface CardRepository {
     boolean deleteAll(List<Card> cardsToDelete);
 
     void saveAll(List<Card> cards);
+
+    List<Card> findCardsByBoardIdOrderByCreatedAtDesc(BoardId boardId, int limit);
 }
