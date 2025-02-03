@@ -22,7 +22,7 @@ import java.io.ByteArrayOutputStream;
 import java.net.URL;
 import java.util.UUID;
 
-@Service
+
 @RequiredArgsConstructor
 @Slf4j
 public class ImageStorageService {

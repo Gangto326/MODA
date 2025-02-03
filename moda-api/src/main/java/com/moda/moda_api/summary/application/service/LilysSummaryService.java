@@ -1,12 +1,7 @@
 package com.moda.moda_api.summary.application.service;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,17 +17,17 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 public class LilysSummaryService {
-	private final LilysAiClient lilysAiClient;
+	private final LilysAiClient lilysWebClient;
 	private static final int MAX_ATTEMPTS = 10;
 	private static final Duration POLLING_INTERVAL = Duration.ofSeconds(30);
 
 	@Transactional
 	public CompletableFuture<CardSummaryResponse> summarize(String url) {
-		return lilysAiClient.getRequestId(url)
+		return lilysWebClient.getRequestId(url)
 			.thenCompose(response -> waitForCompletion(response.getRequestId())
 				.thenCompose(status -> {
 					log.info("Summary is ready. Status: {}", status);
-					return lilysAiClient.getSummaryResults(response.getRequestId(), url);
+					return lilysWebClient.getSummaryResults(response.getRequestId(), url);
 				}));
 	}
 
@@ -47,7 +42,7 @@ public class LilysSummaryService {
 				new SummaryProcessingException("Processing timed out after " + (MAX_ATTEMPTS * POLLING_INTERVAL.getSeconds()) + " seconds")
 			);
 		}
-		return lilysAiClient.checkStatus(requestId)
+		return lilysWebClient.checkStatus(requestId)
 			.thenCompose(status -> {
 				if ("done".equals(status)) {
 					return CompletableFuture.completedFuture(status);

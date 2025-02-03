@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -14,7 +13,6 @@ import com.moda.moda_api.summary.infrastructure.dto.LilysAiResponse;
 import com.moda.moda_api.summary.infrastructure.service.TitleAndImageExtractor;
 import com.moda.moda_api.util.exception.SummaryProcessingException;
 
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
@@ -23,14 +21,8 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 @Slf4j
 public class LilysAiClient {
-	private WebClient webClient;
+	private final WebClient lilysWebClient;
 	private final TitleAndImageExtractor titleAndImageExtractor;
-
-	@Value("${lilys.ai.api.url}")
-	private String apiUrl;
-
-	@Value("${lilys.ai.api.key}")
-	private String apiKey;
 
 
 	// private static final Map<String, Class<?>> TYPE_MAP = new HashMap<>();
@@ -42,17 +34,8 @@ public class LilysAiClient {
 	// 	TYPE_MAP.put("timestamp", TimestampResult.class);
 	// }
 
-	@PostConstruct  // 왜인지 모르겠지만 defaultHeader를 2번 사용하려면 PostConstruct로 해야한다.
-	public void init() {
-		this.webClient = WebClient.builder()
-			.baseUrl(apiUrl)
-			.defaultHeader("Content-Type", "application/json") // 타입 지정
-			.defaultHeader("Authorization", "Bearer " + apiKey) // apiKey 넣기
-			.build();
-	}
-
 	public CompletableFuture<LilysAiResponse> getRequestId(String url) {
-		return webClient.post()
+		return lilysWebClient.post()
 			.bodyValue(createRequestBody(url))  // Http메세지 Body를 만든다.
 			.retrieve()  // 받을 준비가 됨.
 			.bodyToMono(LilysAiResponse.class)  // 응답 본문을 LilysAiResponse 클래스의 객체로 변환
@@ -114,7 +97,7 @@ public class LilysAiClient {
 	}
 
 	private CompletableFuture<JsonNode> getResult(String requestId, String resultType) {
-		return webClient.get()
+		return lilysWebClient.get()
 			.uri(uriBuilder -> uriBuilder
 				.path("/summaries/{requestId}")
 				.queryParam("resultType", resultType)

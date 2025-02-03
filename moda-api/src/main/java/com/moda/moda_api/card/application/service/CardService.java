@@ -14,6 +14,7 @@ import com.moda.moda_api.common.pagination.SliceResponseDto;
 import com.moda.moda_api.summary.application.service.LilysSummaryService;
 import com.moda.moda_api.summary.domain.model.CardSummaryResponse;
 import com.moda.moda_api.user.domain.UserId;
+import java.util.concurrent.ExecutionException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Slice;
@@ -44,9 +45,8 @@ public class CardService {
      * @return
      */
     @Transactional
-    public CompletableFuture<Boolean> createCard(String userId, String url) {
+    public boolean createCard(String userId, String url) {
         UserId userIdObj = new UserId(userId);
-
 
         // TODO: (종원) url로 AI API 메서드 호출
         CompletableFuture<CardSummaryResponse> cardSummaryResponse = lilysSummaryService.summarize(url);
@@ -60,6 +60,14 @@ public class CardService {
         float[] embedding = new float[768];
         for (int i = 0; i < 768; i++) {
             embedding[i] = (float) (Math.random() * 2 - 1);  // -1.0 ~ 1.0 사이의 랜덤값
+        }
+
+        try {
+            System.out.println(cardSummaryResponse.get().getContent());
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
         }
 
         Card card = cardFactory.create(userIdObj,
