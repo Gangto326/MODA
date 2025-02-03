@@ -20,6 +20,9 @@ public class BoardPositionService {
         if (source.getValue().equals(target.getValue())) {
             throw new PositionUpdateException("같은 위치로는 이동할 수 없습니다.");
         }
+        if (target.getValue() == 0) {
+            throw new PositionUpdateException("0번 자리로는 이동할 수 없습니다.");
+        }
 
         // 범위 내 보드의 움직임을 나타내는 Boolean
         boolean isMovingDown = source.getValue() < target.getValue();

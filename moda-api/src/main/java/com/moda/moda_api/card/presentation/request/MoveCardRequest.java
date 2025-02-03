@@ -1,15 +1,17 @@
-package com.moda.moda_api.board.application.response;
+package com.moda.moda_api.card.presentation.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ToggleBookmarkResponse {
-    private String boardId;
-    private Boolean isBookmarked;
+public class MoveCardRequest {
+    String boardId;
+    List<String> cardIdList;
 }

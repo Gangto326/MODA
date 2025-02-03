@@ -2,6 +2,7 @@ package com.moda.moda_api.board.domain;
 
 
 import com.moda.moda_api.board.exception.InvalidBookmarkException;
+import com.moda.moda_api.board.exception.InvalidPositionException;
 import com.moda.moda_api.board.exception.InvalidTitleException;
 import com.moda.moda_api.board.exception.UnauthorizedException;
 import com.moda.moda_api.user.domain.UserId;
@@ -38,6 +39,23 @@ public class Board implements Positionable {
     @Override
     public void movePosition(Position position) {
         this.position = position;
+    }
+
+    public void movePosition(Position position, Position maxPosition) {
+        validatePositionRange(position, maxPosition);
+        this.position = position;
+    }
+
+    private void validatePositionRange(Position position, Position maxPosition) {
+        if (position.getValue() > maxPosition.getValue()) {
+            throw new InvalidPositionException("Position은 보드의 최대 개수를 초과할 수 없습니다.");
+        }
+    }
+
+    public void validateCurrentPosition(Position sourcePosition) {
+        if (!this.position.equals(sourcePosition)) {
+            throw new InvalidPositionException("현재 보드의 위치가 일치하지 않습니다. 현재 위치: " + this.position.getValue() + ", 요청 위치: " + sourcePosition.getValue());
+        }
     }
 
     protected static void validateTitle(String title) {

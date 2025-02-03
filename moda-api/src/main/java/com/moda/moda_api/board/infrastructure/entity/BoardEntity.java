@@ -1,5 +1,6 @@
 package com.moda.moda_api.board.infrastructure.entity;
 
+import com.moda.moda_api.user.infrastructure.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,9 +20,9 @@ public class BoardEntity {
     @Column(name = "user_id", nullable = false)
     private String userId;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "user_id", insertable = false, updatable = false)
-//    private UserEntity user;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    private UserEntity user;
 
     @Column(name = "title", length = 100, nullable = false)
     private String title;
@@ -32,7 +33,7 @@ public class BoardEntity {
     @Column(name = "position", nullable = false)
     private int position;
 
-    @Column(name = "created__at", nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @PrePersist

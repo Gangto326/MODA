@@ -17,6 +17,6 @@ public class BoardBookmarkResponse {
     private String ownerId;
     private String title;
     private Integer position;
-    private boolean isBookmarked;
+    private Boolean isBookmarked;
     private LocalDateTime createdAt;
 }

@@ -5,11 +5,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface BoardJpaRepository extends JpaRepository<BoardEntity, String> {
-    Optional<Integer> findTopByUserIdOrderByPositionDesc(String userId);
+    Optional<BoardEntity> findTopByUserIdOrderByPositionDesc(String userId);
 
     boolean existsByBoardIdAndUserId(String boardId, String userId);
 
     List<BoardEntity> findByUserIdOrderByPosition(String userId);
+
+    boolean existsByUserIdAndBoardIdIn(String userId, Set<String> boardIds);
 }
