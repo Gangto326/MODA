@@ -21,11 +21,11 @@ public class CardController {
 
     // 비동기 응답을 위해 CompletableFuture를 사용하긴했지만 다시 확인을 해야할 필요가 있습니다..
     @PostMapping("")
-    public ResponseEntity<CompletableFuture<Boolean>> createCard(
+    public ResponseEntity<Boolean> createCard(
             @UserId String userId,
             @RequestBody String url
     ) {
-        CompletableFuture<Boolean> result = cardService.createCard(userId, url);
+        Boolean result = cardService.createCard(userId, url);
         return ResponseEntity.ok(result);
     }
 
