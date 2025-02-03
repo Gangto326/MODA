@@ -37,6 +37,7 @@ public class CardService {
     private final BoardService boardService;
     private final ApplicationEventPublisher eventPublisher;
     private final LilysSummaryService lilysSummaryService;
+    private final EmbeddingApiClient embeddingApiClient;
 
     /**
      * URL을 입력 받고 새로운 카드 생성 후 알맞은 보드로 이동합니다.
@@ -47,14 +48,23 @@ public class CardService {
     @Transactional
     public Boolean createCard(String userId, String url) {
         UserId userIdObj = new UserId(userId);
-        // TODO: (종헌) 임베딩 메서드 호출
-        BoardId boardIdObj = new BoardId("18e7e5bc-fd34-41c3-9097-8992925e0048");
 
         // TODO: (종원) url로 AI API 메서드 호출
         CompletableFuture<CardSummaryResponse> cardSummaryResponse = lilysSummaryService.summarize(url);
         // 비동기적으로 createCard를 처리해야함
         // 종원 AI API 메서드 호출후 종헌의 임베딩 메서드 호출은 순차적으로 진행이되어야함.
         // lilysSummaryService.summarize(url).thenCompose를 써서 확실히 요약이 끝나고 임베딩을 진행해야함.
+
+        try {
+            EmbeddingVector embeddingVector = embeddingApiClient.embedContent(cardSummaryResponse.get().getContent());
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+
+        // TODO: 보드 아이디 결정하기
+        BoardId boardIdObj = new BoardId("18e7e5bc-fd34-41c3-9097-8992925e0048");
 
         float[] embedding = new float[768];
         for (int i = 0; i < 768; i++) {
