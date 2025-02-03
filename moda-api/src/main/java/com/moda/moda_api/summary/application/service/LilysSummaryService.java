@@ -2,6 +2,7 @@ package com.moda.moda_api.summary.application.service;
 
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,14 +13,15 @@ import com.moda.moda_api.util.exception.SummaryProcessingException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class LilysSummaryService {
 	private final LilysAiClient lilysWebClient;
-	private static final int MAX_ATTEMPTS = 10;
-	private static final Duration POLLING_INTERVAL = Duration.ofSeconds(30);
+	private static final int MAX_ATTEMPTS = 50;
+	private static final Duration POLLING_INTERVAL = Duration.ofSeconds(200);
 
 	@Transactional
 	public CompletableFuture<CardSummaryResponse> summarize(String url) {
@@ -42,24 +44,23 @@ public class LilysSummaryService {
 				new SummaryProcessingException("Processing timed out after " + (MAX_ATTEMPTS * POLLING_INTERVAL.getSeconds()) + " seconds")
 			);
 		}
+
 		return lilysWebClient.checkStatus(requestId)
 			.thenCompose(status -> {
 				if ("done".equals(status)) {
 					return CompletableFuture.completedFuture(status);
 				}
-
-				log.info("Summary is not ready yet. Attempt: {}", attempt + 1);
-
-				return CompletableFuture.supplyAsync(() -> {
-					try {
-						Thread.sleep(POLLING_INTERVAL.toMillis());
-						return checkStatusWithRetry(requestId, attempt + 1);
-					} catch (InterruptedException e) {
-						Thread.currentThread().interrupt();
-						throw new SummaryProcessingException("Processing was interrupted", e);
-					}
-				}).thenCompose(future -> future);
+				if ("pending".equals(status)) {
+					log.info("Summary is still pending. Will retry in 15 seconds. Attempt: {}", attempt + 1);
+					return CompletableFuture.supplyAsync(
+						() -> checkStatusWithRetry(requestId, attempt + 1),
+						CompletableFuture.delayedExecutor(15, TimeUnit.SECONDS)
+					).thenCompose(future -> future);
+				}
+				return CompletableFuture.failedFuture(
+					new SummaryProcessingException("Unexpected status: " + status)
+				);
 			});
 	}
-
 }
+//0d720162-1bc9-43ac-9258-c2edc9d8f38d

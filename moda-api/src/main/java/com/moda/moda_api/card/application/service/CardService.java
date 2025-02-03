@@ -12,10 +12,12 @@ import com.moda.moda_api.card.presentation.request.UpdateCardRequest;
 import com.moda.moda_api.common.pagination.SliceRequestDto;
 import com.moda.moda_api.common.pagination.SliceResponseDto;
 import com.moda.moda_api.summary.application.service.LilysSummaryService;
-import com.moda.moda_api.summary.domain.model.CardSummaryResponse;
 import com.moda.moda_api.user.domain.UserId;
-import java.util.concurrent.ExecutionException;
+import com.moda.moda_api.util.hash.HashUtil;
+
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,7 @@ import java.util.stream.Collectors;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Slf4j
 public class CardService {
     private final CardRepository cardRepository;
     private final CardFactory cardFactory;
@@ -37,6 +40,7 @@ public class CardService {
     private final BoardService boardService;
     private final ApplicationEventPublisher eventPublisher;
     private final LilysSummaryService lilysSummaryService;
+    private final HashUtil hashUtil;
 
     /**
      * URL을 입력 받고 새로운 카드 생성 후 알맞은 보드로 이동합니다.
@@ -45,46 +49,49 @@ public class CardService {
      * @return
      */
     @Transactional
-    public Boolean createCard(String userId, String url) {
+    public CompletableFuture<Boolean> createCard(String userId, String url) {
+
+
         UserId userIdObj = new UserId(userId);
-        // TODO: (종헌) 임베딩 메서드 호출
         BoardId boardIdObj = new BoardId("18e7e5bc-fd34-41c3-9097-8992925e0048");
 
-        // TODO: (종원) url로 AI API 메서드 호출
-        CompletableFuture<CardSummaryResponse> cardSummaryResponse = lilysSummaryService.summarize(url);
-        // 비동기적으로 createCard를 처리해야함
-        // 종원 AI API 메서드 호출후 종헌의 임베딩 메서드 호출은 순차적으로 진행이되어야함.
-        // lilysSummaryService.summarize(url).thenCompose를 써서 확실히 요약이 끝나고 임베딩을 진행해야함.
+        // AI 요약 서비스 호출 후 카드 생성 로직 수행
+        return lilysSummaryService.summarize(url)
+            .thenCompose(summaryResponse -> {
+                // TODO: (종헌) 임베딩 메서드 호출
+                // 임시로 랜덤 임베딩 사용
+                log.info("Summary Title: {}", summaryResponse.getTitle());
+                log.info("Summary Content: {}", summaryResponse.getContent());
+                log.info("Thumbnail URL: {}", summaryResponse.getThumbnailUrl());
+                log.info("Thumbnail Content: {}", summaryResponse.getThumbnailContent());
 
-        float[] embedding = new float[768];
-        for (int i = 0; i < 768; i++) {
-            embedding[i] = (float) (Math.random() * 2 - 1);  // -1.0 ~ 1.0 사이의 랜덤값
-        }
+                float[] embedding = new float[768];
+                for (int i = 0; i < 768; i++) {
+                    embedding[i] = (float) (Math.random() * 2 - 1);
+                }
 
-        try {
-            System.out.println(cardSummaryResponse.get().getContent());
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-        }
 
-        Card card = cardFactory.create(userIdObj,
-                boardIdObj,
-                1,
-                "asdasdasdasd",
-                "임시 제목",
-                "{JSON 형식입니다.}",
-                "qweqweqweqwe",
-                "urlurlurlurlurl",
-                new EmbeddingVector(embedding));
 
-        Card savedCard = cardRepository.save(card);
+                log.info("정보" ,  summaryResponse.getTitle() );
+                Card card = cardFactory.create(
+                    userIdObj,
+                    boardIdObj,
+                    1,
+                    "asdasdasdasd",
+                    summaryResponse.getTitle(),
+                    summaryResponse.getContent(),
+                    summaryResponse.getThumbnailContent(),
+                    summaryResponse.getThumbnailUrl(),
+                    new EmbeddingVector(embedding)
+                );
 
-        // 새로운 카드가 해당 보드에 INSERT되었다는 이벤트 발생
-        eventPublisher.publishEvent(CardCreatedForBoardEvent.from(card));
+                Card savedCard = cardRepository.save(card);
 
-        return true;
+                // 이벤트 발행
+                eventPublisher.publishEvent(CardCreatedForBoardEvent.from(savedCard));
+
+                return CompletableFuture.completedFuture(true);
+            });
     }
 
     /**

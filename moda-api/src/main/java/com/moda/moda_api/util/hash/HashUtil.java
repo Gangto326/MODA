@@ -4,6 +4,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class HashUtil {
 	public static String hashUrl(String url) {
 		try {

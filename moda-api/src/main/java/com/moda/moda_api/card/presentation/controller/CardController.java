@@ -5,28 +5,37 @@ import java.util.concurrent.CompletableFuture;
 import com.moda.moda_api.card.application.response.CardDetailResponse;
 import com.moda.moda_api.card.application.response.CardListResponse;
 import com.moda.moda_api.card.application.service.CardService;
+import com.moda.moda_api.card.presentation.request.CardRequest;
 import com.moda.moda_api.card.presentation.request.MoveCardRequest;
 import com.moda.moda_api.card.presentation.request.UpdateCardRequest;
 import com.moda.moda_api.common.annotation.UserId;
 import com.moda.moda_api.common.pagination.SliceResponseDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 @RequestMapping("/api/card")
 public class CardController {
     private final CardService cardService;
 
     // 비동기 응답을 위해 CompletableFuture를 사용하긴했지만 다시 확인을 해야할 필요가 있습니다..
     @PostMapping("")
-    public ResponseEntity<Boolean> createCard(
-            @UserId String userId,
-            @RequestBody String url
+    public CompletableFuture<ResponseEntity<Boolean>> createCard(
+        @UserId String userId,
+        @RequestBody CardRequest cardRequest
     ) {
-        Boolean result = cardService.createCard(userId, url);
-        return ResponseEntity.ok(result);
+        return cardService.createCard(userId, cardRequest.getUrl())
+            .thenApply(ResponseEntity::ok)
+            .exceptionally(throwable -> {
+                log.error("Failed to create card", throwable);
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
+            });
     }
 
     @GetMapping("")

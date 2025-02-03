@@ -8,9 +8,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 public class WebClientConfig {
 
-	@Value("${lilys.ai.api.url}")
-	private String lilysUrl;
-
 	@Value("${lilys.ai.api.key}")
 	private String lilysApiKey;
 
@@ -19,11 +16,10 @@ public class WebClientConfig {
 
 	@Bean
 	public WebClient lilysWebClient(WebClient.Builder builder) {
-		return builder.
-				baseUrl(lilysUrl)
-				.defaultHeader("Content-Type", "application/json") // 타입 지정
-				.defaultHeader("Authorization", "Bearer " + lilysApiKey) // apiKey 넣기
-				.build();
+		return builder
+			.defaultHeader("Content-Type", "application/json") // 타입 지정
+			.defaultHeader("Authorization", "Bearer " + lilysApiKey) // apiKey 넣기
+			.build();
 	}
 
 	@Bean
