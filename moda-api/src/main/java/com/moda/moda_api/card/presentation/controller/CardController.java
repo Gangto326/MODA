@@ -1,5 +1,7 @@
 package com.moda.moda_api.card.presentation.controller;
 
+import java.util.concurrent.CompletableFuture;
+
 import com.moda.moda_api.card.application.response.CardDetailResponse;
 import com.moda.moda_api.card.application.response.CardListResponse;
 import com.moda.moda_api.card.application.service.CardService;
@@ -17,12 +19,13 @@ import org.springframework.web.bind.annotation.*;
 public class CardController {
     private final CardService cardService;
 
+    // 비동기 응답을 위해 CompletableFuture를 사용하긴했지만 다시 확인을 해야할 필요가 있습니다..
     @PostMapping("")
-    public ResponseEntity<Boolean> createCard(
+    public ResponseEntity<CompletableFuture<Boolean>> createCard(
             @UserId String userId,
             @RequestBody String url
     ) {
-        Boolean result = cardService.createCard(userId, url);
+        CompletableFuture<Boolean> result = cardService.createCard(userId, url);
         return ResponseEntity.ok(result);
     }
 

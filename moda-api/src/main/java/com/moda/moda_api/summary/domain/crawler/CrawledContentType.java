@@ -1,6 +1,6 @@
 package com.moda.moda_api.summary.domain.crawler;
 
-public enum ContentType {
+public enum CrawledContentType {
 	UNCLASSIFIED,
 	TISTORY,
 	NAVER_BLOG,

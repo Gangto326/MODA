@@ -9,4 +9,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Url {
 	private String value;
+	private String urlType;
 }

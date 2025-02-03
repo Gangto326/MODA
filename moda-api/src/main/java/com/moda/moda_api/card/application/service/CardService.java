@@ -11,6 +11,8 @@ import com.moda.moda_api.card.presentation.request.MoveCardRequest;
 import com.moda.moda_api.card.presentation.request.UpdateCardRequest;
 import com.moda.moda_api.common.pagination.SliceRequestDto;
 import com.moda.moda_api.common.pagination.SliceResponseDto;
+import com.moda.moda_api.summary.application.service.LilysSummaryService;
+import com.moda.moda_api.summary.domain.model.CardSummaryResponse;
 import com.moda.moda_api.user.domain.UserId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -21,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,10 +33,9 @@ public class CardService {
     private final CardRepository cardRepository;
     private final CardFactory cardFactory;
     private final CardDtoMapper cardDtoMapper;
-
     private final BoardService boardService;
-
     private final ApplicationEventPublisher eventPublisher;
+    private final LilysSummaryService lilysSummaryService;
 
     /**
      * URL을 입력 받고 새로운 카드 생성 후 알맞은 보드로 이동합니다.
@@ -42,10 +44,15 @@ public class CardService {
      * @return
      */
     @Transactional
-    public Boolean createCard(String userId, String url) {
+    public CompletableFuture<Boolean> createCard(String userId, String url) {
         UserId userIdObj = new UserId(userId);
 
+
         // TODO: (종원) url로 AI API 메서드 호출
+        CompletableFuture<CardSummaryResponse> cardSummaryResponse = lilysSummaryService.summarize(url);
+        // 비동기적으로 createCard를 처리해야함
+        // 종원 AI API 메서드 호출후 종헌의 임베딩 메서드 호출은 순차적으로 진행이되어야함.
+        // lilysSummaryService.summarize(url).thenCompose를 써서 확실히 요약이 끝나고 임베딩을 진행해야함.
 
         // TODO: (종헌) 임베딩 메서드 호출
         BoardId boardIdObj = new BoardId("18e7e5bc-fd34-41c3-9097-8992925e0048");

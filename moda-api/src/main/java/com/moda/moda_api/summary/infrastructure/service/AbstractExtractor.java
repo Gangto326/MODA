@@ -1,4 +1,4 @@
-package com.moda.moda_api.summary.infrastructure.service.platformStartegy;
+package com.moda.moda_api.summary.infrastructure.service;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -9,10 +9,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Service;
 
-import com.moda.moda_api.summary.domain.crawler.ContentType;
 import com.moda.moda_api.summary.domain.crawler.CrawledContent;
-import com.moda.moda_api.summary.domain.service.ContentExtractorStrategy;
-import com.moda.moda_api.summary.infrastructure.service.PlatformExtractorFactory;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,21 +17,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class AbstractExtractor implements ContentExtractorStrategy {
+public class AbstractExtractor {
 	private final WebDriver driver;
 	private final PlatformExtractorFactory extractorFactory;
 
-	@Override
-	public boolean supports(String url) {
-		try {
-			extractorFactory.getConfig(url);
-			return true;
-		} catch (IllegalArgumentException e) {
-			return false;
-		}
-	}
-
-	@Override
 	public CrawledContent extract(String url) throws Exception {
 		try {
 			ExtractorConfig config = extractorFactory.getConfig(url);
@@ -46,14 +32,13 @@ public class AbstractExtractor implements ContentExtractorStrategy {
 				wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(config.getFrameId()));
 			}
 
-			CrawledContent content = new CrawledContent();
-			content.setUrl(url);
-			content.setContentType(config.getContentType());
-			content.setTitle(extractTitle());
-			content.setContent(extractContent(wait, config));
-			content.setImageUrls(extractImages(wait, config));
-
-			return content;
+			return CrawledContent.builder()
+				.url(url)
+				.crawledContentType(config.getCrawledContentType())
+				.title(extractTitle())
+				.content(extractContent(wait, config))
+				.imageUrls(extractImages(wait, config))
+				.build();
 		} catch (Exception e) {
 			throw new Exception("Failed to crawl content: " + e.getMessage());
 		} finally {
@@ -89,7 +74,8 @@ public class AbstractExtractor implements ContentExtractorStrategy {
 		}
 	}
 
-	private List<String> extractImages(WebDriverWait wait, ExtractorConfig config) {
+	//이거 외부에서 쓰기위해서 잠시 public으로 돌리는데 어떤 문제점이 생길지는 모르겠어.
+	public List<String> extractImages(WebDriverWait wait, ExtractorConfig config) {
 		List<String> images = new ArrayList<>();
 		try {
 			List<WebElement> imageElements = wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(
@@ -102,12 +88,10 @@ public class AbstractExtractor implements ContentExtractorStrategy {
 					if (src == null || src.isEmpty()) {
 						src = img.getAttribute("data-src");
 					}
-
 					if (src != null && !src.isEmpty() && isValidImageUrl(src)) {
 						images.add(src);
 					}
 				} catch (StaleElementReferenceException e) {
-					continue;
 				}
 			}
 		} catch (TimeoutException e) {

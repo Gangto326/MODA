@@ -5,8 +5,8 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import com.moda.moda_api.summary.domain.crawler.ContentType;
-import com.moda.moda_api.summary.infrastructure.service.platformStartegy.ExtractorConfig;
+import com.moda.moda_api.summary.domain.crawler.CrawledContentType;
+import com.moda.moda_api.summary.infrastructure.service.ExtractorConfig;
 
 @Component
 public class PlatformExtractorFactory {
@@ -19,7 +19,7 @@ public class PlatformExtractorFactory {
 			.contentSelector("body") // 일반적으로 본문은 body 태그에 있음
 			.imageSelector("img") // 모든 이미지 태그를 선택
 			.requiresFrame(false)
-			.contentType(ContentType.UNCLASSIFIED)
+			.crawledContentType(CrawledContentType.UNCLASSIFIED)
 			.build());
 
 		// 네이버 블로그 설정
@@ -29,7 +29,7 @@ public class PlatformExtractorFactory {
 			.imageSelector(".se-image img, .se-module-image img")
 			.requiresFrame(true)
 			.frameId("mainFrame")
-			.contentType(ContentType.NAVER_BLOG)
+			.crawledContentType(CrawledContentType.NAVER_BLOG)
 			.build());
 
 		// 네이버 뉴스 설정
@@ -38,7 +38,7 @@ public class PlatformExtractorFactory {
 			.contentSelector("#dic_area, .go_trans._article_content")
 			.imageSelector("#dic_area img, .go_trans._article_content img")
 			.requiresFrame(false)
-			.contentType(ContentType.NAVER_NEWS)
+			.crawledContentType(CrawledContentType.NAVER_NEWS)
 			.build());
 
 		// Tistory 설정
@@ -47,7 +47,7 @@ public class PlatformExtractorFactory {
 			.contentSelector(".contents_style")
 			.imageSelector(".contents_style img")
 			.requiresFrame(false)
-			.contentType(ContentType.TISTORY)
+			.crawledContentType(CrawledContentType.TISTORY)
 			.build());
 
 		// Velog 설정
@@ -56,7 +56,7 @@ public class PlatformExtractorFactory {
 			.contentSelector(".sc-dFtzxp")
 			.imageSelector(".sc-dFtzxp img")
 			.requiresFrame(false)
-			.contentType(ContentType.VELOG)
+			.crawledContentType(CrawledContentType.VELOG)
 			.build());
 
 		// 다음 뉴스 설정
@@ -65,10 +65,8 @@ public class PlatformExtractorFactory {
 			.contentSelector(".article_view")
 			.imageSelector(".article_view img")
 			.requiresFrame(false)
-			.contentType(ContentType.DAUM_NEWS)
+			.crawledContentType(CrawledContentType.DAUM_NEWS)
 			.build());
-
-
 	}
 
 	// 하나씩 꺼내보면서 맞는 사이트가 있는지 찾아보는 과정
@@ -79,4 +77,5 @@ public class PlatformExtractorFactory {
 			.findFirst()
 			.orElse(CONFIGS.get("default")); // 선택되지 않았다면 defalut 방법으로 크롤링
 	}
+
 }
