@@ -9,20 +9,12 @@ class Embedding:
         self.model.to(self.device)
 
     def embed_document(self,
-                       document: str,
+                       content: str,
                        batch_size: int = 32) -> np.ndarray:
         embeddings = self.model.encode(
-            document,
+            content,
             batch_size=batch_size,
             convert_to_numpy=True
         )
 
         return embeddings
-
-    def compare(self,
-                document1: str,
-                document2: str) -> float:
-        embedding_vector1 = self.embed_document(document1)
-        embedding_vector2 = self.embed_document(document2)
-
-        return util.cos_sim(embedding_vector1, embedding_vector2).item()
