@@ -25,7 +25,7 @@ public class CardController {
             @UserId String userId,
             @RequestBody String url
     ) {
-        boolean result = cardService.createCard(userId, url);
+        Boolean result = cardService.createCard(userId, url);
         return ResponseEntity.ok(result);
     }
 

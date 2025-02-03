@@ -45,17 +45,16 @@ public class CardService {
      * @return
      */
     @Transactional
-    public boolean createCard(String userId, String url) {
+    public Boolean createCard(String userId, String url) {
         UserId userIdObj = new UserId(userId);
+        // TODO: (종헌) 임베딩 메서드 호출
+        BoardId boardIdObj = new BoardId("18e7e5bc-fd34-41c3-9097-8992925e0048");
 
         // TODO: (종원) url로 AI API 메서드 호출
         CompletableFuture<CardSummaryResponse> cardSummaryResponse = lilysSummaryService.summarize(url);
         // 비동기적으로 createCard를 처리해야함
         // 종원 AI API 메서드 호출후 종헌의 임베딩 메서드 호출은 순차적으로 진행이되어야함.
         // lilysSummaryService.summarize(url).thenCompose를 써서 확실히 요약이 끝나고 임베딩을 진행해야함.
-
-        // TODO: (종헌) 임베딩 메서드 호출
-        BoardId boardIdObj = new BoardId("18e7e5bc-fd34-41c3-9097-8992925e0048");
 
         float[] embedding = new float[768];
         for (int i = 0; i < 768; i++) {
