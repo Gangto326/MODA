@@ -85,7 +85,7 @@ public class CardService {
 				Card savedCard = cardRepository.save(card);
 
 				// 이벤트 발행
-				eventPublisher.publishEvent(CardCreatedForBoardEvent.from(savedCard));
+				eventPublisher.publishEvent(CardInsertForBoardEvent.from(savedCard.getBoardId()));
 
 				return CompletableFuture.completedFuture(true);
 			});
@@ -218,6 +218,9 @@ public class CardService {
 		// 모든 카드를 입력으로 들어온 BoardId로 이동 후 저장
 		cardsToMove.stream().forEach(card -> card.moveBoard(boardIdObj));
 		cardRepository.saveAll(cardsToMove);
+
+		// 이벤트 발행
+		eventPublisher.publishEvent(CardInsertForBoardEvent.from(boardIdObj));
 
 		return true;
 	}
