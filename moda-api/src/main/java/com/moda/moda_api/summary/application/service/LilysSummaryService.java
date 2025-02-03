@@ -35,6 +35,7 @@ public class LilysSummaryService {
 
 	private CompletableFuture<String> waitForCompletion(String requestId) {
 		return checkStatusWithRetry(requestId, 0);
+
 	}
 
 	private CompletableFuture<String> checkStatusWithRetry(String requestId, int attempt) {

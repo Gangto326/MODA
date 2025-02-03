@@ -72,4 +72,11 @@ public class CardRepositoryImpl implements CardRepository {
                 .stream().map(cardEntityMapper::toDomain)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public Optional<Card> findByUrlHash(String urlHash) {
+        return cardJpaRepository.findFirstByUrlHash(urlHash)
+            .map(cardEntityMapper::toDomain);
+    }
+
 }
