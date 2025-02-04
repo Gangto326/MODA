@@ -29,6 +29,7 @@ public class CardDtoMapper {
                 .type(ContentType.from(card.getTypeId()))
                 .title(card.getTitle())
                 .content(card.getContent())
+                .thumbnailUrl(card.getThumbnailUrl())
                 .createdAt(card.getCreatedAt())
                 .build();
     }
