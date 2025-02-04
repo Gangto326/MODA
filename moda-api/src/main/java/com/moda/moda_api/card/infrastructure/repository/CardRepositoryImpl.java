@@ -1,12 +1,13 @@
 package com.moda.moda_api.card.infrastructure.repository;
 
-import com.moda.moda_api.board.domain.BoardId;
 import com.moda.moda_api.card.domain.Card;
+import com.moda.moda_api.card.domain.CardId;
 import com.moda.moda_api.card.domain.CardRepository;
 import com.moda.moda_api.card.infrastructure.entity.CardEntity;
 import com.moda.moda_api.card.infrastructure.mapper.CardEntityMapper;
+import com.moda.moda_api.category.domain.CategoryId;
+import com.moda.moda_api.user.domain.UserId;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Repository;
@@ -29,14 +30,14 @@ public class CardRepositoryImpl implements CardRepository {
     }
 
     @Override
-    public Slice<Card> findByBoardUserIdAndBoardId(String userId, String boardId, Pageable pageable) {
-        Slice<CardEntity> cardEntities = cardJpaRepository.findByBoardUserIdAndBoardId(userId, boardId, pageable);
+    public Slice<Card> findByUserIdAndCategoryId(UserId userId, CategoryId categoryId, Pageable pageable) {
+        Slice<CardEntity> cardEntities = cardJpaRepository.findByUserIdAndCategoryId(userId.getValue(), categoryId.getValue(), pageable);
         return cardEntities.map(cardEntityMapper::toDomain);
     }
 
     @Override
-    public Optional<Card> findByCardId(String cardId) {
-        return cardJpaRepository.findById(cardId)
+    public Optional<Card> findByUserIdAndCardId(UserId userId, CardId cardId) {
+        return cardJpaRepository.findByUserIdAndCardId(userId.getValue(), cardId.getValue())
                 .map(cardEntityMapper::toDomain);
     }
 
@@ -64,12 +65,5 @@ public class CardRepositoryImpl implements CardRepository {
                 .collect(Collectors.toList());
 
         cardJpaRepository.saveAll(cardEntities);
-    }
-
-    @Override
-    public List<Card> findCardsByBoardIdOrderByCreatedAtDesc(BoardId boardId, int limit) {
-        return cardJpaRepository.findThreeCardsByBoardIdOrderByCreatedAtDesc(boardId.getValue(), PageRequest.of(0, limit))
-                .stream().map(cardEntityMapper::toDomain)
-                .collect(Collectors.toList());
     }
 }

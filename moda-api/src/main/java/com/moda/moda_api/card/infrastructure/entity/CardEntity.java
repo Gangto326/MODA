@@ -1,9 +1,11 @@
 package com.moda.moda_api.card.infrastructure.entity;
 
-import com.moda.moda_api.board.infrastructure.entity.BoardEntity;
 import com.moda.moda_api.card.infrastructure.converter.VectorConverter;
+import com.moda.moda_api.category.infrastructure.entity.CategoryEntity;
+import io.hypersistence.utils.hibernate.type.array.StringArrayType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Type;
 
 import java.time.LocalDateTime;
 
@@ -18,8 +20,11 @@ public class CardEntity {
     @Column(name = "card_id", length = 36, nullable = false)
     private String cardId;
 
-    @Column(name = "board_id", length = 36, nullable = false)
-    private String boardId;
+    @Column(name = "user_id")
+    private String userId;
+
+    @Column(name = "category_id", length = 36, nullable = false)
+    private Long categoryId;
 
     @Column(name = "type_id", nullable = false)
     private Integer typeId;
@@ -47,6 +52,10 @@ public class CardEntity {
     @Builder.Default
     private Integer viewCount = 0;
 
+    @Type(StringArrayType.class)
+    @Column(columnDefinition = "text[]")
+    private String[] keywords;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
@@ -58,8 +67,8 @@ public class CardEntity {
     private LocalDateTime deletedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "board_id", insertable = false, updatable = false)
-    private BoardEntity board;
+    @JoinColumn(name = "category_id", insertable = false, updatable = false)
+    private CategoryEntity category;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "type_id", insertable = false, updatable = false)

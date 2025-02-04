@@ -1,7 +1,5 @@
 package com.moda.moda_api.card.application.service;
 
-import com.moda.moda_api.board.application.service.BoardService;
-import com.moda.moda_api.board.domain.BoardId;
 import com.moda.moda_api.card.application.mapper.CardDtoMapper;
 import com.moda.moda_api.card.application.response.CardDetailResponse;
 import com.moda.moda_api.card.application.response.CardListResponse;
@@ -9,6 +7,7 @@ import com.moda.moda_api.card.domain.*;
 import com.moda.moda_api.card.exception.CardNotFoundException;
 import com.moda.moda_api.card.presentation.request.MoveCardRequest;
 import com.moda.moda_api.card.presentation.request.UpdateCardRequest;
+import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.common.pagination.SliceRequestDto;
 import com.moda.moda_api.common.pagination.SliceResponseDto;
 import com.moda.moda_api.summary.application.service.LilysSummaryService;
@@ -18,14 +17,12 @@ import com.moda.moda_api.util.hash.HashUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -37,8 +34,6 @@ public class CardService {
 	private final CardRepository cardRepository;
 	private final CardFactory cardFactory;
 	private final CardDtoMapper cardDtoMapper;
-	private final BoardService boardService;
-	private final ApplicationEventPublisher eventPublisher;
 	private final LilysSummaryService lilysSummaryService;
 	private final HashUtil hashUtil;
 	private final EmbeddingApiClient embeddingApiClient;
@@ -53,8 +48,8 @@ public class CardService {
 	public CompletableFuture<Boolean> createCard(String userId, String url) {
 		UserId userIdObj = new UserId(userId);
 
-		// TODO: 보드 아이디 결정하기
-		BoardId boardIdObj = new BoardId("18e7e5bc-fd34-41c3-9097-8992925e0048");
+		// TODO: 카테고리 아이디 결정하기
+		CategoryId categoryIdObj = new CategoryId(1L);
 
 		// AI 요약 서비스 호출 후 카드 생성 로직 수행
 		return lilysSummaryService.summarize(url)
@@ -71,21 +66,18 @@ public class CardService {
 
 				log.info("정보", summaryResponse.getTitle());
 				Card card = cardFactory.create(
-					userIdObj,
-					boardIdObj,
-					1,
-					"asdasdasdasd",
-					summaryResponse.getTitle(),
-					summaryResponse.getContent(),
-					summaryResponse.getThumbnailContent(),
-					summaryResponse.getThumbnailUrl(),
-					embeddingVector
+						userIdObj,
+						categoryIdObj,
+						1,
+						"asdasdasdasd",
+						summaryResponse.getTitle(),
+						summaryResponse.getContent(),
+						summaryResponse.getThumbnailContent(),
+						summaryResponse.getThumbnailUrl(),
+						embeddingVector
 				);
 
 				Card savedCard = cardRepository.save(card);
-
-				// 이벤트 발행
-				eventPublisher.publishEvent(CardInsertForBoardEvent.from(savedCard.getBoardId()));
 
 				return CompletableFuture.completedFuture(true);
 			});
@@ -96,7 +88,7 @@ public class CardService {
 	 *
 	 * 최대 15개의 카드를 반환하며 Slice 형식으로 다음 값이 있는지를 SliceInfo에 함께 반환
 	 * @param userId
-	 * @param boardId
+	 * @param categoryId
 	 * @param page
 	 * @param size
 	 * @param sortBy
@@ -104,10 +96,10 @@ public class CardService {
 	 * @return
 	 */
 	public SliceResponseDto<CardListResponse> getCardList(
-		String userId, String boardId, Integer page, Integer size, String sortBy, String sortDirection
+		String userId, Long categoryId, Integer page, Integer size, String sortBy, String sortDirection
 	) {
 		UserId userIdObj = new UserId(userId);
-		BoardId boardIdObj = new BoardId(boardId);
+		CategoryId categoryIdObj = new CategoryId(categoryId);
 
 		// Slice 값 생성
 		SliceRequestDto sliceRequestDto = SliceRequestDto.builder()
@@ -118,14 +110,11 @@ public class CardService {
 			.build();
 
 		// Slice와 파라미터 조건에 맞는 카드를 가져옵니다.
-		Slice<Card> cards = cardRepository.findByBoardUserIdAndBoardId(
-			userIdObj.getValue(),
-			boardIdObj.getValue(),
-			sliceRequestDto.toPageable()
+		Slice<Card> cards = cardRepository.findByUserIdAndCategoryId(
+				userIdObj,
+				categoryIdObj,
+				sliceRequestDto.toPageable()
 		);
-
-		// 보드를 확인했다는 이벤트 발생
-		eventPublisher.publishEvent(BoardReadEvent.from(userIdObj, boardIdObj));
 
 		// 페이지네이션 메타 데이터와 함께 반환합니다.
 		return SliceResponseDto.of(
@@ -144,7 +133,7 @@ public class CardService {
 		CardId cardIdObj = new CardId(cardId);
 
 		// 카드 탐색
-		Card card = findCard(cardIdObj);
+		Card card = findCard(userIdObj, cardIdObj);
 		return cardDtoMapper.toDetailResponse(card);
 	}
 
@@ -162,10 +151,10 @@ public class CardService {
 		List<CardId> cardIdList = toCardIds(Arrays.asList(cardIds.split(",")));
 
 		// 제거할 CardId별 Card 가져오기
-		List<Card> cardsToDelete = findCardList(cardIdList);
+		List<Card> cardsToDelete = findCardList(userIdObj, cardIdList);
 
 		// Card 삭제 권한 검증
-		validateOwnership(userIdObj, cardsToDelete);
+		cardsToDelete.forEach(card -> card.validateOwnership(userIdObj));
 
 		// 카드 삭제
 		return cardRepository.deleteAll(cardsToDelete);
@@ -183,10 +172,10 @@ public class CardService {
 		CardId cardIdObj = new CardId(request.getCardId());
 
 		// Content를 변경할 카드 탐색
-		Card card = findCard(cardIdObj);
+		Card card = findCard(userIdObj, cardIdObj);
 
 		// Content 변경 권한 검증
-		validateOwnership(userIdObj, List.of(card));
+		card.validateOwnership(userIdObj);
 
 		// Card의 콘텐츠 변경 후 저장
 		card.changeContent(request.getContent());
@@ -204,23 +193,20 @@ public class CardService {
 	@Transactional
 	public Boolean updateCardBoard(String userId, MoveCardRequest request) {
 		UserId userIdObj = new UserId(userId);
-		BoardId boardIdObj = new BoardId(request.getBoardId());
+		CategoryId categoryIdObj = new CategoryId(request.getCategoryId());
 
 		// 입력의 모든 CardId를 Value Object로 매핑
 		List<CardId> cardIdList = toCardIds(request.getCardIdList());
 
 		// CardId에 해당하는 모든 카드를 가져옴
-		List<Card> cardsToMove = findCardList(cardIdList);
+		List<Card> cardsToMove = findCardList(userIdObj, cardIdList);
 
 		// 각 카드의 변경 권한 검증
-		validateOwnership(userIdObj, cardsToMove);
+		cardsToMove.forEach(card -> card.validateOwnership(userIdObj));
 
 		// 모든 카드를 입력으로 들어온 BoardId로 이동 후 저장
-		cardsToMove.stream().forEach(card -> card.moveBoard(boardIdObj));
+		cardsToMove.stream().forEach(card -> card.moveCategory(categoryIdObj));
 		cardRepository.saveAll(cardsToMove);
-
-		// 이벤트 발행
-		eventPublisher.publishEvent(CardInsertForBoardEvent.from(boardIdObj));
 
 		return true;
 	}
@@ -237,12 +223,13 @@ public class CardService {
 	}
 
 	/**
-	 * CardId로 Card를 찾습니다.
+	 * UserId와 CardId로 Card를 찾습니다.
+	 * @param userId
 	 * @param cardId
 	 * @return
 	 */
-	private Card findCard(CardId cardId) {
-		return cardRepository.findByCardId(cardId.getValue())
+	private Card findCard(UserId userId, CardId cardId) {
+		return cardRepository.findByUserIdAndCardId(userId, cardId)
 			.orElseThrow(() -> new CardNotFoundException("카드를 찾을 수 없습니다."));
 	}
 
@@ -251,24 +238,9 @@ public class CardService {
 	 * @param cardIdList
 	 * @return
 	 */
-	private List<Card> findCardList(List<CardId> cardIdList) {
+	private List<Card> findCardList(UserId userId, List<CardId> cardIdList) {
 		return cardIdList.stream()
-			.map(this::findCard)
+			.map(cardId -> findCard(userId, cardId))
 			.collect(Collectors.toList());
-	}
-
-	/**
-	 * Card별 User의 소유권 권한 검증 로직
-	 * @param userId
-	 * @param cardList
-	 */
-	private void validateOwnership(UserId userId, List<Card> cardList) {
-		// 각 Card 객체가 존재하는 BoardId를 가져오기. Set로 중복 제거
-		Set<BoardId> boardIds = cardList.stream()
-			.map(Card::getBoardId)
-			.collect(Collectors.toSet());
-
-		// 보드에 존재하는 UserId로 권한 검증 (해당 Card가 User의 카드인지 검증)
-		boardService.someOtherBoardOperation(userId, boardIds);
 	}
 }

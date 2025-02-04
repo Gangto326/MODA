@@ -14,11 +14,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class CardListResponse {
     private String cardId;
-    private String boardId;
+    private Long categoryId;
     private Integer typeId;
     private ContentType type;
     private String title;
     private String thumbnailContent;
     private String thumbnailUrl;
+    private String[] keywords;
     private LocalDateTime createdAt;
 }

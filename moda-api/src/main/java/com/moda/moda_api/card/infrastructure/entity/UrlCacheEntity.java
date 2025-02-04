@@ -1,10 +1,12 @@
 package com.moda.moda_api.card.infrastructure.entity;
 
+import io.hypersistence.utils.hibernate.type.array.StringArrayType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.*;
+import org.hibernate.annotations.Type;
 
 import java.time.LocalDateTime;
 
@@ -27,6 +29,10 @@ public class UrlCacheEntity {
 
     @Column(name = "cached_content", columnDefinition = "TEXT", nullable = false)
     private String cachedContent;
+
+    @Type(StringArrayType.class)
+    @Column(columnDefinition = "text[]")
+    private String[] keywords;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     @Builder.Default

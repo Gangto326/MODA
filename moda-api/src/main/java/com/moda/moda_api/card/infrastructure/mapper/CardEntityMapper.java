@@ -1,10 +1,11 @@
 package com.moda.moda_api.card.infrastructure.mapper;
 
-import com.moda.moda_api.board.domain.BoardId;
 import com.moda.moda_api.card.domain.Card;
 import com.moda.moda_api.card.domain.CardId;
 import com.moda.moda_api.card.domain.EmbeddingVector;
 import com.moda.moda_api.card.infrastructure.entity.CardEntity;
+import com.moda.moda_api.category.domain.CategoryId;
+import com.moda.moda_api.user.domain.UserId;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -12,7 +13,8 @@ public class CardEntityMapper {
     public CardEntity toEntity(Card card) {
         return CardEntity.builder()
                 .cardId(card.getCardId().getValue())
-                .boardId(card.getBoardId().getValue())
+                .userId(card.getUserId().getValue())
+                .categoryId(card.getCategoryId().getValue())
                 .typeId(card.getTypeId())
                 .urlHash(card.getUrlHash())
                 .title(card.getTitle())
@@ -21,6 +23,7 @@ public class CardEntityMapper {
                 .thumbnailUrl(card.getThumbnailUrl())
                 .embedding(card.getEmbedding().getValues())
                 .viewCount(card.getViewCount())
+                .keywords(card.getKeywords())
                 .createdAt(card.getCreatedAt())
                 .updatedAt(card.getUpdatedAt())
                 .deletedAt(card.getDeletedAt())
@@ -30,7 +33,8 @@ public class CardEntityMapper {
     public Card toDomain(CardEntity entity) {
         return Card.builder()
                 .cardId(new CardId(entity.getCardId()))
-                .boardId(new BoardId(entity.getBoardId()))
+                .userId(new UserId(entity.getUserId()))
+                .categoryId(new CategoryId(entity.getCategoryId()))
                 .typeId(entity.getTypeId())
                 .urlHash(entity.getUrlHash())
                 .title(entity.getTitle())
@@ -39,6 +43,7 @@ public class CardEntityMapper {
                 .thumbnailUrl(entity.getThumbnailUrl())
                 .embedding(new EmbeddingVector(entity.getEmbedding()))
                 .viewCount(entity.getViewCount())
+                .keywords(entity.getKeywords())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .deletedAt(entity.getDeletedAt())
