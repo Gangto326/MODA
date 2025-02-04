@@ -37,6 +37,27 @@ public class CardService {
 	private final LilysSummaryService lilysSummaryService;
 	private final HashUtil hashUtil;
 	private final EmbeddingApiClient embeddingApiClient;
+	private final UrlCacheRepository urlCacheRepository;
+
+	@Transactional
+	public boolean testUrlCache(String url) {
+		System.out.println(url);
+		try {
+			System.out.println(url);
+			UrlCache urlCache = UrlCache.builder()
+					.urlHash(UrlCache.generateHash(url))
+					.cachedContent("Content")
+					.originalUrl(url)
+					.cachedTitle("Test")
+					.build();
+			urlCacheRepository.save(urlCache);
+			return true;
+		} catch (Exception e) {
+			log.error("Save failed", e);
+			return false;
+		}
+	}
+
 
 	/**
 	 * URL을 입력 받고 새로운 카드 생성 후 알맞은 보드로 이동합니다.
@@ -48,40 +69,70 @@ public class CardService {
 	public CompletableFuture<Boolean> createCard(String userId, String url) {
 		UserId userIdObj = new UserId(userId);
 
-		// TODO: 카테고리 아이디 결정하기
-		CategoryId categoryIdObj = new CategoryId(1L);
+//		String urlHash = UrlCache.generateHash(url);
+//		Optional<UrlCache> mayUrlCache = urlCacheRepository.findByUrlHash(urlHash);
 
-		// AI 요약 서비스 호출 후 카드 생성 로직 수행
+		if (mayUrlCache.isPresent()) {
+			UrlCache getUrlCache = mayUrlCache.get();
+			Card existingCard = cardRepository.findByUrlHash(urlHash).get();
+			Card card = cardFactory.create(
+					userIdObj,
+					existingCard.getCategoryId(),
+					existingCard.getTypeId(),
+					urlHash,
+					getUrlCache.getCachedTitle(),
+					getUrlCache.getCachedContent(),
+					existingCard.getThumbnailContent(),
+					existingCard.getThumbnailUrl(),
+					existingCard.getEmbedding()
+			);
+
+			//card에 저장한다.
+			Card savedCard = cardRepository.save(card);
+			return CompletableFuture.completedFuture(true);
+		}
 		return lilysSummaryService.summarize(url)
-			.thenCompose(summaryResponse -> {
+				.thenCompose(summaryResponse -> {
 
-				log.info("Summary Title: {}", summaryResponse.getTitle());
-				log.info("Summary Content: {}", summaryResponse.getContent());
-				log.info("Thumbnail URL: {}", summaryResponse.getThumbnailUrl());
-				log.info("Thumbnail Content: {}", summaryResponse.getThumbnailContent());
+					//TODO 임베딩 벡터 연결하기
+					// EmbeddingVector embeddingVector = embeddingApiClient.embedContent(summaryResponse.getContent());
+					float[] values = new float[EmbeddingVector.DIMENSION]; // 768 크기 배열
+					for (int i = 0; i < values.length; i++) {
+						values[i] = 5.3f;  // 모든 값에 5.3을 넣음
+					}
+					EmbeddingVector embeddingVectorTest = new EmbeddingVector(values);
 
-				// TODO: 파싱 더 깔끔하게 하기
-				EmbeddingVector embeddingVector = embeddingApiClient.embedContent(
-					summaryResponse.getContent());
+					//TODO: BoardId는 나중에 종헌이형이 늘어난다.
+					CategoryId categoryIdObj = new CategoryId(1L);
 
-				log.info("정보", summaryResponse.getTitle());
-				Card card = cardFactory.create(
-						userIdObj,
-						categoryIdObj,
-						1,
-						"asdasdasdasd",
-						summaryResponse.getTitle(),
-						summaryResponse.getContent(),
-						summaryResponse.getThumbnailContent(),
-						summaryResponse.getThumbnailUrl(),
-						embeddingVector
-				);
+					Card card = cardFactory.create(
+							userIdObj,
+							categoryIdObj,
+							summaryResponse.getTypeId(),
+							urlHash,
+							summaryResponse.getTitle(),
+							summaryResponse.getContent(),
+							summaryResponse.getThumbnailContent(),
+							summaryResponse.getThumbnailUrl(),
+							embeddingVectorTest
+					);
 
-				Card savedCard = cardRepository.save(card);
+					//UrlCache에 값을 저장한다.
+					urlCacheRepository.save(
+							UrlCache.builder()
+									.urlHash(urlHash)
+									.cachedTitle(summaryResponse.getTitle())
+									.cachedContent(summaryResponse.getContent())
+									.originalUrl(url)
+									.build()
+					);
 
-				return CompletableFuture.completedFuture(true);
-			});
+					//card에 저장한다.
+					Card savedCard = cardRepository.save(card);
+					return CompletableFuture.completedFuture(true);
+				});
 	}
+
 
 	/**
 	 * 페이지네이션에 맞게 카드의 리스트 반환합니다.

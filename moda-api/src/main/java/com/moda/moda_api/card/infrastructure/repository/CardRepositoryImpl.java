@@ -66,4 +66,10 @@ public class CardRepositoryImpl implements CardRepository {
 
         cardJpaRepository.saveAll(cardEntities);
     }
+
+    @Override
+    public Optional<Card> findByUrlHash(String urlHash) {
+        return cardJpaRepository.findFirstByUrlHash(urlHash)
+                .map(cardEntityMapper::toDomain);
+    }
 }
