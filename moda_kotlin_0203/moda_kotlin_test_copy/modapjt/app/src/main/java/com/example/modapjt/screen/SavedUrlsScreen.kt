@@ -81,7 +81,7 @@ private fun formatDate(timestamp: Long): String {
 //fun SavedUrlsScreen(
 //    viewModel: SavedUrlsViewModel = viewModel()
 //) {
-//    val context = LocalContext.current // ✅ 여기서 context 가져오기
+//    val context = LocalContext.current // 여기서 context 가져오기
 //    val captures by viewModel.allUrls.collectAsState()
 //
 //    LazyColumn(

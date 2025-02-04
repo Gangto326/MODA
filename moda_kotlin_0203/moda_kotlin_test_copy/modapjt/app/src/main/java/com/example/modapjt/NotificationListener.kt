@@ -24,7 +24,7 @@ class NotificationListener : NotificationListenerService() {
                 }
 
                 // 🔹 유튜브 영상 제목 가져오기
-                val title = extras.getString("android.title") // ✅ 유튜브 제목 가져오기 시도
+                val title = extras.getString("android.title") // 유튜브 제목 가져오기 시도
                 Log.d("NotificationListener", "유튜브 현재 재생 중: $title")
 
                 if (!title.isNullOrEmpty()) {

@@ -62,6 +62,7 @@ import com.example.modapjt.data.AppDatabase
 import com.example.modapjt.data.CaptureRepository
 import kotlinx.coroutines.*
 
+//
 class ShareReceiverActivity : AppCompatActivity() {
     private lateinit var repository: CaptureRepository
 
@@ -75,7 +76,7 @@ class ShareReceiverActivity : AppCompatActivity() {
         if (intent?.action == Intent.ACTION_SEND && intent.type == "text/plain") {
             val sharedText = intent.getStringExtra(Intent.EXTRA_TEXT)
             sharedText?.let {
-                saveToDatabase(it) // ✅ DB에 저장
+                saveToDatabase(it) // DB에 저장
             }
         }
 
@@ -85,7 +86,7 @@ class ShareReceiverActivity : AppCompatActivity() {
     private fun saveToDatabase(url: String) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                repository.insert(url) // ✅ RoomDB에 URL 저장
+                repository.insert(url) // RoomDB에 URL 저장
                 runOnUiThread {
                     Toast.makeText(applicationContext, "공유된 링크 저장 완료", Toast.LENGTH_SHORT).show()
                 }
@@ -99,7 +100,3 @@ class ShareReceiverActivity : AppCompatActivity() {
     }
 }
 
-
-
-// Unresolved reference: repository
-// <html>Unresolved reference. None of the following candidates is applicable because of receiver type mismatch:<br/>public inline fun kotlin.text.StringBuilder /* = java.lang.StringBuilder */.insert(index: Int, value: Byte): kotlin.text.StringBuilder /* = java.lang.StringBuilder */ defined in kotlin.text<br/>public inline fun kotlin.text.StringBuilder /* = java.lang.StringBuilder */.insert(index: Int, value: Short): kotlin.text.StringBuilder /* = java.lang.StringBuilder */ defined in kotlin.text

@@ -6,6 +6,7 @@ import android.os.IBinder
 import android.util.Log
 import android.view.Gravity
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.LifecycleService
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -138,12 +139,16 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
 
                 withContext(Dispatchers.Main) {
                     showSuccessFeedback()
+                    Toast.makeText(applicationContext, "정보 저장 성공 ! $url", Toast.LENGTH_SHORT).show() //  Toast 추가
+
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
                 Log.e("OverlayService", "URL 저장 중 오류 발생: ${e.message}")
                 withContext(Dispatchers.Main) {
                     showErrorFeedback()
+                    Toast.makeText(applicationContext, "URL 저장 실패", Toast.LENGTH_SHORT).show() // 실패 시에도 Toast 추가
+
                 }
             }
         }
@@ -199,7 +204,7 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
 //    override val savedStateRegistry: SavedStateRegistry
 //        get() = savedStateRegistryController.savedStateRegistry
 //
-//    private val viewModelStoreInstance = ViewModelStore() // ✅ 추가
+//    private val viewModelStoreInstance = ViewModelStore() // 추가
 //    override val viewModelStore: ViewModelStore
 //        get() = viewModelStoreInstance
 //
@@ -210,9 +215,9 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
 //        savedStateRegistryController.performRestore(null)
 //        windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
 //
-//        // ✅ ViewModel 초기화 코드 수정
+//        // ViewModel 초기화 코드 수정
 //        viewModel = ViewModelProvider(
-//            this, // ✅ `this`는 `OverlayService`, `ViewModelStoreOwner` 구현
+//            this, // `this`는 `OverlayService`, `ViewModelStoreOwner` 구현
 //            ViewModelProvider.AndroidViewModelFactory.getInstance(application as Application)
 //        )[SavedUrlsViewModel::class.java]
 //
@@ -293,7 +298,7 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
 //    private fun saveToLocalDatabase(url: String, source: SourceType) {
 //        CoroutineScope(Dispatchers.IO).launch {
 //            try {
-//                viewModel.addOverlayCapture(url) // ✅ ViewModel을 통해 저장
+//                viewModel.addOverlayCapture(url) // ViewModel을 통해 저장
 //                Log.d("OverlayService", "URL 저장 완료 ($source): $url")
 //
 //                withContext(Dispatchers.Main) {

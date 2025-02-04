@@ -1,20 +1,42 @@
-//package com.example.modapjt.components.card
-//
-//import androidx.compose.foundation.background
-//import androidx.compose.foundation.clickable
-//import androidx.compose.foundation.horizontalScroll
-//import androidx.compose.foundation.layout.*
-//import androidx.compose.foundation.rememberScrollState
-//import androidx.compose.material3.*
-//import androidx.compose.runtime.Composable
-//import androidx.compose.ui.Modifier
-//import androidx.compose.ui.graphics.Color
-//import androidx.compose.ui.text.font.FontWeight
-//import androidx.compose.ui.unit.dp
-//import androidx.navigation.NavController
-//import com.example.modapjt.domain.model.Card
-//
-//
+package com.example.modapjt.components.card
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.example.modapjt.domain.model.Card
+
+@Composable
+fun CardItem(card: Card, navController: NavController) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clickable { navController.navigate("card/${card.cardId}") } // 클릭 시 카드 상세 페이지 이동
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = card.thumbnailUrl ?: "썸네일 없음",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = card.thumbnailContent ?: "내용 없음",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
+}
+
+
+
+
+
 //
 //@Composable
 //fun CardItem(card: Card, navController: NavController) {
@@ -66,67 +88,54 @@
 //
 
 
-package com.example.modapjt.components.card
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import com.example.modapjt.components.video.YouTubePlayer
-import com.example.modapjt.domain.model.Card
-import com.example.modapjt.utils.extractYouTubeVideoId
 
-@Composable
-fun CardItem(card: Card, navController: NavController) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .clickable { navController.navigate("card/${card.cardId}") } // 클릭 시 상세 페이지 이동
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            // ✅ 카드 제목
-            Text(
-                text = "제목 :: ${card.title}",
-                style = MaterialTheme.typography.titleMedium
-            )
-
-            // ✅ 카드 내용
-            Text(
-                text = "내용: ${card.content}",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(top = 4.dp)
-            )
-
-            // ✅ isView가 true일 때 콘텐츠 표시 (유튜브 or 블로그)
-            if (card.isView) {
-                Spacer(modifier = Modifier.height(8.dp))
-
-                when (card.typeId) {
-                    1 -> { // ✅ typeId == 1 (유튜브)
-                        val videoId = extractYouTubeVideoId(card.urlHash)
-                        if (!videoId.isNullOrEmpty()) {
-                            YouTubePlayer(videoId = videoId, modifier = Modifier.height(200.dp))
-                        }
-                    }
-                    2 -> { // ✅ typeId == 2 (블로그)
-                        Text(
-                            text = "아직 테스트",
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier
-                                .background(Color.LightGray)
-                                .padding(8.dp)
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-        }
-    }
-}
+//@Composable
+//fun CardItem(card: Card, navController: NavController) {
+//    Card(
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .padding(horizontal = 16.dp, vertical = 8.dp)
+//            .clickable { navController.navigate("card/${card.cardId}") } // 클릭 시 상세 페이지 이동
+//    ) {
+//        Column(modifier = Modifier.padding(16.dp)) {
+//            // 카드 제목
+//            Text(
+//                text = "제목 :: ${card.title}",
+//                style = MaterialTheme.typography.titleMedium
+//            )
+//
+//            // 카드 내용
+//            Text(
+//                text = "내용: ${card.content}",
+//                style = MaterialTheme.typography.bodyMedium,
+//                modifier = Modifier.padding(top = 4.dp)
+//            )
+//
+//            // isView가 true일 때 콘텐츠 표시 (유튜브 or 블로그)
+//            if (card.isView) {
+//                Spacer(modifier = Modifier.height(8.dp))
+//
+//                when (card.typeId) {
+//                    1 -> { // typeId == 1 (유튜브)
+//                        val videoId = extractYouTubeVideoId(card.urlHash)
+//                        if (!videoId.isNullOrEmpty()) {
+//                            YouTubePlayer(videoId = videoId, modifier = Modifier.height(200.dp))
+//                        }
+//                    }
+//                    2 -> { // typeId == 2 (블로그)
+//                        Text(
+//                            text = "아직 테스트",
+//                            style = MaterialTheme.typography.bodyMedium,
+//                            modifier = Modifier
+//                                .background(Color.LightGray)
+//                                .padding(8.dp)
+//                        )
+//                    }
+//                }
+//
+//                Spacer(modifier = Modifier.height(8.dp))
+//            }
+//        }
+//    }
+//}

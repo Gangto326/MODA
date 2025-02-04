@@ -258,7 +258,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // 📌 접근성 서비스 권한이 있는지 확인하고 요청하는 함수 (변경 없음)
+    // 접근성 서비스 권한이 있는지 확인하고 요청하는 함수 (변경 없음)
     private fun checkAccessibilityPermission() {
         val accessibilityEnabled = Settings.Secure.getInt(
             contentResolver,
@@ -278,7 +278,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-//    자동으로 알림 액세스 권한을 요청하는 코드 추가
+//  자동으로 알림 액세스 권한을 요청하는 코드 추가
     private fun checkNotificationAccess() {
         val enabledListeners = Settings.Secure.getString(contentResolver, "enabled_notification_listeners")
         val packageName = packageName

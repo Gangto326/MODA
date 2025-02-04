@@ -89,10 +89,10 @@ fun HomeScreen(
                             }
                         }
 
-                        // 보드 생성 버튼 추가
-                        item {
-                            CreateBoardButton()
-                        }
+//                        // 보드 생성 버튼 추가
+//                        item {
+//                            CreateBoardButton()
+//                        }
 
                         // 보드 목록 표시
                         items(boards) { board ->

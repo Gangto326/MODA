@@ -16,8 +16,8 @@ import com.example.modapjt.components.bar.TopBackBarComponent
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.modapjt.components.video.YouTubePlayer
 import com.example.modapjt.domain.viewmodel.BoardViewModel
+import com.example.modapjt.domain.viewmodel.CardViewModel
 import com.example.modapjt.utils.extractYouTubeVideoId
-
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -25,25 +25,25 @@ fun BoardScreen(
     boardId: String?,
     navController: NavController,
     currentRoute: String,
-    viewModel: BoardViewModel = viewModel()
+    boardViewModel: BoardViewModel = viewModel(),
+    cardViewModel: CardViewModel = viewModel() // 카드 ViewModel 추가
 ) {
-    val boards by viewModel.boards.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
-    val error by viewModel.error.collectAsState()
+    val boards by boardViewModel.boards.collectAsState()
+    val cards by cardViewModel.cards.collectAsState() // 카드 목록 상태 추가
+    val isLoading by cardViewModel.isLoading.collectAsState()
+    val error by cardViewModel.error.collectAsState()
 
     val currentBoard = remember(boards, boardId) {
         boards.find { it.boardId == boardId }
     }
 
-//    LaunchedEffect(boardId) {
-//        if (boardId != null) {
-//            viewModel.loadBoardDetail(boardId)
-//        }
-//    }
-    LaunchedEffect(Unit) {
-        viewModel.loadBoardList("user") // 현재는 userId = "user"로 테스트
+    // 보드 ID가 변경될 때마다 카드 데이터 불러오기
+    LaunchedEffect(boardId) {
+        if (boardId != null) {
+            boardViewModel.loadBoardList("user") // 기존 보드 로딩
+            cardViewModel.loadCardList("user", boardId) // 보드 ID 기반으로 카드 로딩
+        }
     }
-
 
     Scaffold(
         topBar = { TopBackBarComponent(navController) },
@@ -59,23 +59,21 @@ fun BoardScreen(
                 error != null -> Text(text = "에러: $error", Modifier.align(Alignment.Center))
                 currentBoard != null -> {
                     Column(Modifier.padding(16.dp)) {
-                        // 보드 제목
                         Text(
                             text = "보드 이름: ${currentBoard.title}",
                             style = MaterialTheme.typography.headlineMedium,
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
 
-//                        val cards = currentBoard.cards
-//                        if (cards.isEmpty()) {
-//                            Text(text = "카드 리스트가 존재하지 않습니다.", style = MaterialTheme.typography.bodyLarge)
-//                        } else {
-//                            // 모든 카드를 `CardItem`으로 표시 (첫 번째 카드 포함)
-//                            cards.forEach { card ->
-//                                CardItem(card = card, navController = navController)
-//                                Spacer(modifier = Modifier.height(8.dp))
-//                            }
-//                        }
+                        // 카드 목록 표시
+                        if (cards.isEmpty()) {
+                            Text(text = "카드 리스트가 존재하지 않습니다.", style = MaterialTheme.typography.bodyLarge)
+                        } else {
+                            cards.forEach { card ->
+                                CardItem(card = card, navController = navController)
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
+                        }
                     }
                 }
                 else -> Text(text = "보드를 찾을 수 없습니다.", Modifier.align(Alignment.Center))

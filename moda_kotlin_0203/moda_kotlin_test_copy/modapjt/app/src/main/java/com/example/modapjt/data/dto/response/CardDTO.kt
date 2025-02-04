@@ -1,40 +1,33 @@
 package com.example.modapjt.data.dto.response
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import com.example.modapjt.domain.model.Card
-import java.sql.Timestamp
-import java.time.LocalDateTime
+import com.google.gson.annotations.SerializedName
 
-// 서버에서 받아올 데이터 구조 정의
+// 개별 카드 정보를 담는 DTO
 data class CardDTO(
-    val card_id: String,                // UUID 값
-    val board_id: String,               // 소속 보드 ID
-    val type_id: Int,                   // 카드 타입
-    val url_hash: String,              // URL 해시값
-    val title: String,                  // 카드 제목
-    val content: String,                // 카드 내용
-    val thumbnail_content: String,
-    val thumbnail_url: String,
-    val embedding: List<Float>?,        // 벡터 임베딩
-    val view_count: Int,
-    val created_at: Timestamp,          // 생성 시간
-    val updated_at: Timestamp,         // 수정 시간
-    val deleted_at: Timestamp,         // 삭제 시간
+    @SerializedName("cardId") val cardId: String,
+    @SerializedName("boardId") val boardId: String,
+    @SerializedName("typeId") val typeId: Int,
+    @SerializedName("type") val type: String,
+    @SerializedName("thumbnailContent") val thumbnailContent: String?,
+    @SerializedName("thumbnailUrl") val thumbnailUrl: String?,
+    @SerializedName("createdAt") val createdAt: String
 )
-{
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun toDomain() = Card(
-        cardId = card_id,
-        boardId = board_id,
-        typeId = type_id,
-        urlHash = url_hash,
-        title = title,
-        content = content,
-        embedding = embedding,
-        createdAt = LocalDateTime.parse(created_at.toString()),
-        updatedAt = updated_at.let { LocalDateTime.parse(it.toString()) },
-        deletedAt = deleted_at.let { LocalDateTime.parse(it.toString()) },
-        isView = true
+
+// DTO → Domain 변환 함수
+fun CardDTO.toDomain(): Card {
+    return Card(
+        cardId = this.cardId,
+        boardId = this.boardId,
+        typeId = this.typeId,
+        type = this.type,
+        thumbnailContent = this.thumbnailContent ?: "", // 기본값 제공
+        thumbnailUrl = this.thumbnailUrl ?: "", // 기본값 제공
+        createdAt = this.createdAt
     )
 }
+
+// 서버 응답에서 thumbnailContent나 thumbnailUrl이 항상 존재하는 값이라면?
+// 방법 1) nullable 타입 유지 → Card.kt에서 그대로 String? 사용
+// null일 경우 기본적으로 빈 문자열("")을 사용해야 한다면?
+// 방법 2) 기본값 제공 → toDomain()에서 ?: "" 추가
