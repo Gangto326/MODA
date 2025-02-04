@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -69,8 +70,8 @@ public class CardService {
 	public CompletableFuture<Boolean> createCard(String userId, String url) {
 		UserId userIdObj = new UserId(userId);
 
-//		String urlHash = UrlCache.generateHash(url);
-//		Optional<UrlCache> mayUrlCache = urlCacheRepository.findByUrlHash(urlHash);
+		String urlHash = UrlCache.generateHash(url);
+		Optional<UrlCache> mayUrlCache = urlCacheRepository.findByUrlHash(urlHash);
 
 		if (mayUrlCache.isPresent()) {
 			UrlCache getUrlCache = mayUrlCache.get();
