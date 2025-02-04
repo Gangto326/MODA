@@ -35,7 +35,7 @@ fun TopBackBarComponent(navController: NavController) {
 
         // 나머지 아이콘들 (모드 로고 부분은 그대로 둠)
         Row {
-            repeat(4) {
+            repeat(2) {
                 IconButton(onClick = { /* TODO */ }) {
                     Icon(
                         imageVector = Icons.Default.MoreVert,

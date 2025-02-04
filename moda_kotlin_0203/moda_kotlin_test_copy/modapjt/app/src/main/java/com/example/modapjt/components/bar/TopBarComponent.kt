@@ -29,7 +29,7 @@ fun TopBarComponent() {
             modifier = Modifier.size(32.dp)
         )
         Row {
-            repeat(4) {
+            repeat(2) {
                 IconButton(onClick = { /* TODO */ }) {
                     Icon(
                         imageVector = Icons.Default.MoreVert,

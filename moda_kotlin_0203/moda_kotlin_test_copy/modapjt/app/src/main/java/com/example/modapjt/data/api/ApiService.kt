@@ -3,6 +3,7 @@ package com.example.modapjt.data.api
 import com.example.modapjt.data.dto.response.ApiResponse
 import com.example.modapjt.data.dto.response.BoardDTO
 import com.example.modapjt.data.dto.response.CardDTO
+import com.example.modapjt.data.dto.response.CardDetailDTO
 import com.example.modapjt.data.dto.response.CardResponse
 import retrofit2.Call
 import retrofit2.Response
@@ -42,5 +43,11 @@ interface ApiService {
         @Query("sortDirection") sortDirection: String = "DESC"
     ): Response<CardResponse> // List<CardDTO>가 아니라 CardResponse를 반환하도록 변경
 
+    // 카드 상세 정보 조회 api
+    @GET("api/card/{cardId}")
+    suspend fun getCardDetail(
+        @Path("cardId") cardId: String,
+        @Query("userId") userId: String
+    ): Response<CardDetailDTO>
 
 }

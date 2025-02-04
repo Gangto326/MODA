@@ -149,6 +149,11 @@
 //    }
 //}
 
+
+
+
+
+
 package com.example.modapjt.screen.card
 
 import android.os.Build
@@ -168,6 +173,51 @@ import com.example.modapjt.components.card.CardDetail
 import com.example.modapjt.components.video.YouTubePlayer
 import com.example.modapjt.domain.viewmodel.CardViewModel
 import com.example.modapjt.utils.extractYouTubeVideoId
+//
+//@Composable
+//fun CardScreen(
+//    cardId: String?,
+//    navController: NavController,
+//    currentRoute: String,
+//    viewModel: CardViewModel = viewModel()
+//) {
+//    val cards by viewModel.cards.collectAsState()
+//    val isLoading by viewModel.isLoading.collectAsState()
+//    val error by viewModel.error.collectAsState()
+//
+//    val currentCard = remember(cards, cardId) {
+//        cards.find { it.cardId == cardId }
+//    }
+//
+//    LaunchedEffect(cardId) {
+//        if (cardId != null) {
+//            viewModel.loadCardList("user", "1") // 현재는 userId = "user", boardId = "1"로 테스트
+//        }
+//    }
+//
+//    Scaffold(
+//        topBar = { TopBackBarComponent(navController) },
+//        bottomBar = { BottomBarComponent(navController, currentRoute) }
+//    ) { paddingValues ->
+//        Box(
+//            modifier = Modifier
+//                .fillMaxSize()
+//                .padding(paddingValues)
+//        ) {
+//            when {
+//                isLoading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
+//                error != null -> Text(text = "에러: $error", Modifier.align(Alignment.Center))
+//                currentCard != null -> {
+//                    Column(Modifier.padding(16.dp)) {
+//                        // 유튜브 카드면 자동으로 영상이 보이도록 CardDetail 사용
+//                        CardDetail(card = currentCard)
+//                    }
+//                }
+//                else -> Text(text = "카드를 찾을 수 없습니다.", Modifier.align(Alignment.Center))
+//            }
+//        }
+//    }
+//}
 
 @Composable
 fun CardScreen(
@@ -176,17 +226,13 @@ fun CardScreen(
     currentRoute: String,
     viewModel: CardViewModel = viewModel()
 ) {
-    val cards by viewModel.cards.collectAsState()
+    val cardDetail by viewModel.cardDetail.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
 
-    val currentCard = remember(cards, cardId) {
-        cards.find { it.cardId == cardId }
-    }
-
     LaunchedEffect(cardId) {
         if (cardId != null) {
-            viewModel.loadCardList("user", "1") // 현재는 userId = "user", boardId = "1"로 테스트
+            viewModel.loadCardDetail("user", cardId)
         }
     }
 
@@ -202,13 +248,13 @@ fun CardScreen(
             when {
                 isLoading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
                 error != null -> Text(text = "에러: $error", Modifier.align(Alignment.Center))
-                currentCard != null -> {
-                    Column(Modifier.padding(16.dp)) {
-                        // 유튜브 카드면 자동으로 영상이 보이도록 CardDetail 사용
-                        CardDetail(card = currentCard)
-                    }
+                cardDetail != null -> {
+                    CardDetail(cardDetail = cardDetail!!)  // 매개변수 이름을 cardDetail로 지정
                 }
-                else -> Text(text = "카드를 찾을 수 없습니다.", Modifier.align(Alignment.Center))
+                else -> Text(
+                    text = "카드를 찾을 수 없습니다.",
+                    modifier = Modifier.align(Alignment.Center)
+                )
             }
         }
     }

@@ -5,33 +5,133 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.modapjt.components.video.YouTubePlayer
 import com.example.modapjt.domain.model.Card
+import com.example.modapjt.utils.extractYouTubeVideoId
+
 
 @Composable
-fun CardItem(card: Card, navController: NavController) {
+fun CardItem(
+    card: Card,
+    navController: NavController
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
-            .clickable { navController.navigate("card/${card.cardId}") } // 클릭 시 카드 상세 페이지 이동
+            .clickable {
+                // 카드 클릭 시 해당 카드의 상세 화면으로 이동
+                navController.navigate("card/${card.cardId}")
+            }
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
+            // 첫 번째 섹션만 미리보기로 표시
+            // ✅ 카드 제목 추가 (상단)
             Text(
-                text = card.thumbnailUrl ?: "썸네일 없음",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                text = card.title, // 카드 제목
+                style = MaterialTheme.typography.titleMedium, // 제목 스타일 적용
+                color = MaterialTheme.colorScheme.primary, // 색상 적용
+                modifier = Modifier.padding(bottom = 8.dp) // 여백 추가
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = card.thumbnailContent ?: "내용 없음",
-                style = MaterialTheme.typography.bodyMedium
-            )
+            card.thumbnailContent.firstOrNull()?.let { section ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = section.key,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color.Blue
+                    )
+                    Text(
+//                        text = formatTimestamp(section.value),
+                        text = (section.value),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+
+            // 섹션 개수 표시
+            if (card.thumbnailContent.size > 1) {
+                Text(
+                    text = "+ ${card.thumbnailContent.size - 1}개의 타임스탬프",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+            }
+
+            // YouTube 썸네일 표시 (선택적)
+//            if (card.type == "YOUTUBE" && card.thumbnailUrl.isNotEmpty()) {
+//                Spacer(modifier = Modifier.height(8.dp))
+//                YouTubePlayer(
+//                    videoId = extractYouTubeVideoId(card.thumbnailUrl),
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .height(120.dp)  // 리스트에서는 더 작은 크기로 표시
+//                )
+//            }
+            if (card.type == "YOUTUBE" && card.thumbnailUrl.isNotEmpty()) {
+                val videoId = extractYouTubeVideoId(card.thumbnailUrl)
+                if (videoId != null) {  // null이 아닐 때만 플레이어 표시
+                    Spacer(modifier = Modifier.height(8.dp))
+                    YouTubePlayer(
+                        videoId = videoId,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(120.dp)
+                    )
+                }
+            }
         }
     }
 }
+
+private fun formatTimestamp(value: Double): String {
+    val minutes = (value / 60).toInt()
+    val seconds = (value % 60).toInt()
+    return "%02d:%02d".format(minutes, seconds)
+}
+
+
+//package com.example.modapjt.components.card
+//
+//import androidx.compose.foundation.clickable
+//import androidx.compose.foundation.layout.*
+//import androidx.compose.material3.*
+//import androidx.compose.runtime.Composable
+//import androidx.compose.ui.Modifier
+//import androidx.compose.ui.text.font.FontWeight
+//import androidx.compose.ui.unit.dp
+//import androidx.navigation.NavController
+//import com.example.modapjt.domain.model.Card
+//
+//@Composable
+//fun CardItem(card: Card, navController: NavController) {
+//    Card(
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .padding(horizontal = 16.dp, vertical = 8.dp)
+//            .clickable { navController.navigate("card/${card.cardId}") } // 클릭 시 카드 상세 페이지 이동
+//    ) {
+//        Column(modifier = Modifier.padding(16.dp)) {
+//            Text(
+//                text = card.thumbnailUrl ?: "썸네일 없음",
+//                style = MaterialTheme.typography.titleMedium,
+//                fontWeight = FontWeight.Bold
+//            )
+//            Spacer(modifier = Modifier.height(8.dp))
+//            Text(
+//                text = card.thumbnailContent ?: "내용 없음",
+//                style = MaterialTheme.typography.bodyMedium
+//            )
+//        }
+//    }
+//}
 
 
 
