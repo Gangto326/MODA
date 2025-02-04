@@ -19,5 +19,6 @@ public class CardDetailResponse {
     private ContentType type;
     private String title;
     private String content;
+    private String thumbnailUrl;
     private LocalDateTime createdAt;
 }
