@@ -12,9 +12,7 @@ import com.moda.moda_api.card.presentation.request.UpdateCardRequest;
 import com.moda.moda_api.common.pagination.SliceRequestDto;
 import com.moda.moda_api.common.pagination.SliceResponseDto;
 import com.moda.moda_api.summary.application.service.LilysSummaryService;
-import com.moda.moda_api.summary.domain.model.Url;
 import com.moda.moda_api.user.domain.UserId;
-import com.moda.moda_api.util.hash.HashUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +43,24 @@ public class CardService {
 	private final EmbeddingApiClient embeddingApiClient;
 	private final UrlCacheRepository urlCacheRepository;
 
+	@Transactional
+	public boolean testUrlCache(String url) {
+		System.out.println(url);
+		try {
+			System.out.println(url);
+			UrlCache urlCache = UrlCache.builder()
+				.urlHash(UrlCache.generateHash(url))
+				.cachedContent("Content")
+				.originalUrl(url)
+				.cachedTitle("Test")
+				.build();
+			urlCacheRepository.save(urlCache);
+			return true;
+		} catch (Exception e) {
+			log.error("Save failed", e);
+			return false;
+		}
+	}
 
 	/**
 	 * URL을 입력 받고 새로운 카드 생성 후 알맞은 보드로 이동합니다.
@@ -55,11 +71,12 @@ public class CardService {
 	@Transactional
 	public CompletableFuture<Boolean> createCard(String userId, String url) {
 		UserId userIdObj = new UserId(userId);
-		BoardId boardIdObj = new BoardId("18e7e5bc-fd34-41c3-9097-8992925e0048");
+
+
 		String urlHash = UrlCache.generateHash(url);
 		Optional<UrlCache> mayUrlCache = urlCacheRepository.findByUrlHash(urlHash);
 
-		if(mayUrlCache.isPresent()){
+		if (mayUrlCache.isPresent()) {
 			UrlCache getUrlCache = mayUrlCache.get();
 			Card existingCard = cardRepository.findByUrlHash(urlHash).get();
 			Card card = cardFactory.create(
@@ -68,16 +85,31 @@ public class CardService {
 				existingCard.getTypeId(),
 				urlHash,
 				getUrlCache.getCachedTitle(),
-				getUrlCache.getCachedContext(),
+				getUrlCache.getCachedContent(),
 				existingCard.getThumbnailContent(),
 				existingCard.getThumbnailUrl(),
 				existingCard.getEmbedding()
 			);
-			return saveAndPublishEvent(card);
+
+			//card에 저장한다.
+			Card savedCard = cardRepository.save(card);
+
+			eventPublisher.publishEvent(CardInsertForBoardEvent.from(savedCard.getBoardId()));
+			return CompletableFuture.completedFuture(true);
 		}
 		return lilysSummaryService.summarize(url)
 			.thenCompose(summaryResponse -> {
-				EmbeddingVector embeddingVector = embeddingApiClient.embedContent(summaryResponse.getContent());
+
+				//TODO 임베딩 벡터 연결하기
+				// EmbeddingVector embeddingVector = embeddingApiClient.embedContent(summaryResponse.getContent());
+				float[] values = new float[EmbeddingVector.DIMENSION]; // 768 크기 배열
+				for (int i = 0; i < values.length; i++) {
+					values[i] = 5.3f;  // 모든 값에 5.3을 넣음
+				}
+				EmbeddingVector embeddingVectorTest = new EmbeddingVector(values);
+
+				//TODO: BoardId는 나중에 종헌이형이 늘어난다.
+				BoardId boardIdObj = new BoardId("1");
 
 				Card card = cardFactory.create(
 					userIdObj,
@@ -88,18 +120,26 @@ public class CardService {
 					summaryResponse.getContent(),
 					summaryResponse.getThumbnailContent(),
 					summaryResponse.getThumbnailUrl(),
-					embeddingVector
+					embeddingVectorTest
 				);
-				return saveAndPublishEvent(card);
+
+				//UrlCache에 값을 저장한다.
+				urlCacheRepository.save(
+					UrlCache.builder()
+						.urlHash(urlHash)
+						.cachedTitle(summaryResponse.getTitle())
+						.cachedContent(summaryResponse.getContent())
+						.originalUrl(url)
+						.build()
+				);
+
+				//card에 저장한다.
+				Card savedCard = cardRepository.save(card);
+
+				eventPublisher.publishEvent(CardInsertForBoardEvent.from(savedCard.getBoardId()));
+				return CompletableFuture.completedFuture(true);
 			});
 	}
-
-	private CompletableFuture<Boolean> saveAndPublishEvent(Card card) {
-		Card savedCard = cardRepository.save(card);
-		eventPublisher.publishEvent(CardInsertForBoardEvent.from(savedCard.getBoardId()));
-		return CompletableFuture.completedFuture(true);
-	}
-
 
 	/**
 	 * 페이지네이션에 맞게 카드의 리스트 반환합니다.

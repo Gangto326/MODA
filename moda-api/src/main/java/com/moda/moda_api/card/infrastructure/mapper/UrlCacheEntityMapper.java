@@ -12,7 +12,7 @@ public class UrlCacheEntityMapper {
 			.urlHash(entity.getUrlHash())
 			.originalUrl(entity.getOriginalUrl())
 			.cachedTitle(entity.getCachedTitle())
-			.cachedContext(entity.getCachedContent())
+			.cachedContent(entity.getCachedContent())
 			.createdAt(entity.getCreatedAt())
 			.build();
 	}
@@ -22,7 +22,7 @@ public class UrlCacheEntityMapper {
 			.urlHash(domain.getUrlHash())
 			.originalUrl(domain.getOriginalUrl())
 			.cachedTitle(domain.getCachedTitle())
-			.cachedContent(domain.getCachedContext())
+			.cachedContent(domain.getCachedContent())
 			.createdAt(domain.getCreatedAt())
 			.build();
 	}

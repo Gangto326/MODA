@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 public class CardController {
     private final CardService cardService;
 
+
     // 비동기 응답을 위해 CompletableFuture를 사용하긴했지만 다시 확인을 해야할 필요가 있습니다..
     @PostMapping("")
     public CompletableFuture<ResponseEntity<Boolean>> createCard(
