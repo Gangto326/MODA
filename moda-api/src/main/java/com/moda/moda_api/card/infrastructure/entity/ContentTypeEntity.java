@@ -17,4 +17,6 @@ public class ContentTypeEntity {
 
     @Column(name = "type", length = 100, nullable = false)
     private String type;
+
+
 }
