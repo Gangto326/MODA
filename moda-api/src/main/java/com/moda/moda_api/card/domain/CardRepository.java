@@ -1,8 +1,7 @@
 package com.moda.moda_api.card.domain;
 
-import com.moda.moda_api.board.domain.BoardId;
-import com.moda.moda_api.card.infrastructure.entity.CardEntity;
-
+import com.moda.moda_api.category.domain.CategoryId;
+import com.moda.moda_api.user.domain.UserId;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
@@ -12,9 +11,9 @@ import java.util.Optional;
 public interface CardRepository {
     Card save(Card card);
 
-    Slice<Card> findByBoardUserIdAndBoardId(String userId, String boardId, Pageable pageable);
+    Slice<Card> findByUserIdAndCategoryId(UserId userId, CategoryId categoryId, Pageable pageable);
 
-    Optional<Card> findByCardId(String cardId);
+    Optional<Card> findByUserIdAndCardId(UserId userId, CardId cardId);
 
     boolean delete(Card card);
 
@@ -22,8 +21,5 @@ public interface CardRepository {
 
     void saveAll(List<Card> cards);
 
-    List<Card> findCardsByBoardIdOrderByCreatedAtDesc(BoardId boardId, int limit);
-
     Optional<Card> findByUrlHash(String urlHash);
-
 }

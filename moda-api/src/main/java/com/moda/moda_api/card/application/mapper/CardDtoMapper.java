@@ -11,12 +11,13 @@ public class CardDtoMapper {
     public CardListResponse toResponse(Card card) {
         return CardListResponse.builder()
                 .cardId(card.getCardId().getValue())
-                .boardId(card.getBoardId().getValue())
+                .categoryId(card.getCategoryId().getValue())
                 .typeId(card.getTypeId())
                 .type(ContentType.from(card.getTypeId()))
                 .title(card.getTitle())
                 .thumbnailContent(card.getThumbnailContent())
                 .thumbnailUrl(card.getThumbnailUrl())
+                .keywords(card.getKeywords())
                 .createdAt(card.getCreatedAt())
                 .build();
     }
@@ -24,12 +25,13 @@ public class CardDtoMapper {
     public CardDetailResponse toDetailResponse(Card card) {
         return CardDetailResponse.builder()
                 .cardId(card.getCardId().getValue())
-                .boardId(card.getBoardId().getValue())
+                .categoryId(card.getCategoryId().getValue())
                 .typeId(card.getTypeId())
                 .type(ContentType.from(card.getTypeId()))
                 .title(card.getTitle())
                 .content(card.getContent())
                 .thumbnailUrl(card.getThumbnailUrl())
+                .keywords(card.getKeywords())
                 .createdAt(card.getCreatedAt())
                 .build();
     }

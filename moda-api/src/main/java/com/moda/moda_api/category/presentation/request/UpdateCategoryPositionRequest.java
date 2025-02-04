@@ -1,17 +1,16 @@
-package com.moda.moda_api.card.presentation.request;
+package com.moda.moda_api.category.presentation.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MoveCardRequest {
+public class UpdateCategoryPositionRequest {
     Long categoryId;
-    List<String> cardIdList;
+    Integer sourcePosition;
+    Integer targetPosition;
 }

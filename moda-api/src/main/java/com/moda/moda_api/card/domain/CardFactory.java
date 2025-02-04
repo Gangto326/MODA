@@ -1,6 +1,6 @@
 package com.moda.moda_api.card.domain;
 
-import com.moda.moda_api.board.domain.BoardId;
+import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.user.domain.UserId;
 import org.springframework.stereotype.Component;
 
@@ -9,13 +9,14 @@ import java.util.UUID;
 
 @Component
 public class CardFactory {
-    public Card create(UserId userId, BoardId boardId,
+    public Card create(UserId userId, CategoryId categoryId,
                        Integer typeId, String urlHash,
                        String title, String content, String thumbnailContent, String thumbnailUrl,
                        EmbeddingVector embedding) {
         return Card.builder()
                 .cardId(generateCardId())
-                .boardId(boardId)
+                .userId(userId)
+                .categoryId(categoryId)
                 .typeId(typeId)
                 .urlHash(urlHash)
                 .title(title)

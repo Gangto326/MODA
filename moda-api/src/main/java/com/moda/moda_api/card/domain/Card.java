@@ -1,8 +1,10 @@
 package com.moda.moda_api.card.domain;
 
-import com.moda.moda_api.board.domain.BoardId;
 import com.moda.moda_api.card.exception.InvalidCardContentException;
 import com.moda.moda_api.card.exception.InvalidCardTitleException;
+import com.moda.moda_api.card.exception.UnauthorizedException;
+import com.moda.moda_api.category.domain.CategoryId;
+import com.moda.moda_api.user.domain.UserId;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -13,7 +15,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Card {
     private CardId cardId;
-    private BoardId boardId;
+    private UserId userId;
+    private CategoryId categoryId;
     private Integer typeId;
     private String urlHash;
     private String title;
@@ -21,6 +24,7 @@ public class Card {
     private String thumbnailContent;
     private String thumbnailUrl;
     private EmbeddingVector embedding;
+    private String[] keywords;
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
 
@@ -36,8 +40,8 @@ public class Card {
         this.content = content;
     }
 
-    public void moveBoard(BoardId boardId) {
-        this.boardId = boardId;
+    public void moveCategory(CategoryId categoryId) {
+        this.categoryId = categoryId;
     }
 
     private void validateTitle(String title) {
@@ -57,6 +61,12 @@ public class Card {
         String trimmedContent = content.trim();
         if (!trimmedContent.startsWith("{") || !trimmedContent.endsWith("}")) {
             throw new InvalidCardContentException("카드 내용이 올바른 JSON 형식이 아닙니다.");
+        }
+    }
+
+    public void validateOwnership(UserId userId) {
+        if (!this.userId.equals(userId)) {
+            throw new UnauthorizedException("권한이 존재하지 않습니다.");
         }
     }
 }

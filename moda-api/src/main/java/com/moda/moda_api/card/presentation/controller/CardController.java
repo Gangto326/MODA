@@ -42,14 +42,14 @@ public class CardController {
     @GetMapping("")
     public ResponseEntity<SliceResponseDto<CardListResponse>> getCardList(
             @UserId String userId,
-            @RequestParam String boardId,
+            @RequestParam Long categoryId,
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "15") Integer size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "DESC") String sortDirection
     ) {
         SliceResponseDto<CardListResponse> responseList = cardService.getCardList(
-                userId, boardId, page, size, sortBy, sortDirection
+                userId, categoryId, page, size, sortBy, sortDirection
         );
         return ResponseEntity.ok(responseList);
     }
