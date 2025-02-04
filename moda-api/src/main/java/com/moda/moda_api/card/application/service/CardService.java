@@ -102,13 +102,14 @@ public class CardService {
 
 				//TODO 임베딩 벡터 연결하기
 				// EmbeddingVector embeddingVector = embeddingApiClient.embedContent(summaryResponse.getContent());
+
 				float[] values = new float[EmbeddingVector.DIMENSION]; // 768 크기 배열
 				for (int i = 0; i < values.length; i++) {
 					values[i] = 5.3f;  // 모든 값에 5.3을 넣음
 				}
-				EmbeddingVector embeddingVectorTest = new EmbeddingVector(values);
+				EmbeddingVector embeddingVector = new EmbeddingVector(values);
 
-				//TODO: BoardId는 나중에 종헌이형이 늘어난다.
+				//TODO: BoardId는 나중에 종헌이형이 추가.
 				BoardId boardIdObj = new BoardId("1");
 
 				Card card = cardFactory.create(
@@ -120,7 +121,7 @@ public class CardService {
 					summaryResponse.getContent(),
 					summaryResponse.getThumbnailContent(),
 					summaryResponse.getThumbnailUrl(),
-					embeddingVectorTest
+					embeddingVector
 				);
 
 				//UrlCache에 값을 저장한다.
