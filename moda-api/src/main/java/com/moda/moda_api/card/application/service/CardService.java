@@ -41,19 +41,6 @@ public class CardService {
 	private final UrlCacheRepository urlCacheRepository;
 	private final LilysAiClient lilysAiClient;
 
-	// @Getter
-	// @Builder
-	// @ToString
-	// public class CardSummaryResponse {
-	// 	Integer typeId;
-	// 	String title;
-	// 	String content;
-	// 	String thumbnailContent;
-	// 	String thumbnailUrl;
-	//
-	// }
-
-
 	/**
 	 * URL을 입력 받고 새로운 카드 생성 후 알맞은 보드로 이동합니다.
 	 * @param userId
@@ -69,8 +56,6 @@ public class CardService {
 			.map(cache -> createCardFromCache(userIdObj, urlHash))    // url Hash가 있다면 기존에 있던것을 실행
 			.orElseGet(() -> createNewCard(userIdObj, url, urlHash)); // url Hash가 없다면 새로 만들기
 	}
-
-
 
 	private CompletableFuture<Boolean> createCardFromCache(UserId userIdObj, String urlHash) {
 		Card existingCard = cardRepository.findByUrlHash(urlHash).get();
