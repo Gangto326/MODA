@@ -1,4 +1,4 @@
-package com.moda.moda_api.summary.domain.crawler;
+package com.moda.moda_api.summary.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
