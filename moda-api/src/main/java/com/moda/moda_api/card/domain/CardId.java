@@ -1,6 +1,6 @@
 package com.moda.moda_api.card.domain;
 
-import com.moda.moda_api.board.exception.InvalidBoardIdException;
+import com.moda.moda_api.card.exception.InvalidCardIdException;
 import lombok.Value;
 
 @Value
@@ -17,7 +17,7 @@ public class CardId {
      */
     private void validateCardId(String value) {
         if (value == null || value.trim().isEmpty()) {
-            throw new InvalidBoardIdException("카드 ID가 존재하지 않습니다.");
+            throw new InvalidCardIdException("카드 ID가 존재하지 않습니다.");
         }
     }
 }

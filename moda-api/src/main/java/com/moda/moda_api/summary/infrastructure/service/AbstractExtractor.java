@@ -19,8 +19,6 @@ import com.moda.moda_api.common.infrastructure.ImageStorageService;
 import com.moda.moda_api.summary.domain.ContentItem;
 import com.moda.moda_api.summary.domain.ContentItemType;
 import com.moda.moda_api.summary.domain.CrawledContent;
-import com.moda.moda_api.summary.infrastructure.service.ExtractorConfig;
-import com.moda.moda_api.summary.infrastructure.service.PlatformExtractorFactory;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
