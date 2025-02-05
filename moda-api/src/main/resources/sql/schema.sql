@@ -158,3 +158,19 @@ CREATE TABLE "notifications" (
     PRIMARY KEY ("notification_id"),
     FOREIGN KEY ("user_id") REFERENCES "users" ("user_id")
 );
+
+INSERT INTO users (user_id, email, password, profile_img, nickname, status) VALUES
+('01234', 'jongwon', '1234', '1234', '1234', '123');
+
+INSERT INTO content_type (type_id, type) VALUES
+(1, 'YOUTUBE'),
+(2, 'BLOG'),
+(3, 'NEWS'),
+(4, 'IMG'),
+(5, 'SHORTS'),
+(6, 'OTHERS'); 
+
+INSERT INTO category (category_id, category) VALUES
+(1, 'Food'),
+(2, 'Culture');
+
