@@ -53,7 +53,7 @@ public class CardEntity {
     private Integer viewCount = 0;
 
     @Type(StringArrayType.class)
-    @Column(columnDefinition = "text[]")
+    @Column(name = "keywords", columnDefinition = "text[]")
     private String[] keywords;
 
     @Column(name = "created_at", nullable = false, updatable = false)

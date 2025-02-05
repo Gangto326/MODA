@@ -2,7 +2,7 @@ package com.moda.moda_api.summary.application.service;
 
 import org.springframework.stereotype.Service;
 
-import com.moda.moda_api.summary.domain.crawler.CrawledContent;
+import com.moda.moda_api.summary.domain.CrawledContent;
 import com.moda.moda_api.summary.infrastructure.service.AbstractExtractor;
 
 import lombok.AllArgsConstructor;

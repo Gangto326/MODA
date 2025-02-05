@@ -1,6 +1,6 @@
 package com.moda.moda_api.summary.infrastructure.service;
 
-import com.moda.moda_api.summary.domain.crawler.CrawledContentType;
+import com.moda.moda_api.summary.domain.CrawledContentType;
 
 import lombok.Builder;
 import lombok.Getter;
