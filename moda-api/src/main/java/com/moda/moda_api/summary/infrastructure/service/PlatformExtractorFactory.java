@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import com.moda.moda_api.summary.domain.crawler.CrawledContentType;
+import com.moda.moda_api.summary.domain.CrawledContentType;
 import com.moda.moda_api.summary.infrastructure.service.ExtractorConfig;
 
 @Component

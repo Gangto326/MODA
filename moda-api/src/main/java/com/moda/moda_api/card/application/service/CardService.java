@@ -11,6 +11,7 @@ import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.common.pagination.SliceRequestDto;
 import com.moda.moda_api.common.pagination.SliceResponseDto;
 import com.moda.moda_api.summary.application.service.LilysSummaryService;
+import com.moda.moda_api.summary.infrastructure.api.LilysAiClient;
 import com.moda.moda_api.user.domain.UserId;
 import com.moda.moda_api.util.hash.HashUtil;
 
@@ -36,28 +37,21 @@ public class CardService {
 	private final CardFactory cardFactory;
 	private final CardDtoMapper cardDtoMapper;
 	private final LilysSummaryService lilysSummaryService;
-	private final HashUtil hashUtil;
 	private final EmbeddingApiClient embeddingApiClient;
 	private final UrlCacheRepository urlCacheRepository;
+	private final LilysAiClient lilysAiClient;
 
-	@Transactional
-	public boolean testUrlCache(String url) {
-		System.out.println(url);
-		try {
-			System.out.println(url);
-			UrlCache urlCache = UrlCache.builder()
-					.urlHash(UrlCache.generateHash(url))
-					.cachedContent("Content")
-					.originalUrl(url)
-					.cachedTitle("Test")
-					.build();
-			urlCacheRepository.save(urlCache);
-			return true;
-		} catch (Exception e) {
-			log.error("Save failed", e);
-			return false;
-		}
-	}
+	// @Getter
+	// @Builder
+	// @ToString
+	// public class CardSummaryResponse {
+	// 	Integer typeId;
+	// 	String title;
+	// 	String content;
+	// 	String thumbnailContent;
+	// 	String thumbnailUrl;
+	//
+	// }
 
 
 	/**
@@ -68,72 +62,67 @@ public class CardService {
 	 */
 	@Transactional
 	public CompletableFuture<Boolean> createCard(String userId, String url) {
-		UserId userIdObj = new UserId(userId);
-
+		UserId userIdObj = new UserId("01234");
 		String urlHash = UrlCache.generateHash(url);
-		Optional<UrlCache> mayUrlCache = urlCacheRepository.findByUrlHash(urlHash);
 
-		if (mayUrlCache.isPresent()) {
-			UrlCache getUrlCache = mayUrlCache.get();
-			Card existingCard = cardRepository.findByUrlHash(urlHash).get();
-			Card card = cardFactory.create(
-					userIdObj,
-					existingCard.getCategoryId(),
-					existingCard.getTypeId(),
-					urlHash,
-					getUrlCache.getCachedTitle(),
-					getUrlCache.getCachedContent(),
-					existingCard.getThumbnailContent(),
-					existingCard.getThumbnailUrl(),
-					existingCard.getEmbedding()
-			);
-
-			//card에 저장한다.
-			Card savedCard = cardRepository.save(card);
-			return CompletableFuture.completedFuture(true);
-		}
-		return lilysSummaryService.summarize(url)
-				.thenCompose(summaryResponse -> {
-
-					//TODO 임베딩 벡터 연결하기
-					// EmbeddingVector embeddingVector = embeddingApiClient.embedContent(summaryResponse.getContent());
-					float[] values = new float[EmbeddingVector.DIMENSION]; // 768 크기 배열
-					for (int i = 0; i < values.length; i++) {
-						values[i] = 5.3f;  // 모든 값에 5.3을 넣음
-					}
-					EmbeddingVector embeddingVectorTest = new EmbeddingVector(values);
-
-					//TODO: BoardId는 나중에 종헌이형이 늘어난다.
-					CategoryId categoryIdObj = new CategoryId(1L);
-
-					Card card = cardFactory.create(
-							userIdObj,
-							categoryIdObj,
-							summaryResponse.getTypeId(),
-							urlHash,
-							summaryResponse.getTitle(),
-							summaryResponse.getContent(),
-							summaryResponse.getThumbnailContent(),
-							summaryResponse.getThumbnailUrl(),
-							embeddingVectorTest
-					);
-
-					//UrlCache에 값을 저장한다.
-					urlCacheRepository.save(
-							UrlCache.builder()
-									.urlHash(urlHash)
-									.cachedTitle(summaryResponse.getTitle())
-									.cachedContent(summaryResponse.getContent())
-									.originalUrl(url)
-									.build()
-					);
-
-					//card에 저장한다.
-					Card savedCard = cardRepository.save(card);
-					return CompletableFuture.completedFuture(true);
-				});
+		return urlCacheRepository.findByUrlHash(urlHash)
+			.map(cache -> createCardFromCache(userIdObj, urlHash))    // url Hash가 있다면 기존에 있던것을 실행
+			.orElseGet(() -> createNewCard(userIdObj, url, urlHash)); // url Hash가 없다면 새로 만들기
 	}
 
+
+
+	private CompletableFuture<Boolean> createCardFromCache(UserId userIdObj, String urlHash) {
+		Card existingCard = cardRepository.findByUrlHash(urlHash).get();
+		UrlCache cache = urlCacheRepository.findByUrlHash(urlHash).get();
+
+		Card card = cardFactory.create(
+			userIdObj,
+			existingCard.getCategoryId(),
+			existingCard.getTypeId(),
+			urlHash,
+			cache.getCachedTitle(),
+			cache.getCachedContent(),
+			existingCard.getThumbnailContent(),
+			existingCard.getThumbnailUrl(),
+			existingCard.getEmbedding()
+		);
+
+		cardRepository.save(card);
+		return CompletableFuture.completedFuture(true);
+	}
+
+	private CompletableFuture<Boolean> createNewCard(UserId userIdObj, String url, String urlHash) {
+		return lilysSummaryService.summarize(url)
+			.thenApply(summaryResponse -> {
+				EmbeddingVector embeddingVector = embeddingApiClient.embedContent(summaryResponse.getContent());
+				CategoryId categoryIdObj = new CategoryId(1L);
+
+				Card card = cardFactory.create(
+					userIdObj,
+					categoryIdObj,
+					summaryResponse.getTypeId(),
+					urlHash,
+					summaryResponse.getTitle(),
+					summaryResponse.getContent(),
+					summaryResponse.getThumbnailContent(),
+					summaryResponse.getThumbnailUrl(),
+					embeddingVector
+				);
+
+				urlCacheRepository.save(
+					UrlCache.builder()
+						.urlHash(urlHash)
+						.cachedTitle(summaryResponse.getTitle())
+						.cachedContent(summaryResponse.getContent())
+						.originalUrl(url)
+						.build()
+				);
+
+				cardRepository.save(card);
+				return true;
+			});
+	}
 
 	/**
 	 * 페이지네이션에 맞게 카드의 리스트 반환합니다.
@@ -163,9 +152,9 @@ public class CardService {
 
 		// Slice와 파라미터 조건에 맞는 카드를 가져옵니다.
 		Slice<Card> cards = cardRepository.findByUserIdAndCategoryId(
-				userIdObj,
-				categoryIdObj,
-				sliceRequestDto.toPageable()
+			userIdObj,
+			categoryIdObj,
+			sliceRequestDto.toPageable()
 		);
 
 		// 페이지네이션 메타 데이터와 함께 반환합니다.

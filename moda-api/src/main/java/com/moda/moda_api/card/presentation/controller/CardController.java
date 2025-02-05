@@ -24,8 +24,12 @@ import org.springframework.web.bind.annotation.*;
 public class CardController {
     private final CardService cardService;
 
+    // @PostMapping("/test")
+    // public CompletableFuture<ResponseEntity<Boolean>> createCardIfKnowRequestID(@RequestBody CardRequest cardRequest){
+    //     return cardService.createCardByRequestId(cardRequest.getUrl(), cardRequest.getRequestId())
+    //         .thenApply(ResponseEntity::ok);
+    // };
 
-    // 비동기 응답을 위해 CompletableFuture를 사용하긴했지만 다시 확인을 해야할 필요가 있습니다..
     @PostMapping("")
     public CompletableFuture<ResponseEntity<Boolean>> createCard(
         @UserId String userId,

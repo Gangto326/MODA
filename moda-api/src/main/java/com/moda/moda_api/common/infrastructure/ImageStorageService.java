@@ -24,11 +24,12 @@ import java.util.UUID;
 
 
 @RequiredArgsConstructor
+@Service
 @Slf4j
 public class ImageStorageService {
 	private final S3Client s3Client;
 
-	@Value("${cloud.aws.s3.bucket}")
+	@Value("${spring.cloud.aws.s3.bucket}")
 	private String bucket;
 
 

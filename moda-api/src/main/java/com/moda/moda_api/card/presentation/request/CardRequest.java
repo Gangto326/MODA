@@ -7,4 +7,5 @@ import lombok.Setter;
 @Setter
 public class CardRequest {
 	private String url;
+	private String requestId;
 }
