@@ -4,96 +4,37 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.modapjt.components.bar.BottomBarComponent
 import com.example.modapjt.components.bar.CategoryHeaderBar
-
-
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 
-//@Composable
-//fun newCardListScreen(navController: NavController, currentRoute: String) {
-//    Scaffold(
-//        topBar = { CategoryHeaderBar() },
-//        bottomBar = { BottomBarComponent(navController, currentRoute) }
-//    ) { paddingValues ->
-//        Box(
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .padding(paddingValues)
-//        ) {
-//            Column {
-//                TypeSelectBar(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .padding(vertical = 8.dp),
-//                    onCategorySelected = { category ->
-//                        // 여기서 카테고리 선택 처리
-//                        println("Selected category: $category")
-//                    }
-//                )
-//
-//                AllTabCard(
-//                    onImageMoreClick = {
-//                        // 이미지 더보기 클릭 시 이미지 탭으로 이동
-//                        println("Image more clicked")
-//                    },
-//                    onImageClick = { index ->
-//                        // 개별 이미지 클릭 시 상세 페이지로 이동
-////                        navController.navigate("imageDetail/$index")
-//                        println("개별 이미지 클릭 시 상세 페이지로 이동")
-//                    },
-//                    onVideoMoreClick = {
-//                        // 동영상 더보기 클릭 시 동영상 탭으로 이동
-//                        println("Video more clicked")
-//                    },
-//                    onBlogMoreClick = {
-//                        // 블로그 더보기 클릭 시 블로그 탭으로 이동
-//                        println("Blog more clicked")
-//                    },
-//                    onNewsMoreClick = {
-//                        // 뉴스 더보기 클릭 시 뉴스 탭으로 이동
-//                        println("News more clicked")
-//                    }
-//                )
-//            }
-//        }
-//    }
-//}
-
-
-
 
 @Composable
 fun newCardListScreen(navController: NavController, currentRoute: String) {
-    val lazyListState = rememberLazyListState()
     var isTypeBarVisible by remember { mutableStateOf(true) }
-    var selectedCategory by remember { mutableStateOf("전체") } // ✅ 선택된 카테고리 상태 추가
-
-    // ✅ 스크롤 상태 감지하여 TypeSelectBar 표시 여부 조절
-    LaunchedEffect(lazyListState) {
-        snapshotFlow { lazyListState.firstVisibleItemScrollOffset }
-            .collect { offset ->
-                isTypeBarVisible = offset <= 0
-            }
-    }
+    var selectedCategory by remember { mutableStateOf("전체") }
 
     Scaffold(
         topBar = { CategoryHeaderBar() },
@@ -104,105 +45,130 @@ fun newCardListScreen(navController: NavController, currentRoute: String) {
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            LazyColumn(
-                state = lazyListState,
-//                modifier = Modifier.fillMaxSize()
-
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clickable(enabled = false) {} // ✅ 클릭 이벤트 방해 방지
-            ) {
-                // ✅ TypeSelectBar (스크롤에 따라 나타났다 사라짐)
-                item {
-                    AnimatedVisibility(
-                        visible = isTypeBarVisible,
-                        enter = slideInVertically() + fadeIn(),
-                        exit = slideOutVertically() + fadeOut()
-                    ) {
-                        TypeSelectBar(
-                            selectedCategory = selectedCategory, // ✅ 선택된 카테고리 전달
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp),
-                            onCategorySelected = { category ->
-                                selectedCategory = category // ✅ 선택된 카테고리 업데이트
-                            }
-                        )
+            when (selectedCategory) {
+                "전체" -> {
+                    LazyColumn {
+                        item {
+                            TypeSelectBar(
+                                selectedCategory = selectedCategory,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp),
+                                onCategorySelected = { selectedCategory = it }
+                            )
+                        }
+                        item {
+                            AllTabCard(
+                                onImageMoreClick = { selectedCategory = "이미지" },
+                                onVideoMoreClick = { selectedCategory = "동영상" },
+                                onBlogMoreClick = { selectedCategory = "블로그" },
+                                onNewsMoreClick = { selectedCategory = "뉴스" },
+                                onImageClick = { index ->
+                                    println("개별 이미지 클릭 시 상세 페이지로 이동")
+                                }
+                            )
+                        }
                     }
                 }
 
-                // ✅ 선택된 카테고리에 따라 다른 콘텐츠 표시 (이미지를 LazyColumn에서 관리)
-                when (selectedCategory) {
-                    "전체" -> {
+                "이미지" -> {
+                    Column {
+                        AnimatedVisibility(
+                            visible = isTypeBarVisible,
+                            enter = slideInVertically() + fadeIn(),
+                            exit = slideOutVertically() + fadeOut()
+                        ) {
+                            TypeSelectBar(
+                                selectedCategory = selectedCategory,
+                                onCategorySelected = { selectedCategory = it }
+                            )
+                        }
+
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(2),
+                            contentPadding = PaddingValues(12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            state = rememberLazyGridState().also { gridState ->
+                                LaunchedEffect(gridState) {
+                                    snapshotFlow { gridState.firstVisibleItemIndex }
+                                        .collect { index ->
+                                            isTypeBarVisible = index == 0
+                                        }
+                                }
+                            }
+                        ) {
+                            items(60) { index ->
+                                ImageBig(
+                                    modifier = Modifier.padding(4.dp),
+                                    onClick = { println("이미지 $index 클릭됨") }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                "동영상" -> {
+                    LazyColumn {
                         item {
-                            AllTabCard(
-                                onImageMoreClick = { println("Image more clicked") },
-                                onImageClick = { index -> println("개별 이미지 클릭 시 상세 페이지로 이동") },
-                                onVideoMoreClick = { println("Video more clicked") },
-                                onBlogMoreClick = { println("Blog more clicked") },
-                                onNewsMoreClick = { println("News more clicked") }
+                            TypeSelectBar(
+                                selectedCategory = selectedCategory,
+                                onCategorySelected = { selectedCategory = it }
                             )
                         }
-                    }
-                    "이미지" -> {
-                        items(30) { index -> // LazyColumn에서 직접 이미지 아이템을 추가
-                            ImageBig(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp)
-                                    .clickable {
-                                        println("이미지 $index 클릭됨")
-//                                        navController.navigate("imageDetail/$index") // 클릭 시 상세 페이지 이동 가능
-                                    }
-                            )
+                        items(30) { index ->
+                            key(index) {
+                                VideoBig(
+                                    videoId = "sample_video_id_$index",
+                                    title = "Video Title $index",
+                                    modifier = Modifier.padding(vertical = 4.dp)
+                                )
+                            }
                         }
                     }
-                    "동영상" -> {
-                        items(30) { index -> // LazyColumn에서 직접 이미지 아이템을 추가
-                            VideoBig(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp)
-                                    .clickable {
-                                        println("동영상 $index 클릭됨")
-//                                        navController.navigate("imageDetail/$index") // 클릭 시 상세 페이지 이동 가능
-                                    }
+                }
+
+                "블로그" -> {
+                    LazyColumn {
+                        item {
+                            TypeSelectBar(
+                                selectedCategory = selectedCategory,
+                                onCategorySelected = { selectedCategory = it }
                             )
                         }
-                    }
-                    "블로그" -> {
-                        items(30) { index -> // LazyColumn에서 직접 이미지 아이템을 추가
+                        items(30) { index ->
                             BlogBig(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(8.dp)
                                     .clickable {
                                         println("블로그 $index 클릭됨")
-//                                        navController.navigate("imageDetail/$index") // 클릭 시 상세 페이지 이동 가능
+////                                        navController.navigate("imageDetail/$index") // 클릭 시 상세 페이지 이동 가능
                                     }
                             )
                         }
                     }
-                    "뉴스" -> {
-                        items(30) { index -> // LazyColumn에서 직접 이미지 아이템을 추가
+                }
+
+                "뉴스" -> {
+                    LazyColumn {
+                        item {
+                            TypeSelectBar(
+                                selectedCategory = selectedCategory,
+                                onCategorySelected = { selectedCategory = it }
+                            )
+                        }
+                        items(30) { index ->
                             NewsBig(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(8.dp),
-//                                    .clickable {
-//                                        println("뉴스 $index 클릭됨")
-////                                        navController.navigate("imageDetail/$index") // 클릭 시 상세 페이지 이동 가능
-//                                    }
-                                        onClick = {
-                                    println("뉴스 $index 클릭됨") // ✅ 클릭 이벤트 정상 실행 확인
+                                onClick = {
+                                    println("뉴스 $index 클릭됨")
                                 }
                             )
                         }
                     }
-//                    "동영상" -> item { VideoTabCard(navController) }
-//                    "블로그" -> item { BlogTabCard(navController) }
-//                    "뉴스" -> item { NewsTabCard(navController) }
-
                 }
             }
         }

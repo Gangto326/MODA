@@ -98,9 +98,5 @@ fun NavGraph(
         composable("card_detail_test") {
             newCardDetailScreen(navController, currentRoute = "card_detail_test")
         }
-
-
-
-
     }
 }
