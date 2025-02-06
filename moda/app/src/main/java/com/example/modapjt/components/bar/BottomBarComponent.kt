@@ -70,5 +70,47 @@ fun BottomBarComponent(navController: NavController, currentRoute: String) {
                 }
             }
         )
+        // screen2/home/newHomeScreen.kt 화면 테스트
+        NavigationBarItem(
+            icon = { Icon(Icons.Default.Settings, "Settings") },
+            label = { Text("홈테스트") },
+            selected = currentRoute == "settings", // ✅ 변경: screen4 -> settings
+            onClick = {
+                if (currentRoute != "settings") {
+                    navController.navigate("settings") {
+                        popUpTo("home")
+                    }
+                }
+            }
+        )
+
+        // screen2/cardlist/newCardListScreen.kt 화면 테스트
+        NavigationBarItem(
+            icon = { Icon(Icons.Default.Settings, "Card List Test") },
+            label = { Text("카드리스트테스트") },
+            selected = currentRoute == "card_list_test",
+            onClick = {
+                if (currentRoute != "card_list_test") {
+                    navController.navigate("card_list_test") {
+                        popUpTo("home")
+                    }
+                }
+            }
+        )
+
+        // screen2/linkupload/newLinkUploadScreen.kt 화면 테스트
+        NavigationBarItem(
+            icon = { Icon(Icons.Default.Settings, "Settings") },
+            label = { Text("파일업로드테스트") },
+            selected = currentRoute == "settings", // ✅ 변경: screen4 -> settings
+            onClick = {
+                if (currentRoute != "settings") {
+                    navController.navigate("settings") {
+                        popUpTo("home")
+                    }
+                }
+            }
+        )
+
     }
 }

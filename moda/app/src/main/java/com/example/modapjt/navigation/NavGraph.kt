@@ -15,6 +15,7 @@ import androidx.navigation.NavHostController  // NavHostController 임포트 추
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.modapjt.screen.SavedUrlsScreen
 import com.example.modapjt.screen.linkupload.LinkUploadScreen
+import newCardListScreen
 
 @Composable
 fun NavGraph(
@@ -71,5 +72,28 @@ fun NavGraph(
         composable("saved_urls") {
             SavedUrlsScreen()
         }
+
+
+
+        // "홈테스트" 화면 추가
+//        composable("home_test") {
+//            newHomeScreen(navController, currentRoute = "home_test")
+//        }
+
+        // "카드리스트테스트" 화면 추가
+        composable("card_list_test") {
+            newCardListScreen(navController, currentRoute = "card_list_test")
+        }
+
+        // "파일업로드테스트" 화면 추가
+//        composable("file_upload_test") {
+//            newLinkUploadScreen(navController, currentRoute = "file_upload_test")
+//        }
+
+
+
+
+
+
     }
 }
