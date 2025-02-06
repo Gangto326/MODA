@@ -72,6 +72,7 @@ fun HomeScreen(
                                         style = MaterialTheme.typography.titleMedium
                                     )
                                     Spacer(modifier = Modifier.height(8.dp))
+
                                     Button(
                                         onClick = onStartOverlay,
                                         modifier = Modifier.fillMaxWidth()
@@ -79,11 +80,21 @@ fun HomeScreen(
                                         Text("오버레이 시작")
                                     }
                                     Spacer(modifier = Modifier.height(8.dp))
+
                                     Button(
                                         onClick = { navController.navigate("saved_urls") },
                                         modifier = Modifier.fillMaxWidth()
                                     ) {
                                         Text("저장된 링크 보기")
+                                    }
+                                    Spacer(modifier = Modifier.height(8.dp))
+
+                                    // 새롭게 추가한 오버레이 테스트 버튼(아무 기능 없음)
+                                    Button(
+                                        onClick = {}, // 기능 없음
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Text("오버레이 테스트")
                                     }
                                 }
                             }
