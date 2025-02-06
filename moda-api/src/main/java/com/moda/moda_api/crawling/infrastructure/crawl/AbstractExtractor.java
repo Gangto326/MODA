@@ -8,6 +8,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -22,7 +23,7 @@ import com.moda.moda_api.summary.domain.ContentItemType;
 import com.moda.moda_api.crawling.domain.model.CrawledContent;
 import com.moda.moda_api.crawling.infrastructure.config.crawlerConfig.ExtractorConfig;
 import com.moda.moda_api.crawling.infrastructure.config.crawlerConfig.PlatformExtractorFactory;
-import com.moda.moda_api.util.exception.ExtractorException;
+import com.moda.moda_api.summary.exception.ExtractorException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,32 +32,58 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Service
 public class AbstractExtractor {
-	private final WebDriver driver;
 	private final PlatformExtractorFactory extractorFactory;
 	private final ImageStorageService imageStorageService;
+	private final WebDriver driver;
 
-	public List<Url> extarctUrl(String url) {
-		try{
-			// 설정 방식 가져오기
+	// URL을 추출하는 Method
+	public List<Url> extractUrl(String url) {
+		try {
 			ExtractorConfig config = extractorFactory.getConfig(url);
 			driver.get(url);
+
 			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+			wait.until(webDriver -> ((JavascriptExecutor) webDriver)
+				.executeScript("return document.readyState").equals("complete"));
+
+			// 페이지 로딩을 위한 초기 대기 추가
+			Thread.sleep(1000);
+
+			// 먼저 페이지가 완전히 로드될 때까지 대기
+			wait.until(webDriver -> ((JavascriptExecutor) webDriver)
+				.executeScript("return document.readyState").equals("complete"));
+
+			// 그 다음 요소들을 찾음
 			List<WebElement> elements = wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(
 				By.cssSelector(config.getUrlSelector())
 			));
+
+			// 디버깅을 위한 로깅 추가
+			log.debug("셀렉터와 일치하는 요소 {}개 발견", elements.size());
+
 			return elements.stream()
 				.map(element -> {
-					return new Url(element.getAttribute("href"));
+					String href = element.getAttribute("href");
+					if (href != null && !href.isEmpty()) {
+						return new Url(href);
+					}
+					return null;
 				})
-				.filter(extractedUrl -> extractedUrl != null && !extractedUrl.getValue().isEmpty())
+				.filter(Objects::nonNull)
+				.filter(extractedUrl -> !extractedUrl.getValue().isEmpty())
+				.distinct()  // 중복 제거
 				.collect(Collectors.toList());
-		}
-		catch (Exception e) {
+
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new ExtractorException("URL 추출 중 쓰레드 중단됨", e);
+		} catch (Exception e) {
 			log.error("URL 추출 중 오류 발생: {}", url, e);
 			throw new ExtractorException("URL 추출 실패", e);
 		}
 	}
 
+	// 추출하는 매서드
 	public CrawledContent extract(String url) throws Exception {
 		try {
 			ExtractorConfig config = extractorFactory.getConfig(url);
@@ -70,10 +97,10 @@ public class AbstractExtractor {
 			}
 
 			return CrawledContent.builder()
-				.url(url)
+				.url(new Url(url))
 				.urlDomainType(config.getUrlDomainType())
 				.title(extractTitle())
-				.contentItems(extractContent(wait, config))
+				.contentItems(extractContent(config))
 				.build();
 
 		} catch (Exception e) {
@@ -85,7 +112,8 @@ public class AbstractExtractor {
 		}
 	}
 
-	public List<ContentItem> extractContent(WebDriverWait wait, ExtractorConfig config) {
+	//Body본문과 이미지 추출하기
+	public List<ContentItem> extractContent( ExtractorConfig config) {
 		List<CompletableFuture<ContentItem>> futures = new ArrayList<>();
 
 		try {

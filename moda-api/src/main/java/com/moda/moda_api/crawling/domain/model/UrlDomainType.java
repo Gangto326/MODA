@@ -1,5 +1,7 @@
 package com.moda.moda_api.crawling.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 import lombok.Getter;
 
 @Getter
@@ -19,4 +21,13 @@ public enum UrlDomainType {
 		this.typeId = typeId;
 	}
 
+	@JsonCreator
+	public static UrlDomainType fromTypeId(Integer typeId) {
+		for (UrlDomainType type : values()) {
+			if (type.getTypeId().equals(typeId)) {
+				return type;
+			}
+		}
+		throw new IllegalArgumentException("Unknown typeId: " + typeId);
+	}
 }

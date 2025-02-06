@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.moda.moda_api.crawling.application.service.CrawlingService;
+import com.moda.moda_api.crawling.application.service.SearchService;
 import com.moda.moda_api.crawling.domain.model.CrawledContent;
 import com.moda.moda_api.crawling.domain.model.Url;
 import com.moda.moda_api.crawling.presentation.dto.SearchRequest;
@@ -18,11 +19,11 @@ import lombok.AllArgsConstructor;
 @RequestMapping("/api/test")
 @AllArgsConstructor
 public class GetUrlController {
-	private final CrawlingService crawlingService;
+	private final SearchService searchService;
 
 	@PostMapping
-	public CrawledContent search(
+	public List<Url> search(
 		@RequestBody SearchRequest searchRequest) throws Exception {
-		return crawlingService.crawlByUrl(new Url(searchRequest.getKeyword()));
+		return searchService.crawlByKeyWord(searchRequest.getKeyword());
 	}
 }

@@ -11,7 +11,6 @@ import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.common.pagination.SliceRequestDto;
 import com.moda.moda_api.common.pagination.SliceResponseDto;
 import com.moda.moda_api.summary.application.service.LilysSummaryService;
-import com.moda.moda_api.summary.infrastructure.api.LilysAiClient;
 import com.moda.moda_api.user.domain.UserId;
 
 import lombok.RequiredArgsConstructor;
@@ -35,7 +34,6 @@ public class CardService {
 	private final CardFactory cardFactory;
 	private final CardDtoMapper cardDtoMapper;
 	private final LilysSummaryService lilysSummaryService;
-	private final EmbeddingApiClient embeddingApiClient;
 	private final UrlCacheRepository urlCacheRepository;
 
 	/**
@@ -47,6 +45,7 @@ public class CardService {
 	@Transactional
 	public CompletableFuture<Boolean> createCard(String userId, String url) {
 		UserId userIdObj = new UserId("01234");
+		// urlHash처리
 		String urlHash = UrlCache.generateHash(url);
 
 		return urlCacheRepository.findByUrlHash(urlHash)
@@ -54,6 +53,7 @@ public class CardService {
 			.orElseGet(() -> createNewCard(userIdObj, url, urlHash)); // url Hash가 없다면 새로 만들기
 	}
 
+	// UrlHash가 있는 경우
 	private CompletableFuture<Boolean> createCardFromCache(UserId userIdObj, String urlHash) {
 		Card existingCard = cardRepository.findByUrlHash(urlHash).get();
 		UrlCache cache = urlCacheRepository.findByUrlHash(urlHash).get();
@@ -74,29 +74,31 @@ public class CardService {
 		return CompletableFuture.completedFuture(true);
 	}
 
+	// UrlHash가 없는 경우 새로운 것을 만들어야한다.
 	private CompletableFuture<Boolean> createNewCard(UserId userIdObj, String url, String urlHash) {
+
+		// 여기서 2가지 경우로 다시 나눠야한다.
+		// summary에서 2가지 경우로 나눠보자.
 		return lilysSummaryService.summarize(url)
-			.thenApply(summaryResponse -> {
-				EmbeddingVector embeddingVector = embeddingApiClient.embedContent(summaryResponse.getContent());
-				CategoryId categoryIdObj = new CategoryId(1L);
+			.thenApply(SummaryResultDto -> {
 
 				Card card = cardFactory.create(
 					userIdObj,
-					categoryIdObj,
-					summaryResponse.getTypeId(),
+					SummaryResultDto.getCategoryId(),
+					SummaryResultDto.getTypeId(),
 					urlHash,
-					summaryResponse.getTitle(),
-					summaryResponse.getContent(),
-					summaryResponse.getThumbnailContent(),
-					summaryResponse.getThumbnailUrl(),
-					embeddingVector
+					SummaryResultDto.getTitle(),
+					SummaryResultDto.getContent(),
+					SummaryResultDto.getThumbnailContent(),
+					SummaryResultDto.getThumbnailUrl(),
+					SummaryResultDto.getEmbeddingVector()
 				);
 
 				urlCacheRepository.save(
 					UrlCache.builder()
 						.urlHash(urlHash)
-						.cachedTitle(summaryResponse.getTitle())
-						.cachedContent(summaryResponse.getContent())
+						.cachedTitle(SummaryResultDto.getTitle())
+						.cachedContent(SummaryResultDto.getContent())
 						.originalUrl(url)
 						.build()
 				);

@@ -3,14 +3,11 @@ package com.moda.moda_api.crawling.application.service;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import com.moda.moda_api.crawling.domain.model.SearchType;
 import com.moda.moda_api.crawling.domain.model.Url;
 import com.moda.moda_api.crawling.infrastructure.crawl.AbstractExtractor;
-import com.moda.moda_api.crawling.infrastructure.config.searchConfig.SearchStrategy;
 import com.moda.moda_api.crawling.infrastructure.repository.UrlRedisRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -26,9 +23,10 @@ public class SearchService {
 		// 1. Google 검색 URL 생성
 		String searchUrl = buildGoogleSearchUrl(keyword);
 
+		System.out.println(searchUrl);
 		System.out.println("크롤링 수행");
 		// 2. 크롤링 수행
-		List<Url> crawledUrls = abstractExtractor.extarctUrl(searchUrl);
+		List<Url> crawledUrls = abstractExtractor.extractUrl(searchUrl);
 
 		// 3. Redis에 저장 (keyword를 key로 사용)
 		urlRedisRepository.saveUrls(keyword, crawledUrls);
@@ -56,6 +54,5 @@ public class SearchService {
 			throw new RuntimeException("키워드 인코딩 실패: " + keyword, e);
 		}
 	}
-
 
 }

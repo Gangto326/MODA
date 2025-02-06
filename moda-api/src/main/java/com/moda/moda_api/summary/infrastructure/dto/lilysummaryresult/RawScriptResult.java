@@ -1,4 +1,4 @@
-package com.moda.moda_api.summary.infrastructure.dto.summaryResult;
+package com.moda.moda_api.summary.infrastructure.dto.lilysummaryresult;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

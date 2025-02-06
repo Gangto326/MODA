@@ -31,7 +31,7 @@ public class WebClientConfig {
 	}
 
 
-	@Bean
+	@Bean("lilysWebClient")
 	public WebClient lilysWebClient(WebClient.Builder builder) {
 		return builder
 			.defaultHeader("Content-Type", "application/json") // 타입 지정
@@ -39,7 +39,7 @@ public class WebClientConfig {
 			.build();
 	}
 
-	@Bean
+	@Bean("embeddingWebClient")
 	public WebClient embeddingWebClient(WebClient.Builder builder) {
 		return builder.baseUrl(embeddingUrl)
 				.clientConnector(new ReactorClientHttpConnector(HttpClient.create()

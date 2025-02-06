@@ -1,4 +1,4 @@
-package com.moda.moda_api.summary.infrastructure.dto.summaryResult;
+package com.moda.moda_api.summary.infrastructure.dto.lilysummaryresult;
 
 import java.util.List;
 
@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class BlogPostResult {
-	private OuterData data;  // 최상위 data 객체 추가
+public class TimestampResult {
+	private OuterData data;
 	private String status;
 
 	@Data
@@ -22,23 +22,23 @@ public class BlogPostResult {
 	public static class OuterData {
 		private String type;
 		private String resultLanguage;
-		private BlogPostData data;
+		private NestedData data;
 	}
 
 	@Data
 	@NoArgsConstructor
 	@AllArgsConstructor
 	@Builder
-	public static class BlogPostData {
-		private List<BlogPostEntry> blogPost;
+	public static class NestedData {
+		private List<TimestampEntry> result;
 	}
 
 	@Data
 	@NoArgsConstructor
 	@AllArgsConstructor
 	@Builder
-	public static class BlogPostEntry {
+	public static class TimestampEntry {
 		private String title;
-		private String content;
+		private double timestamp;
 	}
 }

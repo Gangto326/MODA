@@ -69,9 +69,9 @@ public class PlatformExtractorFactory {
 
 		CONFIGS.put("google.com", ExtractorConfig.builder()
 			.pattern("google.com")
-			// Using a more general selector that's less likely to break
-			.contentSelector("div[data-sokoban-container] a")
-			.urlSelector("div[data-sokoban-container] a[href]")
+			// 더 구체적이고 정확한 셀렉터 사용
+			.contentSelector("div.MjjYud a[jsname='UWckNb']")
+			.urlSelector("div.MjjYud a[jsname='UWckNb'][href]")
 			.requiresFrame(false)
 			.urlDomainType(UrlDomainType.GOOGLE_SEARCH)
 			.build());

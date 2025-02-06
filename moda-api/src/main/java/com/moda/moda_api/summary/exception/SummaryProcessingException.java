@@ -1,4 +1,4 @@
-package com.moda.moda_api.util.exception;
+package com.moda.moda_api.summary.exception;
 
 
 public class SummaryProcessingException extends RuntimeException {

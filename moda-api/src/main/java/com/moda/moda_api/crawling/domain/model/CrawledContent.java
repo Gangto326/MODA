@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class CrawledContent {
-	private String url;
+	private Url url;
 	private String title;
 	private List<ContentItem> contentItems;
 	private LocalDateTime crawledAt;
