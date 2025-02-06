@@ -1,25 +1,26 @@
 {
-  "analysis": {
-    "analyzer": {
-      "korean": {
-        "type": "nori",
-        "tokenizer": "nori_tokenizer"
-      },
-      "korean_completion": {
-        "tokenizer": "nori_tokenizer",
-        "filter": [
-          "nori_readingform",
-          "lowercase",
-          "edge_ngram_filter"
-        ]
-      }
+  "properties": {
+    "title": {
+      "type": "text",
+      "analyzer": "korean"
     },
-    "filter": {
-      "edge_ngram_filter": {
-        "type": "edge_ngram",
-        "min_gram": 1,
-        "max_gram": 50
-      }
+    "content": {
+      "type": "text",
+      "analyzer": "korean"
+    },
+    "titleCompletion": {
+      "type": "text",
+      "analyzer": "korean_completion",
+      "search_analyzer": "korean"
+    },
+    "contentCompletion": {
+      "type": "text",
+      "analyzer": "korean_completion",
+      "search_analyzer": "korean"
+    },
+    "embedding": {
+      "type": "dense_vector",
+      "dims": 768
     }
   }
 }
