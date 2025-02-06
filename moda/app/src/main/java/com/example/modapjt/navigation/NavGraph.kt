@@ -16,6 +16,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.modapjt.screen.SavedUrlsScreen
 import com.example.modapjt.screen.linkupload.LinkUploadScreen
 import newCardListScreen
+import newHomeScreen
 
 @Composable
 fun NavGraph(
@@ -75,10 +76,10 @@ fun NavGraph(
 
 
 
-        // "홈테스트" 화면 추가
-//        composable("home_test") {
-//            newHomeScreen(navController, currentRoute = "home_test")
-//        }
+//         "홈테스트" 화면 추가
+        composable("home_test") {
+            newHomeScreen(navController, currentRoute = "home_test")
+        }
 
         // "카드리스트테스트" 화면 추가
         composable("card_list_test") {
