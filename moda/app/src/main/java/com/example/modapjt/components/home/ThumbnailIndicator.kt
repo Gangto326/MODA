@@ -18,7 +18,7 @@ fun ThumbnailIndicator(currentIndex: Int, totalItems: Int) {
     ) {
         repeat(totalItems) { index ->
             val isSelected = index == currentIndex
-            val indicatorColor = if (isSelected) Color(0xFFFFF176) else Color(0xFFFFF9C4)
+            val indicatorColor = if (isSelected) Color(0xFFFFF176) else Color(0xFFEEEEEE)
 
             Box(
                 modifier = Modifier

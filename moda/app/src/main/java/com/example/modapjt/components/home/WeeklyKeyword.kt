@@ -1,3 +1,5 @@
+package com.example.modapjt.components.home
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,14 +15,14 @@ import androidx.compose.ui.Alignment
 fun WeeklyKeyword(keyword: String) {
     Box(
         modifier = Modifier
-            .background(Color(0xFFE0E0E0), shape = RoundedCornerShape(50))  // 타원형 배경
-            .padding(horizontal = 16.dp, vertical = 8.dp),  // 내부 패딩으로 타원형 만들기
+            .background(Color(0xFFFFCC80), shape = RoundedCornerShape(50))  // 주황빛 노랑색 배경
+            .padding(horizontal = 14.dp, vertical = 6.dp),  // 크기 조금 키우기
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = keyword,
-            fontSize = 14.sp,
-            color = Color.Black
+            fontSize = 14.sp,  // 글자 크기 증가
+            color = Color.White  // 흰색 글자
         )
     }
 }
