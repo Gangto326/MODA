@@ -1,17 +1,14 @@
-package com.example.modapjt.components.card
+package com.example.modapjt.components.cardlist
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
 import com.example.modapjt.R
 import com.example.modapjt.components.video.YouTubePlayer
 import com.example.modapjt.domain.model.Card

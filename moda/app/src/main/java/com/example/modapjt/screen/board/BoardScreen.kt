@@ -1,8 +1,5 @@
 package com.example.modapjt.screen.board
 
-import android.os.Build
-import androidx.annotation.RequiresApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -10,16 +7,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.modapjt.components.card.CardItem
+import com.example.modapjt.components.cardlist.CardItem
 import com.example.modapjt.components.bar.BottomBarComponent
 import com.example.modapjt.components.bar.TopBackBarComponent
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.modapjt.components.video.YouTubePlayer
-import com.example.modapjt.domain.viewmodel.BoardViewModel
 import com.example.modapjt.domain.viewmodel.CardViewModel
-import com.example.modapjt.utils.extractYouTubeVideoId
+
 //
 //@RequiresApi(Build.VERSION_CODES.O)
 //@Composable
