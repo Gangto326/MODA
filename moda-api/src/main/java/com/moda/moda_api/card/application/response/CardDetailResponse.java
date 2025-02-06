@@ -1,6 +1,6 @@
 package com.moda.moda_api.card.application.response;
 
-import com.moda.moda_api.card.domain.ContentType;
+import com.moda.moda_api.card.domain.CardContentType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,7 +16,7 @@ public class CardDetailResponse {
     private String cardId;
     private Long categoryId;
     private Integer typeId;
-    private ContentType type;
+    private CardContentType type;
     private String title;
     private String content;
     private String thumbnailUrl;

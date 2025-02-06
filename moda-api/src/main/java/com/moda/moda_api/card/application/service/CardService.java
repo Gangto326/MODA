@@ -13,7 +13,6 @@ import com.moda.moda_api.common.pagination.SliceResponseDto;
 import com.moda.moda_api.summary.application.service.LilysSummaryService;
 import com.moda.moda_api.summary.infrastructure.api.LilysAiClient;
 import com.moda.moda_api.user.domain.UserId;
-import com.moda.moda_api.util.hash.HashUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -39,7 +37,6 @@ public class CardService {
 	private final LilysSummaryService lilysSummaryService;
 	private final EmbeddingApiClient embeddingApiClient;
 	private final UrlCacheRepository urlCacheRepository;
-	private final LilysAiClient lilysAiClient;
 
 	/**
 	 * URL을 입력 받고 새로운 카드 생성 후 알맞은 보드로 이동합니다.

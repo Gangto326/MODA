@@ -1,4 +1,4 @@
-package com.moda.moda_api.summary.infrastructure.service;
+package com.moda.moda_api.crawling.infrastructure.crawl;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -16,9 +16,13 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Service;
 
 import com.moda.moda_api.common.infrastructure.ImageStorageService;
+import com.moda.moda_api.crawling.domain.model.Url;
 import com.moda.moda_api.summary.domain.ContentItem;
 import com.moda.moda_api.summary.domain.ContentItemType;
-import com.moda.moda_api.summary.domain.CrawledContent;
+import com.moda.moda_api.crawling.domain.model.CrawledContent;
+import com.moda.moda_api.crawling.infrastructure.config.crawlerConfig.ExtractorConfig;
+import com.moda.moda_api.crawling.infrastructure.config.crawlerConfig.PlatformExtractorFactory;
+import com.moda.moda_api.util.exception.ExtractorException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +34,28 @@ public class AbstractExtractor {
 	private final WebDriver driver;
 	private final PlatformExtractorFactory extractorFactory;
 	private final ImageStorageService imageStorageService;
+
+	public List<Url> extarctUrl(String url) {
+		try{
+			// 설정 방식 가져오기
+			ExtractorConfig config = extractorFactory.getConfig(url);
+			driver.get(url);
+			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+			List<WebElement> elements = wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(
+				By.cssSelector(config.getUrlSelector())
+			));
+			return elements.stream()
+				.map(element -> {
+					return new Url(element.getAttribute("href"));
+				})
+				.filter(extractedUrl -> extractedUrl != null && !extractedUrl.getValue().isEmpty())
+				.collect(Collectors.toList());
+		}
+		catch (Exception e) {
+			log.error("URL 추출 중 오류 발생: {}", url, e);
+			throw new ExtractorException("URL 추출 실패", e);
+		}
+	}
 
 	public CrawledContent extract(String url) throws Exception {
 		try {
@@ -45,7 +71,7 @@ public class AbstractExtractor {
 
 			return CrawledContent.builder()
 				.url(url)
-				.crawledContentType(config.getCrawledContentType())
+				.urlDomainType(config.getUrlDomainType())
 				.title(extractTitle())
 				.contentItems(extractContent(wait, config))
 				.build();
@@ -68,11 +94,16 @@ public class AbstractExtractor {
 				By.cssSelector(config.getContentSelector())
 			));
 
+			// XPath를 수정하여 더 많은 텍스트 요소를 포함
 			contentWait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(
-				By.xpath(".//p[not(ancestor::p)]|.//img")
+				By.xpath(".//p[not(ancestor::p)]|.//img|.//li|.//ul")
 			));
 
-			List<WebElement> elements = contentElement.findElements(By.xpath(".//p[not(ancestor::p)]|.//img"));
+			// 텍스트를 포함할 수 있는 모든 요소 선택
+			List<WebElement> elements = contentElement.findElements(
+				By.xpath(".//p[not(ancestor::p)]|.//img|.//li[not(li)]")  // 중첩된 li는 제외
+			);
+
 
 			for (WebElement element : elements) {
 				try {

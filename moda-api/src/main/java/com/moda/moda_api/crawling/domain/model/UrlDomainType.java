@@ -1,0 +1,22 @@
+package com.moda.moda_api.crawling.domain.model;
+
+import lombok.Getter;
+
+@Getter
+public enum UrlDomainType {
+	UNCLASSIFIED(1),
+	TISTORY(2),
+	NAVER_BLOG(3),
+	VELOG(4),
+	NAVER_NEWS(5),
+	DAUM_NEWS(6),
+	YOUTUBE(7),
+	GOOGLE_SEARCH(8);
+
+	private final Integer typeId;
+
+	UrlDomainType(Integer typeId){
+		this.typeId = typeId;
+	}
+
+}

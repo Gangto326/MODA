@@ -12,6 +12,9 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Component;
 
 import com.moda.moda_api.common.infrastructure.ImageStorageService;
+import com.moda.moda_api.crawling.infrastructure.crawl.AbstractExtractor;
+import com.moda.moda_api.crawling.infrastructure.config.crawlerConfig.ExtractorConfig;
+import com.moda.moda_api.crawling.infrastructure.config.crawlerConfig.PlatformExtractorFactory;
 import com.moda.moda_api.summary.domain.ContentItem;
 import com.moda.moda_api.summary.domain.ContentItemType;
 

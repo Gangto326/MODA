@@ -1,6 +1,6 @@
-package com.moda.moda_api.summary.infrastructure.service;
+package com.moda.moda_api.crawling.infrastructure.config.crawlerConfig;
 
-import com.moda.moda_api.summary.domain.CrawledContentType;
+import com.moda.moda_api.crawling.domain.model.UrlDomainType;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -13,5 +13,6 @@ public class ExtractorConfig {
 	private String imageSelector;
 	private boolean requiresFrame;
 	private String frameId;
-	private CrawledContentType crawledContentType;
+	private String urlSelector;
+	private UrlDomainType urlDomainType;
 }

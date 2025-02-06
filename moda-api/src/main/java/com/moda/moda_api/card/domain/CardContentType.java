@@ -4,7 +4,7 @@ import com.moda.moda_api.card.exception.InvalidContentTypeException;
 import lombok.Getter;
 
 @Getter
-public enum ContentType {
+public enum CardContentType {
     YOUTUBE(1),
     BLOG(2),
     NEWS(3),
@@ -14,14 +14,14 @@ public enum ContentType {
 
     private final Integer typeId;
 
-    ContentType(Integer typeId) {
+    CardContentType(Integer typeId) {
         this.typeId = typeId;
     }
 
-    public static ContentType from(Integer typeId) {
-        for (ContentType contentType : values()) {
-            if (contentType.getTypeId().equals(typeId)) {
-                return contentType;
+    public static CardContentType from(Integer typeId) {
+        for (CardContentType cardContentType : values()) {
+            if (cardContentType.getTypeId().equals(typeId)) {
+                return cardContentType;
             }
         }
         throw new InvalidContentTypeException("유효하지 않은 컨텐츠 타입입니다.");

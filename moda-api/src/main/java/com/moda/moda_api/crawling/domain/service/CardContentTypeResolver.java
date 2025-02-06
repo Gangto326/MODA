@@ -1,27 +1,27 @@
-package com.moda.moda_api.summary.domain.service;
+package com.moda.moda_api.crawling.domain.service;
 
 import java.util.List;
 
-import com.moda.moda_api.card.domain.ContentType;
+import com.moda.moda_api.card.domain.CardContentType;
 
-public class ContentTypeResolver {
+public class CardContentTypeResolver {
 
 	private static final List<String> BLOG_SITES = List.of("tistory.com", "velog.io" ,"medium.com", "brunch.co.kr");
 	private static final List<String> NEWS_SITES = List.of("naver.com", "daum.net", "bbc.com", "cnn.com");
 
-	public static ContentType resolve(String url) {
+	public static CardContentType resolve(String url) {
 		if (url.contains("youtube.com")) {
-			return ContentType.YOUTUBE;
+			return CardContentType.YOUTUBE;
 		}
 
 		if (BLOG_SITES.stream().anyMatch(url::contains)) {
-			return ContentType.BLOG;
+			return CardContentType.BLOG;
 		}
 
 		if (NEWS_SITES.stream().anyMatch(url::contains)) {
-			return ContentType.NEWS;
+			return CardContentType.NEWS;
 		}
 
-		return ContentType.OTHERS;
+		return CardContentType.OTHERS;
 	}
 }

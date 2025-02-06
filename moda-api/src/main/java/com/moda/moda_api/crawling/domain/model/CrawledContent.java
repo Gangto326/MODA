@@ -1,13 +1,14 @@
-package com.moda.moda_api.summary.domain;
+package com.moda.moda_api.crawling.domain.model;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.moda.moda_api.summary.domain.ContentItem;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
 @AllArgsConstructor
@@ -18,5 +19,5 @@ public class CrawledContent {
 	private String title;
 	private List<ContentItem> contentItems;
 	private LocalDateTime crawledAt;
-	private CrawledContentType crawledContentType;
+	private UrlDomainType urlDomainType;
 }
