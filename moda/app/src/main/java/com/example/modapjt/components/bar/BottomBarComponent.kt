@@ -72,12 +72,12 @@ fun BottomBarComponent(navController: NavController, currentRoute: String) {
         )
         // screen2/home/newHomeScreen.kt 화면 테스트
         NavigationBarItem(
-            icon = { Icon(Icons.Default.Settings, "Settings") },
+            icon = { Icon(Icons.Default.Settings, "Home Test") },
             label = { Text("홈테스트") },
-            selected = currentRoute == "settings", // ✅ 변경: screen4 -> settings
+            selected = currentRoute == "home_test", // ✅ 변경: screen4 -> settings
             onClick = {
-                if (currentRoute != "settings") {
-                    navController.navigate("settings") {
+                if (currentRoute != "home_test") {
+                    navController.navigate("home_test") {
                         popUpTo("home")
                     }
                 }
