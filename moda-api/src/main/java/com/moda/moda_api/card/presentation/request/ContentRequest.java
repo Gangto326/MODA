@@ -1,6 +1,5 @@
 package com.moda.moda_api.card.presentation.request;
 
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateCardRequest {
-    String cardId;
-    List<ContentRequest> content;
+public class ContentRequest {
+    String type;
+    String content;
 }

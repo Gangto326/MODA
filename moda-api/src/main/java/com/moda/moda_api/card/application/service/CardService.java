@@ -3,28 +3,34 @@ package com.moda.moda_api.card.application.service;
 import com.moda.moda_api.card.application.mapper.CardDtoMapper;
 import com.moda.moda_api.card.application.response.CardDetailResponse;
 import com.moda.moda_api.card.application.response.CardListResponse;
-import com.moda.moda_api.card.domain.*;
+import com.moda.moda_api.card.domain.Card;
+import com.moda.moda_api.card.domain.CardFactory;
+import com.moda.moda_api.card.domain.CardId;
+import com.moda.moda_api.card.domain.CardRepository;
+import com.moda.moda_api.card.domain.Content;
+import com.moda.moda_api.card.domain.ContentType;
+import com.moda.moda_api.card.domain.EmbeddingApiClient;
+import com.moda.moda_api.card.domain.EmbeddingVector;
+import com.moda.moda_api.card.domain.UrlCache;
+import com.moda.moda_api.card.domain.UrlCacheRepository;
 import com.moda.moda_api.card.exception.CardNotFoundException;
+import com.moda.moda_api.card.presentation.request.ContentRequest;
 import com.moda.moda_api.card.presentation.request.MoveCardRequest;
 import com.moda.moda_api.card.presentation.request.UpdateCardRequest;
 import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.common.pagination.SliceRequestDto;
 import com.moda.moda_api.common.pagination.SliceResponseDto;
 import com.moda.moda_api.summary.application.service.LilysSummaryService;
-import com.moda.moda_api.summary.infrastructure.api.LilysAiClient;
 import com.moda.moda_api.user.domain.UserId;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.data.domain.Slice;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Slice;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional(readOnly = true)
@@ -201,7 +207,7 @@ public class CardService {
 		card.validateOwnership(userIdObj);
 
 		// Card의 콘텐츠 변경 후 저장
-		card.changeContent(request.getContent());
+		card.changeContent(convertContentList(request.getContent()));
 		cardRepository.save(card);
 
 		return cardDtoMapper.toDetailResponse(card);
@@ -265,5 +271,14 @@ public class CardService {
 		return cardIdList.stream()
 			.map(cardId -> findCard(userId, cardId))
 			.collect(Collectors.toList());
+	}
+
+	private List<Content> convertContentList(List<ContentRequest> contentRequest) {
+		return contentRequest.stream()
+				.map(request -> Content.builder()
+						.type(ContentType.valueOf(request.getType()))
+						.content(request.getContent())
+						.build())
+				.toList();
 	}
 }

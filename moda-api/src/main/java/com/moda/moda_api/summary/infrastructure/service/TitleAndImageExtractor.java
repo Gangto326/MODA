@@ -15,8 +15,8 @@ import com.moda.moda_api.common.infrastructure.ImageStorageService;
 import com.moda.moda_api.crawling.infrastructure.crawl.AbstractExtractor;
 import com.moda.moda_api.crawling.infrastructure.config.crawlerConfig.ExtractorConfig;
 import com.moda.moda_api.crawling.infrastructure.config.crawlerConfig.PlatformExtractorFactory;
-import com.moda.moda_api.summary.domain.ContentItem;
-import com.moda.moda_api.summary.domain.ContentItemType;
+import com.moda.moda_api.card.domain.Content;
+import com.moda.moda_api.card.domain.ContentType;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -83,9 +83,9 @@ public class TitleAndImageExtractor {
 
 				// ContentItems에서 첫 번째 이미지 찾기
 				String imageUrl = extractor.extractContent(wait, config).stream()
-					.filter(item -> item.getType() == ContentItemType.IMAGE)
+					.filter(item -> item.getType() == ContentType.IMAGE)
 					.findFirst()
-					.map(ContentItem::getContent)
+					.map(Content::getContent)
 					.orElse("");
 
 				// S3에 업로드

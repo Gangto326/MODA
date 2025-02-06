@@ -1,13 +1,25 @@
 package com.moda.moda_api.card.infrastructure.entity;
 
 import com.moda.moda_api.card.infrastructure.converter.VectorConverter;
+import com.moda.moda_api.card.test.Converter;
 import com.moda.moda_api.category.infrastructure.entity.CategoryEntity;
 import io.hypersistence.utils.hibernate.type.array.StringArrayType;
-import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.Type;
-
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.List;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Type;
 
 @Entity
 @Getter
@@ -36,7 +48,8 @@ public class CardEntity {
     private String title;
 
     @Column(name = "content", columnDefinition = "TEXT", nullable = false)
-    private String content;
+    @Convert(converter = Converter.class)
+    private List<ContentItem> content;
 
     @Column(name = "thumbnail_content", columnDefinition = "TEXT", nullable = false)
     private String thumbnailContent;

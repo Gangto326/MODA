@@ -6,10 +6,14 @@ import com.moda.moda_api.card.domain.EmbeddingVector;
 import com.moda.moda_api.card.infrastructure.entity.CardEntity;
 import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.user.domain.UserId;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class CardEntityMapper {
+    private final ContentItemMapper contentItemMapper;
+
     public CardEntity toEntity(Card card) {
         return CardEntity.builder()
                 .cardId(card.getCardId().getValue())
@@ -18,7 +22,7 @@ public class CardEntityMapper {
                 .typeId(card.getTypeId())
                 .urlHash(card.getUrlHash())
                 .title(card.getTitle())
-                .content(card.getContent())
+                .content(contentItemMapper.toItem(card.getContents()))
                 .thumbnailContent(card.getThumbnailContent())
                 .thumbnailUrl(card.getThumbnailUrl())
                 .embedding(card.getEmbedding().getValues())
@@ -38,7 +42,7 @@ public class CardEntityMapper {
                 .typeId(entity.getTypeId())
                 .urlHash(entity.getUrlHash())
                 .title(entity.getTitle())
-                .content(entity.getContent())
+                .contents(contentItemMapper.toDomain(entity.getContent()))
                 .thumbnailContent(entity.getThumbnailContent())
                 .thumbnailUrl(entity.getThumbnailUrl())
                 .embedding(new EmbeddingVector(entity.getEmbedding()))

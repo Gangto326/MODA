@@ -17,8 +17,8 @@ import org.springframework.stereotype.Service;
 
 import com.moda.moda_api.common.infrastructure.ImageStorageService;
 import com.moda.moda_api.crawling.domain.model.Url;
-import com.moda.moda_api.summary.domain.ContentItem;
-import com.moda.moda_api.summary.domain.ContentItemType;
+import com.moda.moda_api.card.domain.Content;
+import com.moda.moda_api.card.domain.ContentType;
 import com.moda.moda_api.crawling.domain.model.CrawledContent;
 import com.moda.moda_api.crawling.infrastructure.config.crawlerConfig.ExtractorConfig;
 import com.moda.moda_api.crawling.infrastructure.config.crawlerConfig.PlatformExtractorFactory;
@@ -73,7 +73,7 @@ public class AbstractExtractor {
 				.url(url)
 				.urlDomainType(config.getUrlDomainType())
 				.title(extractTitle())
-				.contentItems(extractContent(wait, config))
+				.contents(extractContent(wait, config))
 				.build();
 
 		} catch (Exception e) {
@@ -85,8 +85,8 @@ public class AbstractExtractor {
 		}
 	}
 
-	public List<ContentItem> extractContent(WebDriverWait wait, ExtractorConfig config) {
-		List<CompletableFuture<ContentItem>> futures = new ArrayList<>();
+	public List<Content> extractContent(WebDriverWait wait, ExtractorConfig config) {
+		List<CompletableFuture<Content>> futures = new ArrayList<>();
 
 		try {
 			WebDriverWait contentWait = new WebDriverWait(driver, Duration.ofSeconds(20));
@@ -113,7 +113,7 @@ public class AbstractExtractor {
 								String src = element.getAttribute("src");
 								if (src != null && !src.isEmpty() && isValidImageUrl(src)) {
 									String savedImageUrl = imageStorageService.uploadImage(src);
-									return new ContentItem(savedImageUrl, ContentItemType.IMAGE);
+									return new Content(savedImageUrl, ContentType.IMAGE);
 								}
 							} catch (Exception e) {
 								log.error("Failed to process image", e);
@@ -124,7 +124,7 @@ public class AbstractExtractor {
 						String text = element.getText().trim();
 						if (!text.isEmpty()) {
 							futures.add(CompletableFuture.completedFuture(
-								new ContentItem(text, ContentItemType.TEXT)
+								new Content(text, ContentType.TEXT)
 							));
 						}
 					}

@@ -2,16 +2,16 @@ package com.moda.moda_api.card.domain;
 
 import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.user.domain.UserId;
-import org.springframework.stereotype.Component;
-
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
+import org.springframework.stereotype.Component;
 
 @Component
 public class CardFactory {
     public Card create(UserId userId, CategoryId categoryId,
                        Integer typeId, String urlHash,
-                       String title, String content, String thumbnailContent, String thumbnailUrl,
+                       String title, List<Content> contents, String thumbnailContent, String thumbnailUrl,
                        EmbeddingVector embedding) {
         return Card.builder()
                 .cardId(generateCardId())
@@ -20,7 +20,7 @@ public class CardFactory {
                 .typeId(typeId)
                 .urlHash(urlHash)
                 .title(title)
-                .content(content)
+                .contents(contents)
                 .thumbnailContent(thumbnailContent)
                 .thumbnailUrl(thumbnailUrl)
                 .viewCount(0)

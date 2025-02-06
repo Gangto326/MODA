@@ -1,4 +1,4 @@
-package com.moda.moda_api.summary.domain;
+package com.moda.moda_api.card.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,7 +11,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @Builder
 @ToString
-public class ContentItem {
+public class Content {
 	private String content;
-	private ContentItemType type;
+	private ContentType type;
 }

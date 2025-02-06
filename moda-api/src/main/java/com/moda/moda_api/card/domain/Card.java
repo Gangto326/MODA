@@ -5,9 +5,13 @@ import com.moda.moda_api.card.exception.InvalidCardTitleException;
 import com.moda.moda_api.card.exception.UnauthorizedException;
 import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.user.domain.UserId;
-import lombok.*;
-
 import java.time.LocalDateTime;
+import java.util.List;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @Builder
@@ -20,7 +24,7 @@ public class Card {
     private Integer typeId;
     private String urlHash;
     private String title;
-    private String content;
+    private List<Content> contents;
     private String thumbnailContent;
     private String thumbnailUrl;
     private EmbeddingVector embedding;
@@ -35,9 +39,9 @@ public class Card {
     private LocalDateTime createdAt = LocalDateTime.now();
 
 
-    public void changeContent(String content) {
-        validateContent(content);
-        this.content = content;
+    public void changeContent(List<Content> contents) {
+        validateContents(contents);
+        this.contents = contents;
     }
 
     public void moveCategory(CategoryId categoryId) {
@@ -53,14 +57,9 @@ public class Card {
         }
     }
 
-    private void validateContent(String content) {
-        if (content == null || content.trim().isEmpty()) {
+    private void validateContents(List<Content> contents) {
+        if (contents == null || contents.isEmpty()) {
             throw new InvalidCardContentException("카드 내용은 빈 문자열일 수 없습니다.");
-        }
-        // 가벼운 JSON 형식 검증
-        String trimmedContent = content.trim();
-        if (!trimmedContent.startsWith("{") || !trimmedContent.endsWith("}")) {
-            throw new InvalidCardContentException("카드 내용이 올바른 JSON 형식이 아닙니다.");
         }
     }
 

@@ -4,10 +4,14 @@ import com.moda.moda_api.card.application.response.CardDetailResponse;
 import com.moda.moda_api.card.application.response.CardListResponse;
 import com.moda.moda_api.card.domain.Card;
 import com.moda.moda_api.card.domain.CardContentType;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class CardDtoMapper {
+    private final ContentDtoMapper contentDtoMapper;
+
     public CardListResponse toResponse(Card card) {
         return CardListResponse.builder()
                 .cardId(card.getCardId().getValue())
@@ -29,7 +33,7 @@ public class CardDtoMapper {
                 .typeId(card.getTypeId())
                 .type(CardContentType.from(card.getTypeId()))
                 .title(card.getTitle())
-                .content(card.getContent())
+                .content(contentDtoMapper.toResponse(card.getContents()))
                 .thumbnailUrl(card.getThumbnailUrl())
                 .keywords(card.getKeywords())
                 .createdAt(card.getCreatedAt())
