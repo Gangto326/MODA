@@ -100,7 +100,7 @@
 //}
 
 // components/card/CardDetail.kt
-package com.example.modapjt.components.card
+package com.example.modapjt.components.cardlist
 
 import android.util.Log
 import androidx.compose.foundation.layout.*
@@ -112,11 +112,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.modapjt.domain.model.Card
-import com.example.modapjt.components.video.YouTubePlayer
 import com.example.modapjt.data.dto.response.BlogPost
 import com.example.modapjt.domain.model.CardDetail
-import com.example.modapjt.utils.extractYouTubeVideoId
 
 //@Composable
 //fun CardDetail(cardDetail: CardDetail) {  // Card 대신 CardDetail 타입 받도록 수정

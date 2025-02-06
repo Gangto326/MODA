@@ -156,23 +156,18 @@
 
 package com.example.modapjt.screen.card
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.modapjt.components.card.CardItem
 import com.example.modapjt.components.bar.BottomBarComponent
 import com.example.modapjt.components.bar.TopBackBarComponent
-import com.example.modapjt.components.card.CardDetail
-import com.example.modapjt.components.video.YouTubePlayer
+import com.example.modapjt.components.cardlist.CardDetail
 import com.example.modapjt.domain.viewmodel.CardViewModel
-import com.example.modapjt.utils.extractYouTubeVideoId
+
 //
 //@Composable
 //fun CardScreen(
