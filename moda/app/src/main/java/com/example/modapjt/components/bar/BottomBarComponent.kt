@@ -40,11 +40,11 @@ fun BottomBarComponent(navController: NavController, currentRoute: String) {
 //        )
         NavigationBarItem(
             icon = { Icon(Icons.Default.Favorite, "Link Upload") },
-            label = { Text("링크 업로드") },
-            selected = currentRoute == "link_upload", // ✅ 변경: screen3 -> link_upload
+            label = { Text("디테일테스트") },
+            selected = currentRoute == "card_detail_test", // ✅ 변경: screen3 -> link_upload
             onClick = {
-                if (currentRoute != "link_upload") {
-                    navController.navigate("link_upload") {
+                if (currentRoute != "card_detail_test") {
+                    navController.navigate("card_detail_test") {
                         popUpTo("home")
                     }
                 }
@@ -99,12 +99,12 @@ fun BottomBarComponent(navController: NavController, currentRoute: String) {
 
         // screen2/linkupload/newLinkUploadScreen.kt 화면 테스트
         NavigationBarItem(
-            icon = { Icon(Icons.Default.Settings, "Settings") },
+            icon = { Icon(Icons.Default.Settings, "File Upload Test") },
             label = { Text("파일업로드테스트") },
-            selected = currentRoute == "settings", // ✅ 변경: screen4 -> settings
+            selected = currentRoute == "file_upload_test", // ✅ 변경: screen4 -> settings
             onClick = {
-                if (currentRoute != "settings") {
-                    navController.navigate("settings") {
+                if (currentRoute != "file_upload_test") {
+                    navController.navigate("file_upload_test") {
                         popUpTo("home")
                     }
                 }

@@ -17,6 +17,7 @@ import com.example.modapjt.screen.SavedUrlsScreen
 import com.example.modapjt.screen.linkupload.LinkUploadScreen
 import newCardDetailScreen
 import newCardListScreen
+import newHomeScreen
 //import newHomeScreen
 import newLinkUploadScreen
 
@@ -79,9 +80,9 @@ fun NavGraph(
 
 
 //         "홈테스트" 화면 추가
-//        composable("home_test") {
-//            newHomeScreen(navController, currentRoute = "home_test")
-//        }
+        composable("home_test") {
+            newHomeScreen(navController, currentRoute = "home_test")
+        }
 
         // "카드리스트테스트" 화면 추가
         composable("card_list_test") {
@@ -97,8 +98,6 @@ fun NavGraph(
         composable("card_detail_test") {
             newCardDetailScreen(navController, currentRoute = "card_detail_test")
         }
-
-
 
 
 
