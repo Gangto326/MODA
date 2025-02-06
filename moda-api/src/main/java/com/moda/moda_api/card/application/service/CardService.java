@@ -13,7 +13,6 @@ import com.moda.moda_api.common.pagination.SliceResponseDto;
 import com.moda.moda_api.summary.application.service.LilysSummaryService;
 import com.moda.moda_api.summary.infrastructure.api.LilysAiClient;
 import com.moda.moda_api.user.domain.UserId;
-import com.moda.moda_api.util.hash.HashUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -36,6 +34,7 @@ public class CardService {
 	private final CardRepository cardRepository;
 	private final CardFactory cardFactory;
 	private final CardDtoMapper cardDtoMapper;
+	private final CardDocumentRepository cardDocumentRepository;
 	private final LilysSummaryService lilysSummaryService;
 	private final EmbeddingApiClient embeddingApiClient;
 	private final UrlCacheRepository urlCacheRepository;
@@ -77,6 +76,13 @@ public class CardService {
 		return CompletableFuture.completedFuture(true);
 	}
 
+	/**
+	 * 새로운 카드인 경우 urlCache테이블과 ElasticSearch에 모두 저장
+	 * @param userIdObj
+	 * @param url
+	 * @param urlHash
+	 * @return
+	 */
 	private CompletableFuture<Boolean> createNewCard(UserId userIdObj, String url, String urlHash) {
 		return lilysSummaryService.summarize(url)
 			.thenApply(summaryResponse -> {

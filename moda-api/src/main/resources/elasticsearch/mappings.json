@@ -1,0 +1,25 @@
+{
+  "analysis": {
+    "analyzer": {
+      "korean": {
+        "type": "nori",
+        "tokenizer": "nori_tokenizer"
+      },
+      "korean_completion": {
+        "tokenizer": "nori_tokenizer",
+        "filter": [
+          "nori_readingform",
+          "lowercase",
+          "edge_ngram_filter"
+        ]
+      }
+    },
+    "filter": {
+      "edge_ngram_filter": {
+        "type": "edge_ngram",
+        "min_gram": 1,
+        "max_gram": 50
+      }
+    }
+  }
+}
