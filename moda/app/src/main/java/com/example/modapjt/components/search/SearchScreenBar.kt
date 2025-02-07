@@ -1,26 +1,21 @@
 package com.example.modapjt.components.search
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -34,16 +29,14 @@ fun SearchScreenBar(
     modifier: Modifier = Modifier,
     navController: NavController,
     initialValue: String = "",
-    onSearchValueChange: (String) -> Unit
+    isSearchActive: Boolean, // 🔽 현재 검색 활성화 여부 추가
+    onSearchValueChange: (String) -> Unit,
+    onFocusChanged: (Boolean) -> Unit,
+    onBackPressed: () -> Unit // 🔽 뒤로가기 이벤트 추가
 ) {
     var searchText by remember { mutableStateOf(initialValue) }
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
-
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
-        keyboardController?.show()
-    }
 
     Surface(
         modifier = modifier
@@ -59,7 +52,7 @@ fun SearchScreenBar(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             IconButton(
-                onClick = { navController.navigateUp() },
+                onClick = { onBackPressed() }, // 🔽 뒤로가기 버튼 수정
                 modifier = Modifier.size(48.dp)
             ) {
                 Icon(
@@ -99,15 +92,13 @@ fun SearchScreenBar(
                     modifier = Modifier
                         .fillMaxWidth()
                         .align(Alignment.CenterStart)
-                        .focusRequester(focusRequester),
+                        .focusRequester(focusRequester)
+                        .onFocusChanged { focusState -> onFocusChanged(focusState.isFocused) },
                     textStyle = TextStyle(
                         color = Color.Black,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Normal,
-                        letterSpacing = 0.sp,
-                        platformStyle = PlatformTextStyle(
-                            includeFontPadding = false
-                        )
+                        letterSpacing = 0.sp
                     ),
                     singleLine = true,
                     cursorBrush = SolidColor(MaterialTheme.colorScheme.primary)
