@@ -26,18 +26,7 @@ fun BottomBarComponent(navController: NavController, currentRoute: String) {
                 }
             }
         )
-//        NavigationBarItem(
-//            icon = { Icon(Icons.Default.Search, "Recommend") },
-//            label = { Text("추천 알고리즘") },
-//            selected = currentRoute == "recommend",
-//            onClick = {
-//                if (currentRoute != "recommend") {
-//                    navController.navigate("recommend") {
-//                        popUpTo("home")
-//                    }
-//                }
-//            }
-//        )
+
         NavigationBarItem(
             icon = { Icon(Icons.Default.Favorite, "Link Upload") },
             label = { Text("디테일테스트") },
@@ -50,12 +39,6 @@ fun BottomBarComponent(navController: NavController, currentRoute: String) {
                 }
             }
         )
-//        NavigationBarItem(
-//            icon = { Icon(Icons.Default.Settings, "Screen 4") },
-//            label = { Text("설정") },
-//            selected = currentRoute == "screen4",
-//            onClick = { /* TODO */ }
-//        )
 
         NavigationBarItem(
             icon = { Icon(Icons.Default.Settings, "Settings") },

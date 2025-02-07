@@ -30,16 +30,7 @@ fun TopBarComponent() {
             contentDescription = "Moda Logo",
             modifier = Modifier.size(32.dp)
         )
-//        Row {
-//            repeat(2) {
-//                IconButton(onClick = { /* TODO */ }) {
-//                    Icon(
-//                        imageVector = Icons.Default.MoreVert,
-//                        contentDescription = "Button ${it + 1}"
-//                    )
-//                }
-//            }
-//        }
+
         Row {
             IconButton(onClick = { /* TODO */ }) {
                 Icon(

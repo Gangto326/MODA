@@ -15,10 +15,9 @@ import androidx.navigation.NavHostController  // NavHostController 임포트 추
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.modapjt.screen.SavedUrlsScreen
 import com.example.modapjt.screen.linkupload.LinkUploadScreen
+import com.example.modapjt.screen2.newCardListScreen
 import newCardDetailScreen
-import newCardListScreen
 import newHomeScreen
-//import newHomeScreen
 import newLinkUploadScreen
 import newSearchScreen
 
@@ -59,16 +58,6 @@ fun NavGraph(
             )
         }
 
-//        composable("board/{boardId}") { backStackEntry ->
-//            val boardId = backStackEntry.arguments?.getString("boardId")
-//            BoardScreen(boardId = boardId, navController = navController, currentRoute = currentRoute)
-//        }
-
-//        composable("card/{cardId}") { backStackEntry ->
-//            val cardId = backStackEntry.arguments?.getString("cardId")
-//            CardScreen(cardId = cardId, navController = navController, currentRoute = "card")
-//        }
-
         composable("link_upload") {
             LinkUploadScreen(navController, currentRoute = "link_upload")
         }
@@ -91,18 +80,10 @@ fun NavGraph(
         }
 
 
-//        composable("categoryDetail/{category}") { backStackEntry ->
-//            val category = backStackEntry.arguments?.getString("category")
-//            newCardListScreen(navController = navController, currentRoute = "categoryDetail", category = category)
-//        }
-        composable("categoryDetail/{category}") { backStackEntry ->
-            val category = backStackEntry.arguments?.getString("category")
-            newCardListScreen(navController = navController, currentRoute = "categoryDetail", category = category)
+        composable("categoryDetail/{categoryId}") { backStackEntry ->
+            val categoryId = backStackEntry.arguments?.getString("categoryId")?.toIntOrNull()
+            newCardListScreen(navController = navController, currentRoute = "categoryDetail", categoryId = categoryId)
         }
-
-
-
-
 
         // "파일업로드테스트" 화면 추가
         composable("file_upload_test") {

@@ -14,38 +14,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-//@Composable
-//fun TypeSelectBar(
-//    modifier: Modifier = Modifier,
-//    onCategorySelected: (String) -> Unit = {}
-//) {
-//    // 카테고리 목록
-//    val categories = listOf("전체", "이미지", "동영상", "블로그", "뉴스")
-//
-//    // 선택된 카테고리 상태 관리
-//    var selectedCategory by remember { mutableStateOf(categories[0]) }
-//
-//    LazyRow(
-//        modifier = modifier
-//            .fillMaxWidth()
-//            .background(Color.White)
-//            .padding(horizontal = 16.dp, vertical = 8.dp),
-//        horizontalArrangement = Arrangement.spacedBy(8.dp)
-//    ) {
-//        items(categories) { category ->
-//            CategoryTab(
-//                title = category,
-//                isSelected = selectedCategory == category,
-//                onClick = {
-//                    selectedCategory = category
-//                    onCategorySelected(category)
-//                }
-//            )
-//        }
-//    }
-//}
-
-
 
 @Composable
 fun TypeSelectBar(
