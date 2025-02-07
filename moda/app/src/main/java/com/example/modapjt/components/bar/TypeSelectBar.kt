@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun TypeSelectBar(
-    selectedCategory: String, // ✅ 선택된 카테고리를 외부에서 전달받음
+    selectedCategory: String, // 선택된 카테고리를 외부에서 전달받음
     modifier: Modifier = Modifier,
     onCategorySelected: (String) -> Unit
 ) {
@@ -33,8 +33,8 @@ fun TypeSelectBar(
         items(categories) { category ->
             CategoryTab(
                 title = category,
-                isSelected = selectedCategory == category, // ✅ 외부에서 전달받은 상태 사용
-                onClick = { onCategorySelected(category) } // ✅ 선택 이벤트 외부로 전달
+                isSelected = selectedCategory == category, // 외부에서 전달받은 상태 사용
+                onClick = { onCategorySelected(category) } // 선택 이벤트 외부로 전달
             )
         }
     }
@@ -68,14 +68,3 @@ private fun CategoryTab(
         )
     }
 }
-
-//// 사용 예시
-//@Composable
-//fun PreviewCategoryTypeComponent() {
-//    CategoryTypeComponent(
-//        onCategorySelected = { category ->
-//            // 선택된 카테고리 처리
-//            println("Selected category: $category")
-//        }
-//    )
-//}
