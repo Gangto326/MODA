@@ -15,10 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.unit.sp
-
-
-
-
+import com.example.modapjt.components.video.YouTubePlayer
 
 
 @Composable
@@ -54,35 +51,4 @@ fun VideoBig(
             )
         }
     }
-}
-
-@SuppressLint("SetJavaScriptEnabled")
-@Composable
-private fun YouTubePlayer(
-    videoId: String,
-    modifier: Modifier = Modifier
-) {
-    val context = LocalContext.current
-
-    AndroidView(
-        factory = { ctx ->
-            WebView(ctx).apply {
-                layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                )
-                setBackgroundColor(android.graphics.Color.TRANSPARENT)
-                settings.apply {
-                    javaScriptEnabled = true
-                    loadWithOverviewMode = true
-                    useWideViewPort = true
-                    domStorageEnabled = true
-                    cacheMode = WebSettings.LOAD_DEFAULT
-                }
-                webViewClient = WebViewClient()
-                loadUrl("https://www.youtube.com/embed/$videoId")
-            }
-        },
-        modifier = modifier
-    )
 }

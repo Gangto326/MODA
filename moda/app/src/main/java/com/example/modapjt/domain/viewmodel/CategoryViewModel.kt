@@ -28,9 +28,20 @@ class CategoryViewModel : ViewModel() {
 
     // categoryId에 해당하는 categoryName 업데이트
     fun updateCategoryName(categoryId: Int) {
-        println("현재 카테고리 목록: ${_categories.value}") // 카테고리 리스트 출력
         val name = _categories.value.find { it.categoryId == categoryId }?.category ?: " "
-        _categoryName.value = name
-        println("찾은 카테고리명: $name (categoryId: $categoryId)")
+        _categoryName.value = when (categoryId) {
+            1 -> "전체"
+            2 -> "트렌드"
+            3 -> "오락"
+            4 -> "금융"
+            5 -> "여행"
+            6 -> "음식"
+            7 -> "IT"
+            8 -> "디자인"
+            9 -> "사회"
+            10 -> "건강"
+            else -> "전체"
+        }
+        println("카테고리 ID: $categoryId, 찾은 카테고리명: ${_categoryName.value}")
     }
 }

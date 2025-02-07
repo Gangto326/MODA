@@ -1,5 +1,3 @@
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,75 +18,76 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.modapjt.R
-
 
 @Composable
 fun BlogBig(
-    modifier: Modifier = Modifier
+    title: String, // 블로그 제목
+    description: String, // 블로그 설명 (요약)
+    imageUrl: String, // 블로그 썸네일 이미지 URL
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {} // 클릭 시 실행할 동작
 ) {
+    // 카드 UI (터치 가능)
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clickable(onClick = onClick), // 클릭 이벤트 추가
+        shape = RoundedCornerShape(12.dp), // 카드 모서리를 둥글게 설정
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp) // 그림자 효과 추가
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(16.dp) // 내부 여백 추가
         ) {
-            // 상단부: 플랫폼 아이콘과 제목
+            // 상단 영역 (블로그 플랫폼 아이콘 + 제목)
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)  // 아이콘과 텍스트 간격 조정
             ) {
-                // 플랫폼 아이콘 -> 현재는 Icon으로 잠시 대체
-//                Image(
-//                    painter = painterResource(id = R.drawable.ic_naver_blog),
-//                    contentDescription = "네이버 블로그",
-//                    modifier = Modifier.size(20.dp)
-//                )
                 Icon(
-                    imageVector = Icons.Default.AccountBox,
+                    imageVector = Icons.Default.AccountBox, // 아이콘 (예제: 블로그 아이콘)
                     contentDescription = "블로그",
                     modifier = Modifier.size(20.dp),
                     tint = Color.Gray
                 )
-                // 제목
                 Text(
-                    text = "역삼동 맛집 도비 - 사오지와 동파육 일반",
+                    text = title, // 블로그 제목
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
+                    maxLines = 1, // 한 줄까지만 표시
+                    overflow = TextOverflow.Ellipsis, // 길면 ...으로 생략
+                    modifier = Modifier.weight(1f) // 남은 공간을 최대한 차지
                 )
             }
-
-            // 요약글
+            // 블로그 설명 (요약)
             Text(
-                text = "역삼역 근처의 숨겨진 맛집인 도비에서 즐길 수 있는 사오지와 동파육 일반에 대한 리뷰",
+                text = description,
                 fontSize = 14.sp,
                 color = Color.Gray,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(top = 8.dp)
+                maxLines = 2, // 최대 2줄까지만 표시
+                overflow = TextOverflow.Ellipsis, // 길면 ...으로 생략
+                modifier = Modifier.padding(top = 8.dp) // 위쪽 여백 추가
             )
-
-            // 썸네일 이미지
-            Box(
+            // 블로그 썸네일 이미지 (비율 유지)
+            AsyncImage(
+                model = imageUrl, // 썸네일 이미지 URL
+                contentDescription = null,
+                contentScale = ContentScale.Crop, // 이미지를 크롭하여 꽉 차게 표시
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 12.dp)
-                    .aspectRatio(16f / 9f)
-                    .background(Color.LightGray, RoundedCornerShape(8.dp))
+                    .padding(top = 12.dp) // 위쪽 여백 추가
+                    .aspectRatio(16f / 9f) // 16:9 비율 유지
+                    .clip(RoundedCornerShape(8.dp)) // 모서리 둥글게 처리
             )
         }
     }

@@ -12,35 +12,39 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.*
-
-
-
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextOverflow
+import coil.compose.AsyncImage
 
 
 @Composable
 fun VideoSmall(
+    videoId: String,
+    title: String,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
     Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.Start // 텍스트를 중앙 정렬
+        modifier = modifier.clickable(onClick = onClick)
     ) {
         Box(
             modifier = Modifier
-                .size(width = 160.dp, height = 90.dp) // 16:9 비율 유지
+                .size(width = 160.dp, height = 90.dp)
                 .clip(RoundedCornerShape(8.dp))
-                .background(Color(0xFFE0E0E0))
-                .clickable(onClick = onClick)
-        )
-
-        Spacer(modifier = Modifier.height(4.dp)) // 이미지와 텍스트 사이 여백 추가
-
+        ) {
+            AsyncImage(
+                model = "https://img.youtube.com/vi/$videoId/0.jpg",
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
         Text(
-            text = "Video", // 이미지 아래에 텍스트 배치
+            text = title,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
             fontSize = 14.sp,
-            color = Color.Black // 가독성을 위해 검은색 적용
+            modifier = Modifier.padding(top = 4.dp)
         )
     }
 }
-

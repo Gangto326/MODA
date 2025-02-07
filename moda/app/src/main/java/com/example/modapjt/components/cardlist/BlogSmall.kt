@@ -8,9 +8,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+
 
 @Composable
 fun BlogSmall(
@@ -23,46 +27,38 @@ fun BlogSmall(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp)) // ✅ 더 부드러운 카드 느낌
-            .background(Color.White) // ✅ 흰 배경으로 차별화
-            .clickable(onClick = onClick) // ✅ 클릭 가능하도록 추가
+            .clip(RoundedCornerShape(12.dp))
+            .background(Color.White)
+            .clickable(onClick = onClick)
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // ✅ 텍스트 영역 (제목 + 설명)
         Column(
             modifier = Modifier.weight(1f)
         ) {
             Text(
                 text = title,
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Bold // ✅ 제목 Bold 스타일 적용
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
             Text(
                 text = description,
                 fontSize = 14.sp,
-                color = Color.Gray
+                color = Color.Gray,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(top = 4.dp)
             )
         }
-
-        Spacer(modifier = Modifier.width(12.dp)) // ✅ 텍스트와 이미지 사이 간격
-
-        // ✅ 썸네일 이미지 (오른쪽에 배치)
-        Box(
+        AsyncImage(
+            model = imageUrl,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
             modifier = Modifier
                 .size(70.dp)
                 .clip(RoundedCornerShape(8.dp))
-                .background(Color.Gray),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "이미지",
-                fontSize = 12.sp,
-                color = Color.White
-            )
-        }
+        )
     }
 }
