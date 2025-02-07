@@ -10,21 +10,20 @@ import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.navigation.compose.rememberNavController
 import com.example.modapjt.ui.theme.ModapjtTheme
 import com.example.modapjt.navigation.NavGraph
+import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 
+@OptIn(ExperimentalAnimationApi::class)
 class MainActivity : ComponentActivity() {
-    private val OVERLAY_PERMISSION_REQUEST_CODE = 1234
-    private val USAGE_STATS_PERMISSION_REQUEST_CODE = 1235  // 사용 기록 액세스 권한 요청 코드 추가
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        checkPermissions()  // 앱 실행 시 권한 체크 실행
 
         setContent {
             ModapjtTheme {
-                val navController = rememberNavController()
+                val navController = rememberAnimatedNavController()
                 NavGraph(
                     navController = navController,
                     onStartOverlay = { checkOverlayPermission() }
@@ -32,6 +31,10 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    private val OVERLAY_PERMISSION_REQUEST_CODE = 1234
+    private val USAGE_STATS_PERMISSION_REQUEST_CODE = 1235  // 사용 기록 액세스 권한 요청 코드 추가
+
 
     // 필수 권한들을 확인하는 함수 (오버레이 & 사용 기록 액세스)
     private fun checkPermissions() {

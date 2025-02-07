@@ -24,6 +24,8 @@ import com.example.modapjt.components.home.HomeSmallTitle
 import com.example.modapjt.components.home.ThumbnailSlider
 import com.example.modapjt.components.home.WeeklyKeyword
 import com.example.modapjt.domain.viewmodel.CategoryViewModel
+// ... 기존 imports는 유지
+import com.example.modapjt.components.bar.HeaderBar  // HeaderBar import 추가
 
 @Composable
 fun newHomeScreen(
@@ -33,24 +35,20 @@ fun newHomeScreen(
     val listState = rememberLazyListState()
     var isHeaderVisible by remember { mutableStateOf(true) }
     var lastScrollOffset by remember { mutableStateOf(0) }
-    val viewModel: CategoryViewModel = viewModel() // ✅ 올바른 ViewModel 인스턴스 선언
+    val viewModel: CategoryViewModel = viewModel()
 
-    // 부드러운 애니메이션을 위한 transitionY 값
     val headerOffsetY by animateDpAsState(
-        targetValue = if (isHeaderVisible) 0.dp else (-60).dp, // 헤더 높이에 맞춰 조정
+        targetValue = if (isHeaderVisible) 0.dp else (-60).dp,
         animationSpec = tween(durationMillis = 300, easing = LinearOutSlowInEasing),
         label = "Header Animation"
     )
 
-    // 투명도 조절하기 위해
     val headerAlpha by animateFloatAsState(
         targetValue = if (isHeaderVisible) 1f else 0f,
         animationSpec = tween(durationMillis = 300, easing = LinearOutSlowInEasing),
         label = "Header Alpha"
     )
 
-
-    // 스크롤 방향 감지
     LaunchedEffect(listState.firstVisibleItemIndex, listState.firstVisibleItemScrollOffset) {
         val currentOffset = listState.firstVisibleItemScrollOffset
         val isScrollingDown = currentOffset > lastScrollOffset
@@ -70,10 +68,10 @@ fun newHomeScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
-                    .offset(y = headerOffsetY) // 애니메이션 적용
-                    .alpha(headerAlpha) // 투명도 조절
+                    .offset(y = headerOffsetY)
+                    .alpha(headerAlpha)
             ) {
-                HeaderBar()
+                HeaderBar(modifier = Modifier)  // modifier 파라미터 추가
             }
         },
         bottomBar = { BottomBarComponent(navController, currentRoute) }
@@ -89,7 +87,8 @@ fun newHomeScreen(
                 SearchBar(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 14.dp)
+                        .padding(horizontal = 14.dp),
+                    navController = navController  // navController를 명시적으로 전달
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }

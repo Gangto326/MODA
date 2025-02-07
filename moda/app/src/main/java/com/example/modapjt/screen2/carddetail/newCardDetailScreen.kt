@@ -7,11 +7,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import com.example.modapjt.components.bar.BottomBarComponent
+import com.example.modapjt.components.bar.HeaderBar
 
 @Composable
 fun newCardDetailScreen(navController: NavController, currentRoute: String) {
     Scaffold(
-        topBar = { HeaderBar() },
+        topBar = { HeaderBar(modifier = Modifier) },
         bottomBar = { BottomBarComponent(navController, currentRoute) }
     ) { paddingValues ->
         Box(

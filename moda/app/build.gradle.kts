@@ -98,4 +98,8 @@ dependencies {
 
     // coil라이브러리
     implementation("io.coil-kt:coil-compose:2.2.2")
+
+    //애니메이션을 위한 효과 라이브러리
+    implementation ("com.google.accompanist:accompanist-navigation-animation:0.31.3-beta")
+
 }
