@@ -1,43 +1,99 @@
-package com.example.modapjt.screen.board
-
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.navigation.NavController
-import com.example.modapjt.components.cardlist.CardItem
-import com.example.modapjt.components.bar.BottomBarComponent
-import com.example.modapjt.components.bar.TopBackBarComponent
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.modapjt.domain.viewmodel.CardViewModel
-
+//package com.example.modapjt.screen.board
 //
-//@RequiresApi(Build.VERSION_CODES.O)
+//import androidx.compose.foundation.layout.*
+//import androidx.compose.foundation.lazy.LazyColumn
+//import androidx.compose.foundation.lazy.items
+//import androidx.compose.material3.*
+//import androidx.compose.runtime.*
+//import androidx.compose.ui.Alignment
+//import androidx.compose.ui.Modifier
+//import androidx.navigation.NavController
+//import com.example.modapjt.components.cardlist.CardItem
+//import com.example.modapjt.components.bar.BottomBarComponent
+//import com.example.modapjt.components.bar.TopBackBarComponent
+//import androidx.lifecycle.viewmodel.compose.viewModel
+//import com.example.modapjt.domain.viewmodel.CardViewModel
+//
+////
+////@RequiresApi(Build.VERSION_CODES.O)
+////@Composable
+////fun BoardScreen(
+////    boardId: String?,
+////    navController: NavController,
+////    currentRoute: String,
+////    boardViewModel: BoardViewModel = viewModel(),
+////    cardViewModel: CardViewModel = viewModel() // 카드 ViewModel 추가
+////) {
+////    val boards by boardViewModel.boards.collectAsState()
+////    val cards by cardViewModel.cards.collectAsState() // 카드 목록 상태 추가
+////    val isLoading by cardViewModel.isLoading.collectAsState()
+////    val error by cardViewModel.error.collectAsState()
+////
+////    val currentBoard = remember(boards, boardId) {
+////        boards.find { it.boardId == boardId }
+////    }
+////
+////    // 보드 ID가 변경될 때마다 카드 데이터 불러오기
+////    LaunchedEffect(boardId) {
+////        if (boardId != null) {
+////            boardViewModel.loadBoardList("user") // 기존 보드 로딩
+////            cardViewModel.loadCardList("user", boardId) // 보드 ID 기반으로 카드 로딩
+////        }
+////    }
+////
+////    Scaffold(
+////        topBar = { TopBackBarComponent(navController) },
+////        bottomBar = { BottomBarComponent(navController, currentRoute) }
+////    ) { paddingValues ->
+////        Box(
+////            modifier = Modifier
+////                .fillMaxSize()
+////                .padding(paddingValues)
+////        ) {
+////            when {
+////                isLoading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
+////                error != null -> Text(text = "에러: $error", Modifier.align(Alignment.Center))
+////                currentBoard != null -> {
+////                    Column(Modifier.padding(16.dp)) {
+////                        Text(
+////                            text = "보드 이름: ${currentBoard.title}",
+////                            style = MaterialTheme.typography.headlineMedium,
+////                            modifier = Modifier.padding(bottom = 16.dp)
+////                        )
+////
+////                        // 카드 목록 표시
+////                        if (cards.isEmpty()) {
+////                            Text(text = "카드 리스트가 존재하지 않습니다.", style = MaterialTheme.typography.bodyLarge)
+////                        } else {
+////                            cards.forEach { card ->
+////                                CardItem(card = card, navController = navController)
+////                                Spacer(modifier = Modifier.height(8.dp))
+////                            }
+////                        }
+////                    }
+////                }
+////                else -> Text(text = "보드를 찾을 수 없습니다.", Modifier.align(Alignment.Center))
+////            }
+////        }
+////    }
+////}
+//
+//
 //@Composable
 //fun BoardScreen(
 //    boardId: String?,
 //    navController: NavController,
 //    currentRoute: String,
-//    boardViewModel: BoardViewModel = viewModel(),
-//    cardViewModel: CardViewModel = viewModel() // 카드 ViewModel 추가
+//    viewModel: CardViewModel = viewModel()
 //) {
-//    val boards by boardViewModel.boards.collectAsState()
-//    val cards by cardViewModel.cards.collectAsState() // 카드 목록 상태 추가
-//    val isLoading by cardViewModel.isLoading.collectAsState()
-//    val error by cardViewModel.error.collectAsState()
+//    val cards by viewModel.cards.collectAsState()
+//    val isLoading by viewModel.isLoading.collectAsState()
+//    val error by viewModel.error.collectAsState()
 //
-//    val currentBoard = remember(boards, boardId) {
-//        boards.find { it.boardId == boardId }
-//    }
-//
-//    // 보드 ID가 변경될 때마다 카드 데이터 불러오기
+//    // 화면 진입시 카드 목록 로드
 //    LaunchedEffect(boardId) {
 //        if (boardId != null) {
-//            boardViewModel.loadBoardList("user") // 기존 보드 로딩
-//            cardViewModel.loadCardList("user", boardId) // 보드 ID 기반으로 카드 로딩
+//            viewModel.loadCardList("user", boardId)  // userId는 임시로 "user" 사용
 //        }
 //    }
 //
@@ -53,77 +109,21 @@ import com.example.modapjt.domain.viewmodel.CardViewModel
 //            when {
 //                isLoading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
 //                error != null -> Text(text = "에러: $error", Modifier.align(Alignment.Center))
-//                currentBoard != null -> {
-//                    Column(Modifier.padding(16.dp)) {
-//                        Text(
-//                            text = "보드 이름: ${currentBoard.title}",
-//                            style = MaterialTheme.typography.headlineMedium,
-//                            modifier = Modifier.padding(bottom = 16.dp)
-//                        )
-//
-//                        // 카드 목록 표시
-//                        if (cards.isEmpty()) {
-//                            Text(text = "카드 리스트가 존재하지 않습니다.", style = MaterialTheme.typography.bodyLarge)
-//                        } else {
-//                            cards.forEach { card ->
-//                                CardItem(card = card, navController = navController)
-//                                Spacer(modifier = Modifier.height(8.dp))
-//                            }
+//                cards.isEmpty() -> Text(
+//                    text = "카드가 없습니다",
+//                    modifier = Modifier.align(Alignment.Center)
+//                )
+//                else -> {
+//                    LazyColumn {
+//                        items(cards) { card ->
+//                            CardItem(
+//                                card = card,
+//                                navController = navController
+//                            )
 //                        }
 //                    }
 //                }
-//                else -> Text(text = "보드를 찾을 수 없습니다.", Modifier.align(Alignment.Center))
 //            }
 //        }
 //    }
 //}
-
-
-@Composable
-fun BoardScreen(
-    boardId: String?,
-    navController: NavController,
-    currentRoute: String,
-    viewModel: CardViewModel = viewModel()
-) {
-    val cards by viewModel.cards.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
-    val error by viewModel.error.collectAsState()
-
-    // 화면 진입시 카드 목록 로드
-    LaunchedEffect(boardId) {
-        if (boardId != null) {
-            viewModel.loadCardList("user", boardId)  // userId는 임시로 "user" 사용
-        }
-    }
-
-    Scaffold(
-        topBar = { TopBackBarComponent(navController) },
-        bottomBar = { BottomBarComponent(navController, currentRoute) }
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            when {
-                isLoading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
-                error != null -> Text(text = "에러: $error", Modifier.align(Alignment.Center))
-                cards.isEmpty() -> Text(
-                    text = "카드가 없습니다",
-                    modifier = Modifier.align(Alignment.Center)
-                )
-                else -> {
-                    LazyColumn {
-                        items(cards) { card ->
-                            CardItem(
-                                card = card,
-                                navController = navController
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}

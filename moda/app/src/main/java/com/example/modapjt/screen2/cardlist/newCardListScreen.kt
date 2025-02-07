@@ -32,9 +32,14 @@ import androidx.compose.runtime.snapshotFlow
 
 
 @Composable
-fun newCardListScreen(navController: NavController, currentRoute: String) {
+fun newCardListScreen(navController: NavController, currentRoute: String, category: String?) {
     var isTypeBarVisible by remember { mutableStateOf(true) }
     var selectedCategory by remember { mutableStateOf("전체") }
+
+    // 카드 리스트를 선택한 카테고리 기준으로 필터링
+    val cardList = remember {
+        getAllCards().filter { it.category == selectedCategory || selectedCategory == "전체" }
+    }
 
     Scaffold(
         topBar = { CategoryHeaderBar() },
@@ -174,3 +179,17 @@ fun newCardListScreen(navController: NavController, currentRoute: String) {
         }
     }
 }
+
+// 더미 데이터 (실제 데이터 가져오는 함수)
+fun getAllCards(): List<Card> {
+    return listOf(
+        Card("Card 1", "IT"),
+        Card("Card 2", "Food"),
+        Card("Card 3", "Entertainment"),
+        Card("Card 4", "Finance"),
+        Card("Card 5", "IT")
+    )
+}
+
+// 카드 데이터 모델
+data class Card(val title: String, val category: String)
