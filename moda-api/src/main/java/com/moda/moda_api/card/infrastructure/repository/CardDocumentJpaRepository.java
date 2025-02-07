@@ -10,9 +10,13 @@ public interface CardDocumentJpaRepository extends ElasticsearchRepository<CardD
     @Query("{" +
             "  \"bool\": {" +
             "    \"should\": [" +
+            "      { \"match_phrase_prefix\": { \"titleCompletion\": \"?0\" } }," +
             "      { \"match_phrase_prefix\": { \"contentCompletion\": \"?0\" } }" +
             "    ]" +
             "  }" +
             "}")
     List<CardDocumentEntity> findAutoCompleteSuggestions(String prefix);
+
+    // 키워드 정확히 일치하는 문서 검색
+    List<CardDocumentEntity> findByKeywordsContaining(String keyword);
 }

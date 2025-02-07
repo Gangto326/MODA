@@ -16,7 +16,7 @@ public class CardDocumentRepositoryImpl implements CardDocumentRepository {
     public List<String> findAutoCompleteSuggestions(String prefix) {
         return cardDocumentJpaRepository.findAutoCompleteSuggestions(prefix)
                 .stream()
-                .map(CardDocumentEntity::getContent)
+                .map(CardDocumentEntity::getTitle)
                 .limit(5)  // 상위 5개 결과만
                 .toList();
     }
