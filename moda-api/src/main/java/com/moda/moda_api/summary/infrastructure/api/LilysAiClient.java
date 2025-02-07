@@ -61,7 +61,6 @@ public class LilysAiClient {
 		// 세 번째 Future: title 가져오기
 		CompletableFuture<String> titleFuture = titleExtractor.extractTitle(url);
 
-
 		// 확인용 출력
 		contentFuture.thenAccept(json -> {
 			log.info("Received blogPost data: {}", json);
@@ -82,8 +81,7 @@ public class LilysAiClient {
 
 				String thumbnailContent = thumbnailFuture.join().path("data").path("data").path("summary").toString();
 				String title = titleFuture.join();
-				String thumbnailUrl = getThumbnailUrl(url);
-
+				String thumbnailUrl = getVideoId(url);
 
 				//만약 mainContent가 없으면 error가 난다.
 				return SummaryResultDto.builder()
@@ -134,8 +132,6 @@ public class LilysAiClient {
 			});
 	}
 
-
-
 	//요청 body만드는 과정
 	private Map<String, Object> createRequestBody(String url) {
 		Map<String, Object> source = new HashMap<>();
@@ -153,11 +149,11 @@ public class LilysAiClient {
 		return requestMap;
 	}
 
-	private String getThumbnailUrl(String url) {
+	private String getVideoId(String url) {
 		try {
 			if (url.contains("youtube.com/watch?v=")) {
 				String videoId = url.split("v=")[1].split("&")[0];  // 파라미터 제거
-				return String.format("https://img.youtube.com/vi/%s/hqdefault.jpg", videoId);
+				return videoId;
 			}
 			throw new IllegalArgumentException("Not a YouTube URL");
 		} catch (Exception e) {

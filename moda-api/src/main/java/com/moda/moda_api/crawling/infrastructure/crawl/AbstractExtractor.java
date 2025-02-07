@@ -113,8 +113,9 @@ public class AbstractExtractor {
 	}
 
 	//Body본문과 이미지 추출하기
-	public List<ContentItem> extractContent( ExtractorConfig config) {
-		List<CompletableFuture<ContentItem>> futures = new ArrayList<>();
+	public List<ContentItem> extractContent(ExtractorConfig config) {
+		List<ContentItem> result = new ArrayList<>();
+		StringBuilder textBuilder = new StringBuilder();
 
 		try {
 			WebDriverWait contentWait = new WebDriverWait(driver, Duration.ofSeconds(20));
@@ -122,53 +123,72 @@ public class AbstractExtractor {
 				By.cssSelector(config.getContentSelector())
 			));
 
-			// XPath를 수정하여 더 많은 텍스트 요소를 포함
+			// 모든 콘텐츠 요소들이 로드될 때까지 대기
 			contentWait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(
-				By.xpath(".//p[not(ancestor::p)]|.//img|.//li|.//ul")
+				By.xpath(".//h1|.//h2|.//h3|.//h4|.//h5|.//h6|.//p[not(ancestor::p)]|.//img|.//li|.//ul")
 			));
 
-			// 텍스트를 포함할 수 있는 모든 요소 선택
+			// 텍스트와 이미지를 포함하는 모든 요소 선택
 			List<WebElement> elements = contentElement.findElements(
-				By.xpath(".//p[not(ancestor::p)]|.//img|.//li[not(li)]")  // 중첩된 li는 제외
+				By.xpath(".//h1|.//h2|.//h3|.//h4|.//h5|.//h6|.//p[not(ancestor::p)]|.//img|.//li[not(li)]")
 			);
-
 
 			for (WebElement element : elements) {
 				try {
-					if (element.getTagName().equals("img")) {
-						futures.add(CompletableFuture.supplyAsync(() -> {
+					String tagName = element.getTagName().toLowerCase();
+
+					if (tagName.equals("img")) {
+						// 이미지를 만나면 지금까지 모은 텍스트를 저장
+						if (textBuilder.length() > 0) {
+							result.add(new ContentItem(textBuilder.toString().trim(), ContentItemType.TEXT));
+							textBuilder.setLength(0); // StringBuilder 초기화
+						}
+
+						// 이미지 처리
+						String src = element.getAttribute("src");
+						if (src != null && !src.isEmpty() && isValidImageUrl(src)) {
 							try {
-								String src = element.getAttribute("src");
-								if (src != null && !src.isEmpty() && isValidImageUrl(src)) {
-									String savedImageUrl = imageStorageService.uploadImage(src);
-									return new ContentItem(savedImageUrl, ContentItemType.IMAGE);
-								}
+								String savedImageUrl = imageStorageService.uploadImage(src);
+								result.add(new ContentItem(savedImageUrl, ContentItemType.IMAGE));
 							} catch (Exception e) {
-								log.error("Failed to process image", e);
+								log.error("Failed to process image: {}", src, e);
 							}
-							return null;
-						}));
+						}
 					} else {
+						// 텍스트 요소 처리
 						String text = element.getText().trim();
 						if (!text.isEmpty()) {
-							futures.add(CompletableFuture.completedFuture(
-								new ContentItem(text, ContentItemType.TEXT)
-							));
+							// 헤딩 태그인 경우 태그 정보 포함
+							if (tagName.matches("h[1-6]")) {
+								if (textBuilder.length() > 0) {
+									textBuilder.append("\n");
+								}
+								textBuilder.append(String.format("<%s>%s</%s>", tagName, text, tagName));
+							} else {
+								// 일반 텍스트의 경우
+								if (textBuilder.length() > 0) {
+									textBuilder.append("\n");
+								}
+								textBuilder.append(text);
+							}
 						}
 					}
 				} catch (StaleElementReferenceException e) {
+					log.warn("Encountered stale element", e);
 					continue;
 				}
 			}
 
-			return futures.stream()
-				.map(CompletableFuture::join)
-				.filter(Objects::nonNull)
-				.collect(Collectors.toList());
+			// 마지막 텍스트 블록 처리
+			if (textBuilder.length() > 0) {
+				result.add(new ContentItem(textBuilder.toString().trim(), ContentItemType.TEXT));
+			}
+
+			return result;
 
 		} catch (Exception e) {
 			log.error("Failed to extract content", e);
-			return new ArrayList<>();
+			return result;
 		}
 	}
 

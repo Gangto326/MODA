@@ -35,26 +35,8 @@ public class JsonMapper {
 			entryNode.put("timestamp", entry.getTimestamp());
 			entryNode.put("title", entry.getTitle());
 			entryNode.putPOJO("content", entry.getContent());
-			entryNode.put("originalScript", entry.getOriginalScript());
 			arrayNode.add(entryNode);
 		}
 		return arrayNode;
 	}
-
-
-	// public BlogPostResult mapToBlogPost(JsonNode jsonNode) throws JsonProcessingException {
-	// 	return mapper.treeToValue(jsonNode, BlogPostResult.class);
-	// }
-	//
-	// public RawScriptResult mapToRawScript(JsonNode jsonNode) throws JsonProcessingException {
-	// 	return mapper.treeToValue(jsonNode, RawScriptResult.class);
-	// }
-	//
-	// public ShortSummaryResult mapToShortSummary(JsonNode jsonNode) throws JsonProcessingException {
-	// 	return mapper.treeToValue(jsonNode, ShortSummaryResult.class);
-	// }
-	//
-	// public TimestampResult mapToTimeStamp(JsonNode jsonNode) throws JsonProcessingException {
-	// 	return mapper.treeToValue(jsonNode, TimestampResult.class);
-	// }
 }

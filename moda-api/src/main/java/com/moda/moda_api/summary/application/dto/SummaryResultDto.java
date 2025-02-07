@@ -34,6 +34,10 @@ public class SummaryResultDto {
 			this.embeddingVector = pythonAnalysisDto.getEmbeddingVector();
 		}
 
+		if(pythonAnalysisDto.getThumbnailContent() != null){
+			this.thumbnailContent = pythonAnalysisDto.getThumbnailContent();
+		}
+
 		// this를 반환하여 업데이트된 SummaryResultDto를 반환
 		return this;
 	}

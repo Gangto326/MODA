@@ -17,9 +17,11 @@ import com.moda.moda_api.summary.infrastructure.api.PythonAnalysisService;
 import com.moda.moda_api.summary.infrastructure.dto.PythonAnalysisDto;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class CrawlingSummaryService {
 	private final PythonAnalysisService pythonAnalysisService;
 	private final CrawlingService crawlingService;
@@ -28,8 +30,10 @@ public class CrawlingSummaryService {
 
 		CrawledContent crawledContent = crawlingService.crawlByUrl(url);
 
+		log.info(crawledContent.getContentItems().toString());
 		CompletableFuture<PythonAnalysisDto> pythonAnalysisDtoCompletableFuture = pythonAnalysisService.analyzeSummary(
 			crawledContent.getContentItems());
+
 
 		return pythonAnalysisDtoCompletableFuture.thenApply(pythonAnalysisDto -> {
 			// JsonNode 초기화
@@ -39,11 +43,12 @@ public class CrawlingSummaryService {
 			// 첫 번째 이미지 URL 가져오기
 			String thumbnailUrl = getFirstImageUrl(crawledContent.getContentItems());
 
+			System.out.println(pythonAnalysisDto.toString());
 			// SummaryResultDto 생성
 			return SummaryResultDto.builder()
 				.typeId(crawledContent.getUrl().getCardContentType().getTypeId())
 				.title(crawledContent.getTitle())
-				.content(emptyJsonNode.toString())
+				.content(pythonAnalysisDto.getContent())
 				.keyword(pythonAnalysisDto.getKeywords())  // Python 분석에서 받은 키워드
 				.thumbnailContent(pythonAnalysisDto.getThumbnailContent())  // Python 분석에서 받은 thumbnail content
 				.thumbnailUrl(thumbnailUrl)  // 첫 번째 이미지 URL
@@ -51,7 +56,6 @@ public class CrawlingSummaryService {
 				.categoryId(pythonAnalysisDto.getCategoryId())  // Python 분석에서 받은 CategoryId
 				.build();
 		});
-
 	}
 
 	public String getFirstImageUrl(List<ContentItem> contentItems) {

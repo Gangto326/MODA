@@ -1,10 +1,13 @@
 package com.moda.moda_api.crawling.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 import lombok.Getter;
 
 @Getter
+@JsonFormat(shape = JsonFormat.Shape.NUMBER)
 public enum UrlDomainType {
 	UNCLASSIFIED(1),
 	TISTORY(2),
@@ -19,6 +22,11 @@ public enum UrlDomainType {
 
 	UrlDomainType(Integer typeId){
 		this.typeId = typeId;
+	}
+
+	@JsonValue
+	public Integer getTypeId() {
+		return typeId;
 	}
 
 	@JsonCreator
