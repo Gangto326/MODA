@@ -86,7 +86,7 @@ fun BottomBarComponent(navController: NavController, currentRoute: String) {
         // screen2/cardlist/newCardListScreen.kt 화면 테스트
         NavigationBarItem(
             icon = { Icon(Icons.Default.Settings, "Card List Test") },
-            label = { Text("카드리스트테스트") },
+            label = { Text("검색바테스트") },
             selected = currentRoute == "card_list_test",
             onClick = {
                 if (currentRoute != "card_list_test") {

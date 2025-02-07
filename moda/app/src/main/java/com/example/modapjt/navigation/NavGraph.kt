@@ -20,6 +20,7 @@ import newCardListScreen
 import newHomeScreen
 //import newHomeScreen
 import newLinkUploadScreen
+import newSearchScreen
 
 @Composable
 fun NavGraph(
@@ -84,10 +85,10 @@ fun NavGraph(
             newHomeScreen(navController, currentRoute = "home_test")
         }
 
-        // "카드리스트테스트" 화면 추가
-//        composable("card_list_test") {
-//            newCardListScreen(navController, currentRoute = "card_list_test")
-//        }
+        // "카드리스트테스트" 화면 추가 -> 검색창 임시 변환
+        composable("card_list_test") {
+            newSearchScreen(navController, currentRoute = "card_list_test")
+        }
 
 
         composable("categoryDetail/{category}") { backStackEntry ->

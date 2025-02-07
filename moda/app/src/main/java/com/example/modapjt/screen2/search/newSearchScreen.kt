@@ -9,7 +9,7 @@ import androidx.navigation.NavController
 import com.example.modapjt.components.bar.BottomBarComponent
 
 @Composable
-fun newCardDetailScreen(navController: NavController, currentRoute: String) {
+fun newSearchScreen(navController: NavController, currentRoute: String) {
     Scaffold(
         topBar = { HeaderBar() },
         bottomBar = { BottomBarComponent(navController, currentRoute) }
@@ -19,7 +19,7 @@ fun newCardDetailScreen(navController: NavController, currentRoute: String) {
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            Text(text = "디테일 Screen Page")
+            Text(text = "searchBar page")
         }
     }
 }
