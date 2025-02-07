@@ -3,7 +3,6 @@ package com.moda.moda_api.card.infrastructure.mapper;
 import com.moda.moda_api.card.domain.Card;
 import com.moda.moda_api.card.domain.CardId;
 import com.moda.moda_api.card.domain.EmbeddingVector;
-import com.moda.moda_api.card.infrastructure.entity.CardDocumentEntity;
 import com.moda.moda_api.card.infrastructure.entity.CardEntity;
 import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.user.domain.UserId;
@@ -48,18 +47,6 @@ public class CardEntityMapper {
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .deletedAt(entity.getDeletedAt())
-                .build();
-    }
-
-    public static CardDocumentEntity from(CardEntity card) {
-        return CardDocumentEntity.builder()
-                .id(card.getCardId())
-                .title(card.getTitle())
-                .content(card.getContent())
-                .titleCompletion(card.getTitle())
-                .contentCompletion(card.getContent())
-                .keywords(card.getKeywords())
-                .embedding(card.getEmbedding())
                 .build();
     }
 }

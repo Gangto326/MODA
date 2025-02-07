@@ -1,5 +1,8 @@
 {
   "properties": {
+    "typeId": {
+      "type": "keyword"
+    },
     "title": {
       "type": "text",
       "analyzer": "korean"
@@ -7,6 +10,13 @@
     "content": {
       "type": "text",
       "analyzer": "korean"
+    },
+    "thumbnailContent": {
+      "type": "text",
+      "analyzer": "korean"
+    },
+    "thumbnailUrl": {
+      "type": "keyword"
     },
     "titleCompletion": {
       "type": "text",

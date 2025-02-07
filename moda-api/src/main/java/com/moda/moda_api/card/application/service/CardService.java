@@ -10,6 +10,7 @@ import com.moda.moda_api.card.presentation.request.UpdateCardRequest;
 import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.common.pagination.SliceRequestDto;
 import com.moda.moda_api.common.pagination.SliceResponseDto;
+import com.moda.moda_api.search.domain.CardSearchRepository;
 import com.moda.moda_api.summary.application.service.LilysSummaryService;
 import com.moda.moda_api.summary.infrastructure.api.LilysAiClient;
 import com.moda.moda_api.user.domain.UserId;
@@ -34,7 +35,6 @@ public class CardService {
 	private final CardRepository cardRepository;
 	private final CardFactory cardFactory;
 	private final CardDtoMapper cardDtoMapper;
-	private final CardDocumentRepository cardDocumentRepository;
 	private final LilysSummaryService lilysSummaryService;
 	private final EmbeddingApiClient embeddingApiClient;
 	private final UrlCacheRepository urlCacheRepository;

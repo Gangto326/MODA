@@ -1,4 +1,4 @@
-package com.moda.moda_api.card.infrastructure.config;
+package com.moda.moda_api.search.infrastructure.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;

@@ -1,4 +1,4 @@
-package com.moda.moda_api.card.infrastructure.entity;
+package com.moda.moda_api.search.infrastructure.entity;
 
 import jakarta.persistence.Id;
 import lombok.*;
@@ -15,11 +15,20 @@ public class CardDocumentEntity {
     @Id
     private String id;  // cardId를 사용
 
+    @Field(type = FieldType.Keyword)
+    private Integer typeId;
+
     @Field(type = FieldType.Text, analyzer = "korean")
     private String title;
 
     @Field(type = FieldType.Text, analyzer = "korean")
     private String content;
+
+    @Field(type = FieldType.Text, analyzer = "korean")
+    private String thumbnailContent;
+
+    @Field(type = FieldType.Keyword)
+    private String thumbnailUrl;
 
     @Field(type = FieldType.Text, analyzer = "korean_completion")
     private String titleCompletion;  // 제목 자동완성용
@@ -32,4 +41,6 @@ public class CardDocumentEntity {
 
     @Field(type = FieldType.Dense_Vector, dims = 768)
     private float[] embedding;
+
+    private Float score;
 }
