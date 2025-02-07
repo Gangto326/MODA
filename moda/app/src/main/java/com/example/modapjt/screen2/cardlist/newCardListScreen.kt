@@ -34,15 +34,18 @@ import androidx.compose.runtime.snapshotFlow
 @Composable
 fun newCardListScreen(navController: NavController, currentRoute: String, category: String?) {
     var isTypeBarVisible by remember { mutableStateOf(true) }
+    // TypeSelectBar에서 선택한 콘텐츠 유형 (변경 가능)
     var selectedCategory by remember { mutableStateOf("전체") }
+    // 홈 화면에서 선택한 카테고리 (변하지 않음)
+    val homeCategory = remember { category ?: "전체" }
 
     // 카드 리스트를 선택한 카테고리 기준으로 필터링
     val cardList = remember {
-        getAllCards().filter { it.category == selectedCategory || selectedCategory == "전체" }
+        getAllCards().filter { it.category == homeCategory || homeCategory == "전체" }
     }
 
     Scaffold(
-        topBar = { CategoryHeaderBar() },
+        topBar = { CategoryHeaderBar(categoryName = homeCategory) }, // 선택한 카테고리를 전달
         bottomBar = { BottomBarComponent(navController, currentRoute) }
     ) { paddingValues ->
         Box(

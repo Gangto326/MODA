@@ -91,10 +91,16 @@ fun NavGraph(
         }
 
 
+//        composable("categoryDetail/{category}") { backStackEntry ->
+//            val category = backStackEntry.arguments?.getString("category")
+//            newCardListScreen(navController = navController, currentRoute = "categoryDetail", category = category)
+//        }
         composable("categoryDetail/{category}") { backStackEntry ->
             val category = backStackEntry.arguments?.getString("category")
             newCardListScreen(navController = navController, currentRoute = "categoryDetail", category = category)
         }
+
+
 
 
 

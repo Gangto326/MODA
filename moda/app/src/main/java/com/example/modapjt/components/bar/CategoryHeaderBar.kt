@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 
 @Composable
-fun CategoryHeaderBar(modifier: Modifier = Modifier) {
+fun CategoryHeaderBar(modifier: Modifier = Modifier, categoryName: String) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -47,7 +47,7 @@ fun CategoryHeaderBar(modifier: Modifier = Modifier) {
 
         // 중앙 타이틀 (카테고리)
         Text(
-            text = "카테고리",
+            text = categoryName, // 선택한 카테고리 반영
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             color = Color.Black

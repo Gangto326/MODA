@@ -98,8 +98,19 @@ fun newHomeScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
             item {
-                CategoryList(navController = navController, viewModel = viewModel)
+                CategoryList(
+                    navController = navController,
+                    viewModel = viewModel,
+                    onCategorySelected = { homeCategory ->
+                        navController.navigate("categoryDetail/$homeCategory") // 선택한 카테고리를 네비게이션에 전달
+                    }
+                )
             }
+
+
+
+
+
 
             item {
                 HomeSmallTitle(
