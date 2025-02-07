@@ -53,7 +53,7 @@ fun CategoryItem(category: Category, navController: NavController) {
         modifier = Modifier
             .width(80.dp)
             .padding(8.dp)
-            .clickable { navController.navigate("categoryDetail/${category.category}") },
+            .clickable { navController.navigate("categoryDetail/${category.categoryId}") }, // categoryId 전달
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(

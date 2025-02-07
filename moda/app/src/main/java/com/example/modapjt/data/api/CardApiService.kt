@@ -1,5 +1,6 @@
 package com.example.modapjt.data.api
 
+import com.example.modapjt.data.dto.response.CardApiResponse
 import com.example.modapjt.data.dto.response.CardDTO
 import com.example.modapjt.data.dto.response.CardDetailDTO
 import com.example.modapjt.data.dto.response.CategoryDTO
@@ -10,7 +11,7 @@ import retrofit2.http.Query
 
 // API 요청을 정의하는 인터페이스
 interface CardApiService {
-    @GET("card")
+    @GET("api/card")
     suspend fun getCardList(
         @Query("userId") userId: String,
         @Query("categoryId") categoryId: Int,
@@ -18,9 +19,9 @@ interface CardApiService {
         @Query("size") size: Int,
         @Query("sortBy") sortBy: String = "createdAt",
         @Query("sortDirection") sortDirection: String = "DESC"
-    ): Response<List<CardDTO>>
+    ): Response<CardApiResponse>
 
-    @GET("card/{cardId}")
+    @GET("api/card/{cardId}")
     suspend fun getCardDetail(
         @Path("cardId") cardId: String,
         @Query("userId") userId: String

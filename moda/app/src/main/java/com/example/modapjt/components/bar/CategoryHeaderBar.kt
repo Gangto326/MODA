@@ -19,9 +19,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
+import androidx.navigation.NavController
 
 @Composable
-fun CategoryHeaderBar(modifier: Modifier = Modifier, categoryName: String) {
+fun CategoryHeaderBar(modifier: Modifier = Modifier, categoryName: String, navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -36,7 +37,7 @@ fun CategoryHeaderBar(modifier: Modifier = Modifier, categoryName: String) {
                 .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = { }) {
+            IconButton(onClick = { navController.popBackStack() }) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack, // ← 아이콘
                     contentDescription = "뒤로가기",
@@ -54,38 +55,3 @@ fun CategoryHeaderBar(modifier: Modifier = Modifier, categoryName: String) {
         )
     }
 }
-
-//@Composable
-//fun SearchBar2() { // onBackClick: () -> Unit
-//    Row(
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .height(56.dp)
-//            .background(color = Color.White)
-//            .padding(horizontal = 16.dp),
-//        verticalAlignment = Alignment.CenterVertically
-//    ) {
-//        // 왼쪽 뒤로가기 버튼
-//        IconButton(onClick = {}) { // onBackClick
-//            Icon(
-//                imageVector = Icons.Default.ArrowBack,
-//                contentDescription = "뒤로가기",
-//                tint = Color.Black
-//            )
-//        }
-//
-//        // 중앙 정렬을 위한 Spacer
-//        Spacer(modifier = Modifier.weight(1f))
-//
-//        // 중앙 텍스트 (카테고리)
-//        Text(
-//            text = "음식",  // 원하는 카테고리 이름을 넣으면 됨
-//            fontSize = 18.sp,
-//            fontWeight = FontWeight.Bold,
-//            color = Color.Black
-//        )
-//
-//        // 오른쪽 여백을 맞추기 위한 Spacer
-//        Spacer(modifier = Modifier.weight(1f))
-//    }
-//}
