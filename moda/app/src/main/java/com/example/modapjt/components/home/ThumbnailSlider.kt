@@ -19,11 +19,13 @@ fun ThumbnailSlider() {
     )
 
     var currentIndex by remember { mutableStateOf(0) }
+    var dragOffset by remember { mutableStateOf(0f) }
+    val dragThreshold = 100f  // 슬라이드 감지 임계값
 
     // 자동 슬라이드 기능
     LaunchedEffect(Unit) {
         while (true) {
-            delay(4000)  // 2초마다 자동 슬라이드
+            delay(4000)  // 4초마다 자동 슬라이드
             currentIndex = (currentIndex + 1) % colors.size
         }
     }
@@ -32,15 +34,25 @@ fun ThumbnailSlider() {
         modifier = Modifier
             .fillMaxWidth()
             .pointerInput(Unit) {
-                detectHorizontalDragGestures { _, dragAmount ->
-                    if (dragAmount > 0) {
-                        // 오른쪽으로 드래그 → 이전 썸네일
-                        currentIndex = if (currentIndex == 0) colors.lastIndex else currentIndex - 1
-                    } else {
-                        // 왼쪽으로 드래그 → 다음 썸네일
-                        currentIndex = (currentIndex + 1) % colors.size
+                detectHorizontalDragGestures(
+                    onDragStart = { dragOffset = 0f },
+                    onDragEnd = {
+                        when {
+                            dragOffset > dragThreshold -> {
+                                // 오른쪽으로 드래그 → 이전 썸네일
+                                currentIndex = if (currentIndex == 0) colors.lastIndex else currentIndex - 1
+                            }
+                            dragOffset < -dragThreshold -> {
+                                // 왼쪽으로 드래그 → 다음 썸네일
+                                currentIndex = (currentIndex + 1) % colors.size
+                            }
+                        }
+                        dragOffset = 0f
+                    },
+                    onHorizontalDrag = { _, dragAmount ->
+                        dragOffset += dragAmount
                     }
-                }
+                )
             }
     ) {
         // 썸네일 표시
