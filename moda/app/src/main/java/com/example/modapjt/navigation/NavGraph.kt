@@ -6,8 +6,8 @@ import androidx.compose.runtime.getValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.modapjt.screen.home.HomeScreen
-import com.example.modapjt.screen.board.BoardScreen
-import com.example.modapjt.screen.card.CardScreen
+//import com.example.modapjt.screen.board.BoardScreen
+//import com.example.modapjt.screen.card.CardScreen
 import com.example.modapjt.screen.settings.SettingsScreen
 import com.example.modapjt.screen.recommend.RecommendScreen
 
@@ -58,15 +58,15 @@ fun NavGraph(
             )
         }
 
-        composable("board/{boardId}") { backStackEntry ->
-            val boardId = backStackEntry.arguments?.getString("boardId")
-            BoardScreen(boardId = boardId, navController = navController, currentRoute = currentRoute)
-        }
+//        composable("board/{boardId}") { backStackEntry ->
+//            val boardId = backStackEntry.arguments?.getString("boardId")
+//            BoardScreen(boardId = boardId, navController = navController, currentRoute = currentRoute)
+//        }
 
-        composable("card/{cardId}") { backStackEntry ->
-            val cardId = backStackEntry.arguments?.getString("cardId")
-            CardScreen(cardId = cardId, navController = navController, currentRoute = "card")
-        }
+//        composable("card/{cardId}") { backStackEntry ->
+//            val cardId = backStackEntry.arguments?.getString("cardId")
+//            CardScreen(cardId = cardId, navController = navController, currentRoute = "card")
+//        }
 
         composable("link_upload") {
             LinkUploadScreen(navController, currentRoute = "link_upload")
@@ -85,9 +85,17 @@ fun NavGraph(
         }
 
         // "카드리스트테스트" 화면 추가
-        composable("card_list_test") {
-            newCardListScreen(navController, currentRoute = "card_list_test")
+//        composable("card_list_test") {
+//            newCardListScreen(navController, currentRoute = "card_list_test")
+//        }
+
+
+        composable("categoryDetail/{category}") { backStackEntry ->
+            val category = backStackEntry.arguments?.getString("category")
+            newCardListScreen(navController = navController, currentRoute = "categoryDetail", category = category)
         }
+
+
 
         // "파일업로드테스트" 화면 추가
         composable("file_upload_test") {

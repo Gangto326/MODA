@@ -8,15 +8,14 @@ object RetrofitInstance {
     private const val BASE_URL = "http://10.0.2.2:8080" // localhost → 10.0.2.2 변경 (에뮬레이터 전용)
 //    private const val BASE_URL = "http://192.168.0.38:8080"  // 내 PC의 IP 주소로 변경
 
-
-
-    val api: ApiService by lazy {
+    val api: CategoryApiService by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create()) // JSON 변환기
+            .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(ApiService::class.java) // 실제 API 요청을 보낼 수 있는 객체 생성
+            .create(CategoryApiService::class.java)
     }
 }
+
 
 // addConverterFactory : JSON 데이터를 Kotlin 객체로 변환
