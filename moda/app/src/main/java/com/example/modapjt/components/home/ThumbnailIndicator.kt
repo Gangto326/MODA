@@ -28,7 +28,7 @@ fun ThumbnailIndicator(currentIndex: Int, totalItems: Int) {
             )
 
             if (index != totalItems - 1) {
-                Spacer(modifier = Modifier.width(4.dp))  // 인디케이터 간 간격 조절
+                Spacer(modifier = Modifier.width(8.dp))  // 인디케이터 간 간격 조절
             }
         }
     }
