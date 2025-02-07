@@ -28,6 +28,9 @@ import coil.request.ImageRequest
 
 @Composable
 fun NewsBig(
+    title: String,
+    keywords: List<String>,
+    imageUrl: String,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
@@ -50,17 +53,9 @@ fun NewsBig(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = "AI 기술의 발전, 일상생활 변화 가져온다",
+                    text = title,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                Text(
-                    text = "인공지능 기술이 발전하면서 우리의 일상생활이 크게 변화하고 있다. 전문가들은 앞으로 더 큰 변화가 있을 것으로 전망했다.",
-                    fontSize = 14.sp,
-                    color = Color.Gray,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -68,7 +63,7 @@ fun NewsBig(
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    listOf("AI", "기술혁신", "미래사회").forEach { keyword ->
+                    keywords.take(3).forEach { keyword ->
                         Text(
                             text = "# $keyword",
                             color = Color(0xFF1E88E5),
@@ -78,23 +73,14 @@ fun NewsBig(
                     }
                 }
             }
-            // 썸네일 -> 잠시 box로 대체
-//            AsyncImage(
-//                model = ImageRequest.Builder(LocalContext.current)
-//                    .data("https://via.placeholder.com/200x200")
-//                    .crossfade(true)
-//                    .build(),
-//                contentDescription = "뉴스 썸네일",
-//                contentScale = ContentScale.Crop,
-//                modifier = Modifier
-//                    .size(100.dp)
-//                    .clip(RoundedCornerShape(8.dp))
-//            )
-            Box(
+
+            AsyncImage(
+                model = imageUrl,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .size(100.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(Color.LightGray)
             )
         }
     }
