@@ -20,6 +20,7 @@ import com.example.modapjt.components.home.TopThumbnail
 import com.example.modapjt.components.home.BottomThumbnail
 import com.example.modapjt.components.bar.BottomBar
 import com.example.modapjt.components.bar.BottomBarComponent
+import com.example.modapjt.components.bar.HeaderBar
 import com.example.modapjt.components.bar.LinkAddHeaderBar
 import com.example.modapjt.components.button.LinkAddButton
 import com.example.modapjt.components.home.CategoryItem

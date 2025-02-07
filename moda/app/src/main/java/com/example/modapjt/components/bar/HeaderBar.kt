@@ -1,3 +1,5 @@
+package com.example.modapjt.components.bar
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*

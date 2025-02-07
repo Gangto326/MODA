@@ -1,56 +1,79 @@
 package com.example.modapjt.navigation
 
-
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import com.example.modapjt.screen.home.HomeScreen
-//import com.example.modapjt.screen.board.BoardScreen
-//import com.example.modapjt.screen.card.CardScreen
-import com.example.modapjt.screen.settings.SettingsScreen
-import com.example.modapjt.screen.recommend.RecommendScreen
-
-import androidx.navigation.NavHostController  // NavHostController 임포트 추가
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.runtime.*
+import androidx.navigation.NavHostController
+import com.google.accompanist.navigation.animation.AnimatedNavHost
+import com.google.accompanist.navigation.animation.composable
+import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.modapjt.screen.SavedUrlsScreen
 import com.example.modapjt.screen.linkupload.LinkUploadScreen
+import com.example.modapjt.screen.recommend.RecommendScreen
+import com.example.modapjt.screen.settings.SettingsScreen
 import com.example.modapjt.screen2.newCardListScreen
+import com.example.modapjt.screen2.search.NewSearchScreen
 import newCardDetailScreen
 import newHomeScreen
 import newLinkUploadScreen
-import newSearchScreen
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun NavGraph(
     navController: NavHostController,
-    onStartOverlay: () -> Unit  // 오버레이 시작 콜백 추가
+    onStartOverlay: () -> Unit
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: "home"
 
-    NavHost(
+    AnimatedNavHost(
         navController = navController,
         startDestination = "home"
     ) {
-        // 홈 화면
-        composable("home") {
-            HomeScreen(
+        composable(
+            route = "home",
+            exitTransition = {
+                // 홈 화면이 사라질 때의 애니메이션
+                fadeOut(animationSpec = tween(300))
+            }
+        ) {
+            newHomeScreen(
                 navController = navController,
-                currentRoute = currentRoute,
-                onStartOverlay = onStartOverlay  // 홈 화면에 콜백 전달
+                currentRoute = currentRoute
             )
         }
+
+        composable(
+            route = "search",
+            enterTransition = {
+                // 검색 화면이 나타날 때의 애니메이션
+                slideInVertically(
+                    initialOffsetY = { -it },  // 위에서 아래로
+                    animationSpec = tween(300, easing = FastOutSlowInEasing)
+                ) + fadeIn(animationSpec = tween(300))
+            },
+            exitTransition = {
+                // 검색 화면이 사라질 때의 애니메이션
+                slideOutVertically(
+                    targetOffsetY = { -it },  // 아래에서 위로
+                    animationSpec = tween(300, easing = FastOutSlowInEasing)
+                ) + fadeOut(animationSpec = tween(300))
+            }
+        ) {
+            NewSearchScreen(navController = navController)
+        }
+
 
         // 설정 화면
         composable("settings") {
             SettingsScreen(
                 navController = navController,
-                onStartOverlay = onStartOverlay  // 설정 화면에도 콜백 전달
+                onStartOverlay = onStartOverlay
             )
         }
 
-        // 나머지 composable들은 그대로 유지
+        // 추천 화면
         composable("recommend") {
             RecommendScreen(
                 navController = navController,
@@ -58,39 +81,41 @@ fun NavGraph(
             )
         }
 
+        // 링크 업로드 화면
         composable("link_upload") {
             LinkUploadScreen(navController, currentRoute = "link_upload")
         }
 
-
+        // 저장된 URL 화면
         composable("saved_urls") {
             SavedUrlsScreen()
         }
 
-
-
-//         "홈테스트" 화면 추가
-        composable("home_test") {
-            newHomeScreen(navController, currentRoute = "home_test")
-        }
-
-        // "카드리스트테스트" 화면 추가 -> 검색창 임시 변환
+        // 카드리스트테스트 화면
         composable("card_list_test") {
-            newSearchScreen(navController, currentRoute = "card_list_test")
+            newCardListScreen(
+                navController = navController,
+                currentRoute = "card_list_test",
+                categoryId = null
+            )
         }
 
-
+        // 카테고리 상세 화면
         composable("categoryDetail/{categoryId}") { backStackEntry ->
             val categoryId = backStackEntry.arguments?.getString("categoryId")?.toIntOrNull()
-            newCardListScreen(navController = navController, currentRoute = "categoryDetail", categoryId = categoryId)
+            newCardListScreen(
+                navController = navController,
+                currentRoute = "categoryDetail",
+                categoryId = categoryId
+            )
         }
 
-        // "파일업로드테스트" 화면 추가
+        // 파일업로드테스트 화면
         composable("file_upload_test") {
             newLinkUploadScreen(navController, currentRoute = "file_upload_test")
         }
 
-        // "카드상세페이지" 화면 추가
+        // 카드상세페이지 화면
         composable("card_detail_test") {
             newCardDetailScreen(navController, currentRoute = "card_detail_test")
         }

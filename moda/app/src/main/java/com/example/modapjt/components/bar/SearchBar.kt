@@ -1,28 +1,38 @@
 package com.example.modapjt.components.bar
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.modapjt.R
 
 @Composable
 fun SearchBar(
     modifier: Modifier = Modifier,
-    onSearch: (String) -> Unit = {}
+    onSearch: (String) -> Unit = {},
+    navController: NavController? = null
 ) {
     var searchText by remember { mutableStateOf("") }
 
@@ -30,42 +40,49 @@ fun SearchBar(
         modifier = modifier
             .fillMaxWidth()
             .height(56.dp)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        shape = RoundedCornerShape(8.dp), // 둥근 직사각형
-        shadowElevation = 0.dp // 그림자 제거
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = rememberRipple(bounded = true)  // 클릭 효과 추가
+            ) {
+                navController?.navigate("search")
+            },
+        shape = RoundedCornerShape(8.dp),
+        shadowElevation = 0.dp
     ) {
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .border(width = 2.dp, color = Color(0xFFFFF176), shape = RoundedCornerShape(8.dp)) // 테두리 추가
-                .padding(4.dp), // 테두리와 내부 여백 추가
+                .border(
+                    width = 2.dp,
+                    color = Color(0xFFFFF176),
+                    shape = RoundedCornerShape(8.dp)
+                )
+                .padding(4.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Image(
                 painter = painterResource(id = R.drawable.ic_search),
                 contentDescription = "Search Icon",
-                modifier = Modifier.size(23.dp).padding(start = 8.dp)
+                modifier = Modifier
+                    .size(23.dp)
+                    .padding(start = 8.dp)
             )
 
             Box(modifier = Modifier.weight(1f)) {
                 BasicTextField(
                     value = searchText,
-                    onValueChange = {
-                        searchText = it
-                        onSearch(it)
-                    },
+                    onValueChange = { /* Disabled in home screen */ },
+                    enabled = false,
                     textStyle = TextStyle(fontSize = 16.sp, color = Color.Black),
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                if (searchText.isEmpty()) {
-                    Text(
-                        text = "찾고 싶은 내용을 입력하세요",
-                        color = Color.Gray,
-                        fontSize = 16.sp
-                    )
-                }
+                Text(
+                    text = "찾고 싶은 내용을 입력하세요",
+                    color = Color.Gray,
+                    fontSize = 16.sp
+                )
             }
         }
     }
