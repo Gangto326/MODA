@@ -1,6 +1,7 @@
 import ollama
 from app.constants.category import categories_name
-from app.constants.prompt import category_prompt, make_prompt
+from app.constants.prompt import make_summary_prompt, make_keywords_content_prompt, \
+    make_thumbnail_content_prompt, make_category_prompt
 from app.services.embedding import Embedding
 from app.schemas.post import PostResponse
 
@@ -48,8 +49,8 @@ class Summary:
         self.make_embedding_vector()
         self.choose_category()
         self.summary_content()
-        # TODO: keywords
-        # TODO: thumbnail_content
+        self.make_keywords()
+        self.make_thumbnail_content()
 
     #embeeding_vector를 생성하는 함수
     def make_embedding_vector(self):
@@ -58,8 +59,7 @@ class Summary:
     #category를 선택하는 함수
     def choose_category(self):
         model = self.MODEL
-        messages = category_prompt
-        messages[1]['content'] += self.origin_content
+        messages = make_category_prompt(self.origin_content)
         format = {
             'type': 'object',
             'properties': {
@@ -68,7 +68,9 @@ class Summary:
                 }
             },
             'required': ['category']
-            }
+        }
+
+        print(f'카테고리 프롬프트:\n{messages}')
 
         find_category = False
         attempt_count = 0
@@ -93,13 +95,57 @@ class Summary:
 
         print('선택된 카테고리:', self.category_id, self.category)
 
-    #content를 요약하는 함수
+    #origin_content를 요약하는 함수
     def summary_content(self):
         model = self.MODEL
-        messages = make_prompt(self.category, self.origin_content)
+        messages = make_summary_prompt(self.category, self.origin_content)
+        format = None
 
-        print(f'프롬프트:\n{messages}')
+        print(f'요약 프롬프트:\n{messages}')
 
-        self.content = self.chat(model = model, messages = messages)
-        
+        self.content = self.chat(model = model, messages = messages, format = format)
+
         print(f'요약본:\n{self.content}')
+
+    #keywords를 생성하는 함수
+    def make_keywords(self):
+        model = self.MODEL
+        messages = make_keywords_content_prompt(self.content)
+        format = {
+            'type': 'object',
+            'properties': {
+                'keyword': {
+                    'type': 'array',
+                    'items': {
+                        'type': 'string'
+                    }
+                }
+            },
+            'required': ['keyword']
+        }
+
+        print(f'키워드 프롬프트:\n{messages}')
+
+        self.keywords = self.chat(model = model, messages = messages, format = format)
+
+        print(f'키워드: {self.keywords}')
+
+    # thumbnail_content를 생성하는 함수
+    def make_thumbnail_content(self):
+        model = self.MODEL
+        messages = make_thumbnail_content_prompt(self.content)
+        format = {
+            'type': 'object',
+            'properties': {
+                'summary': {
+                    'type': 'string'
+                }
+            },
+            'required': ['summary']
+        }
+
+        print(f'썸네일 프롬프트:\n{messages}')
+
+        self.thumbnail_content = self.chat(model = model, messages = messages, format = format)
+
+        print(f'썸네일 요약본:\n{self.thumbnail_content}')

@@ -1,19 +1,21 @@
-category_prompt = [
-    {
-        'role': 'system',
-        'content': '''사용자가 요청한 카테고리만 출력하고, 다른 말은 하지 않도록 한다.'''
-    },
-    {
-        'role': 'user',
-        'content': '''아래 내용을 읽고 카테고리 중에 하나 골라서 카테고리만 알려줘. 다른 말은 하지말고 카테고리만 말해줘.
+def make_category_prompt(content:str):
+    return [
+        {
+            'role': 'system',
+            'content': '사용자가 요청한 카테고리만 출력하고, 다른 말은 하지 않도록 한다.'
+        },
+        {
+            'role': 'user',
+            'content': f'''아래 내용을 읽고 카테고리 중에 하나 골라서 카테고리만 알려줘. 다른 말은 하지말고 카테고리만 말해줘.
 ['Trends', 'Entertainment', 'Finance', 'Travel', 'Food', 'IT', 'Design', 'Society', 'Health']
-        
-        '''
-    }
-]
 
-def make_prompt(category: str,
-                content: str):
+{content}
+'''
+        }
+    ]
+
+def make_summary_prompt(category: str,
+                        content: str):
     return [
         {
             'role': 'system',
@@ -21,7 +23,47 @@ def make_prompt(category: str,
         },
         {
             'role': 'user',
-            'content': f'{category_persona[f'{category}']}\n다음 내용 요약해줘\n\n{content}'
+            'content': f'{category_persona[f'{category}']}\n다음 내용을 마크다운 형식으로 요약해줘\n\n{content}'
+        }
+    ]
+
+def make_keywords_content_prompt(content: str):
+    return [
+        {
+            'role': 'system',
+            'content': '''다음 규칙을 반드시 따라주세요:
+- 가장 중요한 정보만 선별하여 포함
+- 최대 2줄을 넘지 않도록 요약
+- 명확하고 간결한 문장으로 작성
+- 불필요한 수식어나 부연 설명 제외'''
+        },
+        {
+            'role': 'user',
+            'content': f'''당신은 주어진 텍스트에서 가장 핵심적인 내용을 1-2줄로 간단히 요약하는 전문가입니다.
+다음 텍스트의 핵심 내용을 1-2줄로 요약해주세요:
+
+{content}
+'''
+        }
+    ]
+
+def make_thumbnail_content_prompt(content: str):
+    return [
+        {
+            'role': 'system',
+            'content': '''다음 규칙을 반드시 따라주세요:
+- 가장 중요한 정보만 선별하여 포함
+- 최대 2줄을 넘지 않도록 요약
+- 명확하고 간결한 문장으로 작성
+- 불필요한 수식어나 부연 설명 제외'''
+        },
+        {
+            'role': 'user',
+            'content': f'''당신은 주어진 텍스트에서 가장 핵심적인 내용을 1-2줄로 간단히 요약하는 전문가입니다.
+다음 텍스트의 핵심 내용을 1-2줄로 요약해주세요:
+
+{content}
+'''
         }
     ]
 
