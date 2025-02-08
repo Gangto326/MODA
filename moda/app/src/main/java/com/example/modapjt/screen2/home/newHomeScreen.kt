@@ -3,6 +3,7 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,8 +15,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.material3.*
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.modapjt.R
 import com.example.modapjt.components.bar.SearchBar
 import com.example.modapjt.components.home.BottomThumbnail
 import com.example.modapjt.components.bar.BottomBarComponent
@@ -26,6 +30,8 @@ import com.example.modapjt.components.home.WeeklyKeyword
 import com.example.modapjt.domain.viewmodel.CategoryViewModel
 // ... 기존 imports는 유지
 import com.example.modapjt.components.bar.HeaderBar  // HeaderBar import 추가
+import com.example.modapjt.components.home.BottomThumbnailList
+import com.example.modapjt.components.home.KeywordList
 
 @Composable
 fun newHomeScreen(
@@ -63,17 +69,6 @@ fun newHomeScreen(
     }
 
     Scaffold(
-        topBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-                    .offset(y = headerOffsetY)
-                    .alpha(headerAlpha)
-            ) {
-                HeaderBar(modifier = Modifier)  // modifier 파라미터 추가
-            }
-        },
         bottomBar = { BottomBarComponent(navController, currentRoute) }
     ) { paddingValues ->
         LazyColumn(
@@ -82,22 +77,47 @@ fun newHomeScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
+            // 기존 `topBar`에서 제거된 헤더를 리스트의 첫 번째 `item`으로 추가
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp)
+                        .offset(y = headerOffsetY)
+                        .alpha(headerAlpha)
+                ) {
+                    HeaderBar(modifier = Modifier)
+                }
+            }
+
             item {
                 Spacer(modifier = Modifier.height(3.dp))
                 SearchBar(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 14.dp),
-                    navController = navController  // navController를 명시적으로 전달
+                    navController = navController
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
+
             item {
                 ThumbnailSlider()
                 Spacer(modifier = Modifier.height(16.dp))
             }
+
+            item {
+                Divider(color = Color(0xFFDCDCDC), thickness = 4.dp, modifier = Modifier.padding(horizontal = 0.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
             item {
                 CategoryList(navController = navController, viewModel = viewModel)
+            }
+
+            item {
+                Divider(color = Color(0xFFDCDCDC), thickness = 4.dp, modifier = Modifier.padding(horizontal = 0.dp))
+                Spacer(modifier = Modifier.height(16.dp))
             }
 
             item {
@@ -107,29 +127,15 @@ fun newHomeScreen(
                 )
             }
 
+
+
             item {
-                val keywords = listOf("운동", "다이어트", "헬스", "근력", "유산소", "식단", "스트레칭")
+                KeywordList()
+                Spacer(modifier = Modifier.height(16.dp))
+            }
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                ) {
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        for (keyword in keywords) {
-                            WeeklyKeyword(keyword)
-                        }
-                    }
-                }
-
+            item {
+                Divider(color = Color(0xFFDCDCDC), thickness = 4.dp, modifier = Modifier.padding(horizontal = 0.dp))
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
@@ -141,33 +147,36 @@ fun newHomeScreen(
             }
 
             item {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                ) {
-                    val thumbnails = listOf(
-                        Color(0xFFFFCDD2),
-                        Color(0xFFC8E6C9),
-                        Color(0xFFBBDEFB),
-                        Color(0xFFFFF9C4),
-                        Color(0xFFD1C4E9)
-                    )
+                BottomThumbnailList()
+                Spacer(modifier = Modifier.height(16.dp))
+            }
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        for (color in thumbnails) {
-                            BottomThumbnail(backgroundColor = color)
-                        }
-                    }
-                }
+            // 이미지 추가
+            item {
+                Image(
+                    painter = painterResource(id = R.drawable.overlayad),
+                    contentDescription = "광고 이미지",
+                    contentScale = ContentScale.FillWidth, // 가로 너비에 맞추기
+                    modifier = Modifier
+                        .fillMaxWidth() // 가로 전체 채우기
+                        .height(80.dp) // 원본 높이 유지
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
             }
+
+            item {
+                HomeSmallTitle(
+                    title = "여유로운 토요일 저녁",
+                    description = ""
+                )
+            }
+
+            item {
+                Divider(color = Color(0xFFDCDCDC), thickness = 4.dp, modifier = Modifier.padding(horizontal = 0.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
         }
     }
 }
