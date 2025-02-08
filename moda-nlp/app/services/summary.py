@@ -1,27 +1,8 @@
 import ollama
-from typing import List, Dict
-from app.constants.category import categories, categories_name
-from app.constants.prompt import category_prompt
+from app.constants.category import categories_name
+from app.constants.prompt import category_prompt, make_prompt
 from app.services.embedding import Embedding
 from app.schemas.post import PostResponse
-
-def system_prompt(prompt: str):
-    return {
-        'role': 'system',
-        'content': f'{prompt}'
-    }
-
-def user_prompt(prompt: str):
-    return {
-        'role': 'user',
-        'content': f'{prompt}'
-    }
-
-def assistant_prompt(prompt: str):
-    return {
-        'role': 'assistant',
-        'content': f'{prompt}'
-    }
 
 class Summary:
     MAX_CATEGORY_TRIES = 10
@@ -66,9 +47,7 @@ class Summary:
     def execute(self):
         self.make_embedding_vector()
         self.choose_category()
-        # TODO: prompt
-        # TODO: content
-        # self.summary_content()
+        self.summary_content()
         # TODO: keywords
         # TODO: thumbnail_content
 
@@ -82,13 +61,13 @@ class Summary:
         messages = category_prompt
         messages[1]['content'] += self.origin_content
         format = {
-            "type": "object",
-            "properties": {
-                "category": {
-                    "type": "string"
+            'type': 'object',
+            'properties': {
+                'category': {
+                    'type': 'string'
                 }
             },
-            "required": ["category"]
+            'required': ['category']
             }
 
         find_category = False
@@ -112,12 +91,15 @@ class Summary:
             self.category_id = 0
             self.category = 'ALL'
 
-        print("선택된 카테고리:", self.category_id, self.category)
+        print('선택된 카테고리:', self.category_id, self.category)
 
     #content를 요약하는 함수
     def summary_content(self):
         model = self.MODEL
-        messages = category_prompt
-        messages[1]['content'] += self.origin_content
+        messages = make_prompt(self.category, self.origin_content)
 
-        self.content = self.chat(model = model, messages = messages, format = format)
+        print(f'프롬프트:\n{messages}')
+
+        self.content = self.chat(model = model, messages = messages)
+        
+        print(f'요약본:\n{self.content}')
