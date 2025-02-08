@@ -67,6 +67,7 @@ public class PlatformExtractorFactory {
 			.urlDomainType(UrlDomainType.DAUM_NEWS)
 			.build());
 
+		// 서치 설정.
 		CONFIGS.put("google.com", ExtractorConfig.builder()
 			.pattern("google.com")
 			// 더 구체적이고 정확한 셀렉터 사용

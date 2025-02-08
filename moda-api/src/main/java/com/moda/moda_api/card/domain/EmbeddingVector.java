@@ -1,5 +1,7 @@
 package com.moda.moda_api.card.domain;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.moda.moda_api.card.exception.InvalidVectorException;
 import lombok.Value;
 
@@ -8,7 +10,8 @@ public class EmbeddingVector {
     public static final int DIMENSION = 768;
     private final float[] values;
 
-    public EmbeddingVector(float[] values) {
+    @JsonCreator
+    public EmbeddingVector(@JsonProperty("values") float[] values) {
         validateVector(values);
         this.values = values.clone();
     }

@@ -34,7 +34,7 @@ public class WebDriverConfig {
 		options.addArguments("--disable-extensions");  // 확장 프로그램 비활성화
 
 		// 헤드리스 모드 설정 (선택사항)
-		// options.addArguments("--headless");  // 브라우저 창을 보이지 않게 하려면 이 줄의 주석을 해제하세요
+		options.addArguments("--headless");  // 브라우저 창을 보이지 않게 하려면 이 줄의 주석을 해제하세요
 
 		return new ChromeDriver(options);
 	}

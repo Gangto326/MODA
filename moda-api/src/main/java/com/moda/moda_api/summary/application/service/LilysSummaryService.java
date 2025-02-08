@@ -1,8 +1,10 @@
 package com.moda.moda_api.summary.application.service;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,7 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.moda.moda_api.summary.application.dto.SummaryResultDto;
 import com.moda.moda_api.summary.infrastructure.api.LilysAiClient;
 import com.moda.moda_api.summary.exception.SummaryProcessingException;
-import com.moda.moda_api.summary.infrastructure.api.PythonAnalysisService;
+import com.moda.moda_api.summary.infrastructure.dto.LilysSummary;
+import com.moda.moda_api.summary.infrastructure.dto.TitleAndContent;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,15 +29,15 @@ public class LilysSummaryService {
 
 	@Transactional
 	public CompletableFuture<SummaryResultDto> summarize(String url) {
-		return lilysWebClient.getRequestId(url) //requestId받고
-			.thenCompose(response -> waitForCompletion(response.getRequestId()) //요약될 때까지 대기
+		return lilysWebClient.getRequestId(url)
+			.thenCompose(response -> waitForCompletion(response.getRequestId())
 				.thenCompose(status -> {
 					log.info("Summary is ready. Status: {}", status);
-					return lilysWebClient.getSummaryResults(response.getRequestId(), url) // 요약이 완성이 됐다면 요약을 가져오기
+					return lilysWebClient.getSummaryResults(response.getRequestId(), url)
+						.thenApply(this::convertToSummaryResult)
 						.thenCompose(summaryResult ->
-							pythonAnalysisService.analyzeSummary(summaryResult.getContent()) // AI 분석 돌리기
-								.thenApply(summaryResult::updateFromDto  // 마지막으로 summaryResult 완성 시키고 보내기
-								)
+							pythonAnalysisService.youtubeAnalyze(summaryResult)
+								.thenApply(summaryResult::updateFromDto)
 						);
 				}));
 	}
@@ -68,5 +71,15 @@ public class LilysSummaryService {
 					new SummaryProcessingException("Unexpected status: " + status)
 				);
 			});
+	}
+
+	private SummaryResultDto convertToSummaryResult(LilysSummary response) {
+		return SummaryResultDto.builder()
+			.typeId(response.getTypeId())
+			.title(response.getTitle())
+			.subContent(response.getTimeStamp())
+			.thumbnailContent(response.getThumbnailContent())
+			.thumbnailUrl(response.getThumbnailUrl())
+			.build();
 	}
 }

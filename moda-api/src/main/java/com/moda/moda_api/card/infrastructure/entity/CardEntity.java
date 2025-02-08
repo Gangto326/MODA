@@ -56,6 +56,10 @@ public class CardEntity {
     @Column(name = "keywords", columnDefinition = "text[]")
     private String[] keywords;
 
+    @Type(StringArrayType.class)
+    @Column(name = "subContents", columnDefinition = "text[]")
+    private String[] subContents;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();

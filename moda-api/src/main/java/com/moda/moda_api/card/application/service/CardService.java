@@ -1,29 +1,34 @@
 package com.moda.moda_api.card.application.service;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Slice;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.moda.moda_api.card.application.mapper.CardDtoMapper;
 import com.moda.moda_api.card.application.response.CardDetailResponse;
 import com.moda.moda_api.card.application.response.CardListResponse;
-import com.moda.moda_api.card.domain.*;
+import com.moda.moda_api.card.domain.Card;
+import com.moda.moda_api.card.domain.CardFactory;
+import com.moda.moda_api.card.domain.CardId;
+import com.moda.moda_api.card.domain.CardRepository;
+import com.moda.moda_api.card.domain.UrlCache;
+import com.moda.moda_api.card.domain.UrlCacheRepository;
 import com.moda.moda_api.card.exception.CardNotFoundException;
 import com.moda.moda_api.card.presentation.request.MoveCardRequest;
 import com.moda.moda_api.card.presentation.request.UpdateCardRequest;
 import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.common.pagination.SliceRequestDto;
 import com.moda.moda_api.common.pagination.SliceResponseDto;
-import com.moda.moda_api.summary.application.service.LilysSummaryService;
+import com.moda.moda_api.summary.application.service.SummaryService;
 import com.moda.moda_api.user.domain.UserId;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.data.domain.Slice;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -33,8 +38,8 @@ public class CardService {
 	private final CardRepository cardRepository;
 	private final CardFactory cardFactory;
 	private final CardDtoMapper cardDtoMapper;
-	private final LilysSummaryService lilysSummaryService;
 	private final UrlCacheRepository urlCacheRepository;
+	private final SummaryService summaryService;
 
 	/**
 	 * URL을 입력 받고 새로운 카드 생성 후 알맞은 보드로 이동합니다.
@@ -44,13 +49,19 @@ public class CardService {
 	 */
 	@Transactional
 	public CompletableFuture<Boolean> createCard(String userId, String url) {
-		UserId userIdObj = new UserId("01234");
-		// urlHash처리
+		UserId userIdObj = new UserId("user");
 		String urlHash = UrlCache.generateHash(url);
 
 		return urlCacheRepository.findByUrlHash(urlHash)
-			.map(cache -> createCardFromCache(userIdObj, urlHash))    // url Hash가 있다면 기존에 있던것을 실행
-			.orElseGet(() -> createNewCard(userIdObj, url, urlHash)); // url Hash가 없다면 새로 만들기
+			.map(cache -> createCardFromCache(userIdObj, urlHash))
+			.orElseGet(() -> {
+				try {
+					return createNewCard(userIdObj, url, urlHash);
+				} catch (Exception e) {
+					e.printStackTrace();
+					return CompletableFuture.completedFuture(false); // 실패 시 false 반환
+				}
+			});
 	}
 
 	// UrlHash가 있는 경우
@@ -67,21 +78,21 @@ public class CardService {
 			cache.getCachedContent(),
 			existingCard.getThumbnailContent(),
 			existingCard.getThumbnailUrl(),
-			existingCard.getEmbedding()
+			existingCard.getEmbedding(),
+			existingCard.getKeywords(),
+			cache.getSubContents()
 		);
-
 		cardRepository.save(card);
 		return CompletableFuture.completedFuture(true);
 	}
 
 	// UrlHash가 없는 경우 새로운 것을 만들어야한다.
-	private CompletableFuture<Boolean> createNewCard(UserId userIdObj, String url, String urlHash) {
+	private CompletableFuture<Boolean> createNewCard(UserId userIdObj, String url, String urlHash) throws Exception {
 
 		// 여기서 2가지 경우로 다시 나눠야한다.
 		// summary에서 2가지 경우로 나눠보자.
-		return lilysSummaryService.summarize(url)
+		return summaryService.getSummary(url)
 			.thenApply(SummaryResultDto -> {
-
 				Card card = cardFactory.create(
 					userIdObj,
 					SummaryResultDto.getCategoryId(),
@@ -91,7 +102,9 @@ public class CardService {
 					SummaryResultDto.getContent(),
 					SummaryResultDto.getThumbnailContent(),
 					SummaryResultDto.getThumbnailUrl(),
-					SummaryResultDto.getEmbeddingVector()
+					SummaryResultDto.getEmbeddingVector(),
+					SummaryResultDto.getKeywords(),
+					SummaryResultDto.getSubContent()
 				);
 
 				urlCacheRepository.save(
@@ -100,6 +113,8 @@ public class CardService {
 						.cachedTitle(SummaryResultDto.getTitle())
 						.cachedContent(SummaryResultDto.getContent())
 						.originalUrl(url)
+						.subContents(SummaryResultDto.getSubContent())
+						.keywords(SummaryResultDto.getKeywords())
 						.build()
 				);
 

@@ -31,6 +31,10 @@ public class UrlCacheEntity {
     private String cachedContent;
 
     @Type(StringArrayType.class)
+    @Column(name = "subContents", columnDefinition = "text[]")
+    private String[] subContents;
+
+    @Type(StringArrayType.class)
     @Column(columnDefinition = "text[]")
     private String[] keywords;
 

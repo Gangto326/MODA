@@ -31,7 +31,8 @@ public class SearchService {
 		// 3. Redis에 저장 (keyword를 key로 사용)
 		urlRedisRepository.saveUrls(keyword, crawledUrls);
 
-		return crawledUrls;
+		List<Url> urls = urlRedisRepository.getUrls(keyword);
+		return urls;
 	}
 
 	private String buildGoogleSearchUrl(String keyword) {
@@ -43,7 +44,7 @@ public class SearchService {
 			searchUrlBuilder.append("?q=").append(URLEncoder.encode(keyword, "UTF-8"));
 
 			// 추가 매개변수
-			searchUrlBuilder.append("&num=10");  // 검색 결과 수 (최대 100)
+			searchUrlBuilder.append("&num=20");  // 검색 결과 수 (최대 100)
 			searchUrlBuilder.append("&hl=ko");   // 검색 언어 설정 (한국어)
 			searchUrlBuilder.append("&safe=active"); // SafeSearch 필터
 			searchUrlBuilder.append("&start=0");  // 검색 시작 위치 (페이징)
