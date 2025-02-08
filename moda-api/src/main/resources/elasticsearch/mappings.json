@@ -1,5 +1,11 @@
 {
   "properties": {
+    "userId": {
+      "type": "keyword"
+    },
+    "categoryId": {
+      "type": "keyword"
+    },
     "typeId": {
       "type": "keyword"
     },
@@ -31,6 +37,9 @@
     "embedding": {
       "type": "dense_vector",
       "dims": 768
+    },
+    "createdAt": {
+      "type": "date"
     }
   }
 }

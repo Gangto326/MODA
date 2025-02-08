@@ -11,42 +11,28 @@ import java.util.List;
 public interface CardSearchJpaRepository extends ElasticsearchRepository<CardDocumentEntity, String> {
 
     /**
-     * 사용자의 콘텐츠 중 적합한 콘텐츠를 가져옵니다.
-     *
-     * 완성이 되어가는 핵심 키워드를 자동으로 완성하고, 이미 완성 된 핵심 키워드 뒤에 연결합니다.
-     * @param exactKeyword 첫 번째 키워드
-     * @param prefixKeyword 마지막 매칭 될 키워드
+     * 키워드가 정확히 일치하는 동영상, 블로그, 뉴스 카드만 가져옵니다.
+     * @param keyword
      * @return
      */
     @Query("{" +
             "  \"bool\": {" +
             "    \"must\": [" +
-            "      { \"term\": { \"userId\": \"?0\" } }," +
-            "      { \"fuzzy\": { " +
-            "          \"keywords\": {" +
-            "              \"value\": \"?1\"," +
-            "              \"fuzziness\": \"AUTO\"" +
-            "          }" +
-            "      }}," +
-            "      { \"prefix\": { \"keywords\": \"?2\" } }" +
+            "      { \"terms\": { \"keywords\": [?1] } }," +
+            "      { \"terms\": { \"typeId\": [1, 2, 3] } }" +
+            "    ]," +
+            "    \"should\": [" +
+            "      { \"term\": { \"userId\": \"?0\", \"boost\": 2.0 } }" +
             "    ]" +
             "  }" +
             "}")
-    List<CardDocumentEntity> findAutoCompleteSuggestions(String userId, String exactKeyword, String prefixKeyword);
+    List<CardDocumentEntity> searchByKeyword(String userId, String keyword, Pageable pageable);
 
     /**
-     * 키워드와 정확히 일치하는 문서만 가져옵니다.
-     * @param keyword
-     * @return
-     */
-    @Query("{\"bool\": {\"must\": [{\"terms\": {\"keywords\": [?0]}}]}}")
-    List<CardDocumentEntity> searchByKeyword(String keyword);
-
-    /**
-     * 검색 후 나오는 메인 페이지에 나올 데이터를 type에 맞게 가져옵니다.
-     * @param typeId
+     * 검색 후 나오는 데이터를 type에 맞게 가져옵니다.
+     * @param typeId ContentType
      * @param userId
-     * @param searchText
+     * @param searchText 검색어
      * @param pageable
      * @return
      */
@@ -68,4 +54,31 @@ public interface CardSearchJpaRepository extends ElasticsearchRepository<CardDoc
             "  }" +
             "}")
     Slice<CardDocumentEntity> searchByType(Integer typeId, String userId, String searchText, Pageable pageable);
+
+    /**
+     * 각 카테고리별 데이터를 type에 맞게 가져옵니다.
+     * @param typeId
+     * @param categoryId
+     * @param userId
+     * @param pageable
+     * @return
+     */
+    @Query("{" +
+            "  \"query\": {" +
+            "    \"bool\": {" +
+            "      \"must\": [" +
+            "        { \"term\": { \"typeId\": ?0 } }," +
+            "        { \"term\": { \"categoryId\": ?1 } }," +
+            "        {" +
+            "          \"bool\": {" +
+            "            \"should\": [" +
+            "              { \"term\": { \"userId\": \"?2\", \"boost\": 2.0 } }" +
+            "            ]" +
+            "          }" +
+            "        }" +
+            "      ]" +
+            "    }" +
+            "  }" +
+            "}")
+    Slice<CardDocumentEntity> searchByCategoryAndType(Integer typeId, Long categoryId, String userId, Pageable pageable);
 }

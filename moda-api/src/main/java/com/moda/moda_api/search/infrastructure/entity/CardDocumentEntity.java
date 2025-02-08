@@ -4,6 +4,8 @@ import jakarta.persistence.Id;
 import lombok.*;
 import org.springframework.data.elasticsearch.annotations.*;
 
+import java.time.LocalDateTime;
+
 @Document(indexName = "card")
 @Getter
 @Builder
@@ -14,6 +16,12 @@ import org.springframework.data.elasticsearch.annotations.*;
 public class CardDocumentEntity {
     @Id
     private String id;  // cardId를 사용
+
+    @Field(type = FieldType.Keyword)
+    private String userId;
+
+    @Field(type = FieldType.Keyword)
+    private Long categoryId;
 
     @Field(type = FieldType.Keyword)
     private Integer typeId;
@@ -41,6 +49,9 @@ public class CardDocumentEntity {
 
     @Field(type = FieldType.Dense_Vector, dims = 768)
     private float[] embedding;
+
+    @Field(type = FieldType.Date)
+    private LocalDateTime createdAt;
 
     private Float score;
 }

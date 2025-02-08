@@ -1,5 +1,6 @@
 package com.moda.moda_api.search.domain;
 
+import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.user.domain.UserId;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -7,9 +8,11 @@ import org.springframework.data.domain.Slice;
 import java.util.List;
 
 public interface CardSearchRepository {
-    List<CardDocument> findAutoCompleteSuggestions(UserId userId, String exactKeyword, String prefixKeyword);
+    List<CardDocument> findAutoCompleteSuggestions(UserId userId, List<String> completeKeywords, String prefixKeyword);
 
-    List<CardDocument> searchByKeyword(String keyword);
+    List<CardDocument> searchByKeyword(UserId userId, String keyword, Pageable pageable);
 
     Slice<CardDocument> searchComplex(Integer typeId, UserId userId, String searchText, Pageable pageable);
+
+    Slice<CardDocument> searchByCategoryAndType(Integer typeId, CategoryId categoryId, UserId userId, Pageable pageable);
 }

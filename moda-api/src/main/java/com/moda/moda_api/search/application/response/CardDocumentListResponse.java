@@ -12,11 +12,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CardDocumentListResponse {
     private String cardId;
+    private Long categoryId;
     private ContentType type;
     private String title;
     private String thumbnailContent;
     private String thumbnailUrl;
     private String[] keywords;
     private String[] excludedKeywords;
+    private Boolean isMine;
     private Float score;
 }
