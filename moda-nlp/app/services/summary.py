@@ -25,10 +25,9 @@ def assistant_prompt(prompt: str):
 
 class Summary:
     MAX_CATEGORY_TRIES = 10
+    MODEL = 'qwen2.5'
 
     def __init__(self, origin_content: str):
-        self.messages = []
-
         self.origin_content = origin_content
         self.embedder = Embedding()
         self.category = ''
@@ -54,7 +53,7 @@ class Summary:
     #ollama 채팅을 진행하는 함수
     def chat(self,
              messages,
-             model: str = 'hf.co/Bllossom/llama-3.2-Korean-Bllossom-3B-gguf-Q4_K_M',
+             model: str = MODEL,
              format = None):
         response = ollama.chat(
             model = model,
@@ -65,12 +64,11 @@ class Summary:
 
     #Summary 객체가 실행되면 가장 먼저 실행되는 함수
     def execute(self):
-        print("embedding")
         self.make_embedding_vector()
-        print("choose")
         self.choose_category()
         # TODO: prompt
         # TODO: content
+        # self.summary_content()
         # TODO: keywords
         # TODO: thumbnail_content
 
@@ -80,7 +78,7 @@ class Summary:
 
     #category를 선택하는 함수
     def choose_category(self):
-        model = 'hf.co/Bllossom/llama-3.2-Korean-Bllossom-3B-gguf-Q4_K_M'
+        model = self.MODEL
         messages = category_prompt
         messages[1]['content'] += self.origin_content
         format = {
@@ -97,8 +95,6 @@ class Summary:
         attempt_count = 0
         while attempt_count < self.MAX_CATEGORY_TRIES:
             selected = self.chat(model = model, messages = messages, format = format)
-
-            print(selected, attempt_count)
 
             for idx, category in enumerate(categories_name()):
                 if category.lower() in selected.lower():
@@ -117,3 +113,11 @@ class Summary:
             self.category = 'ALL'
         
         print("선택된 카테고리:", self.category_id, self.category)
+
+    #content를 요약하는 함수
+    def summary_content(self):
+        model = self.MODEL
+        messages = category_prompt
+        messages[1]['content'] += self.origin_content
+
+        self.content = self.chat(model = model, messages = messages, format = format)
