@@ -10,6 +10,8 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface CardJpaRepository extends JpaRepository<CardEntity, String> {
+    Slice<CardEntity> findByUserId(String value, Pageable pageable);
+
     Slice<CardEntity> findByUserIdAndCategoryId(String userId, Long categoryId, Pageable pageable);
 
     Optional<CardEntity> findByUserIdAndCardId(String userId, String cardId);

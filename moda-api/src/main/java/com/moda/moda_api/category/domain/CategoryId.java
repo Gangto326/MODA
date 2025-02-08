@@ -7,12 +7,17 @@ import lombok.Value;
 
 @Value
 public class CategoryId {
+    public static final Long ALL = 1L;
     Long value;
 
     @JsonCreator
     public CategoryId(@JsonProperty("value") Long value) {
         validateCategoryId(value);
         this.value = value;
+    }
+
+    public static CategoryId all() {
+        return new CategoryId(ALL);
     }
 
     /**

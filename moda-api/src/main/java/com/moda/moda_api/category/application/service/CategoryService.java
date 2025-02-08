@@ -7,6 +7,7 @@ import com.moda.moda_api.category.exception.TargetNotFoundException;
 import com.moda.moda_api.category.presentation.request.UpdateCategoryPositionRequest;
 import com.moda.moda_api.user.domain.UserId;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class CategoryService {
@@ -70,6 +72,7 @@ public class CategoryService {
 
         // 타겟의 위치 변경 후 저장
         targetCategory.movePosition(targetPosition, Position.max());
+
         categoryOrderRepository.save(targetCategory);
 
         return categoryPositionService.sortByPosition(categoryList).stream()
