@@ -72,24 +72,28 @@ fun CategoryList(
     }
 
     Column(modifier = Modifier.fillMaxWidth()) {
-        // 상위 5개 카테고리 표시
+        // position 값이 1~5인 카테고리 (위쪽)
+        val topCategories = categories.filter { it.position in 1..5 }
+
+        // position 값이 6~10인 카테고리 (아래쪽)
+        val bottomCategories = categories.filter { it.position in 6..10 }
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            categories.take(5).forEach { category ->
+            topCategories.forEach { category ->
                 CategoryItem(category = category, navController = navController)
             }
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // 이후 5개 카테고리 표시
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            categories.drop(5).take(5).forEach { category ->
+            bottomCategories.forEach { category ->
                 CategoryItem(category = category, navController = navController)
             }
         }
