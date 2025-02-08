@@ -95,6 +95,15 @@ CREATE TABLE images (
     FOREIGN KEY (category_id) REFERENCES category(category_id)
 );
 
+CREATE TABLE fcm_tokens (
+    token_id BIGSERIAL PRIMARY KEY,
+    user_id VARCHAR(36) NOT NULL,
+    token VARCHAR(255) NOT NULL UNIQUE, 
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT NULL,  
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
 
 INSERT INTO users (user_id, email, password, profile_img, nickname, status) VALUES
 ('01234', 'jongwon', '1234', '1234', '1234', '123');
