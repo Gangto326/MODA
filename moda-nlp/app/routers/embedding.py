@@ -21,6 +21,6 @@ async def embed_document(document: Document):
         embedding_vector = embedder.embed_document(document.content)
         process_time = time.time() - start_time
         print(f"문서 임베딩 완료 - {process_time:.2f}초")
-        return embedding_vector.tolist()
+        return embedding_vector
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

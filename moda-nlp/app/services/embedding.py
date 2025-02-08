@@ -1,6 +1,7 @@
 from sentence_transformers import SentenceTransformer, util
 import numpy as np
 import torch
+from typing import List
 
 class Embedding:
     def __init__(self, model_name: str = 'jhgan/ko-sroberta-multitask', cache_folder: str = './models'):
@@ -10,11 +11,11 @@ class Embedding:
 
     def embed_document(self,
                        content: str,
-                       batch_size: int = 32) -> np.ndarray:
+                       batch_size: int = 32) -> List[float]:
         embeddings = self.model.encode(
             content,
             batch_size=batch_size,
             convert_to_numpy=True
         )
 
-        return embeddings
+        return embeddings.tolist()

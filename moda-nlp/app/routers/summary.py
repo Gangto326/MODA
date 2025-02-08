@@ -1,7 +1,6 @@
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException, Request
+from app.schemas.post import PostRequest
 from app.services.summary import Summary
-from typing import List
 import time
 
 router = APIRouter(
@@ -10,23 +9,15 @@ router = APIRouter(
     responses={404: {"description": "Not found"}}
 )
 
-class Document(BaseModel):
-    contents: List[str]
-
-summarizer = Summary()
-
-@router.post("")
-async def embed_document(document: Document):
+@router.post("/post")
+async def summary_document(postRequest: PostRequest):
     try:
         start_time = time.time()
 
-        summary = List
-
-        for content in document.contents:
-            summary.append(summarizer.summary_document(content))
+        summarizer = Summary(postRequest.content)
 
         process_time = time.time() - start_time
-        print(f"문서 요약 완료 - {process_time:.2f}초")
-        return summary
+        print(f"포스트 요약 완료 - {process_time:.2f}초")
+        return summarizer.get_response()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
