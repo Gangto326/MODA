@@ -1,5 +1,6 @@
-package com.moda.moda_api.summary.infrastructure.dto.lilysummaryresult;
+package com.moda.moda_api.summary.infrastructure.dto.lilysummarytyperesult;
 
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ShortSummaryResult {
+public class TimestampResult {
 	private OuterData data;
 	private String status;
 
@@ -29,6 +30,15 @@ public class ShortSummaryResult {
 	@AllArgsConstructor
 	@Builder
 	public static class NestedData {
-		private String summary;
+		private List<TimestampEntry> result;
+	}
+
+	@Data
+	@NoArgsConstructor
+	@AllArgsConstructor
+	@Builder
+	public static class TimestampEntry {
+		private String title;
+		private double timestamp;
 	}
 }

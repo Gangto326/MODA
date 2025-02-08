@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @Getter
-public class LilysAiResponse {
+public class LilysRequestIdResponse {
 	private String requestId;
 }

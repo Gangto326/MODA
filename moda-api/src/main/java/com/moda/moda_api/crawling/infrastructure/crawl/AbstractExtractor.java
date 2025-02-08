@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import org.openqa.selenium.By;
@@ -17,12 +16,11 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Service;
 
 import com.moda.moda_api.common.infrastructure.ImageStorageService;
-import com.moda.moda_api.crawling.domain.model.Url;
-import com.moda.moda_api.summary.domain.ContentItem;
-import com.moda.moda_api.summary.domain.ContentItemType;
 import com.moda.moda_api.crawling.domain.model.CrawledContent;
+import com.moda.moda_api.crawling.domain.model.Url;
 import com.moda.moda_api.crawling.infrastructure.config.crawlerConfig.ExtractorConfig;
 import com.moda.moda_api.crawling.infrastructure.config.crawlerConfig.PlatformExtractorFactory;
+import com.moda.moda_api.crawling.domain.model.ExtractedContent;
 import com.moda.moda_api.summary.exception.ExtractorException;
 
 import lombok.RequiredArgsConstructor;
@@ -43,14 +41,14 @@ public class AbstractExtractor {
 			driver.get(url);
 
 			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-			wait.until(webDriver -> ((JavascriptExecutor) webDriver)
+			wait.until(webDriver -> ((JavascriptExecutor)webDriver)
 				.executeScript("return document.readyState").equals("complete"));
 
 			// 페이지 로딩을 위한 초기 대기 추가
 			Thread.sleep(1000);
 
 			// 먼저 페이지가 완전히 로드될 때까지 대기
-			wait.until(webDriver -> ((JavascriptExecutor) webDriver)
+			wait.until(webDriver -> ((JavascriptExecutor)webDriver)
 				.executeScript("return document.readyState").equals("complete"));
 
 			// 그 다음 요소들을 찾음
@@ -100,7 +98,7 @@ public class AbstractExtractor {
 				.url(new Url(url))
 				.urlDomainType(config.getUrlDomainType())
 				.title(extractTitle())
-				.contentItems(extractContent(config))
+				.extractedContent(extractContent(config))
 				.build();
 
 		} catch (Exception e) {
@@ -113,9 +111,9 @@ public class AbstractExtractor {
 	}
 
 	//Body본문과 이미지 추출하기
-	public List<ContentItem> extractContent(ExtractorConfig config) {
-		List<ContentItem> result = new ArrayList<>();
+	public ExtractedContent extractContent(ExtractorConfig config) {
 		StringBuilder textBuilder = new StringBuilder();
+		List<String> imagesList = new ArrayList<>();  // 임시로 List 사용
 
 		try {
 			WebDriverWait contentWait = new WebDriverWait(driver, Duration.ofSeconds(20));
@@ -138,18 +136,12 @@ public class AbstractExtractor {
 					String tagName = element.getTagName().toLowerCase();
 
 					if (tagName.equals("img")) {
-						// 이미지를 만나면 지금까지 모은 텍스트를 저장
-						if (textBuilder.length() > 0) {
-							result.add(new ContentItem(textBuilder.toString().trim(), ContentItemType.TEXT));
-							textBuilder.setLength(0); // StringBuilder 초기화
-						}
-
 						// 이미지 처리
 						String src = element.getAttribute("src");
 						if (src != null && !src.isEmpty() && isValidImageUrl(src)) {
 							try {
 								String savedImageUrl = imageStorageService.uploadImage(src);
-								result.add(new ContentItem(savedImageUrl, ContentItemType.IMAGE));
+								imagesList.add(savedImageUrl);
 							} catch (Exception e) {
 								log.error("Failed to process image: {}", src, e);
 							}
@@ -158,17 +150,15 @@ public class AbstractExtractor {
 						// 텍스트 요소 처리
 						String text = element.getText().trim();
 						if (!text.isEmpty()) {
+							// 이전 텍스트가 있으면 줄바꿈 추가
+							if (textBuilder.length() > 0) {
+								textBuilder.append("\n");
+							}
+
 							// 헤딩 태그인 경우 태그 정보 포함
 							if (tagName.matches("h[1-6]")) {
-								if (textBuilder.length() > 0) {
-									textBuilder.append("\n");
-								}
 								textBuilder.append(String.format("<%s>%s</%s>", tagName, text, tagName));
 							} else {
-								// 일반 텍스트의 경우
-								if (textBuilder.length() > 0) {
-									textBuilder.append("\n");
-								}
 								textBuilder.append(text);
 							}
 						}
@@ -179,16 +169,14 @@ public class AbstractExtractor {
 				}
 			}
 
-			// 마지막 텍스트 블록 처리
-			if (textBuilder.length() > 0) {
-				result.add(new ContentItem(textBuilder.toString().trim(), ContentItemType.TEXT));
-			}
-
-			return result;
+			return ExtractedContent.builder()
+				.text(textBuilder.toString().trim())
+				.images(imagesList.toArray(new String[0]))  // List를 배열로 변환
+				.build();
 
 		} catch (Exception e) {
 			log.error("Failed to extract content", e);
-			return result;
+			return ExtractedContent.empty();
 		}
 	}
 

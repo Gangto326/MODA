@@ -13,7 +13,7 @@ public class CardFactory {
 	public Card create(UserId userId, CategoryId categoryId,
 		Integer typeId, String urlHash,
 		String title, String content, String thumbnailContent, String thumbnailUrl,
-		EmbeddingVector embedding, String[] keywords) {
+		EmbeddingVector embedding, String[] keywords, String[] subContent) {
 		return Card.builder()
 			.cardId(generateCardId())
 			.userId(userId)
@@ -28,6 +28,7 @@ public class CardFactory {
 			.embedding(embedding)
 			.createdAt(LocalDateTime.now())
 			.keywords(keywords)
+			.subContents(subContent)
 			.build();
 	}
 

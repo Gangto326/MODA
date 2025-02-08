@@ -1,30 +1,34 @@
 package com.moda.moda_api.card.application.service;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Slice;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.moda.moda_api.card.application.mapper.CardDtoMapper;
 import com.moda.moda_api.card.application.response.CardDetailResponse;
 import com.moda.moda_api.card.application.response.CardListResponse;
-import com.moda.moda_api.card.domain.*;
+import com.moda.moda_api.card.domain.Card;
+import com.moda.moda_api.card.domain.CardFactory;
+import com.moda.moda_api.card.domain.CardId;
+import com.moda.moda_api.card.domain.CardRepository;
+import com.moda.moda_api.card.domain.UrlCache;
+import com.moda.moda_api.card.domain.UrlCacheRepository;
 import com.moda.moda_api.card.exception.CardNotFoundException;
 import com.moda.moda_api.card.presentation.request.MoveCardRequest;
 import com.moda.moda_api.card.presentation.request.UpdateCardRequest;
 import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.common.pagination.SliceRequestDto;
 import com.moda.moda_api.common.pagination.SliceResponseDto;
-import com.moda.moda_api.summary.application.service.LilysSummaryService;
 import com.moda.moda_api.summary.application.service.SummaryService;
 import com.moda.moda_api.user.domain.UserId;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.data.domain.Slice;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -75,9 +79,9 @@ public class CardService {
 			existingCard.getThumbnailContent(),
 			existingCard.getThumbnailUrl(),
 			existingCard.getEmbedding(),
-			existingCard.getKeywords()
+			existingCard.getKeywords(),
+			cache.getSubContents()
 		);
-
 		cardRepository.save(card);
 		return CompletableFuture.completedFuture(true);
 	}
@@ -99,7 +103,8 @@ public class CardService {
 					SummaryResultDto.getThumbnailContent(),
 					SummaryResultDto.getThumbnailUrl(),
 					SummaryResultDto.getEmbeddingVector(),
-					SummaryResultDto.getKeyword()
+					SummaryResultDto.getKeywords(),
+					SummaryResultDto.getSubContent()
 				);
 
 				urlCacheRepository.save(
@@ -108,6 +113,8 @@ public class CardService {
 						.cachedTitle(SummaryResultDto.getTitle())
 						.cachedContent(SummaryResultDto.getContent())
 						.originalUrl(url)
+						.subContents(SummaryResultDto.getSubContent())
+						.keywords(SummaryResultDto.getKeywords())
 						.build()
 				);
 

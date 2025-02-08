@@ -1,7 +1,9 @@
 package com.moda.moda_api.summary.infrastructure.api;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -12,10 +14,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.moda.moda_api.summary.application.dto.SummaryResultDto;
-import com.moda.moda_api.summary.infrastructure.dto.LilysAiResponse;
-import com.moda.moda_api.summary.infrastructure.mapper.JsonMapper;
 import com.moda.moda_api.summary.exception.SummaryProcessingException;
+import com.moda.moda_api.summary.infrastructure.dto.LilysRequestIdResponse;
+import com.moda.moda_api.summary.infrastructure.dto.LilysSummary;
+import com.moda.moda_api.summary.infrastructure.dto.TitleAndContent;
+import com.moda.moda_api.summary.infrastructure.mapper.JsonMapper;
 import com.moda.moda_api.summary.infrastructure.service.TitleExtractor;
 
 import lombok.RequiredArgsConstructor;
@@ -33,13 +36,13 @@ public class LilysAiClient {
 	@Value("${lilys.ai.api.url}")
 	private String lilysUrl;
 
-	public CompletableFuture<LilysAiResponse> getRequestId(String url) {
+	public CompletableFuture<LilysRequestIdResponse> getRequestId(String url) {
 		System.out.println(url);
 		return lilysWebClient.post()
 			.uri(lilysUrl)
 			.bodyValue(createRequestBody(url))  // Http메세지 Body를 만든다.
 			.retrieve()  // 받을 준비가 됨.
-			.bodyToMono(LilysAiResponse.class)  // 응답 본문을 LilysAiResponse 클래스의 객체로 변환
+			.bodyToMono(LilysRequestIdResponse.class)  // 응답 본문을 LilysAiResponse 클래스의 객체로 변환
 			.doOnError(e -> {  // 에러 처리 실패시
 				log.error("Failed to get RequestId for url: {}", url, e);
 				throw new SummaryProcessingException("Failed to get RequestId from Lilys AI", e);
@@ -50,7 +53,7 @@ public class LilysAiClient {
 			.toFuture();
 	}
 
-	public CompletableFuture<SummaryResultDto> getSummaryResults(String requestId, String url) {
+	public CompletableFuture<LilysSummary> getSummaryResults(String requestId, String url) {
 
 		// 첫 번째 Future: summaryNote 가져오기
 		CompletableFuture<JsonNode> contentFuture = getResult(requestId, "summaryNote");
@@ -72,9 +75,11 @@ public class LilysAiClient {
 		// 모든 Future를 조합하여 하나의 CardSummaryResponse 생성
 		return CompletableFuture.allOf(contentFuture, thumbnailFuture, titleFuture)
 			.thenApply(v -> {
-				JsonNode mainContent = null;
+				List<TitleAndContent> mainContent = new ArrayList<>();
+				String[] timeStamps = new String[0];
 				try {
 					mainContent = jsonMapper.processSummaryNote(contentFuture.join());
+					timeStamps = jsonMapper.extractTimestamps(contentFuture.join());
 				} catch (JsonProcessingException e) {
 					e.printStackTrace();
 				}
@@ -84,12 +89,13 @@ public class LilysAiClient {
 				String thumbnailUrl = getVideoId(url);
 
 				//만약 mainContent가 없으면 error가 난다.
-				return SummaryResultDto.builder()
-					.typeId(1)
-					.content(mainContent.toString())
+				return LilysSummary.builder()
+					.contents(mainContent)
 					.thumbnailContent(thumbnailContent)
 					.thumbnailUrl(thumbnailUrl)
 					.title(title)
+					.typeId(1)
+					.timeStamp(timeStamps)
 					.build();
 			})
 			.exceptionally(e -> {

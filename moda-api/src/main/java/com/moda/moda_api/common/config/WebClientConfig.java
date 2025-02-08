@@ -20,7 +20,7 @@ public class WebClientConfig {
 	private String lilysApiKey;
 
 	@Value("${embedding.api.url}")
-	private String embeddingUrl;
+	private String pythonURL;
 
 	@Bean("googleWebClient")
 	public WebClient googleCustomSearchWebClient(WebClient.Builder builder) {
@@ -30,7 +30,6 @@ public class WebClientConfig {
 			.build();
 	}
 
-
 	@Bean("lilysWebClient")
 	public WebClient lilysWebClient(WebClient.Builder builder) {
 		return builder
@@ -39,11 +38,10 @@ public class WebClientConfig {
 			.build();
 	}
 
-	@Bean("embeddingWebClient")
-	public WebClient embeddingWebClient(WebClient.Builder builder) {
-		return builder.baseUrl(embeddingUrl)
-				.clientConnector(new ReactorClientHttpConnector(HttpClient.create()
-						.followRedirect(true)))
-				.build();
+	@Bean("pythonWebClient")
+	public WebClient pythonWebClient(WebClient.Builder builder) {
+		return builder.baseUrl(pythonURL)
+			.clientConnector(new ReactorClientHttpConnector(HttpClient.create().followRedirect(true)))
+			.build();
 	}
 }

@@ -14,7 +14,8 @@ public class CrawlingService {
 
 	// url를 통한 크롤링
 	public CrawledContent crawlByUrl(String url) throws Exception {
-		return extractor.extract(url);
+		CrawledContent crawledContent = extractor.extract(url);
+		return crawledContent;
 	}
 
 }

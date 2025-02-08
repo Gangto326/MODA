@@ -1,19 +1,15 @@
 package com.moda.moda_api.summary.infrastructure.mapper;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.moda.moda_api.summary.infrastructure.dto.lilysummaryresult.BlogPostResult;
-import com.moda.moda_api.summary.infrastructure.dto.lilysummaryresult.RawScriptResult;
-import com.moda.moda_api.summary.infrastructure.dto.lilysummaryresult.ShortSummaryResult;
-import com.moda.moda_api.summary.infrastructure.dto.lilysummaryresult.SummaryNoteResult;
-import com.moda.moda_api.summary.infrastructure.dto.lilysummaryresult.TimestampResult;
+import com.moda.moda_api.summary.infrastructure.dto.TitleAndContent;
+import com.moda.moda_api.summary.infrastructure.dto.lilysummarytyperesult.SummaryNoteResult;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,21 +18,25 @@ import lombok.RequiredArgsConstructor;
 public class JsonMapper {
 	private final ObjectMapper mapper;
 
-	public JsonNode processSummaryNote(JsonNode jsonNode) throws JsonProcessingException {
+	public List<TitleAndContent> processSummaryNote(JsonNode jsonNode) throws JsonProcessingException {
 		SummaryNoteResult summaryNote = mapper.treeToValue(jsonNode, SummaryNoteResult.class);
-		return mapSummaryNoteListToJson(summaryNote.getData().getData().getSummaryNote());
+		return convertToTitleAndContent(summaryNote.getData().getData().getSummaryNote());
 	}
 
-	// 우리만의 방식으로 다시 Json만들기
-	public JsonNode mapSummaryNoteListToJson(List<SummaryNoteResult.SummaryNoteEntry> entries) throws JsonProcessingException {
-		ArrayNode arrayNode = mapper.createArrayNode();
-		for (SummaryNoteResult.SummaryNoteEntry entry : entries) {
-			ObjectNode entryNode = mapper.createObjectNode();
-			entryNode.put("timestamp", entry.getTimestamp());
-			entryNode.put("title", entry.getTitle());
-			entryNode.putPOJO("content", entry.getContent());
-			arrayNode.add(entryNode);
-		}
-		return arrayNode;
+	private List<TitleAndContent> convertToTitleAndContent(List<SummaryNoteResult.SummaryNoteEntry> entries) {
+		return entries.stream()
+			.map(entry -> new TitleAndContent(
+				entry.getTitle(),
+				String.join("\n", entry.getContent())
+			))
+			.collect(Collectors.toList());
+	}
+
+	// timestamp 배열이 필요한 경우를 위한 메서드
+	public String[] extractTimestamps(JsonNode jsonNode) throws JsonProcessingException {
+		SummaryNoteResult summaryNote = mapper.treeToValue(jsonNode, SummaryNoteResult.class);
+		return summaryNote.getData().getData().getSummaryNote().stream()
+			.map(entry -> String.valueOf(entry.getTimestamp()))
+			.toArray(String[]::new);
 	}
 }
