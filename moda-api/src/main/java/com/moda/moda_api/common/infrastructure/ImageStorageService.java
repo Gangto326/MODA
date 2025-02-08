@@ -4,10 +4,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import io.awspring.cloud.s3.ObjectMetadata;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.core.ResponseBytes;
@@ -20,8 +21,8 @@ import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import java.io.ByteArrayOutputStream;
 import java.net.URL;
+import java.util.Optional;
 import java.util.UUID;
-
 
 @RequiredArgsConstructor
 @Service
@@ -32,14 +33,12 @@ public class ImageStorageService {
 	@Value("${spring.cloud.aws.s3.bucket}")
 	private String bucket;
 
-
-
 	/**
 	 * S3에 업로드 하기 위한 메서드
 	 * @param imageUrl 업로드할 이미지의 URL 주소
 	 * @return S3에 업로드된 이미지의 URL 주소
 	 */
-	public String uploadImage(String imageUrl) {
+	public String uploadImageFromurl(String imageUrl) {
 		try {
 			byte[] imageData = downloadImageFromUrl(imageUrl);
 
@@ -47,7 +46,7 @@ public class ImageStorageService {
 			String fileName = UUID.randomUUID() + ".jpg";
 
 			// S3에 저장될 경로
-			String key = "images/" + fileName;
+			String key = "images/blogPost/" + fileName;
 
 			PutObjectRequest request = PutObjectRequest.builder()
 				.bucket(bucket)
@@ -72,7 +71,7 @@ public class ImageStorageService {
 	public byte[] downloadImageFromUrl(String imageUrl) {
 		try {
 			URL url = new URL(imageUrl);
-			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+			HttpURLConnection connection = (HttpURLConnection)url.openConnection();
 			connection.setRequestMethod("GET");
 
 			// 이미지 다운로드
@@ -94,4 +93,37 @@ public class ImageStorageService {
 		}
 	}
 
+	public String uploadMultipartFile(MultipartFile file) {
+		try {
+			// fileName을 UUID로 생성
+			String fileName = UUID.randomUUID() + getExtension(file.getOriginalFilename());
+
+			// S3에 저장될 경로
+			String key = "images/capture/" + fileName;
+
+			PutObjectRequest request = PutObjectRequest.builder()
+				.bucket(bucket)
+				.key(key)
+				.contentType(file.getContentType())
+				.build();
+
+			s3Client.putObject(request,
+				RequestBody.fromBytes(file.getBytes()));
+
+			// URL 생성
+			return String.format("https://%s.s3.ap-northeast-2.amazonaws.com/%s",
+				bucket, key);
+
+		} catch (S3Exception | IOException e) {
+			log.error("Error uploading file to S3: {}", e.getMessage());
+			throw new RuntimeException("Failed to upload image to S3", e);
+		}
+	}
+
+	private String getExtension(String filename) {
+		return Optional.ofNullable(filename)
+			.filter(f -> f.contains("."))
+			.map(f -> "." + f.substring(f.lastIndexOf(".") + 1))
+			.orElse(".jpg");
+	}
 }

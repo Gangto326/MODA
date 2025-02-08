@@ -16,7 +16,7 @@ public class PythonAiClient {
 
 	public AIAnalysisResponseDTO articleAnalysis(String contentItems) {
 		return pythonWebClient.post()
-			.uri("/summary")
+			.uri("summary/post")
 			.bodyValue(contentItems)
 			.retrieve()
 			.bodyToMono(AIAnalysisResponseDTO.class)
@@ -25,11 +25,21 @@ public class PythonAiClient {
 
 	public AIAnalysisResponseDTO youtubeAnalysis(String content) {
 		return pythonWebClient.post()
-			.uri("/youtube")
+			.uri("summary/youtube")
 			.bodyValue(content)
 			.retrieve()
 			.bodyToMono(AIAnalysisResponseDTO.class)
 			.block();
 	}
+
+	public AIAnalysisResponseDTO imageAnalysis(String content) {
+		return pythonWebClient.post()
+			.uri("summary/youtube")
+			.bodyValue(content)
+			.retrieve()
+			.bodyToMono(AIAnalysisResponseDTO.class)
+			.block();
+	}
+
 }
 
