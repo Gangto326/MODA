@@ -9,6 +9,9 @@
 1. pip install poetry
 2. poetry install
 
+## 공통
+1. pip install ollama, py-hanspell-aideer
+
 # 프로젝트 실행 방법
 1. 루트 디렉토리에서 cmd 실행
 2. 가상환경 진입
