@@ -26,6 +26,8 @@ import com.example.modapjt.components.home.WeeklyKeyword
 import com.example.modapjt.domain.viewmodel.CategoryViewModel
 // ... 기존 imports는 유지
 import com.example.modapjt.components.bar.HeaderBar  // HeaderBar import 추가
+import com.example.modapjt.components.home.BottomThumbnailList
+import com.example.modapjt.components.home.KeywordList
 
 @Composable
 fun newHomeScreen(
@@ -63,17 +65,6 @@ fun newHomeScreen(
     }
 
     Scaffold(
-        topBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-                    .offset(y = headerOffsetY)
-                    .alpha(headerAlpha)
-            ) {
-                HeaderBar(modifier = Modifier)  // modifier 파라미터 추가
-            }
-        },
         bottomBar = { BottomBarComponent(navController, currentRoute) }
     ) { paddingValues ->
         LazyColumn(
@@ -82,20 +73,35 @@ fun newHomeScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
+            // 기존 `topBar`에서 제거된 헤더를 리스트의 첫 번째 `item`으로 추가
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp)
+                        .offset(y = headerOffsetY)
+                        .alpha(headerAlpha)
+                ) {
+                    HeaderBar(modifier = Modifier)
+                }
+            }
+
             item {
                 Spacer(modifier = Modifier.height(3.dp))
                 SearchBar(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 14.dp),
-                    navController = navController  // navController를 명시적으로 전달
+                    navController = navController
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
+
             item {
                 ThumbnailSlider()
                 Spacer(modifier = Modifier.height(16.dp))
             }
+
             item {
                 CategoryList(navController = navController, viewModel = viewModel)
             }
@@ -108,28 +114,7 @@ fun newHomeScreen(
             }
 
             item {
-                val keywords = listOf("운동", "다이어트", "헬스", "근력", "유산소", "식단", "스트레칭")
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                ) {
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        for (keyword in keywords) {
-                            WeeklyKeyword(keyword)
-                        }
-                    }
-                }
-
+                KeywordList()
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
@@ -141,31 +126,7 @@ fun newHomeScreen(
             }
 
             item {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                ) {
-                    val thumbnails = listOf(
-                        Color(0xFFFFCDD2),
-                        Color(0xFFC8E6C9),
-                        Color(0xFFBBDEFB),
-                        Color(0xFFFFF9C4),
-                        Color(0xFFD1C4E9)
-                    )
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        for (color in thumbnails) {
-                            BottomThumbnail(backgroundColor = color)
-                        }
-                    }
-                }
-
+                BottomThumbnailList()
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
