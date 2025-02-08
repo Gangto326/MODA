@@ -1,35 +1,11 @@
 category_prompt = [
     {
         'role': 'system',
-        'content': '''# 문서 분류 시스템
-당신은 문서 분류 전문가입니다.
-주어진 문서를 다음 9개의 카테고리 중 가장 적합한 하나의 카테고리로 분류해야 합니다.
-
-## 카테고리 목록
-1. **Trends**: 최신 트렌드, 유행, 시대적 흐름 관련
-2. **Entertainment**: 영화, 음악, 게임, 방송, 공연 등 엔터테인먼트 관련
-3. **Finance**: 금융, 투자, 경제, 재테크 관련
-4. **Travel**: 여행, 관광, 레저 활동 관련
-5. **Food**: 음식, 요리, 식문화 관련
-6. **IT**: 기술, 소프트웨어, 하드웨어, 디지털 관련
-7. **Design**: 디자인, 예술, 시각적 표현 관련
-8. **Society**: 사회 이슈, 정치, 문화, 교육 관련
-9. **Health**: 건강, 의료, 웰빙, 운동 관련
-
-## 분류 규칙
-- 반드시 하나의 카테고리만 선택해야 합니다
-- 위 목록에 없는 다른 카테고리는 절대 사용 불가합니다
-- 문서의 주요 주제와 맥락을 고려하여 가장 적합한 카테고리를 선택하세요
-- 여러 주제가 섞여있다면 가장 핵심적인 주제를 기준으로 판단하세요
-
-## 응답 형식
-{
-    "category" : 카테고리
-}'''
+        'content': '''Analyze the document and select one category from ["Trends", "Entertainment", "Finance", "Travel", "Food", "IT", "Design", "Society", "Health"]'''
     },
     {
         'role': 'user',
-        'content': '''아래 문서의 내용을 분석하여 가장 적합한 하나의 카테고리로 분류해주세요. 추가 설명 없이 카테고리명만 답변해주세요:
+        'content': '''Please categorize the following document:
         
         '''
     }

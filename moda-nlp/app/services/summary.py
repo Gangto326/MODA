@@ -1,6 +1,6 @@
 import ollama
 from typing import List, Dict
-from app.constants.category import categories_name
+from app.constants.category import categories, categories_name
 from app.constants.prompt import category_prompt
 from app.services.embedding import Embedding
 from app.schemas.post import PostResponse
@@ -80,21 +80,32 @@ class Summary:
 
     #category를 선택하는 함수
     def choose_category(self):
+        model = 'hf.co/Bllossom/llama-3.2-Korean-Bllossom-3B-gguf-Q4_K_M'
         messages = category_prompt
         messages[1]['content'] += self.origin_content
+        format = {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                }
+            },
+            "required": ["category"]
+            }
 
         find_category = False
         attempt_count = 0
         while attempt_count < self.MAX_CATEGORY_TRIES:
-            selected = self.chat(messages)
+            selected = self.chat(model = model, messages = messages, format = format)
 
-            print(attempt_count, selected)
+            print(selected, attempt_count)
 
             for idx, category in enumerate(categories_name()):
-                if category in selected:
+                if category.lower() in selected.lower():
                     find_category = True
                     self.category_id = idx
                     self.category = category
+                    break
 
             if find_category:
                 break
@@ -104,3 +115,5 @@ class Summary:
         if attempt_count == self.MAX_CATEGORY_TRIES:
             self.category_id = 0
             self.category = 'ALL'
+        
+        print("선택된 카테고리:", self.category_id, self.category)
