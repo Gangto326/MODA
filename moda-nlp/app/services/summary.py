@@ -1,9 +1,11 @@
 import ollama
+import json
 from app.constants.category import categories_name
 from app.constants.prompt import make_summary_prompt, make_keywords_content_prompt, \
     make_thumbnail_content_prompt, make_category_prompt
 from app.services.embedding import Embedding
 from app.schemas.post import PostResponse
+from app.services.spell_ckeck import spell_check
 
 class Summary:
     MAX_CATEGORY_TRIES = 10
@@ -70,15 +72,13 @@ class Summary:
             'required': ['category']
         }
 
-        print(f'카테고리 프롬프트:\n{messages}')
-
         find_category = False
         attempt_count = 0
         while attempt_count < self.MAX_CATEGORY_TRIES:
-            selected = self.chat(model = model, messages = messages, format = format)
+            response = self.chat(model = model, messages = messages, format = format)
 
             for idx, category in enumerate(categories_name()):
-                if category.lower() in selected.lower():
+                if category.lower() in response.lower():
                     find_category = True
                     self.category_id = idx
                     self.category = category
@@ -93,7 +93,7 @@ class Summary:
             self.category_id = 0
             self.category = 'ALL'
 
-        print('선택된 카테고리:', self.category_id, self.category)
+        print(f'카테고리: {self.category}')
 
     #origin_content를 요약하는 함수
     def summary_content(self):
@@ -101,9 +101,8 @@ class Summary:
         messages = make_summary_prompt(self.category, self.origin_content)
         format = None
 
-        print(f'요약 프롬프트:\n{messages}')
-
-        self.content = self.chat(model = model, messages = messages, format = format)
+        response = self.chat(model = model, messages = messages, format = format)
+        self.content = spell_check(response)
 
         print(f'요약본:\n{self.content}')
 
@@ -124,9 +123,9 @@ class Summary:
             'required': ['keyword']
         }
 
-        print(f'키워드 프롬프트:\n{messages}')
-
-        self.keywords = self.chat(model = model, messages = messages, format = format)
+        response = self.chat(model = model, messages = messages, format = format)
+        self.keywords = json.loads(response)['keyword']
+        self.keywords = [keyword for keyword in self.keywords if keyword in self.content]
 
         print(f'키워드: {self.keywords}')
 
@@ -134,18 +133,9 @@ class Summary:
     def make_thumbnail_content(self):
         model = self.MODEL
         messages = make_thumbnail_content_prompt(self.content)
-        format = {
-            'type': 'object',
-            'properties': {
-                'summary': {
-                    'type': 'string'
-                }
-            },
-            'required': ['summary']
-        }
+        format = None
 
-        print(f'썸네일 프롬프트:\n{messages}')
+        response = self.chat(model = model, messages = messages, format = format)
+        self.thumbnail_content = spell_check(response)
 
-        self.thumbnail_content = self.chat(model = model, messages = messages, format = format)
-
-        print(f'썸네일 요약본:\n{self.thumbnail_content}')
+        print(f'썸네일 요약본: {self.thumbnail_content}')
