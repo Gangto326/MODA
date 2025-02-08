@@ -19,3 +19,7 @@ class Embedding:
         )
 
         return embeddings.tolist()
+
+def vector_compare(vector1: List[float],
+                   vector2: List[float]):
+    return util.cos_sim(vector1, vector2).item()
