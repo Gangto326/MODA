@@ -1,6 +1,6 @@
 import ollama
 from typing import List, Dict
-from app.constants.category import categories, categories_name
+from app.constants.category import categories_name
 from app.constants.prompt import category_prompt
 from app.services.embedding import Embedding
 from app.schemas.post import PostResponse
@@ -90,8 +90,8 @@ class Summary:
 
             print(attempt_count, selected)
 
-            for idx, category in enumerate(categories):
-                if category == selected:
+            for idx, category in enumerate(categories_name()):
+                if selected in category:
                     find_category = True
                     self.category_id = idx
                     self.category = category
