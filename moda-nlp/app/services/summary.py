@@ -83,8 +83,6 @@ class Summary:
         messages = category_prompt
         messages[1]['content'] += self.origin_content
 
-        format =
-
         print(messages)
 
         find_category = False
