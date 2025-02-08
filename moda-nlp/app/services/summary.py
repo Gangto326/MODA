@@ -102,7 +102,7 @@ class Summary:
         format = None
 
         response = self.chat(model = model, messages = messages, format = format)
-        self.content = spell_check(response)
+        self.content = response
 
         print(f'요약본:\n{self.content}')
 
