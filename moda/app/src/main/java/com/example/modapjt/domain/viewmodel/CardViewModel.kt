@@ -35,6 +35,28 @@ class CardViewModel : ViewModel() {
             }
         }
     }
+
+
+    // 카드 삭제 기능 추가
+    fun deleteCard(card: Card) {
+        viewModelScope.launch {
+            val result = repository.deleteCard(card.cardId)
+
+            if (result.isSuccess) {
+                val currentState = _uiState.value
+                if (currentState is CardUiState.Success) {
+                    _uiState.value = currentState.copy(
+                        images = currentState.images.filter { it.cardId != card.cardId },
+                        videos = currentState.videos.filter { it.cardId != card.cardId },
+                        blogs = currentState.blogs.filter { it.cardId != card.cardId },
+                        news = currentState.news.filter { it.cardId != card.cardId }
+                    )
+                }
+            } else {
+                println("카드 삭제 실패: ${result.exceptionOrNull()?.message}")
+            }
+        }
+    }
 }
 
 sealed class CardUiState {
