@@ -55,6 +55,7 @@ CREATE TABLE cards (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP,
     deleted_at TIMESTAMP,
+    subcontents text[] DEFAULT ARRAY[]::text[],
     FOREIGN KEY (user_id) REFERENCES users(user_id),
     FOREIGN KEY (category_id) REFERENCES category(category_id),
     FOREIGN KEY (type_id) REFERENCES content_type(type_id)
@@ -66,6 +67,7 @@ CREATE TABLE url_caches (
     cached_title VARCHAR(100) NOT NULL,
     cached_content TEXT NOT NULL,
     keywords text[],
+    subcontents text[] DEFAULT ARRAY[]::text[],
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -79,6 +81,20 @@ CREATE TABLE notifications (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
+
+CREATE TABLE images (
+    image_id VARCHAR(36) PRIMARY KEY,
+    user_id VARCHAR(36) NOT NULL,
+    category_id BIGSERIAL NOT NULL,
+    Field BIGSERIAL NULL,
+    keywords text[] NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    view_count INT NOT NULL DEFAULT 0,
+    url VARCHAR(255) NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
+    FOREIGN KEY (category_id) REFERENCES category(category_id)
+);
+
 
 INSERT INTO users (user_id, email, password, profile_img, nickname, status) VALUES
 ('01234', 'jongwon', '1234', '1234', '1234', '123');
