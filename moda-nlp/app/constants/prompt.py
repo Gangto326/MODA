@@ -1,11 +1,26 @@
+def make_prompt(category: str):
+    return [
+        {
+            'role': 'system',
+            'content': f'''{category_persona['category']}{markdown_prompt}'''
+        },
+        {
+            'role': 'user',
+            'content': '''Please categorize the following document:
+            
+            '''
+        }
+    ]
+
 category_prompt = [
     {
         'role': 'system',
-        'content': '''Analyze the document and select one category from ["Trends", "Entertainment", "Finance", "Travel", "Food", "IT", "Design", "Society", "Health"]'''
+        'content': '''사용자가 요청한 카테고리만 출력하고, 다른 말은 하지 않도록 한다.'''
     },
     {
         'role': 'user',
-        'content': '''Please categorize the following document:
+        'content': '''아래 내용을 읽고 카테고리 중에 하나 골라서 카테고리만 알려줘. 다른 말은 하지말고 카테고리만 말해줘.
+["Trends", "Entertainment", "Finance", "Travel", "Food", "IT", "Design", "Society", "Health"]
         
         '''
     }

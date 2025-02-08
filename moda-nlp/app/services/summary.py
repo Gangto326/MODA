@@ -2,7 +2,7 @@ import ollama
 from typing import List, Dict
 from app.constants.category import categories, categories_name
 from app.constants.prompt import category_prompt
-from app.services.embedding import Embedding, vector_compare
+from app.services.embedding import Embedding
 from app.schemas.post import PostResponse
 
 def system_prompt(prompt: str):
@@ -78,44 +78,41 @@ class Summary:
 
     #category를 선택하는 함수
     def choose_category(self):
-        for idx, category in enumerate(categories):
-            print(category[0], vector_compare(self.embedding_vector, category[1]))
+        model = self.MODEL
+        messages = category_prompt
+        messages[1]['content'] += self.origin_content
+        format = {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                }
+            },
+            "required": ["category"]
+            }
 
-        # model = self.MODEL
-        # messages = category_prompt
-        # messages[1]['content'] += self.origin_content
-        # format = {
-        #     "type": "object",
-        #     "properties": {
-        #         "category": {
-        #             "type": "string"
-        #         }
-        #     },
-        #     "required": ["category"]
-        #     }
-        #
-        # find_category = False
-        # attempt_count = 0
-        # while attempt_count < self.MAX_CATEGORY_TRIES:
-        #     selected = self.chat(model = model, messages = messages, format = format)
-        #
-        #     for idx, category in enumerate(categories_name()):
-        #         if category.lower() in selected.lower():
-        #             find_category = True
-        #             self.category_id = idx
-        #             self.category = category
-        #             break
-        #
-        #     if find_category:
-        #         break
-        #
-        #     attempt_count += 1
-        #
-        # if attempt_count == self.MAX_CATEGORY_TRIES:
-        #     self.category_id = 0
-        #     self.category = 'ALL'
-        #
-        # print("선택된 카테고리:", self.category_id, self.category)
+        find_category = False
+        attempt_count = 0
+        while attempt_count < self.MAX_CATEGORY_TRIES:
+            selected = self.chat(model = model, messages = messages, format = format)
+
+            for idx, category in enumerate(categories_name()):
+                if category.lower() in selected.lower():
+                    find_category = True
+                    self.category_id = idx
+                    self.category = category
+                    break
+
+            if find_category:
+                break
+
+            attempt_count += 1
+
+        if attempt_count == self.MAX_CATEGORY_TRIES:
+            self.category_id = 0
+            self.category = 'ALL'
+
+        print("선택된 카테고리:", self.category_id, self.category)
 
     #content를 요약하는 함수
     def summary_content(self):
