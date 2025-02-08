@@ -83,8 +83,6 @@ class Summary:
         messages = category_prompt
         messages[1]['content'] += self.origin_content
 
-        print(messages)
-
         find_category = False
         attempt_count = 0
         while attempt_count < self.MAX_CATEGORY_TRIES:

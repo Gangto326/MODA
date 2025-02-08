@@ -10,11 +10,11 @@ router = APIRouter(
 )
 
 @router.post("/post")
-async def summary_document(postRequest: PostRequest):
+async def summary_document(post_request: PostRequest):
     try:
         start_time = time.time()
 
-        summarizer = Summary(postRequest.content)
+        summarizer = Summary(post_request.content)
 
         process_time = time.time() - start_time
         print(f"포스트 요약 완료 - {process_time:.2f}초")
