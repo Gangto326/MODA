@@ -5,7 +5,6 @@ from app.constants.prompt import make_summary_prompt, make_keywords_content_prom
     make_thumbnail_content_prompt, make_category_prompt
 from app.services.embedding import Embedding
 from app.schemas.post import PostResponse
-from app.services.spell_ckeck import spell_check
 
 class Summary:
     MAX_CATEGORY_TRIES = 10
@@ -136,6 +135,6 @@ class Summary:
         format = None
 
         response = self.chat(model = model, messages = messages, format = format)
-        self.thumbnail_content = spell_check(response)
+        self.thumbnail_content = response
 
         print(f'썸네일 요약본: {self.thumbnail_content}')
