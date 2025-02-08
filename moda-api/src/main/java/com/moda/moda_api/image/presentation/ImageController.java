@@ -1,5 +1,6 @@
 package com.moda.moda_api.image.presentation;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import org.springframework.http.HttpStatus;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,28 +33,31 @@ public class ImageController {
 	private final ImageValidService imageValidService;
 
 	@PostMapping
-	public CompletableFuture<ResponseEntity<Boolean>> createImage(
+	public ResponseEntity<Boolean> createImages(
 		@UserId String userId,
-		@RequestParam("file") MultipartFile file) {
+		@RequestPart("files") List<MultipartFile> files) {
+		try {
+			if (files.isEmpty()) {
+				return ResponseEntity.badRequest()
+					.body(false);
+			}
 
-		return CompletableFuture.supplyAsync(() -> {
-			try {
-				if (file.isEmpty()) {
-					return ResponseEntity.badRequest()
-						.body(false);
-				}
-
+			// 각 파일 검증
+			for (MultipartFile file : files) {
 				if (imageValidService.validateFile(file)) {
 					return ResponseEntity.badRequest()
 						.body(false);
 				}
-				return ResponseEntity.ok(imageService.createImage(userId, file));
-			} catch (Exception e) {
-				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(false);
 			}
-		});
+
+			return ResponseEntity.ok(imageService.createImages(userId, files));
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+				.body(false);
+		}
 	}
+
+
 	@GetMapping("")
 	public ResponseEntity<SliceResponseDto<ImageListResponse>> getImageList(
 		@UserId String userId,
@@ -67,6 +72,7 @@ public class ImageController {
 		);
 		return ResponseEntity.ok(responseList);
 	}
+
 	@DeleteMapping("/{imageIds}")
 	public ResponseEntity<Boolean> deleteImage(
 		@UserId String userId,

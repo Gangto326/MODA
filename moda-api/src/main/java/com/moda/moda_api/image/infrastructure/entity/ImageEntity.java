@@ -30,7 +30,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "images")
 public class ImageEntity {
 	@Id
-	@Column(name = "images_id", length = 36, nullable = false)
+	@Column(name = "image_id", length = 36, nullable = false)
 	private String imageId;
 
 	@Column(name = "user_id")
