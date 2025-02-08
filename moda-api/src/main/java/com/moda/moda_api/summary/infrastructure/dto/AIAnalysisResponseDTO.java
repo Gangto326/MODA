@@ -32,11 +32,10 @@ public class AIAnalysisResponseDTO {
 		@JsonProperty("content") String content,
 		@JsonProperty("embeddingVector") EmbeddingVector embeddingVector) {
 
-		this.categoryId = Objects.requireNonNull(categoryId, "categoryId는 필수값입니다.");
+		this.categoryId = categoryId;  // null 허용
 		this.keywords = Objects.requireNonNullElse(keywords, new String[0]);
-		this.thumbnailContent = Objects.requireNonNullElse(thumbnailContent, "");  // 기본값 설정
-		this.content = Objects.requireNonNull(content, "content는 필수값입니다.");
-		this.embeddingVector = Objects.requireNonNull(embeddingVector, "embeddingVector는 필수값입니다.");
+		this.thumbnailContent = Objects.requireNonNullElse(thumbnailContent, "");
+		this.content = Objects.requireNonNullElse(content, "");
+		this.embeddingVector = embeddingVector;  // null 허용
 	}
-
 }

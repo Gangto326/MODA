@@ -140,7 +140,7 @@ public class AbstractExtractor {
 						String src = element.getAttribute("src");
 						if (src != null && !src.isEmpty() && isValidImageUrl(src)) {
 							try {
-								String savedImageUrl = imageStorageService.uploadImage(src);
+								String savedImageUrl = imageStorageService.uploadImageFromurl(src);
 								imagesList.add(savedImageUrl);
 							} catch (Exception e) {
 								log.error("Failed to process image: {}", src, e);
