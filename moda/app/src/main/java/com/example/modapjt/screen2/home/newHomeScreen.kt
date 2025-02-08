@@ -3,6 +3,7 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,8 +15,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.material3.*
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.modapjt.R
 import com.example.modapjt.components.bar.SearchBar
 import com.example.modapjt.components.home.BottomThumbnail
 import com.example.modapjt.components.bar.BottomBarComponent
@@ -103,7 +107,17 @@ fun newHomeScreen(
             }
 
             item {
+                Divider(color = Color(0xFFDCDCDC), thickness = 4.dp, modifier = Modifier.padding(horizontal = 0.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            item {
                 CategoryList(navController = navController, viewModel = viewModel)
+            }
+
+            item {
+                Divider(color = Color(0xFFDCDCDC), thickness = 4.dp, modifier = Modifier.padding(horizontal = 0.dp))
+                Spacer(modifier = Modifier.height(16.dp))
             }
 
             item {
@@ -113,8 +127,15 @@ fun newHomeScreen(
                 )
             }
 
+
+
             item {
                 KeywordList()
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            item {
+                Divider(color = Color(0xFFDCDCDC), thickness = 4.dp, modifier = Modifier.padding(horizontal = 0.dp))
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
@@ -129,6 +150,33 @@ fun newHomeScreen(
                 BottomThumbnailList()
                 Spacer(modifier = Modifier.height(16.dp))
             }
+
+            // 이미지 추가
+            item {
+                Image(
+                    painter = painterResource(id = R.drawable.overlayad),
+                    contentDescription = "광고 이미지",
+                    contentScale = ContentScale.FillWidth, // 가로 너비에 맞추기
+                    modifier = Modifier
+                        .fillMaxWidth() // 가로 전체 채우기
+                        .height(80.dp) // 원본 높이 유지
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            item {
+                HomeSmallTitle(
+                    title = "여유로운 토요일 저녁",
+                    description = ""
+                )
+            }
+
+            item {
+                Divider(color = Color(0xFFDCDCDC), thickness = 4.dp, modifier = Modifier.padding(horizontal = 0.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
         }
     }
 }
