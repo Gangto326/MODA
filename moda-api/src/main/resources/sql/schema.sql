@@ -86,7 +86,7 @@ CREATE TABLE images (
     image_id VARCHAR(36) PRIMARY KEY,
     user_id VARCHAR(36) NOT NULL,
     category_id BIGSERIAL NOT NULL,
-    Field BIGSERIAL NULL,
+    embedding VECTOR(768) NOT NULL,
     keywords text[] NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     view_count INT NOT NULL DEFAULT 0,
