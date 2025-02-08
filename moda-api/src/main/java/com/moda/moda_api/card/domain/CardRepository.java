@@ -11,6 +11,8 @@ import java.util.Optional;
 public interface CardRepository {
     Card save(Card card);
 
+    Slice<Card> findByUserId(UserId userId, Pageable pageable);
+
     Slice<Card> findByUserIdAndCategoryId(UserId userId, CategoryId categoryId, Pageable pageable);
 
     Optional<Card> findByUserIdAndCardId(UserId userId, CardId cardId);

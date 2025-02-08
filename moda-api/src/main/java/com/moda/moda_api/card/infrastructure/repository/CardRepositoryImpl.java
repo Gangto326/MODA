@@ -30,6 +30,12 @@ public class CardRepositoryImpl implements CardRepository {
     }
 
     @Override
+    public Slice<Card> findByUserId(UserId userId, Pageable pageable) {
+        Slice<CardEntity> cardEntities = cardJpaRepository.findByUserId(userId.getValue(), pageable);
+        return cardEntities.map(cardEntityMapper::toDomain);
+    }
+
+    @Override
     public Slice<Card> findByUserIdAndCategoryId(UserId userId, CategoryId categoryId, Pageable pageable) {
         Slice<CardEntity> cardEntities = cardJpaRepository.findByUserIdAndCategoryId(userId.getValue(), categoryId.getValue(), pageable);
         return cardEntities.map(cardEntityMapper::toDomain);

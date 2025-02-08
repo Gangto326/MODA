@@ -150,10 +150,10 @@ public class CardService {
 			.build();
 
 		// Slice와 파라미터 조건에 맞는 카드를 가져옵니다.
-		Slice<Card> cards = cardRepository.findByUserIdAndCategoryId(
-			userIdObj,
-			categoryIdObj,
-			sliceRequestDto.toPageable()
+		Slice<Card> cards = findCardListByCategory(
+				userIdObj,
+				categoryIdObj,
+				sliceRequestDto
 		);
 
 		// 페이지네이션 메타 데이터와 함께 반환합니다.
@@ -282,5 +282,22 @@ public class CardService {
 		return cardIdList.stream()
 			.map(cardId -> findCard(userId, cardId))
 			.collect(Collectors.toList());
+	}
+
+
+	private Slice<Card> findCardListByCategory(UserId userId, CategoryId categoryId, SliceRequestDto sliceRequestDto) {
+
+		if (categoryId.equals(CategoryId.all())) {
+			return cardRepository.findByUserId(
+					userId,
+					sliceRequestDto.toPageable()
+			);
+		}
+
+		return cardRepository.findByUserIdAndCategoryId(
+				userId,
+				categoryId,
+				sliceRequestDto.toPageable()
+		);
 	}
 }

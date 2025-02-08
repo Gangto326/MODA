@@ -12,7 +12,7 @@ import lombok.*;
 @IdClass(CategoryOrderId.class)
 public class CategoryOrderEntiy {
     @Id
-    @Column(name = "category_id")
+    @Column(name = "category_id", updatable = false)
     private Long categoryId;
 
     @Id
@@ -22,7 +22,11 @@ public class CategoryOrderEntiy {
     @Column(name = "position")
     private Integer position;
 
-    @ManyToOne
-    @JoinColumn(name = "category_id")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "category_id", insertable = false, updatable = false)
     private CategoryEntity categoryEntity;
+
+    public void setPosition(Integer position) {
+        this.position = position;
+    }
 }
