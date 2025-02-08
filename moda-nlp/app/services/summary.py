@@ -91,7 +91,7 @@ class Summary:
             print(attempt_count, selected)
 
             for idx, category in enumerate(categories_name()):
-                if selected in category:
+                if category in selected:
                     find_category = True
                     self.category_id = idx
                     self.category = category
