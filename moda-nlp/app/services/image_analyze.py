@@ -62,7 +62,7 @@ class ImageAnalyze:
         return response['message']['content']
 
     #origin_content를 요약하는 함수
-    # def summary_content(self):
+    def analyze_image(self):
     #     model = self.MODEL
     #     messages = make_summary_prompt(self.category, self.origin_content)
     #     format = None
@@ -70,7 +70,7 @@ class ImageAnalyze:
     #     response = self.chat(model = model, messages = messages, format = format)
     #     self.content = response
     #
-    #     print(f'요약본:\n{self.content}')
+        print(f'요약본:\n{self.content}')
 
     #url을 base64로 인코딩하는 함수
     def encode_base64(self):
