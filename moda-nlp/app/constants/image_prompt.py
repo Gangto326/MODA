@@ -1,21 +1,6 @@
 from typing import List
 
-def make_category_prompt(images: List[str]):
-    return [
-        {
-            'role': 'system',
-            'content': 'Only print out the categories requested by the user, and do not say anything else.'
-        },
-        {
-            'role': 'user',
-            'content': f'''Please analyze the following photo and choose one of the categories and tell me only the categories.
-Don't say anything else, just tell me the categories.
-['Trends', 'Entertainment', 'Finance', 'Travel', 'Food', 'IT', 'Design', 'Society', 'Health']''',
-            'images': images
-        }
-    ]
-
-def make_analyze_prompt(images: List[str]):
+def make_analyze_prompt(base64_image: List[str]):
     return [
         {
             'role': 'system',
@@ -38,12 +23,29 @@ Explain everything clearly so anyone can follow along, while still pointing out 
         },
         {
             'role': 'user',
-            'content': '''What do you see in this image?''',
-            'images': images
+            'content': 'What do you see in this image?',
+            'images': base64_image
         }
     ]
 
-def make_keywords_content_prompt(images: List[str]):
+def make_category_prompt(content: str, base64_image: List[str]):
+    return [
+        {
+            'role': 'system',
+            'content': 'Only print out the categories requested by the user, and do not say anything else.'
+        },
+        {
+            'role': 'user',
+            'content': f'''Please choose one of the categories from the image and content given and tell me just the categories.
+Don't say anything else and just tell me the categories.
+['Trends', 'Entertainment', 'Finance', 'Travel', 'Food', 'IT', 'Design', 'Society', 'Health']
+
+{content}''',
+            'images': base64_image
+        }
+    ]
+
+def make_keywords_content_prompt(content: str, base64_image: List[str]):
     return [
         {
             'role': 'system',
@@ -56,7 +58,10 @@ def make_keywords_content_prompt(images: List[str]):
         },
         {
             'role': 'user',
-            'content': f'You are an expert at extracting the most important key keywords from images.\nPlease extract the 3-5 most important key keywords from the following image',
-            'images': images
+            'content': f'''You are an expert at extracting the most important key keywords from images.
+Please extract the 3-5 most important key keywords from the following image and content
+
+{content}''',
+            'images': base64_image
         }
     ]
