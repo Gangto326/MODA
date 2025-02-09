@@ -55,7 +55,7 @@ class ImageAnalyze:
             model = model,
             messages = messages,
             format = format,
-            imagse = images
+            images = images
         )
         return response['message']['content']
 
@@ -73,7 +73,7 @@ class ImageAnalyze:
         response = self.chat(model = model, messages = messages, format = format, images = images)
         self.content = response
 
-        print(f'이미지 분석 완료:\n{self.content}')
+        print(f'이미지 내용:\n{self.content}')
 
     #category를 선택하는 함수
     def choose_category(self):
