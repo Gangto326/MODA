@@ -10,7 +10,7 @@ public class CategoryId {
     public static final Long ALL = 1L;
     Long value;
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public CategoryId(@JsonProperty("value") Long value) {
         validateCategoryId(value);
         this.value = value;

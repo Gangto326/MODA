@@ -1,10 +1,11 @@
 package com.moda.moda_api.card.application.mapper;
 
+import org.springframework.stereotype.Component;
+
 import com.moda.moda_api.card.application.response.CardDetailResponse;
 import com.moda.moda_api.card.application.response.CardListResponse;
 import com.moda.moda_api.card.domain.Card;
 import com.moda.moda_api.card.domain.CardContentType;
-import org.springframework.stereotype.Component;
 
 @Component
 public class CardDtoMapper {

@@ -24,6 +24,11 @@
       "name": "embedding.api.url",
       "type": "java.lang.String",
       "description": "Description for embedding.api.url."
+    },
+    {
+      "name": "fcm.credentials.path",
+      "type": "java.lang.String",
+      "description": "Description for fcm.credentials.path."
     }
   ]
 }

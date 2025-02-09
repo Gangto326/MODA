@@ -17,10 +17,10 @@ import org.springframework.stereotype.Service;
 
 import com.moda.moda_api.common.infrastructure.ImageStorageService;
 import com.moda.moda_api.crawling.domain.model.CrawledContent;
+import com.moda.moda_api.crawling.domain.model.ExtractedContent;
 import com.moda.moda_api.crawling.domain.model.Url;
 import com.moda.moda_api.crawling.infrastructure.config.crawlerConfig.ExtractorConfig;
 import com.moda.moda_api.crawling.infrastructure.config.crawlerConfig.PlatformExtractorFactory;
-import com.moda.moda_api.crawling.domain.model.ExtractedContent;
 import com.moda.moda_api.summary.exception.ExtractorException;
 
 import lombok.RequiredArgsConstructor;

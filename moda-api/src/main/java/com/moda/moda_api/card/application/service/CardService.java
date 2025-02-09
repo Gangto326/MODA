@@ -1,13 +1,16 @@
 package com.moda.moda_api.card.application.service;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.moda.moda_api.card.application.mapper.CardDtoMapper;
 import com.moda.moda_api.card.application.response.CardDetailResponse;
@@ -16,17 +19,21 @@ import com.moda.moda_api.card.domain.Card;
 import com.moda.moda_api.card.domain.CardFactory;
 import com.moda.moda_api.card.domain.CardId;
 import com.moda.moda_api.card.domain.CardRepository;
+import com.moda.moda_api.card.domain.EmbeddingVector;
 import com.moda.moda_api.card.domain.UrlCache;
 import com.moda.moda_api.card.domain.UrlCacheRepository;
 import com.moda.moda_api.card.exception.CardNotFoundException;
 import com.moda.moda_api.card.presentation.request.MoveCardRequest;
 import com.moda.moda_api.card.presentation.request.UpdateCardRequest;
 import com.moda.moda_api.category.domain.CategoryId;
+import com.moda.moda_api.common.infrastructure.ImageStorageService;
 import com.moda.moda_api.common.pagination.SliceRequestDto;
 import com.moda.moda_api.common.pagination.SliceResponseDto;
 
 import com.moda.moda_api.search.domain.CardSearchRepository;
 import com.moda.moda_api.summary.application.service.SummaryService;
+import com.moda.moda_api.summary.infrastructure.api.PythonAiClient;
+import com.moda.moda_api.summary.infrastructure.dto.AIAnalysisResponseDTO;
 import com.moda.moda_api.user.domain.UserId;
 
 import lombok.RequiredArgsConstructor;
@@ -50,6 +57,8 @@ public class CardService {
 	private final CardDtoMapper cardDtoMapper;
 	private final UrlCacheRepository urlCacheRepository;
 	private final SummaryService summaryService;
+	private final ImageStorageService imageStorageService;
+	private final PythonAiClient pythonAiClient;
 
 	/**
 	 * URL을 입력 받고 새로운 카드 생성 후 알맞은 보드로 이동합니다.
@@ -134,11 +143,75 @@ public class CardService {
 						.keywords(SummaryResultDto.getKeywords())
 						.build()
 				);
-
 				cardRepository.save(card);
 				return true;
 			});
 	}
+
+	@Transactional
+	public Boolean createImages(String userId, List<MultipartFile> multipartFiles) {
+		UserId userIdObj = new UserId(userId);
+
+		List<Card> cards = multipartFiles.stream()
+			.map(file -> {
+				try {
+					String s3Url = imageStorageService.uploadMultipartFile(file);
+					String urlHash = UrlCache.generateHash(s3Url);
+
+					// 실제 AI 분석
+					// AIAnalysisResponseDTO aiAnalysisResponseDTO = pythonAiClient.imageAnalysis(new AiImageRequestDTO(s3Url));
+
+					// AI Test생성
+					AIAnalysisResponseDTO aiAnalysisResponseDTO = AIAnalysisResponseDTO.builder()
+						.keywords(new String[]{"으억","냠냠"})
+						.embeddingVector(new EmbeddingVector(null))
+						.categoryId(new CategoryId(1L))
+						.content("AIContnet")
+						.thumbnailContent("abcd")
+						.build();
+
+					urlCacheRepository.save(
+						UrlCache.builder()
+							.urlHash(urlHash)
+							.cachedTitle("title")
+							.cachedContent("ImageContent")
+							.originalUrl(s3Url)
+							.subContents(new String[]{"핵심키워드"})
+							.keywords(aiAnalysisResponseDTO.getKeywords())
+							.build()
+					);
+
+					// Image 엔티티 생성
+					return Card.builder()
+						.cardId(new CardId(UUID.randomUUID().toString()))
+						.userId(userIdObj)
+						.categoryId(aiAnalysisResponseDTO.getCategoryId())
+						.typeId(1) // 이미지 타입
+						.urlHash(urlHash)
+						.title("ImageTitle")
+						.content(s3Url)
+						.thumbnailContent(aiAnalysisResponseDTO.getThumbnailContent())
+						.thumbnailUrl(s3Url)
+						.embedding(aiAnalysisResponseDTO.getEmbeddingVector())
+						.keywords(aiAnalysisResponseDTO.getKeywords())
+						.subContents(new String[]{"핵심키워드"})
+						.viewCount(0)
+						.createdAt(LocalDateTime.now())
+						.build();
+
+				} catch (Exception e) {
+					throw new RuntimeException("Failed to process image", e);
+				}
+			})
+			.collect(Collectors.toList());
+
+
+		cards.forEach(System.out::println);
+		cardRepository.saveAll(cards);
+		return true;
+	}
+
+
 
 	/**
 	 * 페이지네이션에 맞게 카드의 리스트 반환합니다.
@@ -158,7 +231,7 @@ public class CardService {
 		UserId userIdObj = new UserId(userId);
 		CategoryId categoryIdObj = new CategoryId(categoryId);
 
-		// Slice 값 생성
+		// Slicex` 값 생성
 		SliceRequestDto sliceRequestDto = SliceRequestDto.builder()
 			.page(page)
 			.size(size)

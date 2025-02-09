@@ -1,8 +1,11 @@
 package com.moda.moda_api.summary.application.dto;
 
+import java.util.List;
+
 import com.moda.moda_api.card.domain.EmbeddingVector;
 import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.summary.infrastructure.dto.AIAnalysisResponseDTO;
+import com.moda.moda_api.summary.infrastructure.dto.TitleAndContent;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -22,6 +25,7 @@ public class SummaryResultDto {
 	private	String thumbnailUrl;
 	private	EmbeddingVector embeddingVector;
 	private	CategoryId categoryId;
+	private List<TitleAndContent> titleAndContents;
 
 	public SummaryResultDto updateFromDto(AIAnalysisResponseDTO aiAnalysisResponseDTO) {
 		if (aiAnalysisResponseDTO.getCategoryId() != null) {

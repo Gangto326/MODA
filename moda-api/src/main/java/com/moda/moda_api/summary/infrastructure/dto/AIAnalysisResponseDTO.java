@@ -2,7 +2,6 @@ package com.moda.moda_api.summary.infrastructure.dto;
 
 import java.util.Objects;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.moda.moda_api.card.domain.EmbeddingVector;
 import com.moda.moda_api.category.domain.CategoryId;
@@ -26,16 +25,16 @@ public class AIAnalysisResponseDTO {
 
 	@Builder
 	public AIAnalysisResponseDTO(
-		@JsonProperty("categoryId") CategoryId categoryId,
+		@JsonProperty("category_id") CategoryId categoryId,
 		@JsonProperty("keywords") String[] keywords,
-		@JsonProperty("thumbnailContent") String thumbnailContent,
+		@JsonProperty("thumbnail_content") String thumbnailContent,
 		@JsonProperty("content") String content,
-		@JsonProperty("embeddingVector") EmbeddingVector embeddingVector) {
+		@JsonProperty("embedding_vector") EmbeddingVector embeddingVector) {
 
 		this.categoryId = categoryId;  // null 허용
 		this.keywords = Objects.requireNonNullElse(keywords, new String[0]);
 		this.thumbnailContent = Objects.requireNonNullElse(thumbnailContent, "");
 		this.content = Objects.requireNonNullElse(content, "");
-		this.embeddingVector = embeddingVector;  // null 허용
+		this.embeddingVector = Objects.requireNonNullElse(embeddingVector, new EmbeddingVector(new float[768]));
 	}
 }

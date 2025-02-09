@@ -1,6 +1,7 @@
 package com.moda.moda_api.card.domain;
 
 import com.moda.moda_api.category.domain.CategoryId;
+import com.moda.moda_api.summary.infrastructure.dto.AIAnalysisResponseDTO;
 import com.moda.moda_api.user.domain.UserId;
 
 import org.springframework.stereotype.Component;
@@ -29,6 +30,22 @@ public class CardFactory {
 			.createdAt(LocalDateTime.now())
 			.keywords(keywords)
 			.subContents(subContent)
+			.build();
+	}
+	public Card createFromImage(UserId userId,String imageUrl,String urlHash , AIAnalysisResponseDTO aiAnalysis) {
+		return Card.builder()
+			.userId(userId)
+			.cardId(generateCardId())
+			.categoryId(aiAnalysis.getCategoryId())
+			.typeId(CardContentType.IMG.getTypeId())
+			.title("ImageTitle")
+			.keywords(aiAnalysis.getKeywords())
+			.thumbnailContent("Image ThumbNail Content")
+			.embedding(aiAnalysis.getEmbeddingVector())
+			.content(imageUrl)
+			.thumbnailUrl(imageUrl)
+			.urlHash(urlHash)
+			.createdAt(LocalDateTime.now())
 			.build();
 	}
 

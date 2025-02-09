@@ -35,20 +35,25 @@ public class RedisConfig {
 	private final ObjectMapper objectMapper;
 
 	@Bean
-	public RedisTemplate<String, List<Url>> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+	public RedisTemplate<String, List<Url>> urlRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
 		RedisTemplate<String, List<Url>> template = new RedisTemplate<>();
 		template.setConnectionFactory(redisConnectionFactory);
-
-		// Key에 대한 직렬화 설정 (StringSerializer)
 		template.setKeySerializer(new StringRedisSerializer());
 
-		// Value에 대한 직렬화 설정 (Jackson JSON Serializer)
 		Jackson2JsonRedisSerializer<List<Url>> serializer =
 			new Jackson2JsonRedisSerializer<>(objectMapper.getTypeFactory().constructCollectionType(List.class, Url.class));
-
 		template.setValueSerializer(serializer);
 
 		return template;
+	}
+
+	@Bean // FCMTOKEN
+	public RedisTemplate<String, String> tokenRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
+		RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
+		redisTemplate.setConnectionFactory(redisConnectionFactory);
+		redisTemplate.setKeySerializer(new StringRedisSerializer());
+		redisTemplate.setValueSerializer(new StringRedisSerializer());
+		return redisTemplate;
 	}
 
 	@Bean

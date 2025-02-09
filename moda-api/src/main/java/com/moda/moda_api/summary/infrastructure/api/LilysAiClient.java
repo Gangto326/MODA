@@ -38,19 +38,24 @@ public class LilysAiClient {
 
 	public CompletableFuture<LilysRequestIdResponse> getRequestId(String url) {
 		System.out.println(url);
-		return lilysWebClient.post()
-			.uri(lilysUrl)
-			.bodyValue(createRequestBody(url))  // Http메세지 Body를 만든다.
-			.retrieve()  // 받을 준비가 됨.
-			.bodyToMono(LilysRequestIdResponse.class)  // 응답 본문을 LilysAiResponse 클래스의 객체로 변환
-			.doOnError(e -> {  // 에러 처리 실패시
-				log.error("Failed to get RequestId for url: {}", url, e);
-				throw new SummaryProcessingException("Failed to get RequestId from Lilys AI", e);
-			})
-			.switchIfEmpty(Mono.error(  // 아무것도 없을 시
-				new SummaryProcessingException("Received empty response from Lilys AI service")
-			))
-			.toFuture();
+
+		return CompletableFuture.completedFuture(
+			new LilysRequestIdResponse("066b5e4a-c460-4023-8130-9446eb2c4f9f")
+		);
+
+		// return lilysWebClient.post()
+		// 	.uri(lilysUrl)
+		// 	.bodyValue(createRequestBody(url))  // Http메세지 Body를 만든다.
+		// 	.retrieve()  // 받을 준비가 됨.
+		// 	.bodyToMono(LilysRequestIdResponse.class)  // 응답 본문을 LilysAiResponse 클래스의 객체로 변환
+		// 	.doOnError(e -> {  // 에러 처리 실패시
+		// 		log.error("Failed to get RequestId for url: {}", url, e);
+		// 		throw new SummaryProcessingException("Failed to get RequestId from Lilys AI", e);
+		// 	})
+		// 	.switchIfEmpty(Mono.error(  // 아무것도 없을 시
+		// 		new SummaryProcessingException("Received empty response from Lilys AI service")
+		// 	))
+		// 	.toFuture();
 	}
 
 	public CompletableFuture<LilysSummary> getSummaryResults(String requestId, String url) {
@@ -72,9 +77,11 @@ public class LilysAiClient {
 			log.info("Received thumbnail data: {}", json);
 		});
 
+
 		// 모든 Future를 조합하여 하나의 CardSummaryResponse 생성
 		return CompletableFuture.allOf(contentFuture, thumbnailFuture, titleFuture)
 			.thenApply(v -> {
+
 				List<TitleAndContent> mainContent = new ArrayList<>();
 				String[] timeStamps = new String[0];
 				try {
@@ -88,6 +95,10 @@ public class LilysAiClient {
 				String title = titleFuture.join();
 				String thumbnailUrl = getVideoId(url);
 
+				System.out.println(title);
+				System.out.println(thumbnailContent);
+				System.out.println(thumbnailUrl);
+				System.out.println(mainContent);
 				//만약 mainContent가 없으면 error가 난다.
 				return LilysSummary.builder()
 					.contents(mainContent)
