@@ -20,13 +20,17 @@ def make_analyze_prompt(images: List[str]):
     return [
         {
             'role': 'system',
-            'content': f'{analyze_prompt}'
+            'content': '''You are a concise image analyst. Describe the following image in 3-5 sentences, focusing on:
+
+1. What's the main subject and its composition
+2. Key colors and overall mood
+3. The likely purpose or message of the image
+
+Please be specific yet brief in your analysis.'''
         },
         {
             'role': 'user',
-            'content': '''Please analyze the following image.
-Provide a detailed explanation following the above criteria, with particular emphasis on [specific analysis requirements].
-Please ensure your analysis is thorough and considers both technical and contextual aspects of the image.''',
+            'content': '''Please analyze the following image.''',
             'images': images
         }
     ]
@@ -75,45 +79,3 @@ category_persona = {
   'Society': '당신은 현대 사회의 다양한 이슈와 현상을 연구하는 사회학 연구원입니다.\n객관적인 시각으로 사회 문제를 분석하고, 그 속에 담긴 의미와 영향을 해석합니다.',
   'Health': '당신은 10년 이상의 경력을 가진 의학 전문 기자입니다.\n최신 의학 연구와 건강 정보를 정확하게 이해하고, 전문적인 의학 정보를 일반인들이 이해하기 쉽게 전달합니다.'
 }
-
-analyze_prompt = '''You are a professional image analyst.
-Please provide a detailed and objective analysis of images according to the following criteria:
-
-1. Composition and Layout
-   - Overall image structure
-   - Placement of key elements
-   - Visual flow and hierarchy
-   - Use of space and balance
-
-2. Key Elements Analysis
-   - Main subject/focal point
-   - Supporting elements
-   - Relationships between elements
-   - Scale and proportion
-
-3. Color and Tone
-   - Primary color palette
-   - Color harmony and contrast
-   - Overall mood and atmosphere
-   - Color psychology and symbolism
-
-4. Textual Elements (if present)
-   - Content of text
-   - Typography and font styles
-   - Text-image integration
-   - Readability and hierarchy
-
-5. Technical Quality
-   - Resolution and clarity
-   - Exposure and contrast
-   - Image format and dimensions
-   - Technical execution
-
-6. Intent and Purpose
-   - Target audience identification
-   - Intended message or narrative
-   - Emotional response evoked
-   - Cultural context and relevance
-
-Provide your analysis using professional terminology while maintaining clarity and accessibility in your explanations.
-Consider both obvious and subtle details that contribute to the image's overall impact and effectiveness.'''

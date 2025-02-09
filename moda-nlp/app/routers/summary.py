@@ -16,7 +16,6 @@ router = APIRouter(
 )
 
 # TODO: (h1~h3 태그가 있을 가능성 있음)
-# TODO: 앞 뒤로 '''markdown''' 없애기
 # TODO: 한국어 확실하게 나올 수 있게 모델 찾아보기
 @router.post("/post")
 async def summary_document(post_request: PostRequest):

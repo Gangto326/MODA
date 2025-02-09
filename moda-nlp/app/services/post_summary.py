@@ -100,7 +100,7 @@ class PostSummary:
         format = None
 
         response = self.chat(model = model, messages = messages, format = format)
-        self.content = response
+        self.content = str(response).removeprefix("```markdown\n").removesuffix("```")
 
         print(f'요약본:\n{self.content}')
 
