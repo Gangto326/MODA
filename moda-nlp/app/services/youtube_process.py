@@ -58,7 +58,7 @@ class YoutubeProcess:
         format = None
 
         response = self.chat(model = model, messages = messages, format = format)
-        self.content = response
+        self.content = str(response).removeprefix("```markdown\n").removesuffix("```")
 
         print(f'처리된 내용:\n{self.content}')
 
