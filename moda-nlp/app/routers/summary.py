@@ -16,7 +16,8 @@ router = APIRouter(
 )
 
 # TODO: (h1~h3 태그가 있을 가능성 있음)
-# TODO: 앞 뒤로 markdown 없애기
+# TODO: 앞 뒤로 '''markdown''' 없애기
+# TODO: 한국어 확실하게 나올 수 있게 모델 찾아보기
 @router.post("/post")
 async def summary_document(post_request: PostRequest):
     try:
@@ -41,7 +42,6 @@ async def process_youtube(youtube_request: YoutubeRequest):
 
         process_time = time.time() - start_time
         print(f"유튜브 후처리 완료 - {process_time:.2f}초")
-        # return summarizer.get_response()
         return processer.get_response()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

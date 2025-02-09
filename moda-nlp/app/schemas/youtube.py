@@ -1,12 +1,14 @@
-from pydantic import BaseModel
 from typing import List
 
-class Content(BaseModel):
+from pydantic import BaseModel
+
+
+class TitleAndContent(BaseModel):
     title: str
     content: str
 
 class YoutubeRequest(BaseModel):
-    paragraph: List[Content]
+    paragraph: List[TitleAndContent]
 
 class YoutubeResponse(BaseModel):
     category_id: int
