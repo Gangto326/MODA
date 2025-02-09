@@ -78,9 +78,12 @@ dependencies {
     // Lifecycle 관련 의존성
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.lifecycle:lifecycle-common-java8:2.7.0")
-    implementation("androidx.lifecycle:lifecycle-service:2.7.0")  // Service용 Lifecycle
+    implementation("androidx.lifecycle:lifecycle-service:2.7.0")//service용 Life cycle
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:2.7.0")
 
+    // 🔴 중복되던 부분 정리 (버전 통일)
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")  // ✅ 통일 완료
     // Compose 관련 의존성 추가 (혹시 없다면)
     implementation("androidx.compose.runtime:runtime:1.5.4")
     implementation("androidx.compose.ui:ui:1.5.4")
