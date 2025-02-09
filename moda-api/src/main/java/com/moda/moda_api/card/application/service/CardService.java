@@ -59,6 +59,7 @@ public class CardService {
 	private final SummaryService summaryService;
 	private final ImageStorageService imageStorageService;
 	private final PythonAiClient pythonAiClient;
+	private final CardSearchRepository cardSearchRepository;
 
 	/**
 	 * URL을 입력 받고 새로운 카드 생성 후 알맞은 보드로 이동합니다.
@@ -150,7 +151,7 @@ public class CardService {
 
 	@Transactional
 	public Boolean createImages(String userId, List<MultipartFile> multipartFiles) {
-		UserId userIdObj = new UserId(userId);
+		UserId userIdObj = new UserId("user");
 
 		List<Card> cards = multipartFiles.stream()
 			.map(file -> {
@@ -181,7 +182,6 @@ public class CardService {
 							.build()
 					);
 
-					// Image 엔티티 생성
 					return Card.builder()
 						.cardId(new CardId(UUID.randomUUID().toString()))
 						.userId(userIdObj)
@@ -208,6 +208,7 @@ public class CardService {
 
 		cards.forEach(System.out::println);
 		cardRepository.saveAll(cards);
+		cardSearchRepository.saveAll(cards);
 		return true;
 	}
 

@@ -1,17 +1,11 @@
 package com.moda.moda_api.search.infrastructure.repository;
 
-import co.elastic.clients.elasticsearch._types.FieldValue;
-import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
-import co.elastic.clients.elasticsearch._types.query_dsl.Query;
-import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
-import co.elastic.clients.elasticsearch._types.query_dsl.TermsQueryField;
-import com.moda.moda_api.category.domain.CategoryId;
-import com.moda.moda_api.search.domain.CardDocument;
-import com.moda.moda_api.search.domain.CardSearchRepository;
-import com.moda.moda_api.search.infrastructure.entity.CardDocumentEntity;
-import com.moda.moda_api.search.infrastructure.mapper.CardDocumentMapper;
-import com.moda.moda_api.user.domain.UserId;
-import lombok.RequiredArgsConstructor;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
@@ -20,9 +14,19 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Repository;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.moda.moda_api.card.domain.Card;
+import com.moda.moda_api.category.domain.CategoryId;
+import com.moda.moda_api.search.domain.CardDocument;
+import com.moda.moda_api.search.domain.CardSearchRepository;
+import com.moda.moda_api.search.infrastructure.entity.CardDocumentEntity;
+import com.moda.moda_api.search.infrastructure.mapper.CardDocumentMapper;
+import com.moda.moda_api.user.domain.UserId;
+
+import co.elastic.clients.elasticsearch._types.FieldValue;
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch._types.query_dsl.TermsQueryField;
+import lombok.RequiredArgsConstructor;
 
 @Repository
 @RequiredArgsConstructor
@@ -30,6 +34,24 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
     private final ElasticsearchOperations elasticsearchOperations;
     private final CardSearchJpaRepository cardSearchJpaRepository;
     private final CardDocumentMapper cardDocumentMapper;
+
+    // 카드Document Save
+    @Override
+    public CardDocument save(Card card) {
+        CardDocumentEntity entity = cardDocumentMapper.toEntity(card);
+        return cardDocumentMapper.toDomain(cardSearchJpaRepository.save(entity));
+    }
+
+    // CardDocument 리스트 생성
+    @Override
+    public List<CardDocument> saveAll(List<Card> cards) {
+        List<CardDocumentEntity> entities = cardDocumentMapper.toEntity(cards);
+        List<CardDocumentEntity> savedEntities =
+            StreamSupport.stream(cardSearchJpaRepository.saveAll(entities).spliterator(), false)
+                .collect(Collectors.toList()); // Iterable → List 변환
+
+        return cardDocumentMapper.toDomain(savedEntities);
+    }
 
     /**
      * 핵심 키워드를 기준으로 검색하는 동적 쿼리입니다.
@@ -223,6 +245,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
 
         return executeElasticsearchSearch(boolQuery, pageable);
     }
+
 
     /**
      * 쿼리와 Pageable을 가지고 Slice<CardDocument>를 반환합니다.

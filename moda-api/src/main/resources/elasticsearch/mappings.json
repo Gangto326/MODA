@@ -24,6 +24,12 @@
     "thumbnailUrl": {
       "type": "keyword"
     },
+    "keywords": {
+      "type": "keyword"
+    },
+    "subcontents": {
+      "type": "text"
+    },
     "titleCompletion": {
       "type": "text",
       "analyzer": "korean_completion",
