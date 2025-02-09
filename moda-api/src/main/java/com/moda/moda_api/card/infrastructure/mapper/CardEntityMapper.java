@@ -1,5 +1,8 @@
 package com.moda.moda_api.card.infrastructure.mapper;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.moda.moda_api.card.domain.Card;
 import com.moda.moda_api.card.domain.CardId;
 import com.moda.moda_api.card.domain.EmbeddingVector;
@@ -49,4 +52,11 @@ public class CardEntityMapper {
                 .deletedAt(entity.getDeletedAt())
                 .build();
     }
+
+    public List<Card> toDomain(List<CardEntity> entities) {
+        return entities.stream()
+            .map(this::toDomain)
+            .collect(Collectors.toList());
+    }
+
 }
