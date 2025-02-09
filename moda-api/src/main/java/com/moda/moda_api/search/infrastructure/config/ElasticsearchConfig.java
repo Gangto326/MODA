@@ -7,8 +7,11 @@ import org.springframework.data.elasticsearch.client.elc.ElasticsearchConfigurat
 
 @Configuration
 public class ElasticsearchConfig extends ElasticsearchConfiguration {
-    @Value("${spring.elasticsearch.uris}")
-    private String hostAndPort;
+    @Value("${spring.elasticsearch.host}")
+    private String host;
+
+    @Value("${spring.elasticsearch.port}")
+    private int port;
 
     @Value("${spring.elasticsearch.username}")
     private String username;
@@ -20,7 +23,7 @@ public class ElasticsearchConfig extends ElasticsearchConfiguration {
     public ClientConfiguration clientConfiguration() {
 
         return ClientConfiguration.builder()
-                .connectedTo(hostAndPort)
+                .connectedTo(host + ":" + port)
                 .withBasicAuth(username, password)
                 .build();
     }

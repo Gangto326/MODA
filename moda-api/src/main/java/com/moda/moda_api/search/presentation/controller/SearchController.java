@@ -42,7 +42,7 @@ public class SearchController {
      * @param categoryId // null값일 수 있습니다.
      * @return
      */
-    @GetMapping("")
+    @GetMapping("/main")
     public CompletableFuture<ResponseEntity<SearchResultByCardList>>
         searchCardDocumentListByMainPage(
                 @UserId String userId,
