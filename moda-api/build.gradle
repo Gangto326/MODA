@@ -32,7 +32,7 @@ dependencies {
     testAnnotationProcessor 'org.projectlombok:lombok'
 
     implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3:3.2.1'
-
+    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'redis.clients:jedis'
     runtimeOnly 'org.postgresql:postgresql'

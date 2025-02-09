@@ -5,10 +5,10 @@ import lombok.Getter;
 
 @Getter
 public enum CardContentType {
-    YOUTUBE(1),
-    BLOG(2),
-    NEWS(3),
-    IMG(4),
+    IMG(1),
+    VIDEO(2),
+    BLOG(3),
+    NEWS(4),
     SHORTS(5),
     OTHERS(6);
 

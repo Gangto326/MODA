@@ -1,0 +1,13 @@
+package com.moda.moda_api.search.application.response;
+
+import com.moda.moda_api.card.domain.CardContentType;
+
+import lombok.Builder;
+import lombok.Getter;
+
+@Getter
+@Builder
+public class SearchTypeScore {
+    private final CardContentType contentType;
+    private final Float score;
+}
