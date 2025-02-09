@@ -136,11 +136,11 @@ class ImageAnalyze:
         self.embedding_vector = self.embedder.embed_document(self.content)
 
     #한글로 번역하는 함수
-    async def translate_text(self, text: str):
+    def translate_text(self, text: str):
         translator = googletrans.Translator()
         return translator.translate(text, dest = 'ko', src = 'en')
 
     # 동기 함수를 비동기적으로 실행
     async def async_translate(self, text: str):
         result = await asyncio.to_thread(self.translate_text, text)
-        return result
+        return result.text
