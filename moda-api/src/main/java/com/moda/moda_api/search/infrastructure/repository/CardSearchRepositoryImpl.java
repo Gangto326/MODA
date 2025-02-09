@@ -11,8 +11,8 @@ import com.moda.moda_api.user.domain.UserId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Repository;
 
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @Repository
 @RequiredArgsConstructor
 public class CardSearchRepositoryImpl implements CardSearchRepository {
-    private final ElasticsearchTemplate elasticsearchTemplate;
+    private final ElasticsearchOperations elasticsearchOperations;
     private final CardSearchJpaRepository cardSearchJpaRepository;
     private final CardDocumentMapper cardDocumentMapper;
 
@@ -75,7 +75,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                 .withQuery(boolQuery.build()._toQuery())
                 .build();
 
-        SearchHits<CardDocumentEntity> searchHits = elasticsearchTemplate.search(
+        SearchHits<CardDocumentEntity> searchHits = elasticsearchOperations.search(
                 query,
                 CardDocumentEntity.class
         );
