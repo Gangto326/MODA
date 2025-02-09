@@ -27,18 +27,16 @@ class ImageAnalyze:
         self.keywords = []
         self.embedding_vector = []
 
-        self.execute()
-
     #ImageAnalyze 객체가 실행되면 가장 먼저 실행되는 함수
-    def execute(self):
-        self.encode_base64()
-        self.choose_category()
-        self.analyze_image()
-        self.make_keywords()
-        self.make_embedding_vector()
+    async def execute(self):
+        await self.encode_base64()
+        await self.choose_category()
+        await self.analyze_image()
+        await self.make_keywords()
+        await self.make_embedding_vector()
 
     #Response 형태로 만들어주는 함수
-    def get_response(self) -> ImageResponse:
+    async def get_response(self) -> ImageResponse:
         return ImageResponse(
             category_id=self.category_id,
             content=self.content,
@@ -47,7 +45,7 @@ class ImageAnalyze:
         )
 
     #ollama 채팅을 진행하는 함수
-    def chat(self,
+    async def chat(self,
              messages,
              model: str = MODEL,
              format = None):
@@ -59,11 +57,11 @@ class ImageAnalyze:
         return response['message']['content']
 
     #url을 base64로 인코딩하는 함수
-    def encode_base64(self):
+    async def encode_base64(self):
         self.base64_image = [base64.b64encode(requests.get(self.url).content).decode()]
 
     #category를 선택하는 함수
-    def choose_category(self):
+    async def choose_category(self):
         model = self.MODEL
         messages = make_category_prompt(self.base64_image)
         format = {
@@ -79,7 +77,7 @@ class ImageAnalyze:
         find_category = False
         attempt_count = 0
         while attempt_count < self.MAX_CATEGORY_TRIES:
-            response = self.chat(model = model, messages = messages, format = format)
+            response = await self.chat(model = model, messages = messages, format = format)
 
             for idx, category in enumerate(categories_name()):
                 if category.lower() in response.lower():
@@ -100,18 +98,18 @@ class ImageAnalyze:
         print(f'카테고리: {self.category}')
 
     #base64_image를 통해 이미지를 분석하는 함수
-    def analyze_image(self):
+    async def analyze_image(self):
         model = self.MODEL
         messages = make_analyze_prompt(self.base64_image)
         format = None
 
-        response = self.chat(model = model, messages = messages, format = format)
-        self.content = self.async_translate(response)
+        response = await self.chat(model = model, messages = messages, format = format)
+        self.content = await self.async_translate(response)
 
         print(f'이미지 내용:\n{self.content}')
 
     #keywords를 생성하는 함수
-    def make_keywords(self):
+    async def make_keywords(self):
         model = self.MODEL
         messages = make_keywords_content_prompt(self.base64_image)
         format = {
@@ -127,18 +125,18 @@ class ImageAnalyze:
             'required': ['keyword']
         }
 
-        response = self.chat(model = model, messages = messages, format = format)
+        response = await self.chat(model = model, messages = messages, format = format)
         self.keywords = json.loads(response)['keyword']
         #TODO: 키워드 번역
 
         print(f'키워드: {self.keywords}')
 
     #embeeding_vector를 생성하는 함수
-    def make_embedding_vector(self):
+    async def make_embedding_vector(self):
         self.embedding_vector = self.embedder.embed_document(self.content)
 
     #한글로 번역하는 함수
-    def translate_text(self, text: str):
+    async def translate_text(self, text: str):
         translator = googletrans.Translator()
         return translator.translate(text, dest = 'ko', src = 'en')
 

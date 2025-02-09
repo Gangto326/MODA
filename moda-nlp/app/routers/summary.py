@@ -51,9 +51,10 @@ async def analyze_image(image_request: ImageRequest):
         start_time = time.time()
 
         analyzer = ImageAnalyze(image_request.url)
+        await analyzer.execute()
 
         process_time = time.time() - start_time
         print(f"이미지 분석 완료 - {process_time:.2f}초")
-        return analyzer.get_response()
+        return await analyzer.get_response()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
