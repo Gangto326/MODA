@@ -138,6 +138,6 @@ class PostSummary:
 
         print(f'썸네일 요약본: {self.thumbnail_content}')
 
-    # embeeding_vector를 생성하는 함수
+    #embeeding_vector를 생성하는 함수
     def make_embedding_vector(self):
         self.embedding_vector = self.embedder.embed_document(self.content)

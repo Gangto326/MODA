@@ -1,11 +1,12 @@
 import base64
 import json
 
+import googletrans
 import ollama
 import requests
 
 from app.constants.category import categories_name
-from app.constants.image_prompt import make_analyze_prompt, make_category_prompt
+from app.constants.image_prompt import make_analyze_prompt, make_category_prompt, make_keywords_content_prompt
 from app.schemas.image import ImageResponse
 from app.services.embedding import Embedding
 
@@ -16,7 +17,7 @@ class ImageAnalyze:
 
     def __init__(self, url: str):
         self.url = url
-        self.base64_data = ''
+        self.base64_image = []
         self.embedder = Embedding()
         self.category = ''
 
@@ -30,11 +31,10 @@ class ImageAnalyze:
     #ImageAnalyze 객체가 실행되면 가장 먼저 실행되는 함수
     def execute(self):
         self.encode_base64()
+        self.choose_category()
         self.analyze_image()
-        # TODO:
-        # self.choose_category()
-        # self.make_keywords()
-        # self.make_embedding_vector()
+        self.make_keywords()
+        self.make_embedding_vector()
 
     #Response 형태로 만들어주는 함수
     def get_response(self) -> ImageResponse:
@@ -59,23 +59,12 @@ class ImageAnalyze:
 
     #url을 base64로 인코딩하는 함수
     def encode_base64(self):
-        self.base64_data = base64.b64encode(requests.get(self.url).content).decode()
-
-    #base64_data를 통해 이미지를 분석하는 함수
-    def analyze_image(self):
-        model = self.MODEL
-        messages = make_analyze_prompt([self.base64_data])
-        format = None
-
-        response = self.chat(model = model, messages = messages, format = format)
-        self.content = response
-
-        print(f'이미지 내용:\n{self.content}')
+        self.base64_image = [base64.b64encode(requests.get(self.url).content).decode()]
 
     #category를 선택하는 함수
     def choose_category(self):
         model = self.MODEL
-        messages = make_category_prompt(self.content)
+        messages = make_category_prompt(self.base64_image)
         format = {
             'type': 'object',
             'properties': {
@@ -109,10 +98,21 @@ class ImageAnalyze:
 
         print(f'카테고리: {self.category}')
 
+    #base64_image를 통해 이미지를 분석하는 함수
+    def analyze_image(self):
+        model = self.MODEL
+        messages = make_analyze_prompt(self.base64_image)
+        format = None
+
+        response = self.chat(model = model, messages = messages, format = format)
+        self.content = self.translate_text(response)
+
+        print(f'이미지 내용:\n{self.content}')
+
     #keywords를 생성하는 함수
     def make_keywords(self):
         model = self.MODEL
-        messages = make_keywords_content_prompt(self.content)
+        messages = make_keywords_content_prompt(self.base64_image)
         format = {
             'type': 'object',
             'properties': {
@@ -128,10 +128,15 @@ class ImageAnalyze:
 
         response = self.chat(model = model, messages = messages, format = format)
         self.keywords = json.loads(response)['keyword']
-        self.keywords = [keyword for keyword in self.keywords if keyword in self.content]
+        #TODO: 키워드 번역
 
         print(f'키워드: {self.keywords}')
 
-    # embeeding_vector를 생성하는 함수
+    #embeeding_vector를 생성하는 함수
     def make_embedding_vector(self):
         self.embedding_vector = self.embedder.embed_document(self.content)
+
+    #한글로 번역하는 함수
+    def translate_text(self, text: str):
+        translator = googletrans.Translator()
+        return translator.translate(text, dest = 'ko', src = 'en')
