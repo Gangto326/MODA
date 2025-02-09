@@ -23,28 +23,16 @@ def make_analyze_prompt(images: List[str]):
             'content': '''You are a professional image analyst.
 Please provide a detailed and objective analysis of images according to the following criteria:
 
-1. Composition and Layout
-   - Overall image structure
-   - Placement of key elements
-   - Visual flow and hierarchy
-   - Use of space and balance
-
-2. Key Elements Analysis
+1. Key Elements Analysis
    - Main subject/focal point
    - Supporting elements
    - Relationships between elements
 
-3. Textual Elements (if present)
+2. Textual Elements (if present)
    - Content of text
    - Typography and font styles
    - Text-image integration
    - Readability and hierarchy
-
-4. Intent and Purpose
-   - Target audience identification
-   - Intended message or narrative
-   - Emotional response evoked
-   - Cultural context and relevance
 
 Please analyze this using simple, easy-to-understand language.
 Explain everything clearly so anyone can follow along, while still pointing out both the obvious features and smaller details that make the image interesting and effective.'''
