@@ -1,7 +1,10 @@
 package com.moda.moda_api.search.infrastructure.repository;
 
+import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
+import co.elastic.clients.elasticsearch._types.query_dsl.TermsQueryField;
 import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.search.domain.CardDocument;
 import com.moda.moda_api.search.domain.CardSearchRepository;
@@ -11,11 +14,13 @@ import com.moda.moda_api.user.domain.UserId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Repository;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -92,9 +97,51 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
      */
     @Override
     public List<CardDocument> searchByKeyword(UserId userId, String keyword, Pageable pageable) {
-        return cardSearchJpaRepository.searchByKeyword(userId.getValue(), keyword, pageable).stream()
-                .map(cardDocumentMapper::toDomain)
-                .collect(Collectors.toList());
+        BoolQuery.Builder boolQuery = new BoolQuery.Builder();
+
+        boolQuery.must(Query.of(query -> query
+                        .term(term -> term
+                                .field("keywords")
+                                .value(keyword)
+                        )
+                ))
+                .must(Query.of(query -> query
+                                .terms(terms -> terms
+                                        .field("typeId")
+                                        .terms(TermsQueryField.of(f -> f.value(
+                                                Arrays.asList(2, 3, 4).stream()
+                                                        .map(FieldValue::of)
+                                                        .collect(Collectors.toList())
+                                        )))
+                                )
+                ));
+
+        // userId에 대한 should 조건 매칭
+        boolQuery.must(Query.of(query -> query
+                .bool(bool -> bool
+                        .should(Query.of(q -> q
+                                // userId는 term 조건으로 매칭 후 가중치 추가
+                                .term(term -> term
+                                        .field("userId")
+                                        .value(userId.getValue())
+                                        .boost(2.0f)
+                                )
+                        ))
+                )
+        ));
+
+        NativeQuery query = NativeQuery.builder()
+                .withQuery(boolQuery.build()._toQuery())
+                .build();
+
+        SearchHits<CardDocumentEntity> searchHits = elasticsearchOperations.search(
+                query,
+                CardDocumentEntity.class
+        );
+
+        return searchHits.stream()
+                .map(hit -> cardDocumentMapper.toDomain(hit.getContent()))
+                .toList();
     }
 
     /**
@@ -107,10 +154,38 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
      */
     @Override
     public Slice<CardDocument> searchComplex(Integer typeId, UserId userId, String searchText, Pageable pageable) {
-        Slice<CardDocumentEntity> cardDocumentEntities = cardSearchJpaRepository.searchByType(
-                typeId, userId.getValue(), searchText, pageable
-        );
-        return cardDocumentEntities.map(cardDocumentMapper::toDomain);
+        BoolQuery.Builder boolQuery = new BoolQuery.Builder();
+
+        // typeId에 대한 must 쿼리 매칭
+        boolQuery.must(Query.of(query -> query
+                .term(term -> term
+                        .field("typeId")
+                        .value(typeId)
+                )
+        ));
+
+        // userId와 검색어에 대한 should 조건 매칭
+        boolQuery.must(Query.of(query -> query
+                .bool(bool -> bool
+                        .should(Query.of(q -> q
+                                // userId는 term 조건으로 매칭 후 가중치 추가
+                                .term(term -> term
+                                        .field("userId")
+                                        .value(userId.getValue())
+                                        .boost(2.0f)
+                                )
+                        ))
+                        .should(Query.of(q -> q
+                                // 검색어는 키워드, 제목, 콘텐츠 순으로 가중치 차등 지급
+                                .multiMatch(multiMatch -> multiMatch
+                                        .query(searchText)
+                                        .fields("keywords^2", "title^1.5", "content")
+                                )
+                        ))
+                )
+        ));
+
+        return executeElasticsearchSearch(boolQuery, pageable);
     }
 
     /**
@@ -123,9 +198,64 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
      */
     @Override
     public Slice<CardDocument> searchByCategoryAndType(Integer typeId, CategoryId categoryId, UserId userId, Pageable pageable) {
-        Slice<CardDocumentEntity> cardDocumentEntities = cardSearchJpaRepository.searchByCategoryAndType(
-                typeId, categoryId.getValue(), userId.getValue(), pageable
+        // 쿼리 빌더
+        BoolQuery.Builder boolQuery = new BoolQuery.Builder();
+
+        // typeId, categoryId, userId에 대한 must 쿼리 매칭
+        boolQuery.must(Query.of(query -> query
+                        .term(term -> term
+                                .field("typeId")
+                                .value(typeId)
+                        )
+                ))
+                .must(Query.of(query -> query
+                        .term(term -> term
+                                .field("categoryId")
+                                .value(categoryId.getValue())
+                        )
+                ))
+                .must(Query.of(query -> query
+                        .term(term -> term
+                                .field("userId")
+                                .value(userId.getValue())
+                        )
+                ));
+
+        return executeElasticsearchSearch(boolQuery, pageable);
+    }
+
+    /**
+     * 쿼리와 Pageable을 가지고 Slice<CardDocument>를 반환합니다.
+     * @param boolQuery
+     * @param pageable
+     * @return
+     */
+    private Slice<CardDocument> executeElasticsearchSearch(
+            BoolQuery.Builder boolQuery,
+            Pageable pageable
+    ) {
+        // 네이티브 쿼리 생성
+        NativeQuery query = NativeQuery.builder()
+                .withQuery(boolQuery.build()._toQuery())
+                .withPageable(pageable)
+                .build();
+
+        // DB 탐색
+        SearchHits<CardDocumentEntity> searchHits = elasticsearchOperations.search(
+                query,
+                CardDocumentEntity.class
         );
-        return cardDocumentEntities.map(cardDocumentMapper::toDomain);
+
+        // Entity를 Domain으로 변환
+        List<CardDocument> content = searchHits.stream()
+                .map(hit -> cardDocumentMapper.toDomain(hit.getContent()))
+                .collect(Collectors.toList());
+
+        // Slice 객체로 변경 후 반환
+        return new SliceImpl<>(
+                content,
+                pageable,
+                searchHits.getTotalHits() > (long) pageable.getPageNumber() * pageable.getPageSize()
+        );
     }
 }

@@ -17,13 +17,13 @@ public class CardDocumentEntity {
     @Id
     private String id;  // cardId를 사용
 
-    @Field(type = FieldType.Keyword)
+    @Field(type = FieldType.Keyword, name = "userId")
     private String userId;
 
-    @Field(type = FieldType.Keyword)
+    @Field(type = FieldType.Keyword, name = "categoryId")
     private Long categoryId;
 
-    @Field(type = FieldType.Keyword)
+    @Field(type = FieldType.Keyword, name = "typeId")
     private Integer typeId;
 
     @Field(type = FieldType.Text, analyzer = "korean")

@@ -104,7 +104,7 @@ public class SearchService {
 		Map<Integer, Integer> typeSizes = Map.of(1, 10, 2, 5, 3, 5, 4, 5);
 
 		// 쿼리 기준 검색인 경우
-		if (categoryId == null) {
+		if (categoryId == 0L) {
 			// 각 타입별 검색을 비동기로 실행
 			List<CompletableFuture<Map.Entry<CardContentType, List<CardDocument>>>> futures = executeAsyncSearches(
 				userIdObj, query, targetTypes, typeSizes);
@@ -189,7 +189,7 @@ public class SearchService {
 			.build();
 
 		// 쿼리 기준 검색인 경우
-		if (categoryId == null) {
+		if (categoryId == 0L) {
 			Slice<CardDocument> cardDocuments = cardSearchRepository.searchComplex(
 				typeId, userIdObj, searchText, sliceRequestDto.toPageable()
 			);

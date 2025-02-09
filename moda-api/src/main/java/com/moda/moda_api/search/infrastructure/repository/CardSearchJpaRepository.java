@@ -63,16 +63,6 @@ public interface CardSearchJpaRepository extends ElasticsearchRepository<CardDoc
      * @param pageable
      * @return
      */
-    @Query("{" +
-            "  \"query\": {" +
-            "    \"bool\": {" +
-            "      \"must\": [" +
-            "        { \"term\": { \"typeId\": ?0 } }," +
-            "        { \"term\": { \"categoryId\": ?1 } }," +
-            "        { \"term\": { \"userId\": ?2 } }" +
-            "      ]" +
-            "    }" +
-            "  }" +
-            "}")
+    @Query("{\"query\": {\"bool\": {\"must\": [{ \"term\": { \"typeId\": \"?0\"}}, { \"term\": { \"categoryId\": \"?1\"}}, { \"term\": { \"userId\": \"?2\"}}]}}}")
     Slice<CardDocumentEntity> searchByCategoryAndType(Integer typeId, Long categoryId, String userId, Pageable pageable);
 }
