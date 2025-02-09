@@ -141,7 +141,7 @@ public class CardService {
 		UserId userIdObj = new UserId(userId);
 		CategoryId categoryIdObj = new CategoryId(categoryId);
 
-		// Slice 값 생성
+		// Slicex` 값 생성
 		SliceRequestDto sliceRequestDto = SliceRequestDto.builder()
 			.page(page)
 			.size(size)

@@ -40,7 +40,7 @@ public class ImageEntity {
 	private Long categoryId;
 
 	@Column(name = "image_url" , length = 255, nullable = false)
-	private String image_url;
+	private String imageUrl;
 
 	@Column(name = "embedding", columnDefinition = "VECTOR(768)")
 	@Convert(converter = VectorConverter.class)

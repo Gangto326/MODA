@@ -77,7 +77,8 @@ public class ImageService {
 	public SliceResponseDto<ImageListResponse> getImageList(
 		String userId, Long categoryId, Integer page, Integer size, String sortBy, String sortDirection
 	) {
-		UserId userIdObj = new UserId(userId);
+
+		UserId userIdObj = new UserId("userId");
 		CategoryId categoryIdObj = new CategoryId(categoryId);
 
 		// Slice 값 생성
@@ -94,6 +95,15 @@ public class ImageService {
 			categoryIdObj,
 			sliceRequestDto.toPageable()
 		);
+		
+		images.getContent().forEach(image -> {
+			log.info("Image - ID: {}, URL: {}, Keywords: {}",
+				image.getImageId().getValue(),
+				image.getImageUrl(),
+				Arrays.toString(image.getKeywords())
+			);
+		});
+
 
 		// 페이지네이션 메타 데이터와 함께 반환합니다.
 		return SliceResponseDto.of(

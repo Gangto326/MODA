@@ -39,8 +39,10 @@ public class ImageRepositoryImpl implements ImageRepository {
 
 	@Override
 	public Optional<Image> findByUserIdAndImageId(UserId userId, ImageId imageId) {
+
 		return imageJpaRepository.findByUserIdAndImageId(userId.getValue(), imageId.getValue())
 			.map(imageEntityMapper::toDomain);
+
 	}
 
 	@Override
