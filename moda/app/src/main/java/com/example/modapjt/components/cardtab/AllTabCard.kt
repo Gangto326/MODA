@@ -1,4 +1,6 @@
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -41,10 +43,12 @@ fun AllTabCard(
                 )
             } else {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+//                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .horizontalScroll(rememberScrollState()), // 가로 스크롤 가능하도록 설정
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    imageCards.take(3).forEach { card ->
+                    imageCards.take(10).forEach { card ->
                         ImageSmall(
                             imageUrl = card.thumbnailUrl ?: "",
 //                            modifier = Modifier.weight(1f), // Row 내부에서 각 아이템이 같은 비율(1:1:1)로 공간을 차지
@@ -70,14 +74,17 @@ fun AllTabCard(
                 )
             } else {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+//                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .horizontalScroll(rememberScrollState()), // 가로 스크롤 추가
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    videoCards.take(2).forEach { card ->
+                    videoCards.take(10).forEach { card ->
                         VideoSmall(
                             videoId = card.thumbnailUrl ?: "",
                             title = card.title,
-                            modifier = Modifier.weight(1f),
+//                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.width(160.dp), // 가로 크기 유지
                             onClick = {}
                         )
                     }

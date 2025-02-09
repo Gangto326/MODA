@@ -33,4 +33,26 @@ class CardRepository {
             Result.failure(e)
         }
     }
+
+    // 카드 삭제 기능 추가
+    suspend fun deleteCard(cardId: String): Result<Boolean> {
+        return try {
+            println("[CardRepository] 카드 삭제 요청: cardId=$cardId")
+
+            val response = api.deleteCard(cardId)
+            println("[CardRepository] 카드 삭제 응답 코드: ${response.code()}, 메시지: ${response.message()}")
+
+            if (response.isSuccessful) {
+                Result.success(response.body() ?: false)
+            } else {
+                Result.failure(Exception("카드 삭제 실패: ${response.message()}"))
+            }
+        } catch (e: IOException) {
+            println("[CardRepository] 네트워크 오류 발생: ${e.message}")
+            Result.failure(Exception("네트워크 오류 발생: ${e.message}"))
+        } catch (e: Exception) {
+            println("[CardRepository] 카드 삭제 요청 예외 발생: ${e.message}")
+            Result.failure(e)
+        }
+    }
 }
