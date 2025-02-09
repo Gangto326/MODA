@@ -29,7 +29,7 @@ class ImageAnalyze:
     #ImageAnalyze 객체가 실행되면 가장 먼저 실행되는 함수
     async def execute(self):
         self.encode_base64()
-        self.analyze_image()
+        await self.analyze_image()
         self.choose_category()
         self.make_keywords()
         self.make_embedding_vector()
@@ -61,14 +61,14 @@ class ImageAnalyze:
         self.base64_image = [base64.b64encode(requests.get(self.url).content).decode()]
 
     #base64_image를 통해 이미지를 분석하는 함수
-    def analyze_image(self):
+    async def analyze_image(self):
         model = self.MODEL
         messages = make_analyze_prompt(self.base64_image)
         format = None
 
         response =  self.chat(model = model, messages = messages, format = format)
         # self.content = response
-        self.content = self.translate_text(response)
+        self.content = await self.translate_text(response)
 
         print(f'이미지 내용:\n{self.content}')
 
