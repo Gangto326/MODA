@@ -2,11 +2,11 @@ import json
 
 import ollama
 
-from app.constants.category import categories_name, categories
+from app.constants.category import categories_name
 from app.constants.prompt import make_summary_prompt, make_keywords_content_prompt, \
     make_thumbnail_content_prompt, make_category_prompt
 from app.schemas.post import PostResponse
-from app.services.embedding import Embedding, vector_compare
+from app.services.embedding import Embedding
 
 
 class PostSummary:
@@ -58,7 +58,6 @@ class PostSummary:
 
     #category를 선택하는 함수
     def choose_category(self):
-
         model = self.MODEL
         messages = make_category_prompt(self.origin_content)
         format = {
@@ -79,7 +78,7 @@ class PostSummary:
             for idx, category in enumerate(categories_name()):
                 if category.lower() in response.lower():
                     find_category = True
-                    self.category_id = idx
+                    self.category_id = idx + 1
                     self.category = category
                     break
 
@@ -142,5 +141,3 @@ class PostSummary:
     # embeeding_vector를 생성하는 함수
     def make_embedding_vector(self):
         self.embedding_vector = self.embedder.embed_document(self.content)
-        for c in categories:
-            print(c[0], vector_compare(self.embedding_vector, c[1]))
