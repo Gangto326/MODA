@@ -24,10 +24,8 @@ class PostSummary:
         self.thumbnail_content = ''
         self.embedding_vector = []
 
-        self.execute()
-
     #PostSummary 객체가 실행되면 가장 먼저 실행되는 함수
-    def execute(self):
+    async def execute(self):
         self.choose_category()
         self.summary_content()
         self.make_keywords()

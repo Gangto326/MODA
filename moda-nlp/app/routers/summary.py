@@ -23,6 +23,7 @@ async def summary_document(post_request: PostRequest):
         start_time = time.time()
 
         summarizer = PostSummary(post_request.content)
+        await summarizer.execute()
 
         process_time = time.time() - start_time
         print(f"포스트 요약 완료 - {process_time:.2f}초")
@@ -55,6 +56,6 @@ async def analyze_image(image_request: ImageRequest):
 
         process_time = time.time() - start_time
         print(f"이미지 분석 완료 - {process_time:.2f}초")
-        return await analyzer.get_response()
+        return analyzer.get_response()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
