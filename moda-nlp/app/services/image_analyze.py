@@ -138,4 +138,5 @@ class ImageAnalyze:
     #한글로 번역하는 함수
     async def translate_text(self, text: str):
         translator = googletrans.Translator()
-        return await translator.translate(text, dest = 'ko', src = 'en')
+        result = await translator.translate(text, dest = 'ko', src = 'en')
+        return result.text
