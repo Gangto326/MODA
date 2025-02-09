@@ -4,7 +4,7 @@ from typing import List
 import ollama
 
 from app.constants.category import categories_name
-from app.constants.prompt import make_summary_prompt, make_keywords_content_prompt, \
+from app.constants.post_prompt import make_summary_prompt, make_keywords_content_prompt, \
     make_thumbnail_content_prompt, make_category_prompt
 from app.schemas.youtube import YoutubeResponse, TitleAndContent
 from app.services.embedding import Embedding

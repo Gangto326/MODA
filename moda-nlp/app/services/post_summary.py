@@ -3,7 +3,7 @@ import json
 import ollama
 
 from app.constants.category import categories_name
-from app.constants.prompt import make_summary_prompt, make_keywords_content_prompt, \
+from app.constants.post_prompt import make_summary_prompt, make_keywords_content_prompt, \
     make_thumbnail_content_prompt, make_category_prompt
 from app.schemas.post import PostResponse
 from app.services.embedding import Embedding

@@ -5,8 +5,7 @@ import ollama
 import requests
 
 from app.constants.category import categories_name
-from app.constants.prompt import make_keywords_content_prompt, \
-    make_category_prompt
+from app.constants.image_prompt import make_analyze_prompt, make_category_prompt
 from app.schemas.image import ImageResponse
 from app.services.embedding import Embedding
 
@@ -30,15 +29,12 @@ class ImageAnalyze:
 
     #ImageAnalyze 객체가 실행되면 가장 먼저 실행되는 함수
     def execute(self):
-        # TODO: url을 통해 이미지를 base64로 인코딩
         self.encode_base64()
-        # TODO: vision모델을 통해 이미지 분석
-        # TODO: 수정 예정
         self.analyze_image()
         # TODO:
-        self.choose_category()
-        self.make_keywords()
-        self.make_embedding_vector()
+        # self.choose_category()
+        # self.make_keywords()
+        # self.make_embedding_vector()
 
     #Response 형태로 만들어주는 함수
     def get_response(self) -> ImageResponse:
@@ -52,29 +48,32 @@ class ImageAnalyze:
     #ollama 채팅을 진행하는 함수
     def chat(self,
              messages,
+             images,
              model: str = MODEL,
              format = None):
         response = ollama.chat(
             model = model,
             messages = messages,
-            format = format
+            format = format,
+            imagse = images
         )
         return response['message']['content']
-
-    #origin_content를 요약하는 함수
-    def analyze_image(self):
-    #     model = self.MODEL
-    #     messages = make_summary_prompt(self.category, self.origin_content)
-    #     format = None
-    #
-    #     response = self.chat(model = model, messages = messages, format = format)
-    #     self.content = response
-    #
-        print(f'요약본:\n{self.content}')
 
     #url을 base64로 인코딩하는 함수
     def encode_base64(self):
         self.base64_data = base64.b64encode(requests.get(self.url).content)
+
+    #base64_data를 통해 이미지를 분석하는 함수
+    def analyze_image(self):
+        model = self.MODEL
+        messages = make_analyze_prompt()
+        format = None
+        images = [self.base64_data]
+
+        response = self.chat(model = model, messages = messages, format = format, images = images)
+        self.content = response
+
+        print(f'이미지 분석 완료:\n{self.content}')
 
     #category를 선택하는 함수
     def choose_category(self):
