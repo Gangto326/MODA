@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class SearchService {
+public class KeywordSearchService {
 	private final AbstractExtractor abstractExtractor;
 	private final UrlRedisRepository urlRedisRepository;
 

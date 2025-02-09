@@ -19,7 +19,7 @@ public class WebClientConfig {
 	@Value("${lilys.ai.api.key}")
 	private String lilysApiKey;
 
-	@Value("${embedding.api.url}")
+	@Value("${PythonAI.api.url}")
 	private String pythonURL;
 
 	@Bean("googleWebClient")

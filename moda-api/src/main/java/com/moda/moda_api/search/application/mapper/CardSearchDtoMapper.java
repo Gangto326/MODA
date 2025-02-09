@@ -1,14 +1,15 @@
 package com.moda.moda_api.search.application.mapper;
 
-import com.moda.moda_api.card.domain.ContentType;
-import com.moda.moda_api.search.application.response.CardDocumentListResponse;
-import com.moda.moda_api.search.domain.CardDocument;
-import com.moda.moda_api.user.domain.UserId;
-import org.springframework.stereotype.Component;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.springframework.stereotype.Component;
+
+import com.moda.moda_api.card.domain.CardContentType;
+import com.moda.moda_api.search.application.response.CardDocumentListResponse;
+import com.moda.moda_api.search.domain.CardDocument;
+import com.moda.moda_api.user.domain.UserId;
 
 @Component
 public class CardSearchDtoMapper {
@@ -25,7 +26,7 @@ public class CardSearchDtoMapper {
         return CardDocumentListResponse.builder()
                 .cardId(cardDocument.getCardId().getValue())
                 .categoryId(cardDocument.getCategoryId().getValue())
-                .type(ContentType.from(cardDocument.getTypeId()))
+                .type(CardContentType.from(cardDocument.getTypeId()))
                 .title(cardDocument.getTitle())
                 .thumbnailContent(cardDocument.getThumbnailContent())
                 .thumbnailUrl(cardDocument.getThumbnailUrl())

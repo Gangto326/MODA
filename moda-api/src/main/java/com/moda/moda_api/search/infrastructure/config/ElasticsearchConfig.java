@@ -18,9 +18,11 @@ public class ElasticsearchConfig extends ElasticsearchConfiguration {
 
     @Override
     public ClientConfiguration clientConfiguration() {
+
         return ClientConfiguration.builder()
                 .connectedTo(hostAndPort)
                 .withBasicAuth(username, password)
                 .build();
     }
+
 }
