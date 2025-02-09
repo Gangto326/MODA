@@ -4,17 +4,17 @@ from typing import List
 import ollama
 
 from app.constants.category import categories_name
-from app.constants.post_prompt import make_summary_prompt, make_keywords_content_prompt, \
-    make_thumbnail_content_prompt, make_category_prompt
+from app.constants.youtube_prompt import make_category_prompt, make_keywords_content_prompt, make_process_prompt
 from app.schemas.youtube import YoutubeResponse, TitleAndContent
 from app.services.embedding import Embedding
 
 
 class YoutubeProcess:
+    MAX_CATEGORY_TRIES = 10
     MODEL = 'qwen2.5'
 
     def __init__(self, origin_paragraph: List[TitleAndContent]):
-        self.origin_paragraph = origin_paragraph
+        self.origin_content = json.dumps([p.model_dump() for p in origin_paragraph], ensure_ascii=False)
         self.embedder = Embedding()
         self.category = ''
 
@@ -23,21 +23,12 @@ class YoutubeProcess:
         self.keywords = []
         self.embedding_vector = []
 
-        #TODO: 에러남
-        # self.execute()
-
     #YoutubeProcess 객체가 실행되면 가장 먼저 실행되는 함수
-    def execute(self):
-        # TODO: 수정 예정
-        # TODO:
-        # TODO:
-        # TODO:
-        # TODO:
-        self.summary_content()
-        self.make_embedding_vector()
+    async def execute(self):
+        self.process_paragraph()
         self.choose_category()
         self.make_keywords()
-        self.make_thumbnail_content()
+        self.make_embedding_vector()
 
     #Response 형태로 만들어주는 함수
     def get_response(self) -> YoutubeResponse:
@@ -60,14 +51,21 @@ class YoutubeProcess:
         )
         return response['message']['content']
 
-    #embeeding_vector를 생성하는 함수
-    def make_embedding_vector(self):
-        self.embedding_vector = self.embedder.embed_document(self.content)
+    #origin_paragraph의 데이터를 처리하는 함수
+    def process_paragraph(self):
+        model = self.MODEL
+        messages = make_process_prompt(self.origin_content)
+        format = None
+
+        response = self.chat(model = model, messages = messages, format = format)
+        self.content = response
+
+        print(f'처리된 내용:\n{self.content}')
 
     #category를 선택하는 함수
     def choose_category(self):
         model = self.MODEL
-        messages = make_category_prompt(self.origin_content)
+        messages = make_category_prompt(self.content)
         format = {
             'type': 'object',
             'properties': {
@@ -101,17 +99,6 @@ class YoutubeProcess:
 
         print(f'카테고리: {self.category}')
 
-    #origin_content를 요약하는 함수
-    def summary_content(self):
-        model = self.MODEL
-        messages = make_summary_prompt(self.category, self.origin_content)
-        format = None
-
-        response = self.chat(model = model, messages = messages, format = format)
-        self.content = response
-
-        print(f'요약본:\n{self.content}')
-
     #keywords를 생성하는 함수
     def make_keywords(self):
         model = self.MODEL
@@ -135,13 +122,6 @@ class YoutubeProcess:
 
         print(f'키워드: {self.keywords}')
 
-    # thumbnail_content를 생성하는 함수
-    def make_thumbnail_content(self):
-        model = self.MODEL
-        messages = make_thumbnail_content_prompt(self.content)
-        format = None
-
-        response = self.chat(model = model, messages = messages, format = format)
-        self.thumbnail_content = response
-
-        print(f'썸네일 요약본: {self.thumbnail_content}')
+    #embeeding_vector를 생성하는 함수
+    def make_embedding_vector(self):
+        self.embedding_vector = self.embedder.embed_document(self.content)

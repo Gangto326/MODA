@@ -93,8 +93,10 @@ class PostSummary:
 
     #origin_content를 요약하는 함수
     def summary_content(self):
+        has_html_tag = any(tag in self.origin_content for tag in ['<h1>', '<h2>', '<h3>'])
+
         model = self.MODEL
-        messages = make_summary_prompt(self.category, self.origin_content)
+        messages = make_summary_prompt(self.category, self.origin_content, has_html_tag)
         format = None
 
         response = self.chat(model = model, messages = messages, format = format)

@@ -15,8 +15,6 @@ router = APIRouter(
     responses={404: {"description": "Not found"}}
 )
 
-# TODO: (h1~h3 태그가 있을 가능성 있음)
-# TODO: 한국어 확실하게 나올 수 있게 모델 찾아보기
 @router.post("/post")
 async def summary_document(post_request: PostRequest):
     try:
@@ -36,9 +34,8 @@ async def process_youtube(youtube_request: YoutubeRequest):
     try:
         start_time = time.time()
 
-        # TODO: 데이터 전처리
-        # TODO: 키워드 뽑기, 임베딩벡터 만들기
         processer = YoutubeProcess(youtube_request.paragraph)
+        await processer.execute()
 
         process_time = time.time() - start_time
         print(f"유튜브 후처리 완료 - {process_time:.2f}초")
