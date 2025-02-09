@@ -89,7 +89,7 @@ public class SearchService {
 	/**
 	 * 사용자의 요청에 맞는 콘텐츠가 보일 메인 페이지 데이터를 반환합니다.
 	 *
-	 * 4(Img)의 경우는 10개, 다른 콘텐츠(1, 2, 3)의 경우 5개의 최적 컨텐츠를 반환.
+	 * 1(Img)의 경우는 10개, 다른 콘텐츠(2, 3, 4)의 경우 5개의 최적 컨텐츠를 반환.
 	 * @param userId
 	 * @param query
 	 * @return
@@ -100,8 +100,8 @@ public class SearchService {
 		UserId userIdObj = new UserId(userId);
 		List<Integer> targetTypes = List.of(1, 2, 3, 4);
 
-		// IMG(4) 타입은 10개
-		Map<Integer, Integer> typeSizes = Map.of(1, 5, 2, 5, 3, 5, 4, 10);
+		// IMG(1) 타입은 10개
+		Map<Integer, Integer> typeSizes = Map.of(1, 10, 2, 5, 3, 5, 4, 5);
 
 		// 쿼리 기준 검색인 경우
 		if (categoryId == null) {

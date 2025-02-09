@@ -26,6 +26,7 @@ public class CardSearchDtoMapper {
         return CardDocumentListResponse.builder()
                 .cardId(cardDocument.getCardId().getValue())
                 .categoryId(cardDocument.getCategoryId().getValue())
+                .typeId(cardDocument.getTypeId())
                 .type(CardContentType.from(cardDocument.getTypeId()))
                 .title(cardDocument.getTitle())
                 .thumbnailContent(cardDocument.getThumbnailContent())

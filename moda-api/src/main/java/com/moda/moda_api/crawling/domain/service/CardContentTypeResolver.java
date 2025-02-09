@@ -11,7 +11,7 @@ public class CardContentTypeResolver {
 
 	public static CardContentType resolve(String url) {
 		if (url.contains("youtube.com")) {
-			return CardContentType.YOUTUBE;
+			return CardContentType.VIDEO;
 		}
 
 		if (BLOG_SITES.stream().anyMatch(url::contains)) {

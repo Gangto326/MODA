@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 public class CardDocumentListResponse {
     private String cardId;
     private Long categoryId;
+    private Integer typeId;
     private CardContentType type;
     private String title;
     private String thumbnailContent;
