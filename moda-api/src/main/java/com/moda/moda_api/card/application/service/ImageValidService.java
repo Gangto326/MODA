@@ -1,4 +1,4 @@
-package com.moda.moda_api.image.application.service;
+package com.moda.moda_api.card.application.service;
 
 import java.util.Arrays;
 import java.util.List;

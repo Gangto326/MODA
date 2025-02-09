@@ -36,7 +36,7 @@ public class LilysSummaryService {
 					return lilysWebClient.getSummaryResults(response.getRequestId(), url)
 						.thenApply(this::convertToSummaryResult)
 						.thenCompose(summaryResult ->
-							pythonAnalysisService.youtubeAnalyze(summaryResult)
+							pythonAnalysisService.youtubeAnalyze(summaryResult.getTitleAndContents())
 								.thenApply(summaryResult::updateFromDto)
 						);
 				}));
@@ -80,6 +80,7 @@ public class LilysSummaryService {
 			.subContent(response.getTimeStamp())
 			.thumbnailContent(response.getThumbnailContent())
 			.thumbnailUrl(response.getThumbnailUrl())
+			.titleAndContents(response.getContents())
 			.build();
 	}
 }

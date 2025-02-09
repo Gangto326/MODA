@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class FCMTokenService {
-	private final RedisTemplate<String, String> redisTemplate;
+	private final RedisTemplate<String, String> tokenRedisTemplate;
 	private static final String KEY_PREFIX = "fcm:token:";
 	private static final String USER_PREFIX = "fcm:user:";
 
@@ -22,33 +22,33 @@ public class FCMTokenService {
 		String tokenKey = KEY_PREFIX + token;
 		String userKey = USER_PREFIX + userId;
 
-		redisTemplate.opsForValue().set(tokenKey, userId);
-		redisTemplate.opsForSet().add(userKey, token);
+		tokenRedisTemplate.opsForValue().set(tokenKey, userId);
+		tokenRedisTemplate.opsForSet().add(userKey, token);
 
-		redisTemplate.expire(tokenKey, 30, TimeUnit.DAYS);
-		redisTemplate.expire(userKey, 30, TimeUnit.DAYS);
+		tokenRedisTemplate.expire(tokenKey, 30, TimeUnit.DAYS);
+		tokenRedisTemplate.expire(userKey, 30, TimeUnit.DAYS);
 	}
 
 	// 사용자의 모든 토큰 조회
 	public Set<String> getUserTokens(String userId) {
 		String userKey = USER_PREFIX + userId;
-		return redisTemplate.opsForSet().members(userKey);
+		return tokenRedisTemplate.opsForSet().members(userKey);
 	}
 
 	// 토큰 삭제
 	public void removeToken(String token) {
 		String tokenKey = KEY_PREFIX + token;
-		String userId = redisTemplate.opsForValue().get(tokenKey);
+		String userId = tokenRedisTemplate.opsForValue().get(tokenKey);
 
 		if (userId != null) {
 			String userKey = USER_PREFIX + userId;
-			redisTemplate.opsForSet().remove(userKey, token);
-			redisTemplate.delete(tokenKey);
+			tokenRedisTemplate.opsForSet().remove(userKey, token);
+			tokenRedisTemplate.delete(tokenKey);
 		}
 	}
 
 	// 토큰 존재 여부 확인
 	public boolean existsToken(String token) {
-		return redisTemplate.hasKey(KEY_PREFIX + token);
+		return tokenRedisTemplate.hasKey(KEY_PREFIX + token);
 	}
 }

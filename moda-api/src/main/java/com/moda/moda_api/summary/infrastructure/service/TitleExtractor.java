@@ -18,11 +18,15 @@ public class TitleExtractor {
 	public CompletableFuture<String> extractTitle(String url) {
 		return CompletableFuture.supplyAsync(() -> {
 			try {
+
+				System.out.println("들어왔어 ");
+
+
 				driver.get(url);
-				WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+				WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(50));
 
 				// 페이지 로드 완료 대기
-				wait.until(ExpectedConditions.jsReturnsValue("return document.readyState === 'complete'"));
+				// wait.until(ExpectedConditions.jsReturnsValue("return document.readyState === 'complete'"));
 
 				// 제목 가져오기
 				String title = driver.getTitle();
@@ -34,6 +38,8 @@ public class TitleExtractor {
 					}
 				}
 
+				System.out.println("title : " + title);
+;
 				return title != null ? title : "";
 			} catch (Exception e) {
 				System.err.println("Failed to extract title from URL: " + url);
