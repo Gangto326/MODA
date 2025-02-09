@@ -47,7 +47,7 @@ public class SearchController {
         searchCardDocumentListByMainPage(
                 @UserId String userId,
                 @RequestParam(defaultValue = "") String query,
-                @RequestParam Long categoryId) {
+                @RequestParam(defaultValue = "0") Long categoryId) {
 
         return searchService.searchCardDocumentListByMainPage(userId, query, categoryId)
                 .thenApply(ResponseEntity::ok);
@@ -85,7 +85,7 @@ public class SearchController {
     public ResponseEntity<SliceResponseDto<CardDocumentListResponse>> search(
             @UserId String userId,
             @RequestParam(defaultValue = "") String query,
-            @RequestParam Long categoryId,
+            @RequestParam(defaultValue = "0") Long categoryId,
             @RequestParam Integer typeId,
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "15") Integer size,
