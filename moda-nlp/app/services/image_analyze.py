@@ -1,3 +1,4 @@
+import asyncio
 import base64
 import json
 
@@ -31,7 +32,7 @@ class ImageAnalyze:
         self.encode_base64()
         await self.analyze_image()
         self.choose_category()
-        self.make_keywords()
+        await self.make_keywords()
         self.make_embedding_vector()
         #TODO: 번역
 
@@ -67,7 +68,6 @@ class ImageAnalyze:
         format = None
 
         response =  self.chat(model = model, messages = messages, format = format)
-        # self.content = response
         self.content = await self.translate_text(response)
 
         print(f'이미지 내용:\n{self.content}')
@@ -110,7 +110,7 @@ class ImageAnalyze:
         print(f'카테고리: {self.category}')
 
     #keywords를 생성하는 함수
-    def make_keywords(self):
+    async def make_keywords(self):
         model = self.MODEL
         messages = make_keywords_content_prompt(self.content, self.base64_image)
         format = {
@@ -128,6 +128,7 @@ class ImageAnalyze:
 
         response = self.chat(model = model, messages = messages, format = format)
         self.keywords = json.loads(response)['keyword']
+        self.keywords = await asyncio.gather(*[self.translate_text(keyword) for keyword in self.keywords])
 
         print(f'키워드: {self.keywords}')
 
