@@ -1,12 +1,15 @@
-import ollama
 import json
-from app.constants.category import categories_name
+
+import ollama
+
+from app.constants.category import categories_name, categories
 from app.constants.prompt import make_summary_prompt, make_keywords_content_prompt, \
     make_thumbnail_content_prompt, make_category_prompt
-from app.services.embedding import Embedding
 from app.schemas.post import PostResponse
+from app.services.embedding import Embedding, vector_compare
 
-class Summary:
+
+class PostSummary:
     MAX_CATEGORY_TRIES = 10
     MODEL = 'qwen2.5'
 
@@ -22,6 +25,14 @@ class Summary:
         self.embedding_vector = []
 
         self.execute()
+
+    #PostSummary 객체가 실행되면 가장 먼저 실행되는 함수
+    def execute(self):
+        self.choose_category()
+        self.summary_content()
+        self.make_keywords()
+        self.make_thumbnail_content()
+        self.make_embedding_vector()
 
     #Response 형태로 만들어주는 함수
     def get_response(self) -> PostResponse:
@@ -45,20 +56,15 @@ class Summary:
         )
         return response['message']['content']
 
-    #Summary 객체가 실행되면 가장 먼저 실행되는 함수
-    def execute(self):
-        self.make_embedding_vector()
-        self.choose_category()
-        self.summary_content()
-        self.make_keywords()
-        self.make_thumbnail_content()
-
     #embeeding_vector를 생성하는 함수
     def make_embedding_vector(self):
         self.embedding_vector = self.embedder.embed_document(self.content)
 
     #category를 선택하는 함수
     def choose_category(self):
+        for c in categories:
+            print(c[0], vector_compare(self.embedding_vector, c[1]))
+
         model = self.MODEL
         messages = make_category_prompt(self.origin_content)
         format = {
