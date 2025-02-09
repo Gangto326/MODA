@@ -1,13 +1,18 @@
 package com.moda.moda_api.card.domain;
 
+import java.time.LocalDateTime;
+
 import com.moda.moda_api.card.exception.InvalidCardContentException;
 import com.moda.moda_api.card.exception.InvalidCardTitleException;
 import com.moda.moda_api.card.exception.UnauthorizedException;
 import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.user.domain.UserId;
-import lombok.*;
 
-import java.time.LocalDateTime;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @Builder
@@ -25,6 +30,7 @@ public class Card {
     private String thumbnailUrl;
     private EmbeddingVector embedding;
     private String[] keywords;
+    private String[] subContents;
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
 

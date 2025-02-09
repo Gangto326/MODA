@@ -3,7 +3,7 @@ package com.moda.moda_api.card.application.mapper;
 import com.moda.moda_api.card.application.response.CardDetailResponse;
 import com.moda.moda_api.card.application.response.CardListResponse;
 import com.moda.moda_api.card.domain.Card;
-import com.moda.moda_api.card.domain.ContentType;
+import com.moda.moda_api.card.domain.CardContentType;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -13,7 +13,7 @@ public class CardDtoMapper {
                 .cardId(card.getCardId().getValue())
                 .categoryId(card.getCategoryId().getValue())
                 .typeId(card.getTypeId())
-                .type(ContentType.from(card.getTypeId()))
+                .type(CardContentType.from(card.getTypeId()))
                 .title(card.getTitle())
                 .thumbnailContent(card.getThumbnailContent())
                 .thumbnailUrl(card.getThumbnailUrl())
@@ -27,7 +27,7 @@ public class CardDtoMapper {
                 .cardId(card.getCardId().getValue())
                 .categoryId(card.getCategoryId().getValue())
                 .typeId(card.getTypeId())
-                .type(ContentType.from(card.getTypeId()))
+                .type(CardContentType.from(card.getTypeId()))
                 .title(card.getTitle())
                 .content(card.getContent())
                 .thumbnailUrl(card.getThumbnailUrl())

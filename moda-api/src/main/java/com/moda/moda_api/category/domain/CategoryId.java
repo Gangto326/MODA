@@ -1,15 +1,23 @@
 package com.moda.moda_api.category.domain;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.moda.moda_api.category.exception.InvalidCategoryIdException;
 import lombok.Value;
 
 @Value
 public class CategoryId {
+    public static final Long ALL = 1L;
     Long value;
 
-    public CategoryId(Long value) {
+    @JsonCreator
+    public CategoryId(@JsonProperty("value") Long value) {
         validateCategoryId(value);
         this.value = value;
+    }
+
+    public static CategoryId all() {
+        return new CategoryId(ALL);
     }
 
     /**

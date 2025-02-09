@@ -1,7 +1,9 @@
 package com.moda.moda_api.summary.infrastructure.api;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -10,11 +12,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.moda.moda_api.summary.domain.model.CardSummaryResponse;
-import com.moda.moda_api.summary.infrastructure.dto.LilysAiResponse;
-import com.moda.moda_api.summary.infrastructure.service.TitleAndImageExtractor;
-import com.moda.moda_api.util.exception.SummaryProcessingException;
+import com.moda.moda_api.summary.exception.SummaryProcessingException;
+import com.moda.moda_api.summary.infrastructure.dto.LilysRequestIdResponse;
+import com.moda.moda_api.summary.infrastructure.dto.LilysSummary;
+import com.moda.moda_api.summary.infrastructure.dto.TitleAndContent;
+import com.moda.moda_api.summary.infrastructure.mapper.JsonMapper;
+import com.moda.moda_api.summary.infrastructure.service.TitleExtractor;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,29 +30,19 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class LilysAiClient {
 	private final WebClient lilysWebClient;
-	private final TitleAndImageExtractor titleAndImageExtractor;
-
+	private final JsonMapper jsonMapper;
+	private final TitleExtractor titleExtractor;
 
 	@Value("${lilys.ai.api.url}")
 	private String lilysUrl;
 
-
-	// private static final Map<String, Class<?>> TYPE_MAP = new HashMap<>();
-	// static {
-	// 	TYPE_MAP.put("blogPost", BlogPostResult.class);
-	// 	TYPE_MAP.put("summaryNote", SummaryNoteResult.class);
-	// 	TYPE_MAP.put("rawScript", RawScriptResult.class);
-	// 	TYPE_MAP.put("shortSummary", ShortSummaryResult.class);
-	// 	TYPE_MAP.put("timestamp", TimestampResult.class);
-	// }
-
-	public CompletableFuture<LilysAiResponse> getRequestId(String url) {
+	public CompletableFuture<LilysRequestIdResponse> getRequestId(String url) {
 		System.out.println(url);
 		return lilysWebClient.post()
 			.uri(lilysUrl)
 			.bodyValue(createRequestBody(url))  // Http메세지 Body를 만든다.
 			.retrieve()  // 받을 준비가 됨.
-			.bodyToMono(LilysAiResponse.class)  // 응답 본문을 LilysAiResponse 클래스의 객체로 변환
+			.bodyToMono(LilysRequestIdResponse.class)  // 응답 본문을 LilysAiResponse 클래스의 객체로 변환
 			.doOnError(e -> {  // 에러 처리 실패시
 				log.error("Failed to get RequestId for url: {}", url, e);
 				throw new SummaryProcessingException("Failed to get RequestId from Lilys AI", e);
@@ -58,53 +53,56 @@ public class LilysAiClient {
 			.toFuture();
 	}
 
-	public CompletableFuture<CardSummaryResponse> getSummaryResults(String requestId, String url) {
+	public CompletableFuture<LilysSummary> getSummaryResults(String requestId, String url) {
 
-		// 1. 첫번째 Future
-		// blogPost 결과를 가져오는 Future (본문 Content입니다요)
-		CompletableFuture<JsonNode> contentFuture =
-			getResult(requestId, "blogPost");
+		// 첫 번째 Future: summaryNote 가져오기
+		CompletableFuture<JsonNode> contentFuture = getResult(requestId, "summaryNote");
 
-		// 2. 두번째 Future
-		// thumbnailContent를 위한 Future (youtube면 timestamp, 아니면 shortSummary)
-		String thumbnailType = url.contains("youtube.com") ? "timestamp" : "shortSummary";
-		CompletableFuture<JsonNode> thumbnailFuture = getResult(requestId, thumbnailType);
+		// 두 번째 Future: shortSummary 가져오기
+		CompletableFuture<JsonNode> thumbnailFuture = getResult(requestId, "shortSummary");
+
+		// 세 번째 Future: title 가져오기
+		CompletableFuture<String> titleFuture = titleExtractor.extractTitle(url);
+
+		// 확인용 출력
 		contentFuture.thenAccept(json -> {
 			log.info("Received blogPost data: {}", json);
 		});
-
 		thumbnailFuture.thenAccept(json -> {
 			log.info("Received thumbnail data: {}", json);
 		});
 
-		// 3. 세번째 Future
-		CompletableFuture<String> titleFuture = titleAndImageExtractor.extractTitleAsync(url);
-
-		// 4. 네번째 Future thumbNail-Url은 어떻게 저장할건데??
-		CompletableFuture<String> imageUrlFuture = titleAndImageExtractor.extractImageAsync(url);
-
-
 		// 모든 Future를 조합하여 하나의 CardSummaryResponse 생성
-		return CompletableFuture.allOf(contentFuture, thumbnailFuture, titleFuture, imageUrlFuture)
+		return CompletableFuture.allOf(contentFuture, thumbnailFuture, titleFuture)
 			.thenApply(v -> {
-				// 각 Future들이 완료될 때까지 join()을 호출하여 결과를 얻음
-				JsonNode jsonBlogPost = contentFuture.join();
-				JsonNode jsonThumbnailResult = thumbnailFuture.join();
-				String title = titleFuture.join();
-				String thumbnailUrl = imageUrlFuture.join();
+				List<TitleAndContent> mainContent = new ArrayList<>();
+				String[] timeStamps = new String[0];
+				try {
+					mainContent = jsonMapper.processSummaryNote(contentFuture.join());
+					timeStamps = jsonMapper.extractTimestamps(contentFuture.join());
+				} catch (JsonProcessingException e) {
+					e.printStackTrace();
+				}
 
-				return CardSummaryResponse.builder()
-					.typeId(url.contains("youtube.com") ? 1 : 2)
-					.content(jsonBlogPost.path("data").path("data").toString())
-					.thumbnailContent(jsonThumbnailResult.path("data").path("data").toString())
+				String thumbnailContent = thumbnailFuture.join().path("data").path("data").path("summary").toString();
+				String title = titleFuture.join();
+				String thumbnailUrl = getVideoId(url);
+
+				//만약 mainContent가 없으면 error가 난다.
+				return LilysSummary.builder()
+					.contents(mainContent)
+					.thumbnailContent(thumbnailContent)
 					.thumbnailUrl(thumbnailUrl)
 					.title(title)
+					.typeId(1)
+					.timeStamp(timeStamps)
 					.build();
 			})
 			.exceptionally(e -> {
 				log.error("조합하는 과정에서 에러가 발생, requestId: {}", requestId, e);
 				throw new SummaryProcessingException("Failed to combine summary results", e);
 			});
+
 	}
 
 	// 일단 blogPost를 던져놓고 status가 뭔지 파악하는 함수
@@ -156,4 +154,17 @@ public class LilysAiClient {
 		requestMap.put("modelType", "gpt-3.5");
 		return requestMap;
 	}
+
+	private String getVideoId(String url) {
+		try {
+			if (url.contains("youtube.com/watch?v=")) {
+				String videoId = url.split("v=")[1].split("&")[0];  // 파라미터 제거
+				return videoId;
+			}
+			throw new IllegalArgumentException("Not a YouTube URL");
+		} catch (Exception e) {
+			throw new IllegalArgumentException("Invalid YouTube URL format", e);
+		}
+	}
+
 }

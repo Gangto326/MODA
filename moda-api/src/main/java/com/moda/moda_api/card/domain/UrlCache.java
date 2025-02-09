@@ -6,13 +6,11 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.Base64;
 
-import jakarta.persistence.Id;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Value;
 
 @Getter
 @Builder
@@ -20,10 +18,11 @@ import lombok.Value;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UrlCache {
 	String urlHash;
-
 	String originalUrl;
 	String cachedTitle;
 	String cachedContent;
+	String[] subContents;
+	String[] keywords;
 
 	@Builder.Default
 	private LocalDateTime createdAt = LocalDateTime.now();
