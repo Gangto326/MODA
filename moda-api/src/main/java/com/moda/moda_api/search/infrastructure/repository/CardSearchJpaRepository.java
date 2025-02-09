@@ -69,13 +69,7 @@ public interface CardSearchJpaRepository extends ElasticsearchRepository<CardDoc
             "      \"must\": [" +
             "        { \"term\": { \"typeId\": ?0 } }," +
             "        { \"term\": { \"categoryId\": ?1 } }," +
-            "        {" +
-            "          \"bool\": {" +
-            "            \"should\": [" +
-            "              { \"term\": { \"userId\": \"?2\", \"boost\": 2.0 } }" +
-            "            ]" +
-            "          }" +
-            "        }" +
+            "        { \"term\": { \"userId\": ?2 } }" +
             "      ]" +
             "    }" +
             "  }" +

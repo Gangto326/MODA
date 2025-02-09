@@ -2,16 +2,17 @@
   "analysis": {
     "analyzer": {
       "korean": {
-        "type": "nori",
-        "tokenizer": "nori_tokenizer"
+        "type": "nori"
       },
       "korean_completion": {
-        "tokenizer": "nori_tokenizer",
-        "filter": [
-          "nori_readingform",
-          "lowercase",
-          "edge_ngram_filter"
-        ]
+        "type": "custom",
+        "tokenizer": "korean_tokenizer",
+        "filter": ["lowercase", "edge_ngram_filter"]
+      }
+    },
+    "tokenizer": {
+      "korean_tokenizer": {
+        "type": "nori_tokenizer"
       }
     },
     "filter": {
