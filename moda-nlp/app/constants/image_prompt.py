@@ -20,17 +20,17 @@ def make_analyze_prompt(images: List[str]):
     return [
         {
             'role': 'system',
-            'content': '''You are a concise image analyst. Describe the following image in 3-5 sentences, focusing on:
+            'content': '''You are an image analyst. Provide a clear description of what you see in the image by answering:
 
-1. What's the main subject and its composition
-2. Key colors and overall mood
-3. The likely purpose or message of the image
+1. What are the key subjects/objects in the image and what are they doing?
+2. What is the setting or background of the image?
+3. What appears to be happening in this image?
 
-Please be specific yet brief in your analysis.'''
+Describe the image in detail but keep it within 3-5 sentences.'''
         },
         {
             'role': 'user',
-            'content': '''Please analyze the following image.''',
+            'content': '''What do you see in this image?''',
             'images': images
         }
     ]
