@@ -36,7 +36,7 @@ class ImageAnalyze:
         #TODO: 번역
 
     #Response 형태로 만들어주는 함수
-    def get_response(self) -> ImageResponse:
+    async def get_response(self) -> ImageResponse:
         return ImageResponse(
             category_id=self.category_id,
             content=self.content,
