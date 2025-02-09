@@ -56,14 +56,8 @@ class PostSummary:
         )
         return response['message']['content']
 
-    #embeeding_vector를 생성하는 함수
-    def make_embedding_vector(self):
-        self.embedding_vector = self.embedder.embed_document(self.content)
-
     #category를 선택하는 함수
     def choose_category(self):
-        for c in categories:
-            print(c[0], vector_compare(self.embedding_vector, c[1]))
 
         model = self.MODEL
         messages = make_category_prompt(self.origin_content)
@@ -144,3 +138,9 @@ class PostSummary:
         self.thumbnail_content = response
 
         print(f'썸네일 요약본: {self.thumbnail_content}')
+
+    # embeeding_vector를 생성하는 함수
+    def make_embedding_vector(self):
+        self.embedding_vector = self.embedder.embed_document(self.content)
+        for c in categories:
+            print(c[0], vector_compare(self.embedding_vector, c[1]))
