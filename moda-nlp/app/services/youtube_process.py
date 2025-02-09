@@ -6,14 +6,14 @@ import ollama
 from app.constants.category import categories_name
 from app.constants.prompt import make_summary_prompt, make_keywords_content_prompt, \
     make_thumbnail_content_prompt, make_category_prompt
-from app.schemas.youtube import YoutubeResponse, Content
+from app.schemas.youtube import YoutubeResponse, TitleAndContent
 from app.services.embedding import Embedding
 
 
 class YoutubeProcess:
     MODEL = 'qwen2.5'
 
-    def __init__(self, origin_contents: List[Content]):
+    def __init__(self, origin_contents: List[TitleAndContent]):
         self.origin_contents = origin_contents
         self.embedder = Embedding()
         self.category = ''
