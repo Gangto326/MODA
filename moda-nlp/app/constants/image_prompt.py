@@ -1,3 +1,5 @@
+from typing import List
+
 def make_category_prompt(content:str):
     return [
         {
@@ -14,7 +16,7 @@ def make_category_prompt(content:str):
         }
     ]
 
-def make_analyze_prompt():
+def make_analyze_prompt(images: List[bytes]):
     return [
         {
             'role': 'system',
@@ -24,7 +26,8 @@ def make_analyze_prompt():
             'role': 'user',
             'content': '''Please analyze the following image.
 Provide a detailed explanation following the above criteria, with particular emphasis on [specific analysis requirements].
-Please ensure your analysis is thorough and considers both technical and contextual aspects of the image.'''
+Please ensure your analysis is thorough and considers both technical and contextual aspects of the image.''',
+            'images': images
         }
     ]
 

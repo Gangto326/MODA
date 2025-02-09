@@ -48,29 +48,27 @@ class ImageAnalyze:
     #ollama 채팅을 진행하는 함수
     def chat(self,
              messages,
-             images,
              model: str = MODEL,
              format = None):
         response = ollama.chat(
             model = model,
             messages = messages,
-            format = format,
-            images = images
+            format = format
         )
         return response['message']['content']
 
     #url을 base64로 인코딩하는 함수
     def encode_base64(self):
         self.base64_data = base64.b64encode(requests.get(self.url).content)
+        print(type(self.base64_data))
 
     #base64_data를 통해 이미지를 분석하는 함수
     def analyze_image(self):
         model = self.MODEL
-        messages = make_analyze_prompt()
+        messages = make_analyze_prompt([self.base64_data])
         format = None
-        images = [self.base64_data]
 
-        response = self.chat(model = model, messages = messages, format = format, images = images)
+        response = self.chat(model = model, messages = messages, format = format)
         self.content = response
 
         print(f'이미지 내용:\n{self.content}')
