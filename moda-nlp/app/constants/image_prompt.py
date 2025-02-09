@@ -16,7 +16,7 @@ def make_category_prompt(content:str):
         }
     ]
 
-def make_analyze_prompt(images: List[bytes]):
+def make_analyze_prompt(images: List[str]):
     return [
         {
             'role': 'system',

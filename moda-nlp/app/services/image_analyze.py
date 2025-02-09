@@ -59,8 +59,7 @@ class ImageAnalyze:
 
     #url을 base64로 인코딩하는 함수
     def encode_base64(self):
-        self.base64_data = base64.b64encode(requests.get(self.url).content)
-        print(type(self.base64_data))
+        self.base64_data = base64.b64encode(requests.get(self.url).content).decode()
 
     #base64_data를 통해 이미지를 분석하는 함수
     def analyze_image(self):
