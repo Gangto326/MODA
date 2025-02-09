@@ -24,11 +24,21 @@ import com.moda.moda_api.card.presentation.request.UpdateCardRequest;
 import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.common.pagination.SliceRequestDto;
 import com.moda.moda_api.common.pagination.SliceResponseDto;
+
+import com.moda.moda_api.search.domain.CardSearchRepository;
 import com.moda.moda_api.summary.application.service.SummaryService;
 import com.moda.moda_api.user.domain.UserId;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.data.domain.Slice;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -86,6 +96,13 @@ public class CardService {
 		return CompletableFuture.completedFuture(true);
 	}
 
+	/**
+	 * 새로운 카드인 경우 urlCache테이블과 ElasticSearch에 모두 저장
+	 * @param userIdObj
+	 * @param url
+	 * @param urlHash
+	 * @return
+	 */
 	// UrlHash가 없는 경우 새로운 것을 만들어야한다.
 	private CompletableFuture<Boolean> createNewCard(UserId userIdObj, String url, String urlHash) throws Exception {
 
