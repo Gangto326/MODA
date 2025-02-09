@@ -13,8 +13,8 @@ from app.services.embedding import Embedding
 class YoutubeProcess:
     MODEL = 'qwen2.5'
 
-    def __init__(self, origin_contents: List[TitleAndContent]):
-        self.origin_contents = origin_contents
+    def __init__(self, origin_paragraph: List[TitleAndContent]):
+        self.origin_paragraph = origin_paragraph
         self.embedder = Embedding()
         self.category = ''
 
@@ -23,7 +23,8 @@ class YoutubeProcess:
         self.keywords = []
         self.embedding_vector = []
 
-        self.execute()
+        #TODO: 에러남
+        # self.execute()
 
     #YoutubeProcess 객체가 실행되면 가장 먼저 실행되는 함수
     def execute(self):

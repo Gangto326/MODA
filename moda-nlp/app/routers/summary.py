@@ -38,7 +38,7 @@ async def process_youtube(youtube_request: YoutubeRequest):
 
         # TODO: 데이터 전처리
         # TODO: 키워드 뽑기, 임베딩벡터 만들기
-        processer = YoutubeProcess(youtube_request.content)
+        processer = YoutubeProcess(youtube_request.paragraph)
 
         process_time = time.time() - start_time
         print(f"유튜브 후처리 완료 - {process_time:.2f}초")
