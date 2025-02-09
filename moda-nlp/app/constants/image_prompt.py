@@ -20,13 +20,34 @@ def make_analyze_prompt(images: List[str]):
     return [
         {
             'role': 'system',
-            'content': '''You are an image analyst. Provide a clear description of what you see in the image by answering:
+            'content': '''You are a professional image analyst.
+Please provide a detailed and objective analysis of images according to the following criteria:
 
-1. What are the key subjects/objects in the image and what are they doing?
-2. What is the setting or background of the image?
-3. What appears to be happening in this image?
+1. Composition and Layout
+   - Overall image structure
+   - Placement of key elements
+   - Visual flow and hierarchy
+   - Use of space and balance
 
-Describe the image in detail but keep it within 3-5 sentences.'''
+2. Key Elements Analysis
+   - Main subject/focal point
+   - Supporting elements
+   - Relationships between elements
+
+3. Textual Elements (if present)
+   - Content of text
+   - Typography and font styles
+   - Text-image integration
+   - Readability and hierarchy
+
+4. Intent and Purpose
+   - Target audience identification
+   - Intended message or narrative
+   - Emotional response evoked
+   - Cultural context and relevance
+
+Please analyze this using simple, easy-to-understand language.
+Explain everything clearly so anyone can follow along, while still pointing out both the obvious features and smaller details that make the image interesting and effective.'''
         },
         {
             'role': 'user',
