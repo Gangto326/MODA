@@ -1,4 +1,3 @@
-import asyncio
 import base64
 import json
 
@@ -104,7 +103,7 @@ class ImageAnalyze:
         format = None
 
         response = await self.chat(model = model, messages = messages, format = format)
-        self.content = await self.async_translate(response)
+        self.content = await self.translate_text(response)
 
         print(f'이미지 내용:\n{self.content}')
 
@@ -139,8 +138,3 @@ class ImageAnalyze:
     def translate_text(self, text: str):
         translator = googletrans.Translator()
         return translator.translate(text, dest = 'ko', src = 'en')
-
-    # 동기 함수를 비동기적으로 실행
-    async def async_translate(self, text: str):
-        result = await asyncio.to_thread(self.translate_text, text)
-        return result.text
