@@ -41,6 +41,13 @@ object RetrofitInstance {
 
     val userApi: UserApiService by lazy {
         retrofit.create(UserApiService::class.java)
+
+
+    }
+
+    // ✅ Search API 추가
+    val searchApi: SearchApiService by lazy {
+        retrofit.create(SearchApiService::class.java)
     }
 }
 
