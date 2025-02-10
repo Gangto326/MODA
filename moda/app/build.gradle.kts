@@ -109,6 +109,7 @@ dependencies {
 
     implementation("androidx.navigation:navigation-compose:2.7.5") // 최신 버전 확인 후 사용
     implementation("com.google.accompanist:accompanist-navigation-animation:0.32.0") // AnimatedNavHost 관련
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
 
     implementation(platform("com.google.firebase:firebase-bom:33.9.0"))
     implementation("com.google.firebase:firebase-analytics")
