@@ -55,7 +55,7 @@ async def process_youtube(youtube_request: YoutubeRequest):
 @router.post("/image")
 async def analyze_image(image_request: ImageRequest):
     try:
-        print("이미지 분석")
+        print("이미지 분석 시작")
         start_time = time.time()
 
         analyzer = ImageAnalyze(image_request.url)
