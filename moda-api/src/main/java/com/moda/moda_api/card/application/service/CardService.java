@@ -29,6 +29,7 @@ import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.common.infrastructure.ImageStorageService;
 import com.moda.moda_api.common.pagination.SliceRequestDto;
 import com.moda.moda_api.common.pagination.SliceResponseDto;
+import com.moda.moda_api.notification.application.NotificationService;
 import com.moda.moda_api.search.domain.CardSearchRepository;
 import com.moda.moda_api.summary.application.service.SummaryService;
 import com.moda.moda_api.summary.infrastructure.api.PythonAiClient;
@@ -52,7 +53,6 @@ public class CardService {
 	private final ImageStorageService imageStorageService;
 	private final PythonAiClient pythonAiClient;
 	private final CardSearchRepository cardSearchRepository;
-
 	/**
 	 * URL을 입력 받고 새로운 카드 생성 후 알맞은 보드로 이동합니다.
 	 * @param userId
@@ -112,7 +112,7 @@ public class CardService {
 
 		// 여기서 2가지 경우로 다시 나눠야한다.
 		// summary에서 2가지 경우로 나눠보자.
-		return summaryService.getSummary(url)
+		return summaryService.getSummaryAsync(url)
 			.thenApply(SummaryResultDto -> {
 				String thumbnailUrl = SummaryResultDto.getThumbnailUrl() !=
 					null ? SummaryResultDto.getThumbnailUrl() :

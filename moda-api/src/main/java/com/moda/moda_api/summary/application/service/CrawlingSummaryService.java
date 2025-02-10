@@ -19,33 +19,30 @@ public class CrawlingSummaryService {
 	private final PythonAnalysisService pythonAnalysisService;
 	private final CrawlingService crawlingService;
 
-	public CompletableFuture<SummaryResultDto> summarize(String url) throws Exception {
+	public SummaryResultDto summarize(String url) throws Exception {
 
 		CrawledContent crawledContent = crawlingService.crawlByUrl(url);
 
 		log.info(crawledContent.getExtractedContent().getText());
 
-		CompletableFuture<AIAnalysisResponseDTO> pythonAnalysisDtoCompletableFuture
-			= pythonAnalysisService.articleAnalyze(crawledContent.getExtractedContent().getText());
+		AIAnalysisResponseDTO pythonAnalysisDto = pythonAnalysisService.articleAnalyze(
+			crawledContent.getExtractedContent().getText());
 
-		return pythonAnalysisDtoCompletableFuture.thenApply(pythonAnalysisDto -> {
-			// 첫 번째 이미지 URL 가져오기
-			String thumbnailUrl = getFirstImageUrl(crawledContent.getExtractedContent().getImages());
+		// 첫 번째 이미지 URL 가져오기
+		String thumbnailUrl = getFirstImageUrl(crawledContent.getExtractedContent().getImages());
 
-			System.out.println(pythonAnalysisDto.toString());
-			// SummaryResultDto 생성
-			return SummaryResultDto.builder()
-				.typeId(crawledContent.getUrl().getCardContentType().getTypeId())
-				.title(crawledContent.getTitle())
-				.content(pythonAnalysisDto.getContent())
-				.keywords(pythonAnalysisDto.getKeywords())  // Python 분석에서 받은 키워드
-				.thumbnailContent(pythonAnalysisDto.getThumbnailContent())  // Python 분석에서 받은 thumbnail content
-				.thumbnailUrl(thumbnailUrl)  // 첫 번째 이미지 URL
-				.embeddingVector(pythonAnalysisDto.getEmbeddingVector())  // Python 분석에서 받은 EmbeddingVector
-				.categoryId(pythonAnalysisDto.getCategoryId())  // Python 분석에서 받은 CategoryId
-				.subContent(crawledContent.getExtractedContent().getImages())
-				.build();
-		});
+		// SummaryResultDto 생성
+		return SummaryResultDto.builder()
+			.typeId(crawledContent.getUrl().getCardContentType().getTypeId())
+			.title(crawledContent.getTitle())
+			.content(pythonAnalysisDto.getContent())
+			.keywords(pythonAnalysisDto.getKeywords())  // Python 분석에서 받은 키워드
+			.thumbnailContent(pythonAnalysisDto.getThumbnailContent())  // Python 분석에서 받은 thumbnail content
+			.thumbnailUrl(thumbnailUrl)  // 첫 번째 이미지 URL
+			.embeddingVector(pythonAnalysisDto.getEmbeddingVector())  // Python 분석에서 받은 EmbeddingVector
+			.categoryId(pythonAnalysisDto.getCategoryId())  // Python 분석에서 받은 CategoryId
+			.subContent(crawledContent.getExtractedContent().getImages())
+			.build();
 	}
 
 	/**
