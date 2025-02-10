@@ -40,7 +40,7 @@ public class UserEntity {
     @Column(name = "nickname", length = 100, nullable = false)
     private String nickname;
 
-    @Column(name = "status", length = 10, nullable = false)
+    @Column(name = "role", length = 10, nullable = false)
     private String status;
 
     @Column(name = "created_at", nullable = false)

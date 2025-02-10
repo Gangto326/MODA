@@ -8,9 +8,9 @@ group = 'com.moda'
 version = '0.0.1-SNAPSHOT'
 
 configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
 }
 
 java {
@@ -31,6 +31,10 @@ dependencies {
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
 
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3:3.2.1'
+    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'redis.clients:jedis'
     runtimeOnly 'org.postgresql:postgresql'
 
     implementation 'org.seleniumhq.selenium:selenium-java'
@@ -40,6 +44,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    implementation 'io.hypersistence:hypersistence-utils-hibernate-63:3.7.3'
+
+    implementation 'com.google.firebase:firebase-admin:9.4.3'
 }
 
 tasks.named('test') {
