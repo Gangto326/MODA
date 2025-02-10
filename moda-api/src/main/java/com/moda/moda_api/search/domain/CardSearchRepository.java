@@ -18,6 +18,8 @@ public interface CardSearchRepository {
     Slice<CardDocument> searchByCategoryAndType(Integer typeId, CategoryId categoryId, UserId userId,
         Pageable pageable);
 
+    Slice<CardDocument> searchByAllCategoryAndType(Integer typeId, UserId userId, Pageable pageable);
+
     CardDocument save(Card card);
 
     List<CardDocument> saveAll(List<Card> cards);

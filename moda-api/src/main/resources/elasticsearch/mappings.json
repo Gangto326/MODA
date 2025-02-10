@@ -25,7 +25,16 @@
       "type": "keyword"
     },
     "keywords": {
-      "type": "keyword"
+      "type": "text",
+      "fields": {
+        "keyword": {
+          "type": "keyword"
+        },
+        "ngram": {
+          "type": "text",
+          "analyzer": "ngram_analyzer"
+        }
+      }
     },
     "subcontents": {
       "type": "text"
