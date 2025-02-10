@@ -97,7 +97,6 @@ fun NewSearchScreen(
             ) {
                 if (searchQuery.isEmpty()) {
                     // 🔹 검색어가 없을 때 최근 검색어 & 인기 검색어 표시
-                    item { SearchSubtitle(title = "최근 검색어", date = "", isDeletable = true, onDeleteAll = {/* 삭제 로직 */}) }
                     item { SearchKeywordList(context) }
                     item { SearchSubtitle(title = "인기 검색어", date = "25.02.02 기준") }
                     item { KeywordRankList() }

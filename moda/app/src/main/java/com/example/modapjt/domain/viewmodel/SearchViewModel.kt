@@ -1,7 +1,5 @@
 package com.example.modapjt.domain.viewmodel
 
-import android.util.Log
-import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.modapjt.data.api.RetrofitInstance
