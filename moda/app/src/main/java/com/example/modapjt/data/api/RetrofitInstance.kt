@@ -1,5 +1,6 @@
 package com.example.modapjt.data.api
 
+import com.example.modapjt.notification.MyFirebaseMessagingService
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -48,6 +49,10 @@ object RetrofitInstance {
     // ✅ Search API 추가
     val searchApi: SearchApiService by lazy {
         retrofit.create(SearchApiService::class.java)
+    }
+
+    val fcmTokenApi: FcmApiService by lazy{
+        retrofit.create(FcmApiService::class.java)
     }
 }
 
