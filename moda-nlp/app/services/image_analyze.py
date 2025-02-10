@@ -122,7 +122,7 @@ class ImageAnalyze:
         }
 
         response = self.chat(model = model, messages = messages, format = format)
-        self.keywords = json.loads(response)['keyword']
+        self.keywords = json.loads(response)['keyword'][:5]
         self.keywords = await asyncio.gather(*[self.translate_text(keyword) for keyword in self.keywords])
 
     #embeeding_vector를 생성하는 함수

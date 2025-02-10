@@ -113,7 +113,7 @@ class YoutubeProcess:
         }
 
         response = self.chat(model = model, messages = messages, format = format)
-        self.keywords = json.loads(response)['keyword']
+        self.keywords = json.loads(response)['keyword'][:5]
         self.keywords = [keyword for keyword in self.keywords if keyword in self.content]
 
     #embeeding_vector를 생성하는 함수
