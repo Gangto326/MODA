@@ -1,19 +1,23 @@
 package com.example.modapjt.navigation
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
-import androidx.compose.runtime.*
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.composable
 //import com.google.accompanist.navigation.animation.AnimatedNavHost
 //import com.google.accompanist.navigation.animation.composable
 //import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.modapjt.screen.SavedUrlsScreen
 import com.example.modapjt.screen.linkupload.LinkUploadScreen
 import com.example.modapjt.screen.recommend.RecommendScreen
 import com.example.modapjt.screen.settings.SettingsScreen
 import com.example.modapjt.screen2.newCardListScreen
+import com.example.modapjt.screen2.newSearchCardListScreen
 import com.example.modapjt.screen2.search.NewSearchScreen
 import com.example.modapjt.screen2.user.MyPageScreen
 import com.google.accompanist.navigation.animation.AnimatedNavHost
@@ -21,6 +25,7 @@ import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import newCardDetailScreen
 import newHomeScreen
 import newLinkUploadScreen
+
 //
 //@OptIn(ExperimentalAnimationApi::class)
 //@Composable
@@ -215,5 +220,17 @@ fun NavGraph(
             val userId = backStackEntry.arguments?.getString("userId") ?: "user"
             MyPageScreen(userId = userId, navController = navController, currentRoute = "mypage")
         }
+
+
+        // ✅✅추가
+        composable(route = "newSearchCardListScreen/{searchQuery}") { navBackStackEntry ->
+            val searchQuery = navBackStackEntry.arguments?.getString("searchQuery") ?: ""
+            newSearchCardListScreen(
+                navController = navController,
+                currentRoute = "newSearchCardListScreen",
+                initialQuery = searchQuery  // ✅ 검색어를 전달받아 사용
+            )
+        }
+
     }
 }
