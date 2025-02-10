@@ -15,12 +15,15 @@ import com.example.modapjt.components.search.SearchScreenBar
 import com.example.modapjt.components.search.SearchSubtitle
 import com.example.modapjt.domain.viewmodel.SearchViewModel
 import android.util.Log
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun NewSearchScreen(
     navController: NavController,
     searchViewModel: SearchViewModel = viewModel()
 ) {
+    val context = LocalContext.current // 🔹 Context 가져오기
+
     var searchQuery by remember { mutableStateOf("") }
     var isSearchActive by remember { mutableStateOf(false) }
 
@@ -33,7 +36,6 @@ fun NewSearchScreen(
                 isSearchActive = isSearchActive,
                 onSearchValueChange = {
                     searchQuery = it
-                    Log.d("SearchScreen", "입력된 검색어: $it") // 🔹 검색어 입력 로그
                     searchViewModel.fetchAutoCompleteKeywords(it)
                 },
                 onFocusChanged = { isSearchActive = it },
@@ -44,28 +46,27 @@ fun NewSearchScreen(
                     } else {
                         navController.navigateUp()
                     }
-                }
+                },
+                context = context // 🔹 context 전달
             )
         }
     ) { paddingValues ->
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
+            modifier = Modifier.fillMaxSize().padding(paddingValues),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             if (!isSearchActive) {
                 item { SearchSubtitle(title = "최근 검색어", date = "전체 삭제", isDeletable = true) }
-                item { SearchKeywordList() }
+                item { SearchKeywordList(context) } // 🔹 context 넘겨줌
                 item { SearchSubtitle(title = "인기 검색어", date = "25.02.02 기준") }
                 item { KeywordRankList() }
             } else {
-                Log.d("SearchScreen", "자동완성 검색어 개수: ${searchResults.size}") // 🔹 검색 결과 개수 로그
                 item { SearchSuggestions(searchResults) }
             }
         }
     }
 }
+
 
 @Composable
 fun SearchSuggestions(suggestions: List<String>) {

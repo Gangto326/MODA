@@ -22,39 +22,38 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.modapjt.R
+import android.content.Context
+import com.example.modapjt.datastore.SearchKeywordDataStore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreenBar(
     modifier: Modifier = Modifier,
     navController: NavController,
     initialValue: String = "",
-    isSearchActive: Boolean, // 🔽 현재 검색 활성화 여부 추가
+    isSearchActive: Boolean,
     onSearchValueChange: (String) -> Unit,
     onFocusChanged: (Boolean) -> Unit,
-    onBackPressed: () -> Unit // 🔽 뒤로가기 이벤트 추가
+    onBackPressed: () -> Unit,
+    context: Context // 🔹 Context 추가
 ) {
     var searchText by remember { mutableStateOf(initialValue) }
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
 
     Surface(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(56.dp),
+        modifier = modifier.fillMaxWidth().height(56.dp),
         color = MaterialTheme.colorScheme.surface
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 4.dp),
+            modifier = Modifier.fillMaxSize().padding(horizontal = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            IconButton(
-                onClick = { onBackPressed() }, // 🔽 뒤로가기 버튼 수정
-                modifier = Modifier.size(48.dp)
-            ) {
+            IconButton(onClick = { onBackPressed() }, modifier = Modifier.size(48.dp)) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = "Back",
@@ -64,9 +63,7 @@ fun SearchScreenBar(
             }
 
             Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .heightIn(min = 48.dp)
+                modifier = Modifier.weight(1f).heightIn(min = 48.dp)
             ) {
                 if (searchText.isEmpty()) {
                     Text(
@@ -77,9 +74,7 @@ fun SearchScreenBar(
                             fontWeight = FontWeight.Normal,
                             letterSpacing = 0.sp
                         ),
-                        modifier = Modifier
-                            .align(Alignment.CenterStart)
-                            .padding(start = 4.dp)
+                        modifier = Modifier.align(Alignment.CenterStart).padding(start = 4.dp)
                     )
                 }
 
@@ -89,8 +84,7 @@ fun SearchScreenBar(
                         searchText = it
                         onSearchValueChange(it)
                     },
-                    modifier = Modifier
-                        .fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth()
                         .align(Alignment.CenterStart)
                         .focusRequester(focusRequester)
                         .onFocusChanged { focusState -> onFocusChanged(focusState.isFocused) },
@@ -106,15 +100,22 @@ fun SearchScreenBar(
             }
 
             IconButton(
-                onClick = { /* 검색 기능 구현 */ },
+                onClick = {
+                    if (searchText.isNotBlank()) {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            val currentKeywords = SearchKeywordDataStore.getKeywords(context).first()
+                            val updatedKeywords = (listOf(searchText) + currentKeywords).distinct().take(10)
+                            SearchKeywordDataStore.saveKeywords(context, updatedKeywords)
+                        }
+                        keyboardController?.hide()
+                    }
+                },
                 modifier = Modifier.size(48.dp)
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.ic_search),
                     contentDescription = "Search Icon",
-                    modifier = Modifier
-                        .size(24.dp)
-                        .padding(start = 8.dp)
+                    modifier = Modifier.size(24.dp).padding(start = 8.dp)
                 )
             }
         }

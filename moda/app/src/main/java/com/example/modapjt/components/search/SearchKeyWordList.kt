@@ -1,27 +1,42 @@
 package com.example.modapjt.components.search
 
+import android.content.Context
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import com.example.modapjt.datastore.SearchKeywordDataStore
 
 @Composable
-fun SearchKeywordList() {
-    var keywords by remember { mutableStateOf(listOf("침착맨", "싸피", "중간발표", "프론트", "개발", "밥심")) }
+fun SearchKeywordList(context: Context) {
+    val scope = rememberCoroutineScope()
+    var keywords by remember { mutableStateOf(listOf<String>()) }
+
+    // 🔹 DataStore에서 최근 검색어 불러오기
+    LaunchedEffect(Unit) {
+        keywords = SearchKeywordDataStore.getKeywords(context).first()
+    }
 
     Column(modifier = Modifier.fillMaxWidth()) {
-        LazyRow( // 🔽 기존 Row → LazyRow로 변경 (가로 스크롤 지원)
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp), // 🔽 양쪽 패딩 추가
-            horizontalArrangement = Arrangement.spacedBy(8.dp) // 🔽 키워드 간격 유지
+        LazyRow(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(keywords) { keyword ->
                 SearchKeywordItem(
                     keyword = keyword,
-                    onDelete = { keywords = keywords.filter { it != keyword } } // 🔽 삭제 기능 유지
+                    onDelete = {
+                        scope.launch {
+                            // 🔹 DataStore에서 해당 검색어 삭제
+                            val updatedKeywords = keywords.filter { it != keyword }
+                            SearchKeywordDataStore.saveKeywords(context, updatedKeywords)
+                            keywords = updatedKeywords // 🔹 UI 업데이트
+                        }
+                    }
                 )
             }
         }

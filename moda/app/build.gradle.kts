@@ -108,6 +108,7 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.5") // 최신 버전 확인 후 사용
     implementation("com.google.accompanist:accompanist-navigation-animation:0.32.0") // AnimatedNavHost 관련
 
-
+    // datastore 생성을 위함
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
 
 }
