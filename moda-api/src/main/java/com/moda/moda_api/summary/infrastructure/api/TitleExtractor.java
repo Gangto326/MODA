@@ -1,4 +1,4 @@
-package com.moda.moda_api.summary.infrastructure.service;
+package com.moda.moda_api.summary.infrastructure.api;
 
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;

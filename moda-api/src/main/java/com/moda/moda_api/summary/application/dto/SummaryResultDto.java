@@ -25,31 +25,5 @@ public class SummaryResultDto {
 	private	String thumbnailUrl;
 	private	EmbeddingVector embeddingVector;
 	private	CategoryId categoryId;
-	private List<TitleAndContent> titleAndContents;
 
-	public SummaryResultDto updateFromDto(AIAnalysisResponseDTO aiAnalysisResponseDTO) {
-		if (aiAnalysisResponseDTO.getContent() != null){
-			this.content = aiAnalysisResponseDTO.getContent();
-		}
-
-		if (aiAnalysisResponseDTO.getCategoryId() != null) {
-			this.categoryId = aiAnalysisResponseDTO.getCategoryId();
-		}
-
-		if (aiAnalysisResponseDTO.getKeywords() != null && aiAnalysisResponseDTO.getKeywords().length > 0) {
-			this.keywords = aiAnalysisResponseDTO.getKeywords();
-		}
-
-		if (aiAnalysisResponseDTO.getEmbeddingVector() != null) {
-			this.embeddingVector = aiAnalysisResponseDTO.getEmbeddingVector();
-		}
-
-		// thumbnailContent가 null이거나 빈 문자열인 경우에만 업데이트
-		if (aiAnalysisResponseDTO.getThumbnailContent() != null &&
-			(this.thumbnailContent == null || this.thumbnailContent.trim().isEmpty())) {
-			this.thumbnailContent = aiAnalysisResponseDTO.getThumbnailContent();
-		}
-
-		return this;
-	}
 }

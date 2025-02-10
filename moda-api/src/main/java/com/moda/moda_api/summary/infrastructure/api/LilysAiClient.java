@@ -19,7 +19,6 @@ import com.moda.moda_api.summary.infrastructure.dto.LilysRequestIdResponse;
 import com.moda.moda_api.summary.infrastructure.dto.LilysSummary;
 import com.moda.moda_api.summary.infrastructure.dto.TitleAndContent;
 import com.moda.moda_api.summary.infrastructure.mapper.JsonMapper;
-import com.moda.moda_api.summary.infrastructure.service.TitleExtractor;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +35,7 @@ public class LilysAiClient {
 	@Value("${lilys.ai.api.url}")
 	private String lilysUrl;
 
-	public CompletableFuture<LilysRequestIdResponse> getRequestId(String url) {
+	public LilysRequestIdResponse getRequestId(String url) {
 		System.out.println(url);
 
 		// return CompletableFuture.completedFuture(
@@ -55,10 +54,10 @@ public class LilysAiClient {
 			.switchIfEmpty(Mono.error(  // 아무것도 없을 시
 				new SummaryProcessingException("Received empty response from Lilys AI service")
 			))
-			.toFuture();
+			.block();
 	}
 
-	public CompletableFuture<LilysSummary> getSummaryResults(String requestId, String url) {
+	public LilysSummary getSummaryResults(String requestId, String url) {
 
 		// 첫 번째 Future: summaryNote 가져오기
 		CompletableFuture<JsonNode> contentFuture = getResult(requestId, "summaryNote");
@@ -77,45 +76,30 @@ public class LilysAiClient {
 			log.info("Received thumbnail data: {}", json);
 		});
 
+		CompletableFuture.allOf(contentFuture, thumbnailFuture, titleFuture).join();
 
-		// 모든 Future를 조합하여 하나의 CardSummaryResponse 생성
-		return CompletableFuture.allOf(contentFuture, thumbnailFuture, titleFuture)
-			.thenApply(v -> {
+		try {
+			JsonNode content = contentFuture.get();
+			JsonNode thumbnail = thumbnailFuture.get();
+			String title = titleFuture.get();
 
-				List<TitleAndContent> mainContent = new ArrayList<>();
-				String[] timeStamps = new String[0];
-				try {
-					mainContent = jsonMapper.processSummaryNote(contentFuture.join());
-					timeStamps = jsonMapper.extractTimestamps(contentFuture.join());
-				} catch (JsonProcessingException e) {
-					e.printStackTrace();
-				}
+			List<TitleAndContent> mainContent = jsonMapper.processSummaryNote(content);
+			String[] timeStamps = jsonMapper.extractTimestamps(content);
+			String thumbnailContent = thumbnail.path("data").path("data").path("summary").toString();
+			String thumbnailUrl = getVideoId(url);
 
-				String thumbnailContent = thumbnailFuture.join().path("data").path("data").path("summary").toString();
-				String title = titleFuture.join();
-				String thumbnailUrl = getVideoId(url);
-
-				System.out.println(title);
-				System.out.println(thumbnailContent);
-				System.out.println(thumbnailUrl);
-				System.out.println(mainContent);
-				//만약 mainContent가 없으면 error가 난다.
-				return LilysSummary.builder()
-					.contents(mainContent)
-					.thumbnailContent(thumbnailContent)
-					.thumbnailUrl(thumbnailUrl)
-					.title(title)
-					.typeId(1)
-					.timeStamp(timeStamps)
-					.build();
-			})
-			.exceptionally(e -> {
-				log.error("조합하는 과정에서 에러가 발생, requestId: {}", requestId, e);
-				throw new SummaryProcessingException("Failed to combine summary results", e);
-			});
-
+			return LilysSummary.builder()
+				.contents(mainContent)
+				.thumbnailContent(thumbnailContent)
+				.thumbnailUrl(thumbnailUrl)
+				.title(title)
+				.typeId(1)
+				.timeStamp(timeStamps)
+				.build();
+		} catch (Exception e) {
+			throw new SummaryProcessingException("Failed to combine summary results", e);
+		}
 	}
-
 	// 일단 blogPost를 던져놓고 status가 뭔지 파악하는 함수
 	public CompletableFuture<String> checkStatus(String requestId) {
 		return getResult(requestId, "blogPost")
