@@ -11,13 +11,13 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.navigation.compose.rememberNavController
-import com.example.modapjt.ui.theme.ModapjtTheme
 import com.example.modapjt.navigation.NavGraph
+import com.example.modapjt.ui.theme.ModapjtTheme
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 
 @OptIn(ExperimentalAnimationApi::class)
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -29,6 +29,7 @@ class MainActivity : ComponentActivity() {
                     onStartOverlay = { checkOverlayPermission() }
                 )
             }
+
         }
     }
 
@@ -111,6 +112,7 @@ class MainActivity : ComponentActivity() {
                     Toast.makeText(this, "오버레이 권한이 필요합니다", Toast.LENGTH_SHORT).show()
                 }
             }
+
             USAGE_STATS_PERMISSION_REQUEST_CODE -> { // 사용 기록 액세스 권한 요청 후 처리
                 if (hasUsageStatsPermission()) {
                     Toast.makeText(this, "앱 사용 기록 액세스 권한이 허용되었습니다", Toast.LENGTH_SHORT).show()
@@ -141,14 +143,16 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-//  자동으로 알림 액세스 권한을 요청하는 코드 추가
+    //  자동으로 알림 액세스 권한을 요청하는 코드 추가
     private fun checkNotificationAccess() {
-        val enabledListeners = Settings.Secure.getString(contentResolver, "enabled_notification_listeners")
+        val enabledListeners =
+            Settings.Secure.getString(contentResolver, "enabled_notification_listeners")
         val packageName = packageName
         if (!enabledListeners.contains(packageName)) {
             requestNotificationAccess()
         }
     }
+
     private fun requestNotificationAccess() {
         val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
         Toast.makeText(

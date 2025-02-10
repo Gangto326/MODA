@@ -10,5 +10,8 @@ data class Card(
     val thumbnailContent: String?,
     val thumbnailUrl: String?,
     val keywords: List<String>,
-    val createdAt: String
+//    val createdAt: String,
+    val excludedKeywords: List<String>?,
+    val isMine: Boolean,
+    val score: Int?
 )

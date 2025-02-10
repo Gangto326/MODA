@@ -9,30 +9,61 @@ import java.io.IOException
 class CardRepository {
     private val api = RetrofitInstance.cardApi
 
-    // getCards() : categoryId를 받아서 해당 카테고리에 맞는 카드 리스트를 가져옴
-    suspend fun getCards(userId: String, categoryId: Int, page: Int, size: Int): Result<List<Card>> {
+    // ✅ 전체탭 카드 리스트 가져오기 (api/search/main)
+    suspend fun getAllTabCards(userId: String, query: String, categoryId: Int): Result<List<Card>> {
         return try {
-            println("[CardRepository] API 요청: userId=$userId, categoryId=$categoryId, page=$page, size=$size")
+            println("[CardRepository] 전체탭 API 요청: userId=$userId, categoryId=$categoryId, query=$query")
 
-            val response = api.getCardList(userId, categoryId, page, size)
-            println("[CardRepository] API 응답 코드: ${response.code()}, 메시지: ${response.message()}")
+            val response = api.getAllTabCardList(userId, query, categoryId)
+            println("[CardRepository] 전체탭 응답 코드: ${response.code()}, 메시지: ${response.message()}")
 
             if (response.isSuccessful) {
                 val body = response.body()
-                println("[CardRepository] API 응답 성공, 카드 개수: ${body?.content?.size ?: 0}")
-                Result.success(body?.content?.map { it.toDomain() } ?: emptyList()) // content에서 리스트 추출
+                println("[CardRepository] 전체탭 응답 데이터: $body")
+
+                Result.success(body?.toDomain() ?: emptyList()) // ✅ 전체탭 응답 변환 적용
             } else {
-                println("[CardRepository] API 응답 실패: ${response.errorBody()?.string()}")
-                Result.failure(Exception("카드 리스트 불러오기 실패 - ${response.message()}"))
+                println("[CardRepository] 전체탭 응답 실패: ${response.errorBody()?.string()}")
+                Result.failure(Exception("전체탭 카드 리스트 불러오기 실패 - ${response.message()}"))
             }
         } catch (e: IOException) {
             println("[CardRepository] 네트워크 오류 발생: ${e.message}")
             Result.failure(Exception("네트워크 오류 발생: ${e.message}"))
         } catch (e: Exception) {
-            println("[CardRepository] API 요청 예외 발생: ${e.message}")
+            println("[CardRepository] 전체탭 API 요청 예외 발생: ${e.message}")
             Result.failure(e)
         }
     }
+
+    // ✅ 특정탭(이미지, 블로그, 뉴스, 영상) 카드 리스트 가져오기 (api/search)
+    suspend fun getTabCards(userId: String, query: String, categoryId: Int, typeId: Int, sortDirection: String): Result<List<Card>> {
+        return try {
+            println("[CardRepository] 특정탭 API 요청: userId=$userId, categoryId=$categoryId, typeId=$typeId, sortDirection=$sortDirection")
+
+//            val response = api.getTabCardList(userId, query, categoryId, typeId)
+            val response = api.getTabCardList(userId, query, categoryId, typeId, sortDirection = sortDirection) // sortDirection 추가됨
+
+            println("[CardRepository] 특정탭 응답 코드: ${response.code()}, 메시지: ${response.message()}")
+
+            if (response.isSuccessful) {
+                val body = response.body()
+                println("[CardRepository] 특정탭 응답 데이터: $body")
+
+                Result.success(body?.toDomain() ?: emptyList()) // ✅ 특정탭 응답 변환 적용
+            } else {
+                println("[CardRepository] 특정탭 응답 실패: ${response.errorBody()?.string()}")
+                Result.failure(Exception("특정탭 카드 리스트 불러오기 실패 - ${response.message()}"))
+            }
+        } catch (e: IOException) {
+            println("[CardRepository] 네트워크 오류 발생: ${e.message}")
+            Result.failure(Exception("네트워크 오류 발생: ${e.message}"))
+        } catch (e: Exception) {
+            println("[CardRepository] 특정탭 API 요청 예외 발생: ${e.message}")
+            Result.failure(e)
+        }
+    }
+
+
 
     // 카드 삭제 기능 추가
     suspend fun deleteCard(cardId: String): Result<Boolean> {
