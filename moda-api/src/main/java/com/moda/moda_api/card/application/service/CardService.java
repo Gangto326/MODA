@@ -164,7 +164,7 @@ public class CardService {
 
 					// AI Test생성
 					AIAnalysisResponseDTO aiAnalysisResponseDTO = AIAnalysisResponseDTO.builder()
-						.keywords(new String[]{"으억","냠냠"})
+						.keywords(new String[]{"3차"})
 						.embeddingVector(new EmbeddingVector(null))
 						.categoryId(new CategoryId(1L))
 						.content("AIContnet")
@@ -208,7 +208,7 @@ public class CardService {
 
 		cards.forEach(System.out::println);
 		cardRepository.saveAll(cards);
-		cardSearchRepository.saveAll(cards);
+		cardSearchRepository.save(cards.get(0));
 		return true;
 	}
 
