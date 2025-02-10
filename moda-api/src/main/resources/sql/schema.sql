@@ -63,11 +63,18 @@ FOREIGN KEY (type_id) REFERENCES content_type(type_id)
 CREATE TABLE url_caches (
 url_hash VARCHAR(64) PRIMARY KEY,
 original_url TEXT NOT NULL,
+type_id INT NOT NULL,
+category_id INT NOT NULL,
 cached_title VARCHAR(100) NOT NULL,
 cached_content TEXT NOT NULL,
-keywords text[],
-subcontents text[] DEFAULT ARRAY[]::text[],
-created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+cached_thumbnail_content TEXT NOT NULL,
+cached_thumbnail_url TEXT NOT NULL,
+cached_embedding VECTOR(768) NOT NULL,
+cached_keywords text[],
+cached_subcontents text[] DEFAULT ARRAY[]::text[],
+created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+FOREIGN KEY (type_id) REFERENCES content_type(type_id),
+FOREIGN KEY (category_id) REFERENCES category(category_id)
 );
 
 CREATE TABLE notifications (
