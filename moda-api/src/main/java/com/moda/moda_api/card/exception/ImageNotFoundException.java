@@ -1,4 +1,4 @@
-package com.moda.moda_api.card.infrastructure;
+package com.moda.moda_api.card.exception;
 
 public class ImageNotFoundException extends RuntimeException {
 	public ImageNotFoundException(String message) {
