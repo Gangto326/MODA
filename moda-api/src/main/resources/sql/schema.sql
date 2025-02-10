@@ -21,9 +21,9 @@ CREATE TABLE users (
     user_id VARCHAR(36) PRIMARY KEY,
     email VARCHAR(100) NOT NULL,
     password VARCHAR(60) NOT NULL,
-    profile_img VARCHAR(255),
+    profile_image VARCHAR(255),
     nickname VARCHAR(100) NOT NULL,
-    status VARCHAR(10) NOT NULL,
+    role VARCHAR(10) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP
 );
@@ -55,7 +55,7 @@ CREATE TABLE cards (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP,
     deleted_at TIMESTAMP,
-    subcontents text[] DEFAULT ARRAY[]::text[],
+    sub_contents text[] DEFAULT ARRAY[]::text[],
     FOREIGN KEY (user_id) REFERENCES users(user_id),
     FOREIGN KEY (category_id) REFERENCES category(category_id),
     FOREIGN KEY (type_id) REFERENCES content_type(type_id)
@@ -105,8 +105,8 @@ CREATE TABLE fcm_tokens (
 );
 
 
-INSERT INTO users (user_id, email, password, profile_img, nickname, status) VALUES
-('01234', 'jongwon', '1234', '1234', '1234', '123');
+INSERT INTO users (user_id, email, password, profile_image, nickname, role) VALUES
+('user', 'jongwon', '1234', 'https://img1.daumcdn.net/thumb/R1280x0.fjpg/?fname=http://t1.daumcdn.net/brunch/service/user/cnoC/image/XqjxGakdgqypZUy-BrrP5nq70AQ.jpg', '키티', 'USER');
 
 INSERT INTO content_type (type_id, type) VALUES
 (1, 'YOUTUBE'),
@@ -117,5 +117,13 @@ INSERT INTO content_type (type_id, type) VALUES
 (6, 'OTHERS'); 
 
 INSERT INTO category (category_id, category) VALUES
-(1, 'Food'),
-(2, 'Culture');
+(1, 'All'),
+(2, 'Trends'),
+(3, 'Entertainment'),
+(4, 'Finance'),
+(5, 'Travel'),
+(6, 'Food'),
+(7, 'IT'),
+(8, 'Design'),
+(9, 'Society'),
+(10, 'Health');
