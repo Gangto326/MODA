@@ -15,6 +15,7 @@ import com.example.modapjt.components.user.UserProfileCard
 import com.example.modapjt.domain.viewmodel.UserViewModel
 import androidx.navigation.NavController
 import com.example.modapjt.components.bar.BottomBarComponent
+import com.example.modapjt.components.user.InterestKeywords
 
 @Composable
 fun MyPageScreen(
@@ -27,36 +28,35 @@ fun MyPageScreen(
     // ✅ API 호출하여 데이터 가져오기
     LaunchedEffect(userId) {
         viewModel.fetchUser(userId)
+        viewModel.fetchInterestKeywords(userId) // ✅ userId 기반으로 호출
     }
 
+
     val user by viewModel.user.collectAsState()
+    val keywords by viewModel.interestKeywords.collectAsState(initial = emptyList())
 
     Scaffold(
         bottomBar = {
             navController?.let {
                 BottomBarComponent(it, currentRoute)
             }
-        } // ✅ 항상 밑에 고정되는 BottomBar 추가
+        }
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues) // ✅ Scaffold 내부 패딩 적용
+                .padding(paddingValues)
         ) {
-            // ✅ 헤더 항상 고정
             MyPageHeader()
 
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize(), // ✅ 패딩 제거하여 Divider가 가득 차도록 수정
+                modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 item {
-                    // ✅ 로딩 상태 표시
                     if (user == null) {
                         CircularProgressIndicator()
                     } else {
-                        // ✅ UserProfileCard에 데이터 전달
                         UserProfileCard(
                             profileImage = user?.profileImage,
                             nickname = user?.nickname ?: "사용자"
@@ -71,10 +71,14 @@ fun MyPageScreen(
                     Divider(
                         color = Color(0xFFDCDCDC),
                         thickness = 4.dp,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 0.dp) // ✅ 패딩 제거하여 전체 너비 차지하도록 수정
+                        modifier = Modifier.fillMaxWidth()
                     )
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                // ✅ 관심 키워드 컴포넌트 추가 (API 연동)
+                item {
+                    InterestKeywords(keywords)
                     Spacer(modifier = Modifier.height(16.dp))
                 }
             }
