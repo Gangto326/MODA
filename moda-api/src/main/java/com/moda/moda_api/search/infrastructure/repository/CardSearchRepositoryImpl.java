@@ -88,20 +88,31 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
             boolQuery.must(Query.of(query -> query.bool(shouldQuery.build())));
         }
 
-        // 마지막 입력 중인 String에 대한 와일드 카드 + fuzzy 매칭
+        // 마지막 입력 중인 String에 대한 매칭
         if (prefixKeyword != null && !prefixKeyword.isEmpty()) {
             boolQuery.must(Query.of(query -> query
                     .bool(bool -> bool
-                            .should(should -> should
-                                    .match(match -> match
-                                            .field("keywords.ngram")
-                                            .query(prefixKeyword)
+                            .must(must -> must
+                                    .term(term -> term
+                                            .field("userId")
+                                            .value(userId.getValue())
                                     ))
-                            .should(should -> should
-                                    .fuzzy(fuzzy -> fuzzy
-                                            .field("keywords.keyword")
-                                            .value(prefixKeyword)
-                                            .fuzziness("1")
+                            .must(must -> must
+                                    .bool(b -> b
+                                            .should(should -> should
+                                                    .match(match -> match
+                                                            .field("keywords.ngram")
+                                                            .query(prefixKeyword)
+                                                            .boost(2.0f)
+                                                    ))
+                                            .should(should -> should
+                                                    .fuzzy(fuzzy -> fuzzy
+                                                            .field("keywords")
+                                                            .value(prefixKeyword)
+                                                            .fuzziness("AUTO")
+                                                            .boost(1.0f)
+                                                    ))
+                                            .minimumShouldMatch("1")
                                     ))
                     )));
         }
@@ -110,7 +121,6 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                 .withQuery(boolQuery.build()._toQuery())
                 .build();
 
-        System.out.println(query.getQuery());
         SearchHits<CardDocumentEntity> searchHits = elasticsearchOperations.search(
                 query,
                 CardDocumentEntity.class
