@@ -41,10 +41,19 @@ fun newCardListScreen(
     val userId = "user" // 실제 사용자 ID로 교체 필요
     val categoryName by categoryViewModel.categoryName.collectAsState()
 
-    LaunchedEffect(categoryId) {
+    // 카테고리 및 선택된 탭에 따라 API 호출
+//    LaunchedEffect(categoryId) {
+//        categoryViewModel.loadCategories(userId) // 카테고리 먼저 로드
+//        categoryId?.let {
+//            viewModel.loadCards(userId, it)
+//            categoryViewModel.updateCategoryName(it) // 카테고리 로드 후 카테고리 이름 업데이트
+//        }
+//    }
+    LaunchedEffect(categoryId, selectedCategory) {
+        println("[newCardListScreen] 선택된 탭: $selectedCategory") // 🔥 추가된 로그
         categoryViewModel.loadCategories(userId) // 카테고리 먼저 로드
         categoryId?.let {
-            viewModel.loadCards(userId, it)
+            viewModel.loadCards(userId, it, selectedCategory) // selectedCategory 추가
             categoryViewModel.updateCategoryName(it) // 카테고리 로드 후 카테고리 이름 업데이트
         }
     }
@@ -82,12 +91,12 @@ fun newCardListScreen(
                                 item {
                                     AllTabCard(
                                         imageCards = data.images,
-                                        videoCards = data.videos,
                                         blogCards = data.blogs,
+                                        videoCards = data.videos,
                                         newsCards = data.news,
                                         onImageMoreClick = { selectedCategory = "이미지" },
-                                        onVideoMoreClick = { selectedCategory = "동영상" },
                                         onBlogMoreClick = { selectedCategory = "블로그" },
+                                        onVideoMoreClick = { selectedCategory = "동영상" },
                                         onNewsMoreClick = { selectedCategory = "뉴스" }
                                     )
                                 }
@@ -128,26 +137,6 @@ fun newCardListScreen(
                                 }
                             }
 
-
-                            "동영상" -> {
-                                if (data.videos.isEmpty()) {
-                                    item { EmptyMessage("저장된 영상이 없습니다") }
-                                } else {
-                                    items(data.videos) { card ->
-                                        SwipableCardList(
-                                            cards = listOf(card),
-                                            onDelete = { viewModel.deleteCard(it) }
-                                        ) {
-                                            VideoBig(
-                                                videoId = card.thumbnailUrl ?: "",
-                                                title = card.title,
-                                                // onClick = { navController.navigate("videoDetail/${card.id}")} // 비디오 상세 페이지 이동
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-
                             "블로그" -> {
                                 if (data.blogs.isEmpty()) {
                                     item { EmptyMessage("저장된 블로그가 없습니다") }
@@ -168,6 +157,27 @@ fun newCardListScreen(
                                     }
                                 }
                             }
+
+                            "동영상" -> {
+                                if (data.videos.isEmpty()) {
+                                    item { EmptyMessage("저장된 영상이 없습니다") }
+                                } else {
+                                    items(data.videos) { card ->
+                                        SwipableCardList(
+                                            cards = listOf(card),
+                                            onDelete = { viewModel.deleteCard(it) }
+                                        ) {
+                                            VideoBig(
+                                                videoId = card.thumbnailUrl ?: "",
+                                                title = card.title,
+                                                // onClick = { navController.navigate("videoDetail/${card.id}")} // 비디오 상세 페이지 이동
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+
 
                             "뉴스" -> {
                                 if (data.news.isEmpty()) {
