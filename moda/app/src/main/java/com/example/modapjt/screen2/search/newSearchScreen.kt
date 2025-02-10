@@ -16,13 +16,18 @@ import com.example.modapjt.components.search.SearchSubtitle
 import com.example.modapjt.domain.viewmodel.SearchViewModel
 import android.util.Log
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import com.example.modapjt.datastore.SearchKeywordDataStore
+import kotlinx.coroutines.launch
 
 @Composable
 fun NewSearchScreen(
     navController: NavController,
     searchViewModel: SearchViewModel = viewModel()
 ) {
-    val context = LocalContext.current // 🔹 Context 가져오기
+    val context = LocalContext.current
+    val keyboardController = LocalSoftwareKeyboardController.current // 🔹 키보드 컨트롤러 추가
+    val coroutineScope = rememberCoroutineScope() // 🔹 CoroutineScope 추가
 
     var searchQuery by remember { mutableStateOf("") }
     var isSearchActive by remember { mutableStateOf(false) }
@@ -43,11 +48,12 @@ fun NewSearchScreen(
                     if (isSearchActive) {
                         isSearchActive = false
                         searchQuery = ""
+                        keyboardController?.hide()  // 🔹 키보드 내리기 추가
                     } else {
                         navController.navigateUp()
                     }
                 },
-                context = context // 🔹 context 전달
+                context = context
             )
         }
     ) { paddingValues ->
@@ -56,8 +62,19 @@ fun NewSearchScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             if (!isSearchActive) {
-                item { SearchSubtitle(title = "최근 검색어", date = "전체 삭제", isDeletable = true) }
-                item { SearchKeywordList(context) } // 🔹 context 넘겨줌
+                item {
+                    SearchSubtitle(
+                        title = "최근 검색어",
+                        date = "",
+                        isDeletable = true,
+                        onDeleteAll = {
+                            coroutineScope.launch { // 🔹 suspend function을 coroutine에서 실행
+                                SearchKeywordDataStore.saveKeywords(context, emptyList())
+                            }
+                        }
+                    )
+                }
+                item { SearchKeywordList(context) }
                 item { SearchSubtitle(title = "인기 검색어", date = "25.02.02 기준") }
                 item { KeywordRankList() }
             } else {
