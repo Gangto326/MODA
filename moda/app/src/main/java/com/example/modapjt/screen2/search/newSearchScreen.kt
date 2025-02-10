@@ -7,24 +7,35 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.modapjt.components.search.*
+import com.example.modapjt.components.search.KeywordRankList
+import com.example.modapjt.components.search.SearchKeywordList
+import com.example.modapjt.components.search.SearchScreenBar
+import com.example.modapjt.components.search.SearchSubtitle
+import com.example.modapjt.domain.viewmodel.SearchViewModel
+import android.util.Log
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewSearchScreen(
-    navController: NavController
+    navController: NavController,
+    searchViewModel: SearchViewModel = viewModel()
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var isSearchActive by remember { mutableStateOf(false) }
-    val lastUpdatedDate = "25.02.02 기준"
+
+    val searchResults by searchViewModel.searchResults.collectAsState()
 
     Scaffold(
         topBar = {
             SearchScreenBar(
                 navController = navController,
                 isSearchActive = isSearchActive,
-                onSearchValueChange = { searchQuery = it },
+                onSearchValueChange = {
+                    searchQuery = it
+                    Log.d("SearchScreen", "입력된 검색어: $it") // 🔹 검색어 입력 로그
+                    searchViewModel.fetchAutoCompleteKeywords(it)
+                },
                 onFocusChanged = { isSearchActive = it },
                 onBackPressed = {
                     if (isSearchActive) {
@@ -37,56 +48,53 @@ fun NewSearchScreen(
             )
         }
     ) { paddingValues ->
-        LazyColumn( // 🔽 스크롤 가능하도록 변경
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            verticalArrangement = Arrangement.spacedBy(8.dp) // 🔽 위아래 간격 추가
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             if (!isSearchActive) {
-                item {
-                    SearchSubtitle(
-                        title = "최근 검색어",
-                        date = "전체 삭제",
-                        isDeletable = true
-                    ) {
-                        println("최근 검색어 삭제됨!")
-                    }
-                }
-
-                item { SearchKeywordList() } // 🔽 가로 스크롤 키워드 리스트 추가
-
-                item { SearchSubtitle(title = "즐겨찾기", date = "(최근에 많이 저장한 검색어 자동 즐겨찾기)") }
-                item { SearchSubtitle(title = "많이 저장한 키워드", date = lastUpdatedDate) }
-                item { KeywordRankList() } // 🔽 많이 저장한 키워드 리스트 추가
-
-                item { SearchSubtitle(title = "최근 저장한 키워드", date = lastUpdatedDate) }
-                item { KeywordRankList() } // 🔽 최근 저장한 키워드 리스트 추가
-                item {SearchSubtitle(title = "최근에 본 컨텐츠", date = "")}
-
+                item { SearchSubtitle(title = "최근 검색어", date = "전체 삭제", isDeletable = true) }
+                item { SearchKeywordList() }
+                item { SearchSubtitle(title = "인기 검색어", date = "25.02.02 기준") }
+                item { KeywordRankList() }
             } else {
-                item { SearchSuggestions(searchQuery) }
+                Log.d("SearchScreen", "자동완성 검색어 개수: ${searchResults.size}") // 🔹 검색 결과 개수 로그
+                item { SearchSuggestions(searchResults) }
             }
         }
     }
 }
 
-
-
-
-
-// 🔽 연관 검색어 UI (현재는 더미 데이터)
 @Composable
-fun SearchSuggestions(query: String) {
+fun SearchSuggestions(suggestions: List<String>) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Text(text = "'$query'와 관련된 검색어", style = MaterialTheme.typography.titleMedium)
+        Text(text = "자동완성 검색어", style = MaterialTheme.typography.titleMedium)
         Spacer(modifier = Modifier.height(8.dp))
-        repeat(5) { index ->
-            Text(text = "$query 관련 검색어 $index", style = MaterialTheme.typography.bodyMedium)
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        ) {
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                items(suggestions.take(10)) { suggestion ->
+                    Log.d("SearchSuggestions", "자동완성 검색어 아이템: $suggestion") // 🔹 검색어 리스트 로그
+                    Text(
+                        text = suggestion,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
         }
     }
 }

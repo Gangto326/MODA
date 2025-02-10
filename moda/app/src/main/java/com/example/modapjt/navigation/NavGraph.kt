@@ -14,6 +14,7 @@ import com.example.modapjt.screen.recommend.RecommendScreen
 import com.example.modapjt.screen.settings.SettingsScreen
 import com.example.modapjt.screen2.newCardListScreen
 import com.example.modapjt.screen2.search.NewSearchScreen
+import com.example.modapjt.screen2.user.MyPageScreen
 import newCardDetailScreen
 import newHomeScreen
 import newLinkUploadScreen
@@ -119,5 +120,13 @@ fun NavGraph(
         composable("card_detail_test") {
             newCardDetailScreen(navController, currentRoute = "card_detail_test")
         }
+
+        // 마이페이지 화면 추가
+        composable("mypage/{userId}") { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId") ?: "user"
+            val currentRoute = "mypage"
+            MyPageScreen(userId = userId, navController = navController, currentRoute = currentRoute)
+        }
+
     }
 }

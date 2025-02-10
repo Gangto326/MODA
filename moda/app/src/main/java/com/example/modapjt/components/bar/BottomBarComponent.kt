@@ -2,6 +2,7 @@
 package com.example.modapjt.components.bar
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
@@ -52,19 +53,20 @@ fun BottomBarComponent(navController: NavController, currentRoute: String) {
                 }
             }
         )
-        // screen2/home/newHomeScreen.kt 화면 테스트
+        // screen2/마이페이지 테스트
         NavigationBarItem(
-            icon = { Icon(Icons.Default.Settings, "Home Test") },
-            label = { Text("홈테스트") },
-            selected = currentRoute == "home_test", // 변경: screen4 -> settings
+            icon = { Icon(Icons.Default.AccountCircle, "My Page") },
+            label = { Text("마이페이지") },
+            selected = currentRoute == "mypage",
             onClick = {
-                if (currentRoute != "home_test") {
-                    navController.navigate("home_test") {
-                        popUpTo("home")
+                if (currentRoute != "mypage") {
+                    navController.navigate("mypage/user") { // ✅ userId 추가
+                        popUpTo("home") { inclusive = false }
                     }
                 }
             }
         )
+
 
         // screen2/cardlist/newCardListScreen.kt 화면 테스트
         NavigationBarItem(
