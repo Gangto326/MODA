@@ -29,23 +29,15 @@ import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.common.infrastructure.ImageStorageService;
 import com.moda.moda_api.common.pagination.SliceRequestDto;
 import com.moda.moda_api.common.pagination.SliceResponseDto;
-
 import com.moda.moda_api.search.domain.CardSearchRepository;
 import com.moda.moda_api.summary.application.service.SummaryService;
 import com.moda.moda_api.summary.infrastructure.api.PythonAiClient;
 import com.moda.moda_api.summary.infrastructure.dto.AIAnalysisResponseDTO;
+import com.moda.moda_api.summary.infrastructure.dto.AiImageRequestDTO;
 import com.moda.moda_api.user.domain.UserId;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.data.domain.Slice;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -86,22 +78,23 @@ public class CardService {
 
 	// UrlHash가 있는 경우
 	private CompletableFuture<Boolean> createCardFromCache(UserId userIdObj, String urlHash) {
-		Card existingCard = cardRepository.findByUrlHash(urlHash).get();
+
 		UrlCache cache = urlCacheRepository.findByUrlHash(urlHash).get();
 
 		Card card = cardFactory.create(
 			userIdObj,
-			existingCard.getCategoryId(),
-			existingCard.getTypeId(),
+			cache.getCategoryId(),
+			cache.getTypeId(),
 			urlHash,
 			cache.getCachedTitle(),
 			cache.getCachedContent(),
-			existingCard.getThumbnailContent(),
-			existingCard.getThumbnailUrl(),
-			existingCard.getEmbedding(),
-			existingCard.getKeywords(),
-			cache.getSubContents()
+			cache.getCachedThumbnailContent(),
+			cache.getCachedThumbnailContent(),
+			cache.getCachedEmbedding(),
+			cache.getCachedKeywords(),
+			cache.getCachedSubContents()
 		);
+
 		cardRepository.save(card);
 		cardSearchRepository.save(card);
 		return CompletableFuture.completedFuture(true);
@@ -121,10 +114,9 @@ public class CardService {
 		// summary에서 2가지 경우로 나눠보자.
 		return summaryService.getSummary(url)
 			.thenApply(SummaryResultDto -> {
-				String thumbnailUrl = "";
-				if(SummaryResultDto.getThumbnailUrl() == null){
-					thumbnailUrl="https://a805bucket.s3.ap-northeast-2.amazonaws.com/images/logo/download.jpg";
-				}
+				String thumbnailUrl = SummaryResultDto.getThumbnailUrl() !=
+					null ? SummaryResultDto.getThumbnailUrl() :
+					"https://a805bucket.s3.ap-northeast-2.amazonaws.com/images/logo/download.jpg";
 				Card card = cardFactory.create(
 					userIdObj,
 					SummaryResultDto.getCategoryId(),
@@ -139,16 +131,24 @@ public class CardService {
 					SummaryResultDto.getSubContent()
 				);
 
+				System.out.println(card.toString());
+
 				urlCacheRepository.save(
 					UrlCache.builder()
 						.urlHash(urlHash)
-						.cachedTitle(SummaryResultDto.getTitle())
-						.cachedContent(SummaryResultDto.getContent())
+						.categoryId(card.getCategoryId())
+						.typeId(card.getTypeId())
+						.cachedTitle(card.getTitle())
+						.cachedContent(card.getContent())
 						.originalUrl(url)
-						.subContents(SummaryResultDto.getSubContent())
-						.keywords(SummaryResultDto.getKeywords())
+						.cachedThumbnailContent(card.getThumbnailContent())
+						.cachedThumbnailUrl(card.getThumbnailUrl())
+						.cachedEmbedding(card.getEmbedding())
+						.cachedKeywords(card.getKeywords())
+						.cachedSubContents(card.getSubContents())
 						.build()
 				);
+
 				cardRepository.save(card);
 				cardSearchRepository.save(card);
 
@@ -167,43 +167,30 @@ public class CardService {
 					String urlHash = UrlCache.generateHash(s3Url);
 
 					// 실제 AI 분석
-					// AIAnalysisResponseDTO aiAnalysisResponseDTO = pythonAiClient.imageAnalysis(new AiImageRequestDTO(s3Url));
+					AIAnalysisResponseDTO aiAnalysisResponseDTO = pythonAiClient.imageAnalysis(new AiImageRequestDTO(s3Url));
 
 					// AI Test생성
-					AIAnalysisResponseDTO aiAnalysisResponseDTO = AIAnalysisResponseDTO.builder()
-						.keywords(new String[]{"3차"})
-						.embeddingVector(new EmbeddingVector(null))
-						.categoryId(new CategoryId(1L))
-						.content("AIContnet")
-						.thumbnailContent("abcd")
-						.build();
-
-					urlCacheRepository.save(
-						UrlCache.builder()
-							.urlHash(urlHash)
-							.cachedTitle("title")
-							.cachedContent("ImageContent")
-							.originalUrl(s3Url)
-							.subContents(new String[]{"핵심키워드"})
-							.keywords(aiAnalysisResponseDTO.getKeywords())
-							.build()
-					);
+					// AIAnalysisResponseDTO aiAnalysisResponseDTO = AIAnalysisResponseDTO.builder()
+					// 	.keywords(new String[] {"3차"})
+					// 	.embeddingVector(new EmbeddingVector(null))
+					// 	.categoryId(new CategoryId(1L))
+					// 	.content("AIContnet")
+					// 	.thumbnailContent("abcd")
+					// 	.build();
 
 					return Card.builder()
 						.cardId(new CardId(UUID.randomUUID().toString()))
 						.userId(userIdObj)
 						.categoryId(aiAnalysisResponseDTO.getCategoryId())
-						.typeId(1) // 이미지 타입
+						.typeId(4) // 이미지 타입
 						.urlHash(urlHash)
 						.title("ImageTitle")
-						.content(s3Url)
+						.content(aiAnalysisResponseDTO.getContent())
 						.thumbnailContent(aiAnalysisResponseDTO.getThumbnailContent())
 						.thumbnailUrl(s3Url)
 						.embedding(aiAnalysisResponseDTO.getEmbeddingVector())
 						.keywords(aiAnalysisResponseDTO.getKeywords())
-						.subContents(new String[]{"핵심키워드"})
-						.viewCount(0)
-						.createdAt(LocalDateTime.now())
+						.subContents(null)
 						.build();
 
 				} catch (Exception e) {
@@ -212,14 +199,11 @@ public class CardService {
 			})
 			.collect(Collectors.toList());
 
-
 		cards.forEach(System.out::println);
 		cardRepository.saveAll(cards);
 		cardSearchRepository.save(cards.get(0));
 		return true;
 	}
-
-
 
 	/**
 	 * 페이지네이션에 맞게 카드의 리스트 반환합니다.
@@ -230,7 +214,7 @@ public class CardService {
 	 * @param page
 	 * @param size
 	 * @param sortBy
-	 * @param sortDirection
+	`	 * @param sortDirection
 	 * @return
 	 */
 	public SliceResponseDto<CardListResponse> getCardList(
@@ -249,9 +233,9 @@ public class CardService {
 
 		// Slice와 파라미터 조건에 맞는 카드를 가져옵니다.
 		Slice<Card> cards = findCardListByCategory(
-				userIdObj,
-				categoryIdObj,
-				sliceRequestDto
+			userIdObj,
+			categoryIdObj,
+			sliceRequestDto
 		);
 
 		// 페이지네이션 메타 데이터와 함께 반환합니다.
@@ -382,20 +366,19 @@ public class CardService {
 			.collect(Collectors.toList());
 	}
 
-
 	private Slice<Card> findCardListByCategory(UserId userId, CategoryId categoryId, SliceRequestDto sliceRequestDto) {
 
 		if (categoryId.equals(CategoryId.all())) {
 			return cardRepository.findByUserId(
-					userId,
-					sliceRequestDto.toPageable()
+				userId,
+				sliceRequestDto.toPageable()
 			);
 		}
 
 		return cardRepository.findByUserIdAndCategoryId(
-				userId,
-				categoryId,
-				sliceRequestDto.toPageable()
+			userId,
+			categoryId,
+			sliceRequestDto.toPageable()
 		);
 	}
 }

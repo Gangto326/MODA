@@ -22,6 +22,4 @@ public interface CardRepository {
     boolean deleteAll(List<Card> cardsToDelete);
 
     List<Card> saveAll(List<Card> cards);
-
-    Optional<Card> findByUrlHash(String urlHash);
 }
