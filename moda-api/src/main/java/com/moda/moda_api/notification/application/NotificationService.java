@@ -47,6 +47,7 @@ public class NotificationService {
 
 	// FCM 발송
 	private void sendFCMNotification(String userId, NotificationType type, String content) {
+		// 유저 토큰 가져오기.
 		Set<String> tokens = fcmTokenService.getUserTokens(userId);
 
 		tokens.forEach(token -> {

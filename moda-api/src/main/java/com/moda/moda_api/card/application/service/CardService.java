@@ -103,6 +103,7 @@ public class CardService {
 			cache.getSubContents()
 		);
 		cardRepository.save(card);
+		cardSearchRepository.save(card);
 		return CompletableFuture.completedFuture(true);
 	}
 
@@ -120,6 +121,10 @@ public class CardService {
 		// summary에서 2가지 경우로 나눠보자.
 		return summaryService.getSummary(url)
 			.thenApply(SummaryResultDto -> {
+				String thumbnailUrl = "";
+				if(SummaryResultDto.getThumbnailUrl() == null){
+					thumbnailUrl="https://a805bucket.s3.ap-northeast-2.amazonaws.com/images/logo/download.jpg";
+				}
 				Card card = cardFactory.create(
 					userIdObj,
 					SummaryResultDto.getCategoryId(),
@@ -128,7 +133,7 @@ public class CardService {
 					SummaryResultDto.getTitle(),
 					SummaryResultDto.getContent(),
 					SummaryResultDto.getThumbnailContent(),
-					SummaryResultDto.getThumbnailUrl(),
+					thumbnailUrl,
 					SummaryResultDto.getEmbeddingVector(),
 					SummaryResultDto.getKeywords(),
 					SummaryResultDto.getSubContent()
@@ -145,6 +150,8 @@ public class CardService {
 						.build()
 				);
 				cardRepository.save(card);
+				cardSearchRepository.save(card);
+
 				return true;
 			});
 	}
