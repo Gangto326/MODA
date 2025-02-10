@@ -1,6 +1,5 @@
 package com.moda.moda_api.search.infrastructure.repository;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -81,7 +80,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
             for (String keyword : completeKeywords) {
                 shouldQuery.should(Query.of(query -> query
                         .fuzzy(fuzzy -> fuzzy
-                                .field("keywords")
+                                .field("keywords.keyword")
                                 .value(keyword)
                                 .fuzziness("AUTO")
                         )));
@@ -89,13 +88,21 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
             boolQuery.must(Query.of(query -> query.bool(shouldQuery.build())));
         }
 
-        // 마지막 입력 중인 String에 대한 fuzzy 매칭
+        // 마지막 입력 중인 String에 대한 와일드 카드 + fuzzy 매칭
         if (prefixKeyword != null && !prefixKeyword.isEmpty()) {
             boolQuery.must(Query.of(query -> query
-                    .fuzzy(fuzzy -> fuzzy
-                            .field("keywords")
-                            .value(prefixKeyword)
-                            .fuzziness("AUTO")
+                    .bool(bool -> bool
+                            .should(should -> should
+                                    .match(match -> match
+                                            .field("keywords.ngram")
+                                            .query(prefixKeyword)
+                                    ))
+                            .should(should -> should
+                                    .fuzzy(fuzzy -> fuzzy
+                                            .field("keywords.keyword")
+                                            .value(prefixKeyword)
+                                            .fuzziness("1")
+                                    ))
                     )));
         }
 
@@ -103,6 +110,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                 .withQuery(boolQuery.build()._toQuery())
                 .build();
 
+        System.out.println(query.getQuery());
         SearchHits<CardDocumentEntity> searchHits = elasticsearchOperations.search(
                 query,
                 CardDocumentEntity.class
@@ -124,7 +132,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
 
         boolQuery.must(Query.of(query -> query
                         .term(term -> term
-                                .field("keywords")
+                                .field("keywords.keyword")
                                 .value(keyword)
                         )
                 ))
@@ -202,7 +210,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                                 // 검색어는 키워드, 제목, 콘텐츠 순으로 가중치 차등 지급
                                 .multiMatch(multiMatch -> multiMatch
                                         .query(searchText)
-                                        .fields("keywords^2", "title^1.5", "content")
+                                        .fields("keywords.keyword^2", "title^1.5", "content")
                                 )
                         ))
                 )
@@ -235,6 +243,35 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                         .term(term -> term
                                 .field("categoryId")
                                 .value(categoryId.getValue())
+                        )
+                ))
+                .must(Query.of(query -> query
+                        .term(term -> term
+                                .field("userId")
+                                .value(userId.getValue())
+                        )
+                ));
+
+        return executeElasticsearchSearch(boolQuery, pageable);
+    }
+
+    /**
+     * 콘텐츠 타입별 유저 및 모든 카테고리 검색
+     * @param typeId
+     * @param userId
+     * @param pageable
+     * @return
+     */
+    @Override
+    public Slice<CardDocument> searchByAllCategoryAndType(Integer typeId, UserId userId, Pageable pageable) {
+        // 쿼리 빌더
+        BoolQuery.Builder boolQuery = new BoolQuery.Builder();
+
+        // typeId, userId에 대한 must 쿼리 매칭
+        boolQuery.must(Query.of(query -> query
+                        .term(term -> term
+                                .field("typeId")
+                                .value(typeId)
                         )
                 ))
                 .must(Query.of(query -> query

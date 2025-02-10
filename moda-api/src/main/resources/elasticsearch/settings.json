@@ -8,11 +8,22 @@
         "type": "custom",
         "tokenizer": "korean_tokenizer",
         "filter": ["lowercase", "edge_ngram_filter"]
+      },
+      "ngram_analyzer": {
+        "type": "custom",
+        "tokenizer": "ngram_tokenizer",
+        "filter": ["lowercase"]
       }
     },
     "tokenizer": {
       "korean_tokenizer": {
         "type": "nori_tokenizer"
+      },
+      "ngram_tokenizer": {
+        "type": "ngram",
+        "min_gram": 1,
+        "max_gram": 2,
+        "token_chars": ["letter", "digit"]
       }
     },
     "filter": {

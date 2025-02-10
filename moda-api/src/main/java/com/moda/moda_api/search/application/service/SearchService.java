@@ -262,8 +262,18 @@ public class SearchService {
 				PageRequest pageRequest = PageRequest.of(0, typeSizes.get(typeId));
 
 				// 타입별 카테고리 기준 데이터 가져오기
-				Slice<CardDocument> results = cardSearchRepository.searchByCategoryAndType(
-					typeId, categoryId, userId, pageRequest);
+				Slice<CardDocument> results = null;
+				
+				// 카테고리 ID가 ALL인 경우 모든 카테고리에서 탐색
+				if (categoryId.equals(CategoryId.ALL)) {
+					results = cardSearchRepository.searchByAllCategoryAndType(
+							typeId, userId, pageRequest);
+				}
+				else {
+					results = cardSearchRepository.searchByCategoryAndType(
+							typeId, categoryId, userId, pageRequest);
+				}
+
 				return Map.entry(
 					CardContentType.from(typeId),
 					results.getContent().stream()
