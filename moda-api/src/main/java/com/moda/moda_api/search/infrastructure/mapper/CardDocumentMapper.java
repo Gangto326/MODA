@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import com.moda.moda_api.user.domain.UserId;
 import org.springframework.stereotype.Component;
 
 import com.moda.moda_api.card.domain.Card;
@@ -36,6 +37,7 @@ public class CardDocumentMapper {
 	public CardDocument toDomain(CardDocumentEntity entity) {
 		return CardDocument.builder()
 			.cardId(new CardId(entity.getId()))
+				.userId(new UserId(entity.getUserId()))
 			.categoryId(new CategoryId(entity.getCategoryId()))
 			.typeId(entity.getTypeId())
 			.title(entity.getTitle())
