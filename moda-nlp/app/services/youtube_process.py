@@ -60,8 +60,6 @@ class YoutubeProcess:
         response = self.chat(model = model, messages = messages, format = format)
         self.content = str(response).removeprefix("```markdown\n").removesuffix("```")
 
-        print(f'처리된 내용:\n{self.content}')
-
     #category를 선택하는 함수
     def choose_category(self):
         model = self.MODEL
@@ -97,8 +95,6 @@ class YoutubeProcess:
             self.category_id = 0
             self.category = 'ALL'
 
-        print(f'카테고리: {self.category}')
-
     #keywords를 생성하는 함수
     def make_keywords(self):
         model = self.MODEL
@@ -119,8 +115,6 @@ class YoutubeProcess:
         response = self.chat(model = model, messages = messages, format = format)
         self.keywords = json.loads(response)['keyword']
         self.keywords = [keyword for keyword in self.keywords if keyword in self.content]
-
-        print(f'키워드: {self.keywords}')
 
     #embeeding_vector를 생성하는 함수
     def make_embedding_vector(self):

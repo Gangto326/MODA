@@ -69,8 +69,6 @@ class ImageAnalyze:
         response =  self.chat(model = model, messages = messages, format = format)
         self.content = await self.translate_text(response)
 
-        print(f'이미지 내용:\n{self.content}')
-
     #category를 선택하는 함수
     def choose_category(self):
         model = self.MODEL
@@ -106,8 +104,6 @@ class ImageAnalyze:
             self.category_id = 0
             self.category = 'ALL'
 
-        print(f'카테고리: {self.category}')
-
     #keywords를 생성하는 함수
     async def make_keywords(self):
         model = self.MODEL
@@ -128,8 +124,6 @@ class ImageAnalyze:
         response = self.chat(model = model, messages = messages, format = format)
         self.keywords = json.loads(response)['keyword']
         self.keywords = await asyncio.gather(*[self.translate_text(keyword) for keyword in self.keywords])
-
-        print(f'키워드: {self.keywords}')
 
     #embeeding_vector를 생성하는 함수
     def make_embedding_vector(self):

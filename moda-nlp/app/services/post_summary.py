@@ -89,8 +89,6 @@ class PostSummary:
             self.category_id = 0
             self.category = 'ALL'
 
-        print(f'카테고리: {self.category}')
-
     #origin_content를 요약하는 함수
     def summary_content(self):
         has_html_tag = any(tag in self.origin_content for tag in ['<h1>', '<h2>', '<h3>'])
@@ -101,8 +99,6 @@ class PostSummary:
 
         response = self.chat(model = model, messages = messages, format = format)
         self.content = str(response).removeprefix("```markdown\n").removesuffix("```")
-
-        print(f'요약본:\n{self.content}')
 
     #keywords를 생성하는 함수
     def make_keywords(self):
@@ -125,8 +121,6 @@ class PostSummary:
         self.keywords = json.loads(response)['keyword']
         self.keywords = [keyword for keyword in self.keywords if keyword in self.content]
 
-        print(f'키워드: {self.keywords}')
-
     # thumbnail_content를 생성하는 함수
     def make_thumbnail_content(self):
         model = self.MODEL
@@ -135,8 +129,6 @@ class PostSummary:
 
         response = self.chat(model = model, messages = messages, format = format)
         self.thumbnail_content = response
-
-        print(f'썸네일 요약본: {self.thumbnail_content}')
 
     #embeeding_vector를 생성하는 함수
     def make_embedding_vector(self):

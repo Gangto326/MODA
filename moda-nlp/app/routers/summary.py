@@ -1,3 +1,4 @@
+import json
 import time
 
 from fastapi import APIRouter, HTTPException
@@ -25,7 +26,10 @@ async def summary_document(post_request: PostRequest):
 
         process_time = time.time() - start_time
         print(f"포스트 요약 완료 - {process_time:.2f}초")
-        return summarizer.get_response()
+
+        response = summarizer.get_response()
+        print(json.dumps(response, indent=2, ensure_ascii=False))
+        return response
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -39,7 +43,10 @@ async def process_youtube(youtube_request: YoutubeRequest):
 
         process_time = time.time() - start_time
         print(f"유튜브 후처리 완료 - {process_time:.2f}초")
-        return processer.get_response()
+
+        response = processer.get_response()
+        print(json.dumps(response, indent=2, ensure_ascii=False))
+        return response
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -53,6 +60,9 @@ async def analyze_image(image_request: ImageRequest):
 
         process_time = time.time() - start_time
         print(f"이미지 분석 완료 - {process_time:.2f}초")
-        return analyzer.get_response()
+
+        response = analyzer.get_response()
+        print(json.dumps(response, indent=2, ensure_ascii=False))
+        return response
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
