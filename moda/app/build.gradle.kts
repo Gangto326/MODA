@@ -82,8 +82,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:2.7.0")
 
-    // 🔴 중복되던 부분 정리 (버전 통일)
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")  // ✅ 통일 완료
+    // 중복되던 부분 정리 (버전 통일)
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")  // 통일 완료
     // Compose 관련 의존성 추가 (혹시 없다면)
     implementation("androidx.compose.runtime:runtime:1.5.4")
     implementation("androidx.compose.ui:ui:1.5.4")
@@ -104,5 +104,10 @@ dependencies {
 
     //애니메이션을 위한 효과 라이브러리
     implementation ("com.google.accompanist:accompanist-navigation-animation:0.31.3-beta")
+
+    implementation("androidx.navigation:navigation-compose:2.7.5") // 최신 버전 확인 후 사용
+    implementation("com.google.accompanist:accompanist-navigation-animation:0.32.0") // AnimatedNavHost 관련
+
+
 
 }
