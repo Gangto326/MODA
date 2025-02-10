@@ -1,0 +1,13 @@
+# PyCharm
+.idea/
+
+# Python
+__pycache__/
+.venv/
+*.pyc
+
+# FastAPI specific
+.env
+
+# AI model
+models/
