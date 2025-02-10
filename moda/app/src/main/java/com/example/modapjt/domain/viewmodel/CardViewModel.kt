@@ -135,6 +135,60 @@ class CardViewModel : ViewModel() {
 
 
 
+    // ✅ 새로운 방식: 키워드 검색을 기반으로 카드 리스트 로드
+    fun loadSearchCards(userId: String, query: String, selectedTab: String, sortDirection: String) {
+        viewModelScope.launch {
+            _uiState.value = CardUiState.Loading
+            try {
+                println("[CardViewModel] 검색어 '$query' 로 데이터 로드 시작 (정렬: $sortDirection)")
+
+                val result = if (selectedTab == "전체") {
+                    repository.getAllTabCards(userId, query, 0) // ✅ 검색어 기반 API 호출
+                } else {
+                    val typeId = when (selectedTab) {
+                        "이미지" -> 4
+                        "블로그" -> 2
+                        "뉴스" -> 3
+                        "동영상" -> 1
+                        else -> 0
+                    }
+                    repository.getTabCards(userId, query, 0, typeId, sortDirection)
+                }
+
+                if (result.isSuccess) {
+                    val cards = result.getOrNull() ?: emptyList()
+                    _uiState.value = createCardUiState(cards, selectedTab)
+                } else {
+                    _uiState.value = CardUiState.Error("검색 데이터를 불러오는데 실패했습니다.")
+                }
+            } catch (e: Exception) {
+                _uiState.value = CardUiState.Error(e.message ?: "알 수 없는 오류가 발생했습니다.")
+            }
+        }
+    }
+
+    // ✅ 공통 함수: UI 상태를 카드 데이터로 변환 (isMine 체크하여 배경색 변경)
+//    private fun createCardUiState(cards: List<Card>, selectedTab: String): CardUiState.Success {
+//        val updatedCards = cards.map { card ->
+//            card.copy(backgroundColor = if (!card.isMine) "gray" else "white") // ✅ isMine=false이면 회색 배경
+//        }
+//
+//        return CardUiState.Success(
+//            images = if (selectedTab == "전체") updatedCards.filter { it.typeId == 4 } else emptyList(),
+//            blogs = if (selectedTab == "전체") updatedCards.filter { it.typeId == 2 } else emptyList(),
+//            news = if (selectedTab == "전체") updatedCards.filter { it.typeId == 3 } else emptyList(),
+//            videos = if (selectedTab == "전체") updatedCards.filter { it.typeId == 1 } else emptyList()
+//        )
+//    }
+    private fun createCardUiState(cards: List<Card>, selectedTab: String): CardUiState.Success {
+        return CardUiState.Success(
+            images = if (selectedTab == "전체") cards.filter { it.typeId == 4 } else emptyList(),
+            blogs = if (selectedTab == "전체") cards.filter { it.typeId == 2 } else emptyList(),
+            news = if (selectedTab == "전체") cards.filter { it.typeId == 3 } else emptyList(),
+            videos = if (selectedTab == "전체") cards.filter { it.typeId == 1 } else emptyList()
+        )
+    }
+
 
 
     // 카드 삭제 기능 추가

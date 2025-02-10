@@ -1,5 +1,12 @@
+
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -53,7 +60,8 @@ fun AllTabCard(
                             imageUrl = card.thumbnailUrl ?: "",
 //                            modifier = Modifier.weight(1f), // Row 내부에서 각 아이템이 같은 비율(1:1:1)로 공간을 차지
                             modifier = Modifier.size(120.dp), // 크기 고정
-                            onClick = {}
+                            onClick = {},
+                            isMine = card.isMine,  // ✅ isMine 값 전달
                         )
                     }
                 }
@@ -85,7 +93,8 @@ fun AllTabCard(
                             title = card.title,
 //                            modifier = Modifier.weight(1f),
                             modifier = Modifier.width(160.dp), // 가로 크기 유지
-                            onClick = {}
+                            onClick = {},
+                            isMine = card.isMine,  // ✅ isMine 값 전달
                         )
                     }
                 }
@@ -110,7 +119,8 @@ fun AllTabCard(
                         title = card.title,
                         description = card.thumbnailContent ?: "",
                         imageUrl = card.thumbnailUrl ?: "",
-                        onClick = {}
+                        onClick = {},
+                        isMine = card.isMine,  // ✅ isMine 값 전달
                     )
                 }
             }
@@ -134,7 +144,8 @@ fun AllTabCard(
                         headline = card.title,
                         keywords = card.keywords,
                         imageUrl = card.thumbnailUrl ?: "",
-                        onClick = {}
+                        onClick = {},
+                        isMine = card.isMine,  // ✅ isMine 값 전달
                     )
                 }
             }

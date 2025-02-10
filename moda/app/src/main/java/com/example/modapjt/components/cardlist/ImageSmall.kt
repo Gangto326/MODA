@@ -1,7 +1,6 @@
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,6 +18,7 @@ import coil.compose.AsyncImage
 fun ImageSmall(
     imageUrl: String,
     modifier: Modifier = Modifier,
+    isMine: Boolean,
     onClick: () -> Unit = {}
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
@@ -28,7 +28,8 @@ fun ImageSmall(
         modifier = modifier
             .size(imageSize)  // 1/3 크기 적용
             .clip(RoundedCornerShape(8.dp))
-            .background(Color(0xFFE0E0E0))
+//            .background(Color(0xFFE0E0E0))
+            .background(if (!isMine) Color.Gray else Color.White) // ✅ 배경색 적용
             .clickable(onClick = onClick)
     ) {
         AsyncImage(
