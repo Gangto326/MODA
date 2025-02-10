@@ -3,7 +3,7 @@ package com.example.modapjt.domain.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.modapjt.data.repository.CardRepository
-import com.example.modapjt.domain.model.*
+import com.example.modapjt.domain.model.Card
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -14,7 +14,7 @@ class CardViewModel : ViewModel() {
     private val _uiState = MutableStateFlow<CardUiState>(CardUiState.Loading)
     val uiState: StateFlow<CardUiState> = _uiState
 
-    private var sortDirection = MutableStateFlow("DESC") // ✅ 기본 정렬은 최신순
+    private var sortDirection = MutableStateFlow("DESC") // 기본 정렬 : 최신순
 
 //    fun loadCards(userId: String, categoryId: Int) {
 //        viewModelScope.launch {
@@ -72,12 +72,12 @@ class CardViewModel : ViewModel() {
 //    }
 //}
 
-    fun loadCards(userId: String, categoryId: Int, selectedTab: String) {
+    // 카드 리스트 불러오기 (정렬 포함)
+    fun loadCards(userId: String, categoryId: Int, selectedTab: String, sortDirection: String) {
         viewModelScope.launch {
             _uiState.value = CardUiState.Loading
             try {
-                val currentSort = sortDirection.value
-                println("[CardViewModel] $selectedTab 탭 데이터 로드 시작 (정렬: $currentSort)")
+                println("[CardViewModel] $selectedTab 탭 데이터 로드 시작 (정렬: $sortDirection)")
 
                 val result = if (selectedTab == "전체") {
                     repository.getAllTabCards(userId, "", categoryId)
@@ -89,7 +89,7 @@ class CardViewModel : ViewModel() {
                         "동영상" -> 1
                         else -> 0
                     }
-                    repository.getTabCards(userId, "", categoryId, typeId, currentSort) // ✅ 정렬 추가
+                    repository.getTabCards(userId, "", categoryId, typeId, sortDirection) // 정렬 추가
                 }
 
                 if (result.isSuccess) {

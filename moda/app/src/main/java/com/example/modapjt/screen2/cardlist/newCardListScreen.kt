@@ -6,13 +6,25 @@ import ImageBig
 import NewsBig
 import TypeSelectBar
 import VideoBig
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,12 +32,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.modapjt.components.cardtab.SwipableCardList
-import com.example.modapjt.domain.viewmodel.CardViewModel
-import com.example.modapjt.domain.viewmodel.CategoryViewModel
 import com.example.modapjt.components.bar.BottomBarComponent
 import com.example.modapjt.components.bar.CategoryHeaderBar
+import com.example.modapjt.components.cardtab.SwipableCardList
 import com.example.modapjt.domain.viewmodel.CardUiState
+import com.example.modapjt.domain.viewmodel.CardViewModel
+import com.example.modapjt.domain.viewmodel.CategoryViewModel
 
 
 @Composable
@@ -37,6 +49,7 @@ fun newCardListScreen(
     categoryViewModel: CategoryViewModel = viewModel()
 ) {
     var selectedCategory by remember { mutableStateOf("전체") }
+    var selectedSort by remember { mutableStateOf("최신순") } // ✅ 정렬 상태 추가
     val uiState by viewModel.uiState.collectAsState()
     val userId = "user" // 실제 사용자 ID로 교체 필요
     val categoryName by categoryViewModel.categoryName.collectAsState()
@@ -49,11 +62,14 @@ fun newCardListScreen(
 //            categoryViewModel.updateCategoryName(it) // 카테고리 로드 후 카테고리 이름 업데이트
 //        }
 //    }
-    LaunchedEffect(categoryId, selectedCategory) {
-        println("[newCardListScreen] 선택된 탭: $selectedCategory") // 🔥 추가된 로그
+    // 데이터 로드
+    LaunchedEffect(categoryId, selectedCategory, selectedSort) {
+        val sortDirection = if (selectedSort == "최신순") "DESC" else "ASC"
+        println("[newCardListScreen] 선택된 탭: $selectedCategory, 정렬: $selectedSort ($sortDirection)")
+
         categoryViewModel.loadCategories(userId) // 카테고리 먼저 로드
         categoryId?.let {
-            viewModel.loadCards(userId, it, selectedCategory) // selectedCategory 추가
+            viewModel.loadCards(userId, it, selectedCategory, sortDirection) // selectedCategory 추가
             categoryViewModel.updateCategoryName(it) // 카테고리 로드 후 카테고리 이름 업데이트
         }
     }
@@ -81,8 +97,12 @@ fun newCardListScreen(
                     ) {
                         item {
                             TypeSelectBar(
+//                                selectedCategory = selectedCategory,
+//                                onCategorySelected = { selectedCategory = it }
                                 selectedCategory = selectedCategory,
-                                onCategorySelected = { selectedCategory = it }
+                                selectedSort = selectedSort, // ✅ 정렬 상태 추가
+                                onCategorySelected = { selectedCategory = it },
+                                onSortSelected = { selectedSort = it } // ✅ 정렬 변경
                             )
                         }
 
