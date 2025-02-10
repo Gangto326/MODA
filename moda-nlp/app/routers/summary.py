@@ -28,7 +28,7 @@ async def summary_document(post_request: PostRequest):
         print(f"포스트 요약 완료 - {process_time:.2f}초")
 
         response = summarizer.get_response()
-        print(json.dumps(response.model_dump(), indent=2, ensure_ascii=False))
+        print(json.dumps(response.model_dump(exclude={'embedding_vector'}), indent=2, ensure_ascii=False))
         return response
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -45,7 +45,7 @@ async def process_youtube(youtube_request: YoutubeRequest):
         print(f"유튜브 후처리 완료 - {process_time:.2f}초")
 
         response = processer.get_response()
-        print(json.dumps(response.model_dump(), indent=2, ensure_ascii=False))
+        print(json.dumps(response.model_dump(exclude={'embedding_vector'}), indent=2, ensure_ascii=False))
         return response
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -62,7 +62,7 @@ async def analyze_image(image_request: ImageRequest):
         print(f"이미지 분석 완료 - {process_time:.2f}초")
 
         response = analyzer.get_response()
-        print(json.dumps(response.model_dump(), indent=2, ensure_ascii=False))
+        print(json.dumps(response.model_dump(exclude={'embedding_vector'}), indent=2, ensure_ascii=False))
         return response
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
