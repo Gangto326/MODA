@@ -263,9 +263,9 @@ public class SearchService {
 
 				// 타입별 카테고리 기준 데이터 가져오기
 				Slice<CardDocument> results = null;
-				
+
 				// 카테고리 ID가 ALL인 경우 모든 카테고리에서 탐색
-				if (categoryId.equals(CategoryId.ALL)) {
+				if (categoryId.equals(CategoryId.all())) {
 					results = cardSearchRepository.searchByAllCategoryAndType(
 							typeId, userId, pageRequest);
 				}
@@ -318,6 +318,7 @@ public class SearchService {
 			.filter(entry -> !entry.getValue().isEmpty())
 
 			// 각 타입별 리스트의 0번째 게시글의 점수를 비교하여 우선순위 metaData를 생성
+				.filter(entry -> entry.getValue().get(0).getScore() != null)
 			.map(entry -> SearchTypeScore.builder()
 				.contentType(entry.getKey())
 				.score(entry.getValue().get(0).getScore())
