@@ -204,10 +204,11 @@ public class SearchService {
 		// 카테고리 기준 검색인 경우
 		else {
 			CategoryId categoryIdObj = new CategoryId(categoryId);
-
-			Slice<CardDocument> cardDocuments = cardSearchRepository.searchByCategoryAndType(
-				typeId, categoryIdObj, userIdObj, sliceRequestDto.toPageable()
-			);
+			Slice<CardDocument> cardDocuments = categoryIdObj.equals(CategoryId.all())
+					// 카테고리가 ALL인 경우
+					? cardSearchRepository.searchByAllCategoryAndType(typeId, userIdObj, sliceRequestDto.toPageable())
+					// 카테고리가 지정된 경우
+					: cardSearchRepository.searchByCategoryAndType(typeId, categoryIdObj, userIdObj, sliceRequestDto.toPageable());
 
 			return SliceResponseDto.of(
 				cardDocuments.map(cardDocument -> cardSearchDtoMapper.toListResponse(
@@ -262,17 +263,11 @@ public class SearchService {
 				PageRequest pageRequest = PageRequest.of(0, typeSizes.get(typeId));
 
 				// 타입별 카테고리 기준 데이터 가져오기
-				Slice<CardDocument> results = null;
-
-				// 카테고리 ID가 ALL인 경우 모든 카테고리에서 탐색
-				if (categoryId.equals(CategoryId.all())) {
-					results = cardSearchRepository.searchByAllCategoryAndType(
-							typeId, userId, pageRequest);
-				}
-				else {
-					results = cardSearchRepository.searchByCategoryAndType(
-							typeId, categoryId, userId, pageRequest);
-				}
+				Slice<CardDocument> results = categoryId.equals(CategoryId.all())
+						// 카테고리가 ALL인 경우
+						? cardSearchRepository.searchByAllCategoryAndType(typeId, userId, pageRequest)
+						// 카테고리가 지정된 경우
+						: cardSearchRepository.searchByCategoryAndType(typeId, categoryId, userId, pageRequest);
 
 				return Map.entry(
 					CardContentType.from(typeId),
