@@ -39,7 +39,8 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
     @Override
     public CardDocument save(Card card) {
         CardDocumentEntity entity = cardDocumentMapper.toEntity(card);
-        return cardDocumentMapper.toDomain(cardSearchJpaRepository.save(entity));
+        System.out.println(entity.toString());
+        return cardDocumentMapper.toDomain(elasticsearchOperations.save(entity));
     }
 
     // CardDocument 리스트 생성

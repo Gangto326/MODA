@@ -17,6 +17,7 @@ public class CardDocumentMapper {
 
 	public CardDocumentEntity toEntity(Card card) {
 		return CardDocumentEntity.builder()
+			.userId(card.getUserId().getValue())
 			.id(card.getCardId().getValue())
 			.categoryId(card.getCategoryId().getValue())
 			.typeId(card.getTypeId())
