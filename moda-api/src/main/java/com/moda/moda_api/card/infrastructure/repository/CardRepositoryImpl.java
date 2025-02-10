@@ -37,14 +37,15 @@ public class CardRepositoryImpl implements CardRepository {
 
     @Override
     public Slice<Card> findByUserIdAndCategoryId(UserId userId, CategoryId categoryId, Pageable pageable) {
-        Slice<CardEntity> cardEntities = cardJpaRepository.findByUserIdAndCategoryId(userId.getValue(), categoryId.getValue(), pageable);
+        Slice<CardEntity> cardEntities = cardJpaRepository.findByUserIdAndCategoryId(userId.getValue(),
+            categoryId.getValue(), pageable);
         return cardEntities.map(cardEntityMapper::toDomain);
     }
 
     @Override
     public Optional<Card> findByUserIdAndCardId(UserId userId, CardId cardId) {
         return cardJpaRepository.findByUserIdAndCardId(userId.getValue(), cardId.getValue())
-                .map(cardEntityMapper::toDomain);
+            .map(cardEntityMapper::toDomain);
     }
 
     @Override
@@ -57,8 +58,8 @@ public class CardRepositoryImpl implements CardRepository {
     @Override
     public boolean deleteAll(List<Card> cardsToDelete) {
         List<CardEntity> cardEntities = cardsToDelete.stream()
-                .map(cardEntityMapper::toEntity)
-                .collect(Collectors.toList());
+            .map(cardEntityMapper::toEntity)
+            .collect(Collectors.toList());
 
         cardJpaRepository.deleteAll(cardEntities);
         return true;
@@ -67,15 +68,10 @@ public class CardRepositoryImpl implements CardRepository {
     @Override
     public List<Card> saveAll(List<Card> cards) {
         List<CardEntity> cardEntities = cards.stream()
-                .map(cardEntityMapper::toEntity)
-                .collect(Collectors.toList());
+            .map(cardEntityMapper::toEntity)
+            .collect(Collectors.toList());
 
         return cardEntityMapper.toDomain(cardJpaRepository.saveAll(cardEntities));
     }
 
-    @Override
-    public Optional<Card> findByUrlHash(String urlHash) {
-        return cardJpaRepository.findFirstByUrlHash(urlHash)
-                .map(cardEntityMapper::toDomain);
-    }
 }

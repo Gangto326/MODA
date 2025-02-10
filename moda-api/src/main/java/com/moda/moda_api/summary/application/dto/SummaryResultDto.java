@@ -28,6 +28,10 @@ public class SummaryResultDto {
 	private List<TitleAndContent> titleAndContents;
 
 	public SummaryResultDto updateFromDto(AIAnalysisResponseDTO aiAnalysisResponseDTO) {
+		if (aiAnalysisResponseDTO.getContent() != null){
+			this.content = aiAnalysisResponseDTO.getContent();
+		}
+
 		if (aiAnalysisResponseDTO.getCategoryId() != null) {
 			this.categoryId = aiAnalysisResponseDTO.getCategoryId();
 		}

@@ -17,18 +17,16 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class UrlCacheRepositoryImpl implements UrlCacheRepository {
 	private final UrlCacheJpaRepository urlCacheJpaRepository;
-	private final UrlCacheEntityMapper mapper;
+	private final UrlCacheEntityMapper urlCacheEntityMapper;
 
 	@Override
 	public UrlCache save(UrlCache urlCache) {
-		System.out.println("들어오긴 혀?");
 		try {
-			log.debug("Saving UrlCache: {}", urlCache);
-			UrlCacheEntity entity = mapper.toEntity(urlCache);
-			log.debug("Converted to entity: {}", entity);
+			System.out.println(urlCache.getCategoryId().getValue());
+			UrlCacheEntity entity = urlCacheEntityMapper.toEntity(urlCache);
+			System.out.println(entity.getCategoryId());
 			UrlCacheEntity savedEntity = urlCacheJpaRepository.save(entity);
-			log.debug("Saved entity: {}", savedEntity);
-			return mapper.toDomain(savedEntity);
+			return urlCacheEntityMapper.toDomain(savedEntity);
 		} catch (Exception e) {
 			log.error("Error saving UrlCache", e);
 			throw e;
@@ -38,6 +36,6 @@ public class UrlCacheRepositoryImpl implements UrlCacheRepository {
 	@Override
 	public Optional<UrlCache> findByUrlHash(String urlHash) { // 추가
 		return urlCacheJpaRepository.findById(urlHash)
-			.map(mapper::toDomain);
+			.map(urlCacheEntityMapper::toDomain);
 	}
 }
