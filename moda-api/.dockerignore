@@ -1,0 +1,9 @@
+# Git 관련 파일 제외
+.git
+.gitignore
+
+# 빌드 산출물 제외
+target/
+
+# 로컬 설정 제외
+application-local.properties
