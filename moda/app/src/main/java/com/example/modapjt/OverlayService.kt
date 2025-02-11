@@ -7,22 +7,30 @@ import android.util.Log
 import android.view.Gravity
 import android.view.WindowManager
 import android.widget.Toast
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.ComposeView
-import androidx.lifecycle.LifecycleService
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.setViewTreeLifecycleOwner
-import androidx.savedstate.setViewTreeSavedStateRegistryOwner
-import androidx.compose.runtime.*
-import kotlinx.coroutines.*
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
+import androidx.savedstate.setViewTreeSavedStateRegistryOwner
+import com.example.modapjt.data.repository.CardRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class OverlayService : LifecycleService(), SavedStateRegistryOwner {
     private var windowManager: WindowManager? = null
     private var overlayView: ComposeView? = null
 
-    private val repository by lazy { (application as ModapApplication).repository }
+    private val repository = CardRepository()
     private val savedStateRegistryController = SavedStateRegistryController.create(this)
 
     override val savedStateRegistry: SavedStateRegistry
@@ -68,7 +76,7 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
-            x = 0
+            x = 100
             y = 100
         }
 
@@ -134,7 +142,7 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
                     return@launch
                 }
 
-                repository.insert(finalUrl) // 데이터베이스에 저장
+                repository.createCard(finalUrl) // 백엔드 서버와 통신하여 카드 저장
                 Log.d("OverlayService", "URL 저장 완료: $finalUrl") // 저장 로그 추가
 
                 withContext(Dispatchers.Main) {

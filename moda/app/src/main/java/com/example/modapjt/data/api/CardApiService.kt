@@ -1,13 +1,14 @@
 package com.example.modapjt.data.api
 
+import com.example.modapjt.data.dto.request.CardRequest
 import com.example.modapjt.data.dto.response.AllTabCardApiResponse
-import com.example.modapjt.data.dto.response.CardDTO
 import com.example.modapjt.data.dto.response.CardDetailDTO
-import com.example.modapjt.data.dto.response.CategoryDTO
 import com.example.modapjt.data.dto.response.TabCardApiResponse
 import retrofit2.Response
+import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -51,6 +52,12 @@ interface CardApiService {
         @Path("cardId") cardId: String,
         @Query("userId") userId: String
     ): Response<CardDetailDTO>
+
+    // 카드 저장 API
+    @POST("api/card")
+    suspend fun createCard(
+        @Body cardRequest: CardRequest
+    ): Response<Boolean>
 
     // 카드 삭제 API
     @DELETE("api/card/{cardId}")
