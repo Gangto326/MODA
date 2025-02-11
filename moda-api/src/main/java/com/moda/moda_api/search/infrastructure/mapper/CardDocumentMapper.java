@@ -30,6 +30,7 @@ public class CardDocumentMapper {
 			.contentCompletion(card.getContent())
 			.keywords(card.getKeywords())
 			.embedding(card.getEmbedding().getValues())
+				.bookmark(card.getBookmark())
 			.createdAt(card.getCreatedAt())
 			.build();
 	}
@@ -45,6 +46,7 @@ public class CardDocumentMapper {
 			.thumbnailContent(entity.getThumbnailContent())
 			.thumbnailUrl(entity.getThumbnailUrl())
 			.keywords(entity.getKeywords())
+				.bookmark(entity.getBookmark())
 			.score(entity.getScore())
 			.build();
 	}

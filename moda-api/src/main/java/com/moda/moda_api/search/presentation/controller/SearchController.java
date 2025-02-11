@@ -56,6 +56,45 @@ public class SearchController {
     }
 
     /**
+     * 즐겨찾기한 콘텐츠만을 보여줄 메인 페이지의 종합 데이터를 반환합니다.
+     * @param userId
+     * @return
+     */
+    @GetMapping("/bookmark")
+    public CompletableFuture<ResponseEntity<SearchResultByCardList>> searchByBookmarkMainPage(
+            @UserId String userId
+    ) {
+
+        return searchService.searchByBookmarkMainPage(userId)
+                .thenApply(ResponseEntity::ok);
+    }
+
+    /**
+     * 즐겨찾기한 콘텐츠 페이지의 상단 메뉴를 활용한 ContentType을 변경한 뒤 호출합니다.
+     * @param userId
+     * @param typeId
+     * @param page
+     * @param size
+     * @param sortBy
+     * @param sortDirection
+     * @return
+     */
+    @GetMapping("/bookmark/type")
+    public ResponseEntity<SliceResponseDto<CardDocumentListResponse>> searchByBookmark(
+            @UserId String userId,
+            @RequestParam Integer typeId,
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "15") Integer size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "DESC") String sortDirection
+    ) {
+        SliceResponseDto<CardDocumentListResponse> responseList = searchService.searchByBookmark(
+                userId, typeId, page, size, sortBy, sortDirection
+        );
+        return ResponseEntity.ok(responseList);
+    }
+
+    /**
      * 메인 화면에서 보여질 키워드 기준 5개의 콘텐츠를 반환합니다.
      * 현재는 조회수 기반 서치가 제외되어있습니다. (Redis와 RDBMS 사용에 따라 다른 로직 구현)
      * @param userId
