@@ -21,9 +21,8 @@
       },
       "ngram_tokenizer": {
         "type": "ngram",
-        "min_gram": 1,
-        "max_gram": 2,
-        "token_chars": ["letter", "digit"]
+        "min_gram": 2,
+        "max_gram": 10
       }
     },
     "filter": {

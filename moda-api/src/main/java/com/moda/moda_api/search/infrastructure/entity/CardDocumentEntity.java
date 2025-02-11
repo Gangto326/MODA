@@ -51,6 +51,9 @@ public class CardDocumentEntity {
     @Field(type = FieldType.Dense_Vector, dims = 768)
     private float[] embedding;
 
+    @Field(type = FieldType.Boolean)
+    private Boolean bookmark;
+
     @Field(type = FieldType.Date, format = {}, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSS")
     private LocalDateTime createdAt;
 
