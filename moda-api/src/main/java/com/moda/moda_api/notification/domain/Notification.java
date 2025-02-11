@@ -40,13 +40,13 @@ public class Notification {
 	private boolean isRead = false;
 
 	private LocalDateTime createdAt;
-
 	@Builder
 	public Notification(String userId, NotificationType type, String contentId, String content) {
 		this.userId = userId;
 		this.type = type;
 		this.contentId = contentId;
 		this.content = content;
+		this.createdAt = LocalDateTime.now();
 	}
 	public void markAsRead() {
 		this.isRead = true;

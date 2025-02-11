@@ -1,6 +1,7 @@
 package com.moda.moda_api.notification.application;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -21,11 +22,15 @@ public class NotificationApplicationService {
 
 	// FCM 토큰 등록
 	public void registerToken(String userId, String token) {
+
 		fcmTokenService.saveToken(userId, token);
 	}
 
 	// 알림 전송
 	public void sendNotification(String userId, NotificationType type, String contentId, String content) {
+
+
+
 		notificationService.sendNotification(userId, type, contentId, content);
 	}
 
@@ -35,6 +40,10 @@ public class NotificationApplicationService {
 			.stream()
 			.map(NotificationResponse::from)
 			.collect(Collectors.toList());
+	}
+
+	public Set<String> getTokenByUserId(String userId){
+		return fcmTokenService.getUserTokens(userId);
 	}
 
 	// 알림 읽음 처리

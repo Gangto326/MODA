@@ -1,13 +1,26 @@
 package com.moda.moda_api.card.infrastructure.entity;
 
-import com.moda.moda_api.card.infrastructure.converter.VectorConverter;
-import com.moda.moda_api.category.infrastructure.entity.CategoryEntity;
-import io.hypersistence.utils.hibernate.type.array.StringArrayType;
-import jakarta.persistence.*;
-import lombok.*;
+import java.time.LocalDateTime;
+
 import org.hibernate.annotations.Type;
 
-import java.time.LocalDateTime;
+import com.moda.moda_api.card.infrastructure.converter.VectorConverter;
+import com.moda.moda_api.category.infrastructure.entity.CategoryEntity;
+
+import io.hypersistence.utils.hibernate.type.array.StringArrayType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter

@@ -13,6 +13,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.stereotype.Service;
 
 import com.moda.moda_api.common.infrastructure.ImageStorageService;
@@ -32,11 +33,15 @@ import lombok.extern.slf4j.Slf4j;
 public class AbstractExtractor {
 	private final PlatformExtractorFactory extractorFactory;
 	private final ImageStorageService imageStorageService;
-	private final WebDriver driver;
+	private final ObjectFactory<WebDriver> webDriverFactory;  // prototype scope의 WebDriver를 생성하기 위한 factory
 
 	// URL을 추출하는 Method
 	public List<Url> extractUrl(String url) {
+		WebDriver driver = null;
+
 		try {
+
+			driver = webDriverFactory.getObject();  // 새로운 WebDriver 인스턴스 생성
 			ExtractorConfig config = extractorFactory.getConfig(url);
 			driver.get(url);
 
@@ -83,9 +88,13 @@ public class AbstractExtractor {
 
 	// 추출하는 매서드
 	public CrawledContent extract(String url) throws Exception {
+		WebDriver driver = null;
+
 		try {
+			driver = webDriverFactory.getObject();  // 새로운 WebDriver 인스턴스 생성
 			ExtractorConfig config = extractorFactory.getConfig(url);
 			driver.get(url);
+
 			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 			wait.until(ExpectedConditions.jsReturnsValue("return document.readyState === 'complete'"));
 
@@ -97,8 +106,8 @@ public class AbstractExtractor {
 			return CrawledContent.builder()
 				.url(new Url(url))
 				.urlDomainType(config.getUrlDomainType())
-				.title(extractTitle())
-				.extractedContent(extractContent(config))
+				.title(extractTitle(driver))  // driver 전달
+				.extractedContent(extractContent(config, driver))  // driver 전달
 				.build();
 
 		} catch (Exception e) {
@@ -111,7 +120,7 @@ public class AbstractExtractor {
 	}
 
 	//Body본문과 이미지 추출하기
-	public ExtractedContent extractContent(ExtractorConfig config) {
+	public ExtractedContent extractContent(ExtractorConfig config,WebDriver driver) {
 		StringBuilder textBuilder = new StringBuilder();
 		List<String> imagesList = new ArrayList<>();  // 임시로 List 사용
 
@@ -180,10 +189,9 @@ public class AbstractExtractor {
 		}
 	}
 
-	private String extractTitle() {
+	private String extractTitle(WebDriver driver) {
 		return driver.getTitle();
 	}
-
 	private boolean isValidImageUrl(String url) {
 		return url.matches(".*\\.(jpg|jpeg|png|gif|webp)($|\\?.*)") &&
 			!url.contains("favicon") &&
