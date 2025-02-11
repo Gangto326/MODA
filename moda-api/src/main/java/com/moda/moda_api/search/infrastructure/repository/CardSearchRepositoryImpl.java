@@ -31,6 +31,7 @@ import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.TermsQueryField;
 import lombok.RequiredArgsConstructor;
 
+
 @Repository
 @RequiredArgsConstructor
 public class CardSearchRepositoryImpl implements CardSearchRepository {

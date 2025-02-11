@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CardRepository {
-    Card save(Card card);
+    void save(Card card);
 
     Slice<Card> findByUserId(UserId userId, Pageable pageable);
 
@@ -23,7 +23,7 @@ public interface CardRepository {
 
     boolean deleteAll(List<Card> cardsToDelete);
 
-    List<Card> saveAll(List<Card> cards);
+    void saveAll(List<Card> cards);
 
     Optional<Card> findByUrlHash(String urlHash);
 

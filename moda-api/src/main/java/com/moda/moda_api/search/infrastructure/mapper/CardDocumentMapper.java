@@ -29,6 +29,7 @@ public class CardDocumentMapper {
 			.titleCompletion(card.getTitle())
 			.contentCompletion(card.getContent())
 			.keywords(card.getKeywords())
+			.bookmark(card.getBookmark())
 			.embedding(card.getEmbedding().getValues())
 			.createdAt(card.getCreatedAt())
 			.build();

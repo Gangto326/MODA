@@ -9,6 +9,8 @@ import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.moda.moda_api.card.domain.EmbeddingVector;
+import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.summary.application.dto.SummaryResultDto;
 import com.moda.moda_api.summary.exception.SummaryProcessingException;
 import com.moda.moda_api.summary.infrastructure.api.LilysAiClient;
@@ -31,32 +33,68 @@ public class LilysSummaryService {
 	private static final Duration POLLING_INTERVAL = Duration.ofSeconds(200);
 	private final YoutubeApiClient youtubeApiClient;
 
-
 	@Transactional
-	public SummaryResultDto summarize(String url) {
-		LilysRequestIdResponse requestId = lilysWebClient.getRequestId(url);
-		waitForCompletion(requestId.getRequestId());
-		LilysSummary lilysSummary = lilysWebClient.getSummaryResults(requestId.getRequestId(), url);
-		AIAnalysisResponseDTO aiAnalysisResponseDTO = pythonAnalysisService.youtubeAnalyze(
-			lilysSummary.getContents());
-		// 여기서 만들어지고
-		YoutubeAPIResponseDTO youtubeAPIResponseDTO = youtubeApiClient.getVideoData(lilysSummary.getThumbnailUrl());
+	public CompletableFuture<SummaryResultDto> summarize(String url) {
+		return CompletableFuture.supplyAsync(() -> lilysWebClient.getRequestId(url))
+			.thenCompose(requestId -> {
+				// RequestId를 받은 후 waitForCompletion 실행하고 완료될 때까지 대기
+				return waitForCompletion(requestId.getRequestId())
+					.thenApply(status -> requestId);
+			})
+			.thenCompose(requestId -> {
+				// waitForCompletion이 완전히 완료된 후에만 getSummaryResults 실행
+				return CompletableFuture.supplyAsync(() ->
+					lilysWebClient.getSummaryResults(requestId.getRequestId(), url)
+				);
+			})
+			.thenCompose(lilysSummary -> {
+				// getSummaryResults 완료 후 병렬로 실행 가능한 작업들
+				CompletableFuture<AIAnalysisResponseDTO> aiAnalysisFuture =
+					CompletableFuture.supplyAsync(() ->
+						pythonAnalysisService.youtubeAnalyze(lilysSummary.getContents())
+					);
 
-		String[] keyWords = Stream.concat(Arrays.stream(youtubeAPIResponseDTO.getTags()),
-			Arrays.stream(aiAnalysisResponseDTO.getKeywords())).toArray(String[]::new);
+				// CompletableFuture<AIAnalysisResponseDTO> aiAnalysisFuture = CompletableFuture.completedFuture(
+				// 	AIAnalysisResponseDTO.builder()
+				// 		.categoryId(new CategoryId(1L))  // null 허용
+				// 		.keywords(new String[0])
+				// 		.thumbnailContent("")
+				// 		.content("")
+				// 		.embeddingVector(new EmbeddingVector(new float[768]))
+				// 		.build()
+				// );
 
-		String[] subContents = getSubContents(lilysSummary, youtubeAPIResponseDTO);
+				CompletableFuture<YoutubeAPIResponseDTO> youtubeApiFuture =
+					CompletableFuture.supplyAsync(() ->
+						youtubeApiClient.getVideoData(lilysSummary.getThumbnailUrl())
+					);
 
-		return SummaryResultDto.builder()
-			.typeId(lilysSummary.getTypeId())
-			.title(lilysSummary.getTitle())
-			.content(aiAnalysisResponseDTO.getContent())
-			.thumbnailContent(youtubeAPIResponseDTO.getChannelTitle())
-			.embeddingVector(aiAnalysisResponseDTO.getEmbeddingVector())
-			.categoryId(aiAnalysisResponseDTO.getCategoryId())
-			.keywords(keyWords)
-			.subContent(subContents)
-			.build();
+				// 두 작업이 모두 완료될 때까지 대기 후 결과 조합
+				return CompletableFuture.allOf(aiAnalysisFuture, youtubeApiFuture)
+					.thenApply(v -> {
+						AIAnalysisResponseDTO aiAnalysis = aiAnalysisFuture.join();
+						YoutubeAPIResponseDTO youtubeAPI = youtubeApiFuture.join();
+
+						String[] keyWords = Stream.concat(
+							Arrays.stream(youtubeAPI.getTags()),
+							Arrays.stream(aiAnalysis.getKeywords())
+						).toArray(String[]::new);
+
+						String[] subContents = getSubContents(lilysSummary, youtubeAPI);
+
+						return SummaryResultDto.builder()
+							.typeId(lilysSummary.getTypeId())
+							.title(lilysSummary.getTitle())
+							.content(aiAnalysis.getContent())
+							.thumbnailContent(youtubeAPI.getChannelTitle())
+							.embeddingVector(aiAnalysis.getEmbeddingVector())
+							.categoryId(aiAnalysis.getCategoryId())
+							.thumbnailUrl(lilysSummary.getThumbnailUrl())
+							.keywords(keyWords)
+							.subContent(subContents)
+							.build();
+					});
+			});
 	}
 
 	private String[] getSubContents(LilysSummary lilysSummary, YoutubeAPIResponseDTO youtubeAPIResponseDTO) {
@@ -71,7 +109,6 @@ public class LilysSummaryService {
 
 	private CompletableFuture<String> waitForCompletion(String requestId) {
 		return checkStatusWithRetry(requestId, 0);
-
 	}
 
 	private CompletableFuture<String> checkStatusWithRetry(String requestId, int attempt) {
