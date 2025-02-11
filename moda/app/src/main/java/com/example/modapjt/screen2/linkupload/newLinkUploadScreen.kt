@@ -1,34 +1,44 @@
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
+
 import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.material3.*
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.modapjt.components.bar.SearchBar
-import com.example.modapjt.components.home.TopThumbnail
-import com.example.modapjt.components.home.BottomThumbnail
-import com.example.modapjt.components.bar.BottomBar
 import com.example.modapjt.components.bar.BottomBarComponent
 import com.example.modapjt.components.bar.HeaderBar
 import com.example.modapjt.components.bar.LinkAddHeaderBar
 import com.example.modapjt.components.button.LinkAddButton
-import com.example.modapjt.components.home.CategoryItem
+import com.example.modapjt.data.repository.CardRepository
+import kotlinx.coroutines.launch
 
 @Composable
-fun newLinkUploadScreen(navController: NavController, currentRoute: String) {
+fun newLinkUploadScreen(navController: NavController, currentRoute: String, repository: CardRepository) {
     // linkText는 사용자가 입력한 텍스트를 저장하는 상태 변수
     var linkText by remember { mutableStateOf("") }
+
+    // 저장 요청 중인지 여부를 나타내는 상태 변수 (로딩 상태)
+    var isLoading by remember { mutableStateOf(false) }
+
+    // 성공 또는 실패 메시지를 저장하는 상태 변수
+    var message by remember { mutableStateOf<String?>(null) }
+
+    val coroutineScope = rememberCoroutineScope() // CoroutineScope 획득
 
     // Scaffold: 화면의 기본 레이아웃을 설정하는 컴포넌트
     Scaffold(
@@ -60,14 +70,47 @@ fun newLinkUploadScreen(navController: NavController, currentRoute: String) {
             // LinkAddButton: "링크 추가하기" 버튼 컴포넌트
             LinkAddButton(
                 onClick = {
-                    /* 클릭 시 실행될 동작을 여기에 정의 */
-                    // 예를 들어, linkText 값을 서버에 전송하거나 링크 목록에 추가하는 코드가 들어갈 수 있음
+                    // 입력값이 비어 있는 경우 처리
+                    if (linkText.isNotBlank()) {
+                        isLoading = true // 로딩 상태 활성화
+                        message = null // 메시지 초기화
+
+                        // 비동기 작업 실행 (Coroutine 사용)
+                        coroutineScope.launch  {
+                            val result = repository.createCard(linkText) // 카드 추가 요청
+                            isLoading = false // 요청 완료 후 로딩 해제
+
+                            result.onSuccess {
+                                message = "✅ URL 저장 성공!" // 성공 메시지
+                                linkText = "" // 입력 필드 초기화
+                            }.onFailure { e ->
+                                message = "❌ 저장 실패: ${e.message}" // 실패 메시지
+                            }
+                        }
+                    } else {
+                        message = "⚠️ URL을 입력해주세요." // 입력값이 없을 때 경고 메시지
+                    }
                 }
             )
+
+            Spacer(modifier = Modifier.height(8.dp)) // 버튼과 메시지 사이 간격 추가
+
+            // 성공 또는 실패 메시지 표시
+            message?.let {
+                Text(
+                    text = it,
+                    color = if (it.contains("성공")) Color.Green else Color.Red, // 성공이면 초록, 실패면 빨간색
+                    fontSize = 14.sp
+                )
+            }
+
+            // 로딩 중일 때 표시할 Progress Indicator
+            if (isLoading) {
+                CircularProgressIndicator(modifier = Modifier.padding(top = 8.dp)) // 로딩 애니메이션 표시
+            }
         }
     }
 }
-
 
 
 //@Preview(showBackground = true)
