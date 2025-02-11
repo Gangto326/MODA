@@ -15,6 +15,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
+import com.example.modapjt.data.repository.CardRepository
 import com.example.modapjt.domain.viewmodel.AuthViewModel
 import com.example.modapjt.screen.SavedUrlsScreen
 import com.example.modapjt.screen.linkupload.LinkUploadScreen
@@ -159,6 +160,9 @@ fun NavGraph(
     // AuthViewModel 인스턴스 생성
     val authViewModel: AuthViewModel = viewModel()
 
+    val repository = CardRepository() // CardRepository 인스턴스 생성
+
+
     AnimatedNavHost(
         navController = navController,
         startDestination = "home"
@@ -217,7 +221,7 @@ fun NavGraph(
         }
 
         composable("file_upload_test") {
-            newLinkUploadScreen(navController, currentRoute = "file_upload_test")
+            newLinkUploadScreen(navController, currentRoute = "file_upload_test", repository = repository)
         }
 
 //        composable("card_detail_test") {
