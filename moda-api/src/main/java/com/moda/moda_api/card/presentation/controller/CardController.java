@@ -3,6 +3,7 @@ package com.moda.moda_api.card.presentation.controller;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import com.moda.moda_api.card.presentation.request.CardBookmarkRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -132,6 +133,15 @@ public class CardController {
 		@RequestBody MoveCardRequest request
 	) {
 		Boolean result = cardService.updateCardBoard(userId, request);
+		return ResponseEntity.ok(result);
+	}
+
+	@PostMapping("/bookmark")
+	public ResponseEntity<Boolean> cardBookmark(
+			@UserId String userId,
+			@RequestBody CardBookmarkRequest request
+	) {
+		Boolean result = cardService.cardBookmark(userId, request);
 		return ResponseEntity.ok(result);
 	}
 }

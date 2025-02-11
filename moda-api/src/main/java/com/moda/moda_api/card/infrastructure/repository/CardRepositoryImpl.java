@@ -110,4 +110,12 @@ public class CardRepositoryImpl implements CardRepository {
                 .map(cardEntityMapper::toDomain)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public Slice<Card> findByUserIdAndBookmarkTrueAndTypeIdAndDeletedAtIsNull(UserId userId, Integer typeId, Pageable pageable) {
+        Slice<CardEntity> cardEntities = cardJpaRepository.findByUserIdAndBookmarkTrueAndTypeIdAndDeletedAtIsNull(
+                userId.getValue(), typeId, pageable);
+
+        return cardEntities.map(cardEntityMapper::toDomain);
+    }
 }

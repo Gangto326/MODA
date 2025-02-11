@@ -34,5 +34,7 @@ public interface CardJpaRepository extends JpaRepository<CardEntity, String> {
             @Param("typeIds") List<Integer> typeIds,
             Pageable toDaysPage);
 
-    List<CardEntity> findByUserIdAndViewCountAndTypeIdIn(String value, Integer viewCount, List<Integer> typeIds, Pageable pageable);
+    List<CardEntity> findByUserIdAndViewCountAndTypeIdIn(String userId, Integer viewCount, List<Integer> typeIds, Pageable pageable);
+
+    Slice<CardEntity> findByUserIdAndBookmarkTrueAndTypeIdAndDeletedAtIsNull(String userId, Integer typeId, Pageable pageable);
 }

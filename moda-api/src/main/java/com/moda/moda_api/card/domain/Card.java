@@ -52,6 +52,10 @@ public class Card {
         this.content = content;
     }
 
+    public void setBookmark(Boolean bookmark) {
+        this.bookmark = bookmark;
+    }
+
     public void moveCategory(CategoryId categoryId) {
         this.categoryId = categoryId;
     }

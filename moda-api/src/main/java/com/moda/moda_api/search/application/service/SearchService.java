@@ -486,4 +486,113 @@ public class SearchService {
 			return result;
 		});
 	}
+
+	/**
+	 * 사용자가 즐겨찾기한 콘텐츠가 보일 즐겨찾기 메인 페이지 데이터를 반환합니다.
+	 *
+	 * 4(Img)의 경우는 10개, 다른 콘텐츠(1, 2, 3)의 경우 5개의 최적 컨텐츠를 반환.
+	 * @param userId
+	 * @return
+	 */
+	public CompletableFuture<SearchResultByCardList> searchByBookmarkMainPage(String userId) {
+		UserId userIdObj = new UserId(userId);
+		List<Integer> targetTypes = List.of(1, 2, 3, 4);
+
+		// IMG(4) 타입은 10개
+		Map<Integer, Integer> typeSizes = Map.of(1, 5, 2, 5, 3, 5, 4, 10);
+
+		// 각 타입별 검색을 비동기로 실행
+		List<CompletableFuture<Map.Entry<CardContentType, List<CardDocumentListResponse>>>> futures = executeAsyncSearchesByBookmark(
+				userIdObj, targetTypes, typeSizes);
+
+		// 모든 비동기 작업이 완료되면 결과 합치기 및 메타데이터 생성
+		return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+				.thenApply(v -> {
+					Map<CardContentType, List<CardDocumentListResponse>> results = futures.stream()
+							.map(CompletableFuture::join)
+							.collect(Collectors.toMap(
+									Map.Entry::getKey,
+									Map.Entry::getValue
+							));
+
+					return SearchResultByCardList.builder()
+							.contentResults(results)
+							.topScores(null)
+							.build();
+				});
+	}
+
+	/**
+	 * 비동기로 즐겨찾기한 카드에 대해 검색을 실행합니다.
+	 * @param userId
+	 * @return
+	 */
+	private List<CompletableFuture<Map.Entry<CardContentType, List<CardDocumentListResponse>>>> executeAsyncSearchesByBookmark(
+			UserId userId, List<Integer> targetTypes, Map<Integer, Integer> typeSizes) {
+
+		return targetTypes.stream()
+				.map(typeId -> CompletableFuture.supplyAsync(() -> {
+					// 각 타입별 가져올 갯수를 PageRequest로 생성
+					PageRequest pageRequest = PageRequest.of(
+							0,
+							typeSizes.get(typeId),
+							Sort.by(Sort.Direction.DESC, "createdAt")
+					);
+
+					// 타입별 데이터 가져오기
+					Slice<Card> results = cardRepository
+							.findByUserIdAndBookmarkTrueAndTypeIdAndDeletedAtIsNull(
+									userId,
+									typeId,
+									pageRequest
+							);
+
+					List<CardDocumentListResponse> responseList = cardSearchDtoMapper.toCardListResponse(
+							results.getContent(),
+							userId
+					);
+
+					return Map.entry(
+							CardContentType.from(typeId),
+							responseList
+					);
+				}))
+				.toList();
+	}
+
+	/**
+	 * 즐겨찾기한 카드 중 해당 콘텐츠 타입과 일치하는 카드를 가져옵니다.
+	 * @param userId
+	 * @param typeId
+	 * @param page
+	 * @param size
+	 * @param sortBy
+	 * @param sortDirection
+	 * @return
+	 */
+	public SliceResponseDto<CardDocumentListResponse> searchByBookmark(
+			String userId, Integer typeId,
+			Integer page, Integer size, String sortBy, String sortDirection) {
+		UserId userIdObj = new UserId(userId);
+
+		// Slice 값 생성
+		SliceRequestDto sliceRequestDto = SliceRequestDto.builder()
+				.page(page)
+				.size(size)
+				.sortBy(sortBy)
+				.sortDirection(sortDirection)
+				.build();
+
+		// 타입별 데이터 가져오기
+		Slice<Card> results = cardRepository
+				.findByUserIdAndBookmarkTrueAndTypeIdAndDeletedAtIsNull(
+						userIdObj,
+						typeId,
+						sliceRequestDto.toPageable()
+				);
+
+		return SliceResponseDto.of(
+				results.map(card -> cardSearchDtoMapper.toListResponse(card, userIdObj))
+		);
+	}
 }

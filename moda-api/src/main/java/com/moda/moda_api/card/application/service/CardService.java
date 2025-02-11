@@ -3,11 +3,13 @@ package com.moda.moda_api.card.application.service;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import com.moda.moda_api.card.domain.*;
+import com.moda.moda_api.card.presentation.request.CardBookmarkRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -382,5 +384,24 @@ public class CardService {
 			categoryId,
 			sliceRequestDto.toPageable()
 		);
+	}
+
+	/**
+	 * 북마크 변경
+	 * @param userId
+	 * @param request
+	 * @return
+	 */
+	@Transactional
+	public Boolean cardBookmark(String userId, CardBookmarkRequest request) {
+		UserId userIdObj = new UserId(userId);
+		CardId cardIdObj = new CardId(request.getCardId());
+
+		Card card = findCard(userIdObj, cardIdObj);
+		card.setBookmark(request.getIsBookmark());
+
+		cardRepository.save(card);
+		cardSearchRepository.save(card);
+		return true;
 	}
 }
