@@ -1,12 +1,14 @@
 package com.moda.moda_api.card.infrastructure.mapper;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.moda.moda_api.card.domain.Card;
 import com.moda.moda_api.card.domain.CardId;
 import com.moda.moda_api.card.domain.EmbeddingVector;
 import com.moda.moda_api.card.infrastructure.entity.CardEntity;
+import com.moda.moda_api.card.infrastructure.entity.UrlCacheEntity;
 import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.user.domain.UserId;
 import org.springframework.stereotype.Component;
@@ -42,7 +44,12 @@ public class CardEntityMapper {
                 .categoryId(new CategoryId(entity.getCategoryId()))
                 .typeId(entity.getTypeId())
                 .urlHash(entity.getUrlHash())
-                .originalUrl(entity.getUrlCache().getOriginalUrl())
+//                .originalUrl(entity.getUrlCache().getOriginalUrl())
+                .originalUrl(
+                        Optional.ofNullable(entity.getUrlCache())
+                                .map(UrlCacheEntity::getOriginalUrl)
+                                .orElse(null)
+                )
                 .title(entity.getTitle())
                 .content(entity.getContent())
                 .thumbnailContent(entity.getThumbnailContent())

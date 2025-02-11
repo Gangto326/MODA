@@ -3,11 +3,13 @@ package com.moda.moda_api.card.infrastructure.repository;
 import com.moda.moda_api.card.domain.Card;
 import com.moda.moda_api.card.domain.CardId;
 import com.moda.moda_api.card.domain.CardRepository;
+import com.moda.moda_api.card.exception.CardNotFoundException;
 import com.moda.moda_api.card.infrastructure.entity.CardEntity;
 import com.moda.moda_api.card.infrastructure.mapper.CardEntityMapper;
 import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.user.domain.UserId;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Repository;
@@ -18,6 +20,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Repository
+@Slf4j
 @RequiredArgsConstructor
 public class CardRepositoryImpl implements CardRepository {
     private final CardJpaRepository cardJpaRepository;
@@ -45,8 +48,15 @@ public class CardRepositoryImpl implements CardRepository {
 
     @Override
     public Optional<Card> findByUserIdAndCardId(UserId userId, CardId cardId) {
-        return cardJpaRepository.findByUserIdAndCardId(userId.getValue(), cardId.getValue())
-            .map(cardEntityMapper::toDomain);
+        CardEntity entity = cardJpaRepository.findByUserIdAndCardId(userId.getValue(), cardId.getValue())
+                .orElseThrow(() -> new CardNotFoundException("카드를 찾을 수 없습니다."));
+
+        log.debug("CardEntity found: {}", entity);
+        log.debug("URL Hash: {}", entity.getUrlHash());
+        log.debug("URL Cache: {}", entity.getUrlCache());
+        return Optional.of(cardEntityMapper.toDomain(entity));
+//        return cardJpaRepository.findByUserIdAndCardId(userId.getValue(), cardId.getValue())
+//            .map(cardEntityMapper::toDomain);
     }
 
     @Override

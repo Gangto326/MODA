@@ -141,6 +141,8 @@ public class CardController {
 			@UserId String userId,
 			@RequestBody CardBookmarkRequest request
 	) {
+		System.out.println(userId);
+		System.out.println(request.getCardId());
 		Boolean result = cardService.cardBookmark(userId, request);
 		return ResponseEntity.ok(result);
 	}
