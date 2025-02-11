@@ -135,7 +135,7 @@ class CardViewModel : ViewModel() {
 
 
 
-    // ✅ 새로운 방식: 키워드 검색을 기반으로 카드 리스트 로드
+    // 새로운 방식: 키워드 검색을 기반으로 카드 리스트 로드
     fun loadSearchCards(userId: String, query: String, selectedTab: String, sortDirection: String) {
         viewModelScope.launch {
             _uiState.value = CardUiState.Loading
@@ -143,7 +143,7 @@ class CardViewModel : ViewModel() {
                 println("[CardViewModel] 검색어 '$query' 로 데이터 로드 시작 (정렬: $sortDirection)")
 
                 val result = if (selectedTab == "전체") {
-                    repository.getAllTabCards(userId, query, 0) // ✅ 검색어 기반 API 호출
+                    repository.getAllTabCards(userId, query, 0) // 검색어 기반 API 호출
                 } else {
                     val typeId = when (selectedTab) {
                         "이미지" -> 4
@@ -157,6 +157,7 @@ class CardViewModel : ViewModel() {
 
                 if (result.isSuccess) {
                     val cards = result.getOrNull() ?: emptyList()
+                    println("[CardViewModel] 검색 결과 개수: ${cards.size} (탭: $selectedTab) (타입: ${cards.map {it.typeId}})")
                     _uiState.value = createCardUiState(cards, selectedTab)
                 } else {
                     _uiState.value = CardUiState.Error("검색 데이터를 불러오는데 실패했습니다.")
@@ -167,25 +168,13 @@ class CardViewModel : ViewModel() {
         }
     }
 
-    // ✅ 공통 함수: UI 상태를 카드 데이터로 변환 (isMine 체크하여 배경색 변경)
-//    private fun createCardUiState(cards: List<Card>, selectedTab: String): CardUiState.Success {
-//        val updatedCards = cards.map { card ->
-//            card.copy(backgroundColor = if (!card.isMine) "gray" else "white") // ✅ isMine=false이면 회색 배경
-//        }
-//
-//        return CardUiState.Success(
-//            images = if (selectedTab == "전체") updatedCards.filter { it.typeId == 4 } else emptyList(),
-//            blogs = if (selectedTab == "전체") updatedCards.filter { it.typeId == 2 } else emptyList(),
-//            news = if (selectedTab == "전체") updatedCards.filter { it.typeId == 3 } else emptyList(),
-//            videos = if (selectedTab == "전체") updatedCards.filter { it.typeId == 1 } else emptyList()
-//        )
-//    }
+    // 공통 함수: UI 상태를 카드 데이터로 변환 (isMine 체크하여 배경색 변경)
     private fun createCardUiState(cards: List<Card>, selectedTab: String): CardUiState.Success {
         return CardUiState.Success(
-            images = if (selectedTab == "전체") cards.filter { it.typeId == 4 } else emptyList(),
-            blogs = if (selectedTab == "전체") cards.filter { it.typeId == 2 } else emptyList(),
-            news = if (selectedTab == "전체") cards.filter { it.typeId == 3 } else emptyList(),
-            videos = if (selectedTab == "전체") cards.filter { it.typeId == 1 } else emptyList()
+            images = if (selectedTab == "전체" || selectedTab == "이미지") cards.filter { it.typeId == 4 } else emptyList(),
+            blogs = if (selectedTab == "전체" || selectedTab == "블로그") cards.filter { it.typeId == 2 } else emptyList(),
+            news = if (selectedTab == "전체" || selectedTab == "뉴스") cards.filter { it.typeId == 3 } else emptyList(),
+            videos = if (selectedTab == "전체" || selectedTab == "동영상") cards.filter { it.typeId == 1 } else emptyList()
         )
     }
 
