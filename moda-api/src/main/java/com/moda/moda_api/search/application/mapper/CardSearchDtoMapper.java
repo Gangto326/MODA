@@ -36,6 +36,7 @@ public class CardSearchDtoMapper {
                 .keywords(cardDocument.getKeywords())
                 .excludedKeywords(excludedKeywords)
                 .isMine(cardDocument.isOwnedBy(currentUserId))
+                .bookmark(cardDocument.getBookmark())
                 .score(cardDocument.getScore())
                 .build();
     }
@@ -59,6 +60,7 @@ public class CardSearchDtoMapper {
                 .keywords(card.getKeywords())
                 .excludedKeywords(new String[]{})  // Card 엔티티는 검색 결과가 아니므로 제외된 키워드 없음
                 .isMine(card.isOwnedBy(currentUserId))
+                .bookmark(card.getBookmark())
                 .score(0.0F)  // Card 엔티티는 검색 결과가 아니므로 score 없음
                 .build();
     }
