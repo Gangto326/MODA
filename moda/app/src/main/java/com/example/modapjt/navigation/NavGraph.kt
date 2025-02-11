@@ -243,5 +243,12 @@ fun NavGraph(
         }
 
 
+//        composable("favorite_card_list") {
+//            newFavoriteCardListScreen(
+//                navController = navController,
+//                currentRoute = "favorite_card_list"
+//            )
+//        }
+
     }
 }
