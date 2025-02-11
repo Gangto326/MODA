@@ -21,6 +21,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // 오버레이 및 접근성 서비스를 위한 권한 요청
+        checkOverlayPermission()
+        checkAccessibilityPermission()
+
         setContent {
             ModapjtTheme {
                 val navController = rememberAnimatedNavController()

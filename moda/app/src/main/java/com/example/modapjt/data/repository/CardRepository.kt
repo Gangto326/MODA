@@ -1,6 +1,7 @@
 package com.example.modapjt.data.repository
 
 import com.example.modapjt.data.api.RetrofitInstance
+import com.example.modapjt.data.dto.request.CardRequest
 import com.example.modapjt.data.dto.response.toDomain
 import com.example.modapjt.domain.model.Card
 import java.io.IOException
@@ -63,7 +64,27 @@ class CardRepository {
         }
     }
 
+    // 카드 추가 기능
+    suspend fun createCard(url: String): Result<Boolean> {
+        return try {
+            println("[CardRepository] 카드 추가 요청: url=$url")
 
+            val response = api.createCard(CardRequest(url))
+            println("[CardRepository] 카드 추가 응답 코드: ${response.code()}, 메시지: ${response.message()}")
+
+            if (response.isSuccessful) {
+                Result.success(response.body() ?: false)
+            } else {
+                Result.failure(Exception("카드 추가 실패: ${response.message()}"))
+            }
+        } catch (e: IOException) {
+            println("[CardRepository] 네트워크 오류 발생: ${e.message}")
+            Result.failure(Exception("네트워크 오류 발생: ${e.message}"))
+        } catch (e: Exception) {
+            println("[CardRepository] 카드 추가 요청 예외 발생: ${e.message}")
+            Result.failure(e)
+        }
+    }
 
     // 카드 삭제 기능 추가
     suspend fun deleteCard(cardId: String): Result<Boolean> {
