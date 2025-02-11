@@ -55,6 +55,7 @@ fun SearchScreenBar(
     onSearchValueChange: (String) -> Unit,
     onFocusChanged: (Boolean) -> Unit,
     onBackPressed: () -> Unit,
+    onSearchSubmit: (String) -> Unit, // ✅✅ 검색 버튼 클릭 이벤트 추가
     context: Context // 🔹 Context 추가
 ) {
     var searchText by remember { mutableStateOf(initialValue) }
@@ -131,6 +132,7 @@ fun SearchScreenBar(
             IconButton(
                 onClick = {
                     if (searchText.isNotBlank()) {
+                        onSearchSubmit(searchText)
                         CoroutineScope(Dispatchers.IO).launch {
                             val currentKeywords = SearchKeywordDataStore.getKeywords(context).first()
                             val updatedKeywords = (listOf(searchText) + currentKeywords).distinct().take(10)

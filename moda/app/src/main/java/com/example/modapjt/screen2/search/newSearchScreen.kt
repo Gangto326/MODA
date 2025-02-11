@@ -69,6 +69,11 @@ fun NewSearchScreen(
                     searchViewModel.fetchAutoCompleteKeywords(it)
                 },
                 onFocusChanged = { isSearchActive = it },
+                onSearchSubmit = { query -> // ✅ 검색 버튼 클릭 시 동작
+                    if (query.isNotBlank()) {
+                        navController.navigate("newSearchCardListScreen/$query") // ✅ 검색어와 함께 이동
+                    }
+                },
                 onBackPressed = {
                     if (isSearchActive) {
                         isSearchActive = false
