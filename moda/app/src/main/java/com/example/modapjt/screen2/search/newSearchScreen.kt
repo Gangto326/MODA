@@ -1,6 +1,7 @@
 package com.example.modapjt.screen2.search
 
 import android.util.Log
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,7 +36,11 @@ import com.example.modapjt.components.search.KeywordRankList
 import com.example.modapjt.components.search.SearchKeywordList
 import com.example.modapjt.components.search.SearchScreenBar
 import com.example.modapjt.components.search.SearchSubtitle
+import com.example.modapjt.datastore.SearchKeywordDataStore
 import com.example.modapjt.domain.viewmodel.SearchViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 @Composable
 fun NewSearchScreen(
@@ -102,7 +107,7 @@ fun NewSearchScreen(
             ) {
                 if (searchQuery.isEmpty()) {
                     // 🔹 검색어가 없을 때 최근 검색어 & 인기 검색어 표시
-                    item { SearchKeywordList(context) }
+                    item { SearchKeywordList(context, navController = navController) }
                     item { SearchSubtitle(title = "인기 검색어", date = "25.02.02 기준") }
                     item { KeywordRankList() }
                 }
@@ -111,7 +116,11 @@ fun NewSearchScreen(
                     // 🔹 검색어 입력 시 자동완성 검색어 표시
                     item {
                         Log.d("UI_CHECK", "SearchSuggestions 표시됨!")
-                        SearchSuggestions(searchResults)
+                        SearchSuggestions(searchResults, onSearchSubmit = { query ->
+                            if (query.isNotBlank()) {
+                                navController.navigate("newSearchCardListScreen/$query") // ✅ 검색어와 함께 이동
+                            }
+                        })//SearchSuggestions 사용하는 화면에서 onSearchSubmit 넘겨줌
                     }
                 }
             }
@@ -120,7 +129,13 @@ fun NewSearchScreen(
 }
 
 @Composable
-fun SearchSuggestions(suggestions: List<String>) {
+fun SearchSuggestions(
+    suggestions: List<String>,
+    onSearchSubmit: (String) -> Unit
+) {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope() // ✅ rememberCoroutineScope() 사용
+
     Log.d("SearchSuggestions", "검색어 리스트 갱신됨: $suggestions")
 
     Column(
@@ -145,6 +160,17 @@ fun SearchSuggestions(suggestions: List<String>) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(8.dp)
+                        .clickable {
+                            Log.d("SearchSuggestions", "검색어 클릭됨: $suggestion")
+                            onSearchSubmit(suggestion) // ✅ 클릭된 검색어 전달
+
+                            // ✅ 최근 검색어 저장
+                            coroutineScope.launch(Dispatchers.IO) {
+                                val currentKeywords = SearchKeywordDataStore.getKeywords(context).first()
+                                val updatedKeywords = (listOf(suggestion) + currentKeywords).distinct().take(10)
+                                SearchKeywordDataStore.saveKeywords(context, updatedKeywords)
+                            }
+                        }
                 )
             }
         }

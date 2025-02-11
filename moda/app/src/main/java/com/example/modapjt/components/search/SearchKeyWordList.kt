@@ -25,12 +25,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.modapjt.datastore.SearchKeywordDataStore
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @Composable
-fun SearchKeywordList(context: Context) {
+fun SearchKeywordList(context: Context, navController: NavController) {
     val scope = rememberCoroutineScope()
     var keywords by remember { mutableStateOf(listOf<String>()) }
 
@@ -75,13 +76,20 @@ fun SearchKeywordList(context: Context) {
             items(keywords) { keyword ->
                 SearchKeywordItem(
                     keyword = keyword,
+                    onSearchSubmit = { query -> // ✅ 검색 버튼 클릭 시 동작
+                        if (query.isNotBlank()) {
+                            navController.navigate("newSearchCardListScreen/$query") // ✅ 검색어와 함께 이동
+                        }
+                    },
                     onDelete = {
                         scope.launch {
                             val updatedKeywords = keywords.filter { it != keyword }
                             SearchKeywordDataStore.saveKeywords(context, updatedKeywords)
                             keywords = updatedKeywords // 🔹 UI 업데이트
                         }
+
                     }
+
                 )
             }
         }
