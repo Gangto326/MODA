@@ -13,6 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.savedstate.SavedStateRegistry
@@ -29,6 +30,7 @@ import kotlinx.coroutines.withContext
 class OverlayService : LifecycleService(), SavedStateRegistryOwner {
     private var windowManager: WindowManager? = null
     private var overlayView: ComposeView? = null
+    private lateinit var params: WindowManager.LayoutParams  // 여기서 선언
 
     private val repository = CardRepository()
     private val savedStateRegistryController = SavedStateRegistryController.create(this)
@@ -45,6 +47,22 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
     }
 
     private fun setupOverlayView() {
+        params = WindowManager.LayoutParams(
+            200,
+            200,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+            else WindowManager.LayoutParams.TYPE_PHONE,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            PixelFormat.TRANSLUCENT
+        ).apply {
+            gravity = Gravity.TOP or Gravity.START
+            x = 40
+            y = 80
+        }
+
         overlayView = ComposeView(this).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setViewTreeLifecycleOwner(this@OverlayService)
@@ -56,6 +74,9 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
 
                 OverlayIcon(
                     onDoubleTab = { captureUrl() },
+                    onDrag = { offset ->
+                        movePosition(offset)
+                    },
                     isSuccess = isSuccess,
                     isError = isError,
                     onAnimationComplete = {
@@ -64,20 +85,6 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
                     }
                 )
             }
-        }
-
-        val params = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)
-                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-            else WindowManager.LayoutParams.TYPE_PHONE,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-            PixelFormat.TRANSLUCENT
-        ).apply {
-            gravity = Gravity.TOP or Gravity.START
-            x = 100
-            y = 100
         }
 
         windowManager?.addView(overlayView, params)
@@ -96,8 +103,15 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
             url = url ?: "Unknown URL"
             Log.d("OverlayService", "최종 URL 저장: $url") // 로그 추가
 
-            saveToLocalDatabase(url)
+            saveToDatabase(url)
         }
+    }
+
+    private fun movePosition(offset: IntOffset) {
+        params.x += offset.x
+        params.y += offset.y
+        windowManager?.updateViewLayout(overlayView, params)
+
     }
 
     private fun showSuccessFeedback() {
@@ -105,6 +119,9 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
             var isSuccess by remember { mutableStateOf(true) }
             OverlayIcon(
                 onDoubleTab = { captureUrl() },
+                onDrag = { offset ->
+                    movePosition(offset)
+                },
                 isSuccess = isSuccess,
                 isError = false,
                 onAnimationComplete = { isSuccess = false }
@@ -117,6 +134,9 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
             var isError by remember { mutableStateOf(true) }
             OverlayIcon(
                 onDoubleTab = { captureUrl() },
+                onDrag = { offset ->
+                    movePosition(offset)
+                },
                 isSuccess = false,
                 isError = isError,
                 onAnimationComplete = { isError = false }
@@ -124,7 +144,7 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
         }
     }
 
-    private fun saveToLocalDatabase(url: String) {
+    private fun saveToDatabase(url: String) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 var finalUrl = url
@@ -156,7 +176,6 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
                 withContext(Dispatchers.Main) {
                     showErrorFeedback()
                     Toast.makeText(applicationContext, "URL 저장 실패", Toast.LENGTH_SHORT).show() // 실패 시에도 Toast 추가
-
                 }
             }
         }

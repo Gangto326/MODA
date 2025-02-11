@@ -2,23 +2,30 @@ package com.example.modapjt
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
-import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material3.Icon
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
 fun OverlayIcon(
     onDoubleTab: () -> Unit,
+    onDrag: (IntOffset) -> Unit = {},
     isSuccess: Boolean = false,
     isError: Boolean = false,
     onAnimationComplete: () -> Unit = {},
@@ -26,11 +33,18 @@ fun OverlayIcon(
 ) {
     val coroutineScope = rememberCoroutineScope()
 
+    val terminationZone = Rect(
+        left = 0F,
+        top = 0F,
+        right = 200F,  // 200픽셀 너비
+        bottom = 200F  // 200픽셀 높이
+    )
+
     val iconColor by animateColorAsState(
         targetValue = when {
             isSuccess -> Color.Green
             isError -> Color.Red
-            else -> Color(0xFF6200EE)  // 기본 보라색
+            else -> Color(0xFF090808)  // 기본 검정색
         },
         animationSpec = tween(durationMillis = 500)
     )
@@ -49,10 +63,22 @@ fun OverlayIcon(
         contentDescription = "Overlay Icon",
         modifier = modifier
             .size(48.dp)
+            .alpha(0.3f) //투명도 설정
             .pointerInput(Unit) {
                 detectTapGestures(
                     onDoubleTap = {
                         onDoubleTab()
+                    }
+                )
+            }
+            .pointerInput(Unit) {
+                detectDragGestures(
+                    onDragStart = {
+
+                    },
+                    onDrag = { change, dragAmount ->
+                        change.consume()
+                        onDrag(IntOffset(dragAmount.x.toInt(), dragAmount.y.toInt()))
                     }
                 )
             },
