@@ -396,7 +396,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
         List<CardDocument> content = searchHits.stream()
                 .map(hit -> cardDocumentMapper.toDomain(
                         hit.getContent().toBuilder()
-                                .score(hit.getScore()) // hit에서 score 가져옴
+                                .score(Float.isNaN(hit.getScore()) ? 1.0f : hit.getScore()) // hit에서 score 가져옴
                                 .build()
                 ))
                 .collect(Collectors.toList());
