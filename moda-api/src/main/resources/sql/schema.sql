@@ -57,7 +57,31 @@ deleted_at TIMESTAMP,
 sub_contents text[] DEFAULT ARRAY[]::text[],
 FOREIGN KEY (user_id) REFERENCES users(user_id),
 FOREIGN KEY (category_id) REFERENCES category(category_id),
-FOREIGN KEY (type_id) REFERENCES content_type(type_id)
+FOREIGN KEY (type_id) REFERENCES content_type(type_id),
+FOREIGN KEY (url_hash) REFERENCES url_caches(url_hash)
+);
+CREATE TABLE child_cards (
+    child_id VARCHAR(36) PRIMARY KEY,
+    card_id VARCHAR(36) NOT NULL,
+    type_id INT NOT NULL,
+    url_hash VARCHAR(64) NOT NULL,
+    category_id BIGSERIAL NOT NULL,
+    title VARCHAR(100) NOT NULL,
+    content TEXT NOT NULL,
+    thumbnail_content TEXT NOT NULL,
+    thumbnail_url TEXT NOT NULL,
+    "order" INT NOT NULL,
+    embedding VECTOR(768) NOT NULL,
+    keywords text[] NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    subcontents text[] DEFAULT ARRAY[]::TEXT[],
+    isLike BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (card_id) REFERENCES cards(card_id),
+    FOREIGN KEY (category_id) REFERENCES category(category_id),
+    FOREIGN KEY (type_id) REFERENCES content_type(type_id),
+    FOREIGN KEY (url_hash) REFERENCES url_caches(url_hash)
 );
 
 CREATE TABLE url_caches (
@@ -86,6 +110,27 @@ content VARCHAR(200) NOT NULL,
 is_read BOOLEAN NOT NULL DEFAULT false,
 created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+CREATE TABLE refresh_tokens (
+    refresh_token_id BIGSERIAL PRIMARY KEY,
+    token TEXT NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_active BOOLEAN DEFAULT TRUE
+);
+
+CREATE TABLE saved (
+    user_id VARCHAR(36) NOT NULL,
+    type_id BIGSERIAL NOT NULL,
+    type_count INT NOT NULL DEFAULT 0
+);
+
+
+CREATE TABLE `category_order` (
+	`category_id`	BIGSERIAL	NOT NULL,
+	`user_id`	VARCHAR(36)	NOT NULL	COMMENT 'UUID 값',
+	`position`	INT	NOT NULL
 );
 
 
