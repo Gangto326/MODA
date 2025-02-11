@@ -9,9 +9,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.moda.moda_api.card.domain.Card;
-import com.moda.moda_api.card.domain.CardRepository;
-import com.moda.moda_api.card.domain.UserKeywordRepository;
+import com.moda.moda_api.card.domain.*;
 import com.moda.moda_api.user.domain.User;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,7 +18,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.moda.moda_api.card.domain.CardContentType;
 import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.common.pagination.SliceRequestDto;
 import com.moda.moda_api.common.pagination.SliceResponseDto;
@@ -42,6 +39,7 @@ public class SearchService {
 	private final CardSearchDtoMapper cardSearchDtoMapper;
 	private final CardRepository cardRepository;
 	private final UserKeywordRepository userKeywordRepository;
+	private final VideoCreatorRepository videoCreatorRepository;
 	private final ExecutorService executorService;
 
 	/**
@@ -362,7 +360,7 @@ public class SearchService {
 		/**
 		 * 이번주 주요 키워드
 		 *
-		 * 주요 키워드 기준 조회수가 적은 5개의 비디오만 조회
+		 * 주요 키워드 기준 조회수가 적은 5개의 컨텐츠 조회
 		 */
 		Pageable keywordsPageable = PageRequest.of(
 				0,  // 첫 번째 페이지 (0부터 시작)
@@ -378,7 +376,7 @@ public class SearchService {
 					if (keywords.isEmpty()) {
 						return Collections.emptyList();
 					}
-					return cardSearchRepository.searchByKeywordOnlyVideo(userIdObj, keywords.get(0), keywordsPageable);
+					return cardSearchRepository.searchByKeyword(userIdObj, keywords.get(0), typeIds, keywordsPageable);
 				});
 
 		/**
@@ -414,11 +412,12 @@ public class SearchService {
 				5  // 페이지당 10개 항목
 		);
 		
-		// Redis에서 키워드 가져오는 로직 추가
+		// Redis에서 user별 크리에이터 정보를 가져옵니다.
+		String creator = videoCreatorRepository.getCreatorByUserId(userIdObj);
 		
 		CompletableFuture<List<CardDocument>> videosFuture = CompletableFuture
 				.supplyAsync(() -> cardSearchRepository.searchByKeywordOnlyVideo(
-						userIdObj, "", videosPage
+						userIdObj, creator, videosPage
 				), executorService)
 				.orTimeout(2, TimeUnit.SECONDS)
 				.exceptionally(ex -> Collections.emptyList());

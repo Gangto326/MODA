@@ -17,12 +17,10 @@ public interface CardJpaRepository extends JpaRepository<CardEntity, String> {
 
     Slice<CardEntity> findByUserIdAndCategoryId(String userId, Long categoryId, Pageable pageable);
 
-//    @Query("SELECT c FROM CardEntity c LEFT JOIN FETCH c.urlCache WHERE c.userId = :userId AND c.cardId = :cardId")
-//    Optional<CardEntity> findByUserIdAndCardId(
-//            @Param("userId") String userId,
-//            @Param("cardId") String cardId
-//    );
-    Optional<CardEntity> findByUserIdAndCardId(String userId, String cardId);
+//    Optional<CardEntity> findByUserIdAndCardId(String userId, String cardId);
+
+    @Query("SELECT c FROM CardEntity c JOIN FETCH c.urlCache uc WHERE c.userId = :userId AND c.cardId = :cardId")
+    Optional<CardEntity> findByUserIdAndCardId(@Param("userId") String userId, @Param("cardId") String cardId);
 
     @Query("SELECT c FROM CardEntity c WHERE c.urlCache.urlHash = :urlHash")
     Optional<CardEntity> findFirstByUrlHash(@Param("urlHash") String urlHash);
@@ -42,4 +40,6 @@ public interface CardJpaRepository extends JpaRepository<CardEntity, String> {
     List<CardEntity> findByUserIdAndViewCountAndTypeIdIn(String userId, Integer viewCount, List<Integer> typeIds, Pageable pageable);
 
     Slice<CardEntity> findByUserIdAndBookmarkTrueAndTypeIdAndDeletedAtIsNull(String userId, Integer typeId, Pageable pageable);
+
+    List<CardEntity> findAllByTypeId(Integer typeId);
 }

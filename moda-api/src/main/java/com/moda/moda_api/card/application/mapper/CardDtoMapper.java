@@ -1,5 +1,6 @@
 package com.moda.moda_api.card.application.mapper;
 
+import com.moda.moda_api.user.domain.UserId;
 import org.springframework.stereotype.Component;
 
 import com.moda.moda_api.card.application.response.CardDetailResponse;
@@ -23,7 +24,7 @@ public class CardDtoMapper {
                 .build();
     }
 
-    public CardDetailResponse toDetailResponse(Card card) {
+    public CardDetailResponse toDetailResponse(UserId userId, Card card) {
         return CardDetailResponse.builder()
                 .cardId(card.getCardId().getValue())
                 .categoryId(card.getCategoryId().getValue())
@@ -35,7 +36,8 @@ public class CardDtoMapper {
                 .thumbnailUrl(card.getThumbnailUrl())
                 .keywords(card.getKeywords())
                 .subContents(card.getSubContents())
-                .bookmark(card.getBookmark())
+                .isMine(card.isOwnedBy(userId))
+                .bookmark(card.isOwnedBy(userId)? card.getBookmark(): false)
                 .createdAt(card.getCreatedAt())
                 .build();
     }
