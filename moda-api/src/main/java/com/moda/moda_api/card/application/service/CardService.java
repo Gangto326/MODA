@@ -7,6 +7,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+import com.moda.moda_api.card.domain.*;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,13 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.moda.moda_api.card.application.mapper.CardDtoMapper;
 import com.moda.moda_api.card.application.response.CardDetailResponse;
 import com.moda.moda_api.card.application.response.CardListResponse;
-import com.moda.moda_api.card.domain.Card;
-import com.moda.moda_api.card.domain.CardFactory;
-import com.moda.moda_api.card.domain.CardId;
-import com.moda.moda_api.card.domain.CardRepository;
-import com.moda.moda_api.card.domain.EmbeddingVector;
-import com.moda.moda_api.card.domain.UrlCache;
-import com.moda.moda_api.card.domain.UrlCacheRepository;
 import com.moda.moda_api.card.exception.CardNotFoundException;
 import com.moda.moda_api.card.presentation.request.MoveCardRequest;
 import com.moda.moda_api.card.presentation.request.UpdateCardRequest;
@@ -48,6 +42,7 @@ public class CardService {
 	private final CardRepository cardRepository;
 	private final CardFactory cardFactory;
 	private final CardDtoMapper cardDtoMapper;
+	private final UserKeywordRepository userKeywordRepository;
 	private final UrlCacheRepository urlCacheRepository;
 	private final SummaryService summaryService;
 	private final ImageStorageService imageStorageService;
@@ -95,8 +90,12 @@ public class CardService {
 			cache.getCachedSubContents()
 		);
 
+		// 유저별 핵심 키워드 저장 (Redis)
+		userKeywordRepository.saveKeywords(userIdObj, card.getKeywords());
+
 		cardRepository.save(card);
 		cardSearchRepository.save(card);
+
 		return CompletableFuture.completedFuture(true);
 	}
 
@@ -148,6 +147,9 @@ public class CardService {
 						.cachedSubContents(card.getSubContents())
 						.build()
 				);
+
+				// 유저별 핵심 키워드 저장 (Redis)
+				userKeywordRepository.saveKeywords(userIdObj, card.getKeywords());
 
 				cardRepository.save(card);
 				cardSearchRepository.save(card);
