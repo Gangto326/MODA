@@ -23,6 +23,7 @@ public class CardDetailResponse {
     private String thumbnailUrl;
     private String[] keywords;
     private String[] subContents;
+    private Boolean isMine;
     private Boolean bookmark;
     private LocalDateTime createdAt;
 }

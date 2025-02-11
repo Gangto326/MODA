@@ -48,15 +48,8 @@ public class CardRepositoryImpl implements CardRepository {
 
     @Override
     public Optional<Card> findByUserIdAndCardId(UserId userId, CardId cardId) {
-        CardEntity entity = cardJpaRepository.findByUserIdAndCardId(userId.getValue(), cardId.getValue())
-                .orElseThrow(() -> new CardNotFoundException("카드를 찾을 수 없습니다."));
-
-        log.debug("CardEntity found: {}", entity);
-        log.debug("URL Hash: {}", entity.getUrlHash());
-        log.debug("URL Cache: {}", entity.getUrlCache());
-        return Optional.of(cardEntityMapper.toDomain(entity));
-//        return cardJpaRepository.findByUserIdAndCardId(userId.getValue(), cardId.getValue())
-//            .map(cardEntityMapper::toDomain);
+        return cardJpaRepository.findByUserIdAndCardId(userId.getValue(), cardId.getValue())
+            .map(cardEntityMapper::toDomain);
     }
 
     @Override

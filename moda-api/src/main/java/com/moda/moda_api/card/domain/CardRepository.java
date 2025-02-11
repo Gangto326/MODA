@@ -1,5 +1,6 @@
 package com.moda.moda_api.card.domain;
 
+import com.moda.moda_api.card.infrastructure.entity.CardEntity;
 import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.user.domain.UserId;
 import org.springframework.data.domain.PageRequest;

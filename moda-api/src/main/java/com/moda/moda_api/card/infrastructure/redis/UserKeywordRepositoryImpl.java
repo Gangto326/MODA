@@ -19,6 +19,11 @@ public class UserKeywordRepositoryImpl implements UserKeywordRepository {
         this.redisTemplate = redisTemplate;
     }
 
+    /**
+     * user별 저장한 키워드의 count와 저장, 갱신 date를 따로 저장하여 관리합니다.
+     * @param userId
+     * @param keywords
+     */
     @Override
     public void saveKeywords(UserId userId, String[] keywords) {
         String countKey = "user:keywords:count:" + userId.getValue();
@@ -42,6 +47,12 @@ public class UserKeywordRepositoryImpl implements UserKeywordRepository {
         }
     }
 
+    /**
+     * user별 count가 가장 높은 키워드를 가져옵니다.
+     * @param userId
+     * @param limit
+     * @return
+     */
     @Override
     public List<String> getTopKeywords(UserId userId, int limit) {
         String key = "user:keywords:count:" + userId.getValue();

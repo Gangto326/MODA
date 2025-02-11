@@ -277,7 +277,7 @@ public class CardService {
 
 		// 카드 탐색
 		Card card = findCard(userIdObj, cardIdObj);
-		return cardDtoMapper.toDetailResponse(card);
+		return cardDtoMapper.toDetailResponse(userIdObj, card);
 	}
 
 	/**
@@ -324,7 +324,7 @@ public class CardService {
 		card.changeContent(request.getContent());
 		cardRepository.save(card);
 
-		return cardDtoMapper.toDetailResponse(card);
+		return cardDtoMapper.toDetailResponse(userIdObj, card);
 	}
 
 	/**
