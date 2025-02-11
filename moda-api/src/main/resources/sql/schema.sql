@@ -5,16 +5,30 @@ DROP TABLE IF EXISTS category_order CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS content_type CASCADE;
 DROP TABLE IF EXISTS category CASCADE;
+DROP TABLE IF EXISTS saved CASCADE;
+DROP TABLE IF EXISTS refresh_tokens CASCADE;
+DROP TABLE IF EXISTS child_cards CASCADE;
 
-CREATE TABLE category (
-category_id BIGSERIAL PRIMARY KEY,
-category VARCHAR NOT NULL
+
+CREATE TABLE refresh_tokens (
+    refresh_token_id BIGSERIAL PRIMARY KEY,
+    token TEXT NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_active BOOLEAN DEFAULT TRUE
 );
 
 CREATE TABLE content_type (
 type_id BIGSERIAL PRIMARY KEY,
 type VARCHAR(100) NOT NULL
 );
+
+
+CREATE TABLE category (
+category_id BIGSERIAL PRIMARY KEY,
+category VARCHAR NOT NULL
+);
+
 
 CREATE TABLE users (
 user_id VARCHAR(36) PRIMARY KEY,
@@ -27,6 +41,12 @@ created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 deleted_at TIMESTAMP
 );
 
+CREATE TABLE saved (
+    user_id VARCHAR(36) NOT NULL,
+    type_id BIGSERIAL NOT NULL,
+    type_count INT NOT NULL DEFAULT 0
+);
+
 -- Category Order Table
 CREATE TABLE category_order (
 category_id BIGSERIAL NOT NULL,
@@ -36,6 +56,24 @@ PRIMARY KEY (category_id, user_id),
 FOREIGN KEY (category_id) REFERENCES category(category_id),
 FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
+
+CREATE TABLE url_caches (
+url_hash VARCHAR(64) PRIMARY KEY,
+original_url TEXT NOT NULL,
+type_id INT NOT NULL,
+category_id INT NOT NULL,
+cached_title VARCHAR(100) NOT NULL,
+cached_content TEXT NOT NULL,
+cached_thumbnail_content TEXT NOT NULL,
+cached_thumbnail_url TEXT NOT NULL,
+cached_embedding VECTOR(768) NOT NULL,
+cached_keywords text[],
+cached_subcontents text[] DEFAULT ARRAY[]::text[],
+created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+FOREIGN KEY (type_id) REFERENCES content_type(type_id),
+FOREIGN KEY (category_id) REFERENCES category(category_id)
+);
+
 
 -- Cards Table
 CREATE TABLE cards (
@@ -55,6 +93,7 @@ created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 updated_at TIMESTAMP,
 deleted_at TIMESTAMP,
 sub_contents text[] DEFAULT ARRAY[]::text[],
+bookmark BOOLEAN NOT NULL DEFAULT FALSE,
 FOREIGN KEY (user_id) REFERENCES users(user_id),
 FOREIGN KEY (category_id) REFERENCES category(category_id),
 FOREIGN KEY (type_id) REFERENCES content_type(type_id),
@@ -77,28 +116,10 @@ CREATE TABLE child_cards (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     subcontents text[] DEFAULT ARRAY[]::TEXT[],
-    isLike BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (card_id) REFERENCES cards(card_id),
     FOREIGN KEY (category_id) REFERENCES category(category_id),
     FOREIGN KEY (type_id) REFERENCES content_type(type_id),
     FOREIGN KEY (url_hash) REFERENCES url_caches(url_hash)
-);
-
-CREATE TABLE url_caches (
-url_hash VARCHAR(64) PRIMARY KEY,
-original_url TEXT NOT NULL,
-type_id INT NOT NULL,
-category_id INT NOT NULL,
-cached_title VARCHAR(100) NOT NULL,
-cached_content TEXT NOT NULL,
-cached_thumbnail_content TEXT NOT NULL,
-cached_thumbnail_url TEXT NOT NULL,
-cached_embedding VECTOR(768) NOT NULL,
-cached_keywords text[],
-cached_subcontents text[] DEFAULT ARRAY[]::text[],
-created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-FOREIGN KEY (type_id) REFERENCES content_type(type_id),
-FOREIGN KEY (category_id) REFERENCES category(category_id)
 );
 
 CREATE TABLE notifications (
@@ -112,26 +133,6 @@ created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
-CREATE TABLE refresh_tokens (
-    refresh_token_id BIGSERIAL PRIMARY KEY,
-    token TEXT NOT NULL,
-    expires_at TIMESTAMP NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    is_active BOOLEAN DEFAULT TRUE
-);
-
-CREATE TABLE saved (
-    user_id VARCHAR(36) NOT NULL,
-    type_id BIGSERIAL NOT NULL,
-    type_count INT NOT NULL DEFAULT 0
-);
-
-
-CREATE TABLE `category_order` (
-	`category_id`	BIGSERIAL	NOT NULL,
-	`user_id`	VARCHAR(36)	NOT NULL	COMMENT 'UUID 값',
-	`position`	INT	NOT NULL
-);
 
 
 INSERT INTO users (user_id, email, password, profile_image, nickname, role) VALUES
