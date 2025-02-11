@@ -36,7 +36,11 @@ import com.example.modapjt.components.search.KeywordRankList
 import com.example.modapjt.components.search.SearchKeywordList
 import com.example.modapjt.components.search.SearchScreenBar
 import com.example.modapjt.components.search.SearchSubtitle
+import com.example.modapjt.datastore.SearchKeywordDataStore
 import com.example.modapjt.domain.viewmodel.SearchViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 @Composable
 fun NewSearchScreen(
@@ -125,7 +129,13 @@ fun NewSearchScreen(
 }
 
 @Composable
-fun SearchSuggestions(suggestions: List<String>, onSearchSubmit: (String) -> Unit ) {// ✅ 검색어를 전달하는 함수 추가
+fun SearchSuggestions(
+    suggestions: List<String>,
+    onSearchSubmit: (String) -> Unit
+) {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope() // ✅ rememberCoroutineScope() 사용
+
     Log.d("SearchSuggestions", "검색어 리스트 갱신됨: $suggestions")
 
     Column(
@@ -151,9 +161,16 @@ fun SearchSuggestions(suggestions: List<String>, onSearchSubmit: (String) -> Uni
                         .fillMaxWidth()
                         .padding(8.dp)
                         .clickable {
-                        Log.d("SearchSuggestions", "검색어 클릭됨: $suggestion")
-                        onSearchSubmit(suggestion) // ✅ 클릭된 검색어 전달
-                    }
+                            Log.d("SearchSuggestions", "검색어 클릭됨: $suggestion")
+                            onSearchSubmit(suggestion) // ✅ 클릭된 검색어 전달
+
+                            // ✅ 최근 검색어 저장
+                            coroutineScope.launch(Dispatchers.IO) {
+                                val currentKeywords = SearchKeywordDataStore.getKeywords(context).first()
+                                val updatedKeywords = (listOf(suggestion) + currentKeywords).distinct().take(10)
+                                SearchKeywordDataStore.saveKeywords(context, updatedKeywords)
+                            }
+                        }
                 )
             }
         }
