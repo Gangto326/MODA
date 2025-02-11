@@ -12,6 +12,7 @@ import co.elastic.clients.elasticsearch._types.query_dsl.FunctionBoostMode;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;
@@ -290,14 +291,14 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                                 .term(term -> term
                                         .field("userId")
                                         .value(userId.getValue())
-                                        .boost(1.5f)
+                                        .boost(1.6f)
                                 )
                         ))
                         .should(Query.of(q -> q
                                 // 검색어는 키워드, 제목, 콘텐츠 순으로 가중치 차등 지급
                                 .multiMatch(multiMatch -> multiMatch
                                         .query(searchText)
-                                        .fields("keywords.keyword^1.0", "title^0.8", "content^0.5")
+                                        .fields("keywords.keyword^0.8", "title^0.5", "content^0.3")
                                 )
                         ))
                         .minimumShouldMatch("1")
@@ -388,6 +389,8 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                 .withQuery(boolQuery.build()._toQuery())
                 .withPageable(pageable)
                 .withMinScore(MIN_SCORE)
+                .withTrackScores(true)  // 점수 추적 활성화
+                .withSort(Sort.by(Sort.Direction.DESC, "_score"))
                 .build();
 
         // DB 탐색
