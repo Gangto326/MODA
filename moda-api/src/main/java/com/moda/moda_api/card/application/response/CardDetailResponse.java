@@ -17,9 +17,12 @@ public class CardDetailResponse {
     private Long categoryId;
     private Integer typeId;
     private CardContentType type;
+    private String originalUrl;
     private String title;
     private String content;
     private String thumbnailUrl;
     private String[] keywords;
+    private String[] subContents;
+    private Boolean bookmark;
     private LocalDateTime createdAt;
 }

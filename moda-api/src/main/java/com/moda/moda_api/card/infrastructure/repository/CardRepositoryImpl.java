@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -23,10 +24,10 @@ public class CardRepositoryImpl implements CardRepository {
     private final CardEntityMapper cardEntityMapper;
 
     @Override
-    public Card save(Card card) {
+    public void save(Card card) {
         CardEntity entity = cardEntityMapper.toEntity(card);
         CardEntity savedEntity = cardJpaRepository.save(entity);
-        return cardEntityMapper.toDomain(savedEntity);
+
     }
 
     @Override
@@ -66,12 +67,55 @@ public class CardRepositoryImpl implements CardRepository {
     }
 
     @Override
-    public List<Card> saveAll(List<Card> cards) {
+    public void saveAll(List<Card> cards) {
         List<CardEntity> cardEntities = cards.stream()
             .map(cardEntityMapper::toEntity)
             .collect(Collectors.toList());
 
-        return cardEntityMapper.toDomain(cardJpaRepository.saveAll(cardEntities));
+        cardJpaRepository.saveAll(cardEntities);
     }
 
+    @Override
+    public Optional<Card> findByUrlHash(String urlHash) {
+        return cardJpaRepository.findFirstByUrlHash(urlHash)
+                .map(cardEntityMapper::toDomain);
+    }
+
+    @Override
+    public List<Card> findByUserIdAndTypeIdIn(UserId userIdObj, List<Integer> typeIds, Pageable pageable) {
+        List<CardEntity> cardEntities = cardJpaRepository.findByUserIdAndTypeIdInAndDeletedAtIsNull(
+                userIdObj.getValue(), typeIds, pageable);
+
+        return cardEntities.stream()
+                .map(cardEntityMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Card> findRandomCards(UserId userIdObj, LocalDateTime startDate, LocalDateTime endDate, List<Integer> typeIds, Pageable toDaysPage) {
+        List<CardEntity> cardEntities = cardJpaRepository.findRandomCards(
+                userIdObj.getValue(), startDate, endDate, typeIds, toDaysPage);
+
+        return cardEntities.stream()
+                .map(cardEntityMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Card> findByUserIdAndViewCountAndTypeIdIn(UserId userId, Integer viewCount, List<Integer> typeIds, Pageable pageable) {
+        List<CardEntity> cardEntities = cardJpaRepository.findByUserIdAndViewCountAndTypeIdIn(
+                userId.getValue(), viewCount, typeIds, pageable);
+
+        return cardEntities.stream()
+                .map(cardEntityMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Slice<Card> findByUserIdAndBookmarkTrueAndTypeIdAndDeletedAtIsNull(UserId userId, Integer typeId, Pageable pageable) {
+        Slice<CardEntity> cardEntities = cardJpaRepository.findByUserIdAndBookmarkTrueAndTypeIdAndDeletedAtIsNull(
+                userId.getValue(), typeId, pageable);
+
+        return cardEntities.map(cardEntityMapper::toDomain);
+    }
 }

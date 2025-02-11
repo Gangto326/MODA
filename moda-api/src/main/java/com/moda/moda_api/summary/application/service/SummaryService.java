@@ -14,12 +14,13 @@ public class SummaryService {
 	private final CrawlingSummaryService crawlingSummaryService;
 	private final LilysSummaryService lilysSummaryService;
 
-	public CompletableFuture<SummaryResultDto> getSummary(String url) throws Exception {
-		//youtube일 경우
-		if(url.contains("youtube.com")){
+	public CompletableFuture<SummaryResultDto> getSummary(String url) {
+		// YouTube일 경우
+		if (url.contains("youtube.com")) {
 			return lilysSummaryService.summarize(url);
 		}
-		//webSite일경우
+		// 일반 웹사이트일 경우
 		return crawlingSummaryService.summarize(url);
 	}
+
 }

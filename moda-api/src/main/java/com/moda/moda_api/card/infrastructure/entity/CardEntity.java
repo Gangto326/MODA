@@ -65,6 +65,10 @@ public class CardEntity {
     @Builder.Default
     private Integer viewCount = 0;
 
+    @Column(name = "bookmark", nullable = false)
+    @Builder.Default
+    private Boolean bookmark = false;
+
     @Type(StringArrayType.class)
     @Column(name = "keywords", columnDefinition = "text[]")
     private String[] keywords;

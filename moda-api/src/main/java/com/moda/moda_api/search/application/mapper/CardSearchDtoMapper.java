@@ -2,8 +2,10 @@ package com.moda.moda_api.search.application.mapper;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import com.moda.moda_api.card.domain.Card;
 import org.springframework.stereotype.Component;
 
 import com.moda.moda_api.card.domain.CardContentType;
@@ -34,7 +36,39 @@ public class CardSearchDtoMapper {
                 .keywords(cardDocument.getKeywords())
                 .excludedKeywords(excludedKeywords)
                 .isMine(cardDocument.isOwnedBy(currentUserId))
+                .bookmark(cardDocument.getBookmark())
                 .score(cardDocument.getScore())
                 .build();
+    }
+
+    public List<CardDocumentListResponse> toDocumentListResponse(List<CardDocument> cardDocuments, UserId currentUserId) {
+        return cardDocuments.stream()
+                .map(document -> toListResponse(document, "", currentUserId))
+                .toList();
+    }
+
+    // Card 엔티티를 위한 메서드
+    public CardDocumentListResponse toListResponse(Card card, UserId currentUserId) {
+        return CardDocumentListResponse.builder()
+                .cardId(card.getCardId().getValue())
+                .categoryId(card.getCategoryId().getValue())
+                .typeId(card.getTypeId())
+                .type(CardContentType.from(card.getTypeId()))
+                .title(card.getTitle())
+                .thumbnailContent(card.getThumbnailContent())
+                .thumbnailUrl(card.getThumbnailUrl())
+                .keywords(card.getKeywords())
+                .excludedKeywords(new String[]{})  // Card 엔티티는 검색 결과가 아니므로 제외된 키워드 없음
+                .isMine(card.isOwnedBy(currentUserId))
+                .bookmark(card.getBookmark())
+                .score(0.0F)  // Card 엔티티는 검색 결과가 아니므로 score 없음
+                .build();
+    }
+
+    // Card List를 위한 메서드
+    public List<CardDocumentListResponse> toCardListResponse(List<Card> cards, UserId currentUserId) {
+        return cards.stream()
+                .map(card -> toListResponse(card, currentUserId))
+                .toList();
     }
 }

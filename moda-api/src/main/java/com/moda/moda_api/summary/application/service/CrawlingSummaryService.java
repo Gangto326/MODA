@@ -1,9 +1,12 @@
 package com.moda.moda_api.summary.application.service;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 import org.springframework.stereotype.Service;
 
+import com.moda.moda_api.card.domain.EmbeddingVector;
+import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.crawling.application.service.CrawlingService;
 import com.moda.moda_api.crawling.domain.model.CrawledContent;
 import com.moda.moda_api.summary.application.dto.SummaryResultDto;
@@ -19,33 +22,65 @@ public class CrawlingSummaryService {
 	private final PythonAnalysisService pythonAnalysisService;
 	private final CrawlingService crawlingService;
 
-	public CompletableFuture<SummaryResultDto> summarize(String url) throws Exception {
+	public CompletableFuture<SummaryResultDto> summarize(String url) {
+		return CompletableFuture.supplyAsync(() -> {
+				try {
+					// 1단계: 크롤링 수행
+					return crawlingService.crawlByUrl(url);
+				} catch (Exception e) {
+					throw new CompletionException("Crawling failed", e);
+				}
+			})
+			.thenCompose(crawledContent -> {
+				log.info(crawledContent.getExtractedContent().getText());
 
-		CrawledContent crawledContent = crawlingService.crawlByUrl(url);
+				// 2단계: Python 분석과 이미지 URL 가져오기를 병렬로 실행
+				CompletableFuture<AIAnalysisResponseDTO> pythonAnalysisFuture =
+					CompletableFuture.supplyAsync(() -> {
+						try {
+							return pythonAnalysisService.articleAnalyze(
+								crawledContent.getExtractedContent().getText()
+							);
+						} catch (Exception e) {
+							throw new CompletionException("Python analysis failed", e);
+						}
+					});
 
-		log.info(crawledContent.getExtractedContent().getText());
+				// AI TEST용
+				// CompletableFuture<AIAnalysisResponseDTO> pythonAnalysisFuture = CompletableFuture.completedFuture(
+				// 	AIAnalysisResponseDTO.builder()
+				// 		.categoryId(new CategoryId(1L))  // null 허용
+				// 		.keywords(new String[0])
+				// 		.thumbnailContent("")
+				// 		.content("")
+				// 		.embeddingVector(new EmbeddingVector(new float[768]))
+				// 		.build()
+				// );
 
-		CompletableFuture<AIAnalysisResponseDTO> pythonAnalysisDtoCompletableFuture
-			= pythonAnalysisService.articleAnalyze(crawledContent.getExtractedContent().getText());
+				CompletableFuture<String> thumbnailUrlFuture =
+					CompletableFuture.supplyAsync(() ->
+						getFirstImageUrl(crawledContent.getExtractedContent().getImages())
+					);
 
-		return pythonAnalysisDtoCompletableFuture.thenApply(pythonAnalysisDto -> {
-			// 첫 번째 이미지 URL 가져오기
-			String thumbnailUrl = getFirstImageUrl(crawledContent.getExtractedContent().getImages());
+				// 3단계: 두 작업이 모두 완료되면 최종 결과 생성
+				return CompletableFuture.allOf(pythonAnalysisFuture, thumbnailUrlFuture)
+					.thenApply(ignored -> {
+						AIAnalysisResponseDTO pythonAnalysisDto = pythonAnalysisFuture.join();
+						String thumbnailUrl = thumbnailUrlFuture.join();
 
-			System.out.println(pythonAnalysisDto.toString());
-			// SummaryResultDto 생성
-			return SummaryResultDto.builder()
-				.typeId(crawledContent.getUrl().getCardContentType().getTypeId())
-				.title(crawledContent.getTitle())
-				.content(pythonAnalysisDto.getContent())
-				.keywords(pythonAnalysisDto.getKeywords())  // Python 분석에서 받은 키워드
-				.thumbnailContent(pythonAnalysisDto.getThumbnailContent())  // Python 분석에서 받은 thumbnail content
-				.thumbnailUrl(thumbnailUrl)  // 첫 번째 이미지 URL
-				.embeddingVector(pythonAnalysisDto.getEmbeddingVector())  // Python 분석에서 받은 EmbeddingVector
-				.categoryId(pythonAnalysisDto.getCategoryId())  // Python 분석에서 받은 CategoryId
-				.subContent(crawledContent.getExtractedContent().getImages())
-				.build();
-		});
+						return SummaryResultDto.builder()
+							.typeId(crawledContent.getUrl().getCardContentType().getTypeId())
+							.title(crawledContent.getTitle())
+							.content(pythonAnalysisDto.getContent())
+							.keywords(pythonAnalysisDto.getKeywords())
+							.thumbnailContent(pythonAnalysisDto.getThumbnailContent())
+							.thumbnailUrl(thumbnailUrl)
+							.embeddingVector(pythonAnalysisDto.getEmbeddingVector())
+							.categoryId(pythonAnalysisDto.getCategoryId())
+							.subContent(crawledContent.getExtractedContent().getImages())
+							.build();
+					});
+			});
 	}
 
 	/**

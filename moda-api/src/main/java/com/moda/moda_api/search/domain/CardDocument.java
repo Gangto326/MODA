@@ -19,6 +19,7 @@ public class CardDocument {
     private String thumbnailContent;
     private String thumbnailUrl;
     private String[] keywords;
+    private Boolean bookmark;
     private Float score;
 
     public boolean isOwnedBy(UserId userId) {

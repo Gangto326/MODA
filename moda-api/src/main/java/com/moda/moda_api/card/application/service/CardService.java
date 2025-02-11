@@ -3,10 +3,13 @@ package com.moda.moda_api.card.application.service;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+import com.moda.moda_api.card.domain.*;
+import com.moda.moda_api.card.presentation.request.CardBookmarkRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,13 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.moda.moda_api.card.application.mapper.CardDtoMapper;
 import com.moda.moda_api.card.application.response.CardDetailResponse;
 import com.moda.moda_api.card.application.response.CardListResponse;
-import com.moda.moda_api.card.domain.Card;
-import com.moda.moda_api.card.domain.CardFactory;
-import com.moda.moda_api.card.domain.CardId;
-import com.moda.moda_api.card.domain.CardRepository;
-import com.moda.moda_api.card.domain.EmbeddingVector;
-import com.moda.moda_api.card.domain.UrlCache;
-import com.moda.moda_api.card.domain.UrlCacheRepository;
 import com.moda.moda_api.card.exception.CardNotFoundException;
 import com.moda.moda_api.card.presentation.request.MoveCardRequest;
 import com.moda.moda_api.card.presentation.request.UpdateCardRequest;
@@ -29,6 +25,7 @@ import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.common.infrastructure.ImageStorageService;
 import com.moda.moda_api.common.pagination.SliceRequestDto;
 import com.moda.moda_api.common.pagination.SliceResponseDto;
+import com.moda.moda_api.notification.application.NotificationService;
 import com.moda.moda_api.search.domain.CardSearchRepository;
 import com.moda.moda_api.summary.application.service.SummaryService;
 import com.moda.moda_api.summary.infrastructure.api.PythonAiClient;
@@ -47,12 +44,12 @@ public class CardService {
 	private final CardRepository cardRepository;
 	private final CardFactory cardFactory;
 	private final CardDtoMapper cardDtoMapper;
+	private final UserKeywordRepository userKeywordRepository;
 	private final UrlCacheRepository urlCacheRepository;
 	private final SummaryService summaryService;
 	private final ImageStorageService imageStorageService;
 	private final PythonAiClient pythonAiClient;
 	private final CardSearchRepository cardSearchRepository;
-
 	/**
 	 * URL을 입력 받고 새로운 카드 생성 후 알맞은 보드로 이동합니다.
 	 * @param userId
@@ -61,7 +58,7 @@ public class CardService {
 	 */
 	@Transactional
 	public CompletableFuture<Boolean> createCard(String userId, String url) {
-		UserId userIdObj = new UserId("user");
+		UserId userIdObj = new UserId("user123");
 		String urlHash = UrlCache.generateHash(url);
 
 		return urlCacheRepository.findByUrlHash(urlHash)
@@ -95,8 +92,12 @@ public class CardService {
 			cache.getCachedSubContents()
 		);
 
+		// 유저별 핵심 키워드 저장 (Redis)
+		userKeywordRepository.saveKeywords(userIdObj, card.getKeywords());
+
 		cardRepository.save(card);
 		cardSearchRepository.save(card);
+
 		return CompletableFuture.completedFuture(true);
 	}
 
@@ -149,6 +150,9 @@ public class CardService {
 						.build()
 				);
 
+				// 유저별 핵심 키워드 저장 (Redis)
+				userKeywordRepository.saveKeywords(userIdObj, card.getKeywords());
+
 				cardRepository.save(card);
 				cardSearchRepository.save(card);
 
@@ -178,9 +182,26 @@ public class CardService {
 					// 	.thumbnailContent("abcd")
 					// 	.build();
 
+
+					UrlCache urlCache =UrlCache.builder()
+						.urlHash(UrlCache.generateHash(s3Url))
+						.originalUrl("https://example.com/article/123")
+						.typeId(1)
+						.categoryId(new CategoryId(1L))  // assuming CategoryId has a string constructor
+						.cachedTitle("Sample Article Title")
+						.cachedContent("This is the full content of the article...")
+						.cachedThumbnailContent("Base64 encoded thumbnail data...")
+						.cachedThumbnailUrl("https://example.com/thumbnails/123.jpg")
+						.cachedEmbedding(new EmbeddingVector(null))  // assuming EmbeddingVector has this constructor
+						.cachedKeywords(new String[]{"technology", "sample", "article"})
+						.cachedSubContents(new String[]{"Section 1 content", "Section 2 content", "Section 3 content"})
+						.build();
+
+					urlCacheRepository.save(urlCache);
 					return Card.builder()
 						.cardId(new CardId(UUID.randomUUID().toString()))
 						.userId(userIdObj)
+						.urlHash(urlCache.getUrlHash())
 						.categoryId(aiAnalysisResponseDTO.getCategoryId())
 						.typeId(4) // 이미지 타입
 						.urlHash(urlHash)
@@ -380,5 +401,24 @@ public class CardService {
 			categoryId,
 			sliceRequestDto.toPageable()
 		);
+	}
+
+	/**
+	 * 북마크 변경
+	 * @param userId
+	 * @param request
+	 * @return
+	 */
+	@Transactional
+	public Boolean cardBookmark(String userId, CardBookmarkRequest request) {
+		UserId userIdObj = new UserId(userId);
+		CardId cardIdObj = new CardId(request.getCardId());
+
+		Card card = findCard(userIdObj, cardIdObj);
+		card.setBookmark(request.getIsBookmark());
+
+		cardRepository.save(card);
+		cardSearchRepository.save(card);
+		return true;
 	}
 }

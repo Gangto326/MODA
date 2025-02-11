@@ -3,6 +3,7 @@ package com.moda.moda_api.search.presentation.controller;
 import com.moda.moda_api.common.annotation.UserId;
 import com.moda.moda_api.common.pagination.SliceResponseDto;
 import com.moda.moda_api.search.application.response.CardDocumentListResponse;
+import com.moda.moda_api.search.application.response.MainResultByCardList;
 import com.moda.moda_api.search.application.response.SearchResultByCardList;
 import com.moda.moda_api.search.application.service.SearchService;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
@@ -42,7 +44,7 @@ public class SearchController {
      * @param categoryId // null값일 수 있습니다.
      * @return
      */
-    @GetMapping("/main")
+    @GetMapping("/tab")
     public CompletableFuture<ResponseEntity<SearchResultByCardList>>
         searchCardDocumentListByMainPage(
                 @UserId String userId,
@@ -51,6 +53,45 @@ public class SearchController {
 
         return searchService.searchCardDocumentListByMainPage(userId, query, categoryId)
                 .thenApply(ResponseEntity::ok);
+    }
+
+    /**
+     * 즐겨찾기한 콘텐츠만을 보여줄 메인 페이지의 종합 데이터를 반환합니다.
+     * @param userId
+     * @return
+     */
+    @GetMapping("/bookmark")
+    public CompletableFuture<ResponseEntity<SearchResultByCardList>> searchByBookmarkMainPage(
+            @UserId String userId
+    ) {
+
+        return searchService.searchByBookmarkMainPage(userId)
+                .thenApply(ResponseEntity::ok);
+    }
+
+    /**
+     * 즐겨찾기한 콘텐츠 페이지의 상단 메뉴를 활용한 ContentType을 변경한 뒤 호출합니다.
+     * @param userId
+     * @param typeId
+     * @param page
+     * @param size
+     * @param sortBy
+     * @param sortDirection
+     * @return
+     */
+    @GetMapping("/bookmark/type")
+    public ResponseEntity<SliceResponseDto<CardDocumentListResponse>> searchByBookmark(
+            @UserId String userId,
+            @RequestParam Integer typeId,
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "15") Integer size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "DESC") String sortDirection
+    ) {
+        SliceResponseDto<CardDocumentListResponse> responseList = searchService.searchByBookmark(
+                userId, typeId, page, size, sortBy, sortDirection
+        );
+        return ResponseEntity.ok(responseList);
     }
 
     /**
@@ -96,5 +137,18 @@ public class SearchController {
                 userId, query, categoryId, typeId, page, size, sortBy, sortDirection
         );
         return ResponseEntity.ok(responseList);
+    }
+
+    /**
+     * 사용자의 메인 페이지에서 보여질 다양한 컨텐츠의 종합 데이터를 반환합니다.
+     * @param userId
+     * @return
+     */
+    @GetMapping("/main")
+    public CompletableFuture<ResponseEntity<Map<String, List<CardDocumentListResponse>>>> getMainPage(
+            @UserId String userId
+    ) {
+        return searchService.getMainPage(userId)
+                .thenApply(ResponseEntity::ok);
     }
 }
