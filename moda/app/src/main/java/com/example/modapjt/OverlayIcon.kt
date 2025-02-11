@@ -14,7 +14,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.IntOffset
@@ -26,19 +25,14 @@ import kotlinx.coroutines.launch
 fun OverlayIcon(
     onDoubleTab: () -> Unit,
     onDrag: (IntOffset) -> Unit = {},
+    onDragStart: () -> Unit,
+    onDragEnd: () -> Unit,
     isSuccess: Boolean = false,
     isError: Boolean = false,
     onAnimationComplete: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val coroutineScope = rememberCoroutineScope()
-
-    val terminationZone = Rect(
-        left = 0F,
-        top = 0F,
-        right = 200F,  // 200픽셀 너비
-        bottom = 200F  // 200픽셀 높이
-    )
 
     val iconColor by animateColorAsState(
         targetValue = when {
@@ -62,7 +56,7 @@ fun OverlayIcon(
         imageVector = Icons.Default.AddCircle,
         contentDescription = "Overlay Icon",
         modifier = modifier
-            .size(48.dp)
+            .size(60.dp)
             .alpha(0.3f) //투명도 설정
             .pointerInput(Unit) {
                 detectTapGestures(
@@ -74,7 +68,10 @@ fun OverlayIcon(
             .pointerInput(Unit) {
                 detectDragGestures(
                     onDragStart = {
-
+                        onDragStart()
+                    },
+                    onDragEnd = {
+                        onDragEnd()
                     },
                     onDrag = { change, dragAmount ->
                         change.consume()

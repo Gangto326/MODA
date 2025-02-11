@@ -7,13 +7,26 @@ import android.util.Log
 import android.view.Gravity
 import android.view.WindowManager
 import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBox
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.savedstate.SavedStateRegistry
@@ -30,7 +43,10 @@ import kotlinx.coroutines.withContext
 class OverlayService : LifecycleService(), SavedStateRegistryOwner {
     private var windowManager: WindowManager? = null
     private var overlayView: ComposeView? = null
-    private lateinit var params: WindowManager.LayoutParams  // 여기서 선언
+    private lateinit var params: WindowManager.LayoutParams
+
+    private var backgroundView: ComposeView? = null
+    private var backgroundParams: WindowManager.LayoutParams? = null
 
     private val repository = CardRepository()
     private val savedStateRegistryController = SavedStateRegistryController.create(this)
@@ -47,9 +63,44 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
     }
 
     private fun setupOverlayView() {
+        backgroundParams = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.MATCH_PARENT,
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+            else WindowManager.LayoutParams.TYPE_PHONE,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            PixelFormat.TRANSLUCENT
+        ).apply {
+            gravity = Gravity.CENTER
+        }
+
+        backgroundView = ComposeView(this).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setViewTreeLifecycleOwner(this@OverlayService)
+            setViewTreeSavedStateRegistryOwner(this@OverlayService)
+
+            setContent {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Gray.copy(alpha = 0.5f))
+                        .padding(bottom = 60.dp),
+                    contentAlignment = Alignment.BottomCenter
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AccountBox,
+                        contentDescription = "Termination Zone Icon",
+                        modifier = Modifier
+                            .size(60.dp)
+                            .alpha(0.5f),
+                        tint = Color.Red,
+                    )
+                }
+            }
+        }
+
         params = WindowManager.LayoutParams(
-            200,
-            200,
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)
@@ -77,6 +128,8 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
                     onDrag = { offset ->
                         movePosition(offset)
                     },
+                    onDragStart = { showBackground() },
+                    onDragEnd = { hideBackground() },
                     isSuccess = isSuccess,
                     isError = isError,
                     onAnimationComplete = {
@@ -110,8 +163,19 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
     private fun movePosition(offset: IntOffset) {
         params.x += offset.x
         params.y += offset.y
+
         windowManager?.updateViewLayout(overlayView, params)
 
+
+
+    }
+
+    private fun showBackground() {
+        windowManager?.addView(backgroundView, backgroundParams)
+    }
+
+    private fun hideBackground() {
+        windowManager?.removeView(backgroundView)
     }
 
     private fun showSuccessFeedback() {
@@ -122,6 +186,8 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
                 onDrag = { offset ->
                     movePosition(offset)
                 },
+                onDragStart = { showBackground() },
+                onDragEnd = { hideBackground() },
                 isSuccess = isSuccess,
                 isError = false,
                 onAnimationComplete = { isSuccess = false }
@@ -137,6 +203,8 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
                 onDrag = { offset ->
                     movePosition(offset)
                 },
+                onDragStart = { showBackground() },
+                onDragEnd = { hideBackground() },
                 isSuccess = false,
                 isError = isError,
                 onAnimationComplete = { isError = false }
