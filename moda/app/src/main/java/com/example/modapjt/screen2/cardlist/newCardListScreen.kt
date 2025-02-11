@@ -142,8 +142,9 @@ fun newCardListScreen(
                                                     ) {
                                                         ImageBig(
                                                             imageUrl = card.thumbnailUrl ?: "",
-                                                            onClick = {},
-                                                            isMine = card.isMine, // ✅ isMine 전달
+//                                                            onClick = {},
+                                                            onClick = { navController.navigate("cardDetail/${card.cardId}") }, // ✅ 카드 ID 전달
+                                                                    isMine = card.isMine, // ✅ isMine 전달
                                                             modifier = Modifier.fillMaxWidth()
                                                         )
                                                     }
@@ -172,8 +173,8 @@ fun newCardListScreen(
                                                 description = card.thumbnailContent ?: "",
                                                 imageUrl = card.thumbnailUrl ?: "",
                                                 isMine = card.isMine, // ✅ isMine 전달
-                                                onClick = {},
-                                                // onClick = { navController.navigate("blogDetail/${card.id}") } // 블로그 상세 페이지 이동
+//                                                onClick = {},
+                                                onClick = { navController.navigate("cardDetail/${card.cardId}") }, // ✅ 카드 ID 전달
                                             )
                                         }
                                     }
@@ -193,7 +194,7 @@ fun newCardListScreen(
                                                 videoId = card.thumbnailUrl ?: "",
                                                 title = card.title,
                                                 isMine = card.isMine, // ✅ isMine 전달
-                                                // onClick = { navController.navigate("videoDetail/${card.id}")} // 비디오 상세 페이지 이동
+                                                onClick = { navController.navigate("cardDetail/${card.cardId}") }, // ✅ 카드 ID 전달
                                             )
                                         }
                                     }
@@ -216,8 +217,8 @@ fun newCardListScreen(
                                                 keywords = card.keywords,
                                                 imageUrl = card.thumbnailUrl ?: "",
                                                 isMine = card.isMine, // ✅ isMine 전달
-                                                onClick = {},
-                                                // onClick = { navController.navigate("newsDetail/${card.id}") } // 뉴스 상세 페이지 이동
+//                                                onClick = {},
+                                                onClick = { navController.navigate("cardDetail/${card.cardId}") }, // ✅ 카드 ID 전달
                                             )
                                         }
                                     }

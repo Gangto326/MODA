@@ -10,8 +10,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.navArgument
 import com.example.modapjt.screen.SavedUrlsScreen
 import com.example.modapjt.screen.linkupload.LinkUploadScreen
 import com.example.modapjt.screen.recommend.RecommendScreen
@@ -212,9 +214,9 @@ fun NavGraph(
             newLinkUploadScreen(navController, currentRoute = "file_upload_test")
         }
 
-        composable("card_detail_test") {
-            newCardDetailScreen(navController, currentRoute = "card_detail_test")
-        }
+//        composable("card_detail_test") {
+//            newCardDetailScreen(navController, currentRoute = "card_detail_test")
+//        }
 
         composable("mypage/{userId}") { backStackEntry ->
             val userId = backStackEntry.arguments?.getString("userId") ?: "user"
@@ -231,6 +233,15 @@ fun NavGraph(
                 initialQuery = searchQuery  // ✅ 검색어를 전달받아 사용
             )
         }
+
+        composable(
+            route = "cardDetail/{cardId}",
+            arguments = listOf(navArgument("cardId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val cardId = backStackEntry.arguments?.getString("cardId") ?: "Unknown"
+            newCardDetailScreen(navController, currentRoute = "cardDetail", cardId)
+        }
+
 
     }
 }
