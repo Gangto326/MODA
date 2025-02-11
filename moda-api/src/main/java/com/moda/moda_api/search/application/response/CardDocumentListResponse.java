@@ -22,5 +22,6 @@ public class CardDocumentListResponse {
     private String[] keywords;
     private String[] excludedKeywords;
     private Boolean isMine;
+    private Boolean bookmark;
     private Float score;
 }

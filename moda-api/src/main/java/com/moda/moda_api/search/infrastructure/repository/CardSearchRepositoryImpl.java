@@ -34,6 +34,8 @@ import lombok.RequiredArgsConstructor;
 @Repository
 @RequiredArgsConstructor
 public class CardSearchRepositoryImpl implements CardSearchRepository {
+    private static final float MIN_SCORE = 0.7f;
+
     private final ElasticsearchOperations elasticsearchOperations;
     private final CardSearchJpaRepository cardSearchJpaRepository;
     private final CardDocumentMapper cardDocumentMapper;
@@ -234,7 +236,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                                 .term(term -> term
                                         .field("userId")
                                         .value(userId.getValue())
-                                        .boost(2.0f)
+                                        .boost(1.5f)
                                 )
                         ))
                 )
@@ -287,14 +289,14 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                                 .term(term -> term
                                         .field("userId")
                                         .value(userId.getValue())
-                                        .boost(2.0f)
+                                        .boost(1.5f)
                                 )
                         ))
                         .should(Query.of(q -> q
                                 // 검색어는 키워드, 제목, 콘텐츠 순으로 가중치 차등 지급
                                 .multiMatch(multiMatch -> multiMatch
                                         .query(searchText)
-                                        .fields("keywords.keyword^2", "title^1.5", "content")
+                                        .fields("keywords.keyword^1.0", "title^0.8", "content^0.5")
                                 )
                         ))
                         .minimumShouldMatch("1")
@@ -384,6 +386,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
         NativeQuery query = NativeQuery.builder()
                 .withQuery(boolQuery.build()._toQuery())
                 .withPageable(pageable)
+                .withMinScore(MIN_SCORE)
                 .build();
 
         // DB 탐색
@@ -396,7 +399,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
         List<CardDocument> content = searchHits.stream()
                 .map(hit -> cardDocumentMapper.toDomain(
                         hit.getContent().toBuilder()
-                                .score(Float.isNaN(hit.getScore()) ? 1.0f : hit.getScore()) // hit에서 score 가져옴
+                                .score(Float.isNaN(hit.getScore()) ? 5.0f : hit.getScore()) // hit에서 score 가져옴
                                 .build()
                 ))
                 .collect(Collectors.toList());
