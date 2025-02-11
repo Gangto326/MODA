@@ -29,10 +29,13 @@ public class CardDtoMapper {
                 .categoryId(card.getCategoryId().getValue())
                 .typeId(card.getTypeId())
                 .type(CardContentType.from(card.getTypeId()))
+                .originalUrl(card.getOriginalUrl())
                 .title(card.getTitle())
                 .content(card.getContent())
                 .thumbnailUrl(card.getThumbnailUrl())
                 .keywords(card.getKeywords())
+                .subContents(card.getSubContents())
+                .bookmark(card.getBookmark())
                 .createdAt(card.getCreatedAt())
                 .build();
     }

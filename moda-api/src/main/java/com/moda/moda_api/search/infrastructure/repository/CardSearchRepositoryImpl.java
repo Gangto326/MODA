@@ -1,10 +1,14 @@
 package com.moda.moda_api.search.infrastructure.repository;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import co.elastic.clients.elasticsearch._types.SortOptionsBuilders;
+import co.elastic.clients.elasticsearch._types.query_dsl.FunctionBoostMode;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
@@ -51,6 +55,71 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                 .collect(Collectors.toList()); // Iterable → List 변환
 
         return cardDocumentMapper.toDomain(savedEntities);
+    }
+
+    /**
+     * startDate와 endDate 내의 userId와 typeIds에 일치하는 데이터를 "랜덤"으로 가져옵니다.
+     * @param userId
+     * @param startDate
+     * @param endDate
+     * @param typeIds
+     * @param pageable
+     * @return
+     */
+    @Override
+    public List<CardDocument> findRandomCards(UserId userId, LocalDateTime startDate, LocalDateTime endDate, Integer[] typeIds, Pageable pageable) {
+        BoolQuery.Builder boolQuery = new BoolQuery.Builder()
+                // userId 필터
+                .must(Query.of(query -> query
+                        .term(term -> term
+                                .field("userId")
+                                .value(userId.getValue())
+                        )
+                ))
+                // typeId 필터
+                .must(Query.of(query -> query
+                        .terms(terms -> terms
+                                .field("typeId")
+                                .terms(TermsQueryField.of(f -> f.value(
+                                        Arrays.stream(typeIds)
+                                                .map(FieldValue::of)
+                                                .collect(Collectors.toList())
+                                )))
+                        )
+                ))
+                // 날짜 범위 필터
+                .must(Query.of(query -> query
+                        .range(range -> range
+                                .date(d -> d
+                                        .field("createdAt")
+                                        .gte(startDate.toString())
+                                        .lte(endDate.toString())
+                                )
+                        )
+                ));
+
+        // 랜덤 정렬과 필터를 조합한 쿼리
+        NativeQuery query = NativeQuery.builder()
+                .withQuery(q -> q
+                        .functionScore(fs -> fs
+                                .query(boolQuery.build()._toQuery())
+                                .functions(f -> f
+                                        .randomScore(rs -> rs.seed("random-" + System.currentTimeMillis()))
+                                )
+                                .boostMode(FunctionBoostMode.Replace)  // 랜덤 점수로 대체
+                        )
+                )
+                .withPageable(pageable)
+                .build();
+
+        SearchHits<CardDocumentEntity> searchHits = elasticsearchOperations.search(
+                query,
+                CardDocumentEntity.class
+        );
+
+        return searchHits.stream()
+                .map(hit -> cardDocumentMapper.toDomain(hit.getContent()))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -137,7 +206,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
      * @return
      */
     @Override
-    public List<CardDocument> searchByKeyword(UserId userId, String keyword, Pageable pageable) {
+    public List<CardDocument> searchByKeyword(UserId userId, String keyword, List<Integer> typeIds, Pageable pageable) {
         BoolQuery.Builder boolQuery = new BoolQuery.Builder();
 
         boolQuery.must(Query.of(query -> query
@@ -147,14 +216,14 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                         )
                 ))
                 .must(Query.of(query -> query
-                                .terms(terms -> terms
-                                        .field("typeId")
-                                        .terms(TermsQueryField.of(f -> f.value(
-                                                Arrays.asList(2, 3, 4).stream()
-                                                        .map(FieldValue::of)
-                                                        .collect(Collectors.toList())
-                                        )))
-                                )
+                        .terms(terms -> terms
+                                .field("typeId")
+                                .terms(TermsQueryField.of(f -> f.value(
+                                        typeIds.stream()
+                                                .map(FieldValue::of)
+                                                .collect(Collectors.toList())
+                                )))
+                        )
                 ));
 
         // userId에 대한 should 조건 매칭
@@ -183,6 +252,11 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
         return searchHits.stream()
                 .map(hit -> cardDocumentMapper.toDomain(hit.getContent()))
                 .toList();
+    }
+
+    @Override
+    public List<CardDocument> searchByKeywordOnlyVideo(UserId userId, String keyword, Pageable pageable) {
+        return searchByKeyword(userId, keyword, Collections.singletonList(1), pageable);
     }
 
     /**
@@ -223,6 +297,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                                         .fields("keywords.keyword^2", "title^1.5", "content")
                                 )
                         ))
+                        .minimumShouldMatch("1")
                 )
         ));
 
@@ -319,7 +394,11 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
 
         // Entity를 Domain으로 변환
         List<CardDocument> content = searchHits.stream()
-                .map(hit -> cardDocumentMapper.toDomain(hit.getContent()))
+                .map(hit -> cardDocumentMapper.toDomain(
+                        hit.getContent().toBuilder()
+                                .score(hit.getScore()) // hit에서 score 가져옴
+                                .build()
+                ))
                 .collect(Collectors.toList());
 
         // Slice 객체로 변경 후 반환

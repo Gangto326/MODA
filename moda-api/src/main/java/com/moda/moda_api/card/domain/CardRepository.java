@@ -5,6 +5,8 @@ import com.moda.moda_api.user.domain.UserId;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
+import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,4 +26,10 @@ public interface CardRepository {
     List<Card> saveAll(List<Card> cards);
 
     Optional<Card> findByUrlHash(String urlHash);
+
+    List<Card> findByUserIdAndTypeIdIn(UserId userIdObj, List<Integer> typeIds, Pageable pageable);
+
+    List<Card> findRandomCards(UserId userIdObj, LocalDateTime startDate, LocalDateTime endDate, List<Integer> typeIds, Pageable toDaysPage);
+
+    List<Card> findByUserIdAndViewCountAndTypeIdIn(UserId userId, Integer viewCount, List<Integer> typeIds, Pageable pageable);
 }

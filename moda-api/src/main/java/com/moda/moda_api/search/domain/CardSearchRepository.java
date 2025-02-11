@@ -6,12 +6,13 @@ import com.moda.moda_api.user.domain.UserId;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface CardSearchRepository {
     List<CardDocument> findAutoCompleteSuggestions(UserId userId, List<String> completeKeywords, String prefixKeyword);
 
-    List<CardDocument> searchByKeyword(UserId userId, String keyword, Pageable pageable);
+    List<CardDocument> searchByKeyword(UserId userId, String keyword, List<Integer> typeIds, Pageable pageable);
 
     Slice<CardDocument> searchComplex(Integer typeId, UserId userId, String searchText, Pageable pageable);
 
@@ -23,4 +24,8 @@ public interface CardSearchRepository {
     CardDocument save(Card card);
 
     List<CardDocument> saveAll(List<Card> cards);
+
+    List<CardDocument> findRandomCards(UserId userId, LocalDateTime startDate, LocalDateTime endDate, Integer[] typeIds, Pageable pageable);
+
+    List<CardDocument> searchByKeywordOnlyVideo(UserId userId, String keyword, Pageable pageable);
 }

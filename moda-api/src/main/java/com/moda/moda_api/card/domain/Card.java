@@ -26,6 +26,7 @@ public class Card {
     private CategoryId categoryId;
     private Integer typeId;
     private String urlHash;
+    private String originalUrl;
     private String title;
     private String content;
     private String thumbnailContent;
@@ -38,6 +39,9 @@ public class Card {
 
     @Builder.Default
     private Integer viewCount = 0;
+
+    @Builder.Default
+    private Boolean bookmark = false;
 
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
@@ -76,5 +80,9 @@ public class Card {
         if (!this.userId.equals(userId)) {
             throw new UnauthorizedException("권한이 존재하지 않습니다.");
         }
+    }
+
+    public Boolean isOwnedBy(UserId currentUserId) {
+        return this.userId.equals(currentUserId);
     }
 }

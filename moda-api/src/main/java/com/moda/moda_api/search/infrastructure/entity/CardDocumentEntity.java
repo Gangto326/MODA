@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Document(indexName = "card")
 @Getter
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Setting(settingPath = "elasticsearch/settings.json")
