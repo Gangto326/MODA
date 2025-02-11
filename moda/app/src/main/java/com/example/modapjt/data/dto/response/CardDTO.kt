@@ -13,7 +13,7 @@ data class CardDTO(
     val keywords: List<String>?,
     val excludedKeywords: List<String>?,
     val isMine: Boolean,
-    val score: Int?
+    val score: Float?
 )
 
 // DTO → 도메인 모델 변환 함수

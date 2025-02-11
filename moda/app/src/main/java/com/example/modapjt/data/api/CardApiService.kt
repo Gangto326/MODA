@@ -26,7 +26,7 @@ interface CardApiService {
 //    ): Response<CardApiResponse>
 
     // 전체탭 카드 리스트 API 재설정
-    @GET("api/search/main") // main -> tab으로 변경
+    @GET("api/search/tab") // main -> tab으로 변경
     suspend fun getAllTabCardList(
         @Query("userId") userId: String,
         @Query("query") query: String,

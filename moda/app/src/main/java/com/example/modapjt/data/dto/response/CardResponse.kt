@@ -18,7 +18,7 @@ data class TabCardApiResponse(
 // ✅ 공통 모델
 data class TopScore(
     val contentType: String,
-    val score: Int?
+    val score: Float?
 )
 
 // ✅ 페이징 정보 DTO
