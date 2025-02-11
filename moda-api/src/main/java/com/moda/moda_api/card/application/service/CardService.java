@@ -58,7 +58,7 @@ public class CardService {
 	 */
 	@Transactional
 	public CompletableFuture<Boolean> createCard(String userId, String url) {
-		UserId userIdObj = new UserId("user");
+		UserId userIdObj = new UserId("user123");
 		String urlHash = UrlCache.generateHash(url);
 
 		return urlCacheRepository.findByUrlHash(urlHash)
@@ -113,7 +113,7 @@ public class CardService {
 
 		// 여기서 2가지 경우로 다시 나눠야한다.
 		// summary에서 2가지 경우로 나눠보자.
-		return summaryService.getSummaryAsync(url)
+		return summaryService.getSummary(url)
 			.thenApply(SummaryResultDto -> {
 				String thumbnailUrl = SummaryResultDto.getThumbnailUrl() !=
 					null ? SummaryResultDto.getThumbnailUrl() :
@@ -182,9 +182,26 @@ public class CardService {
 					// 	.thumbnailContent("abcd")
 					// 	.build();
 
+
+					UrlCache urlCache =UrlCache.builder()
+						.urlHash(UrlCache.generateHash(s3Url))
+						.originalUrl("https://example.com/article/123")
+						.typeId(1)
+						.categoryId(new CategoryId(1L))  // assuming CategoryId has a string constructor
+						.cachedTitle("Sample Article Title")
+						.cachedContent("This is the full content of the article...")
+						.cachedThumbnailContent("Base64 encoded thumbnail data...")
+						.cachedThumbnailUrl("https://example.com/thumbnails/123.jpg")
+						.cachedEmbedding(new EmbeddingVector(null))  // assuming EmbeddingVector has this constructor
+						.cachedKeywords(new String[]{"technology", "sample", "article"})
+						.cachedSubContents(new String[]{"Section 1 content", "Section 2 content", "Section 3 content"})
+						.build();
+
+					urlCacheRepository.save(urlCache);
 					return Card.builder()
 						.cardId(new CardId(UUID.randomUUID().toString()))
 						.userId(userIdObj)
+						.urlHash(urlCache.getUrlHash())
 						.categoryId(aiAnalysisResponseDTO.getCategoryId())
 						.typeId(4) // 이미지 타입
 						.urlHash(urlHash)

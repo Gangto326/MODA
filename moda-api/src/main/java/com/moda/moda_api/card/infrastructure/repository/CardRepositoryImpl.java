@@ -24,10 +24,10 @@ public class CardRepositoryImpl implements CardRepository {
     private final CardEntityMapper cardEntityMapper;
 
     @Override
-    public Card save(Card card) {
+    public void save(Card card) {
         CardEntity entity = cardEntityMapper.toEntity(card);
         CardEntity savedEntity = cardJpaRepository.save(entity);
-        return cardEntityMapper.toDomain(savedEntity);
+
     }
 
     @Override
@@ -67,12 +67,12 @@ public class CardRepositoryImpl implements CardRepository {
     }
 
     @Override
-    public List<Card> saveAll(List<Card> cards) {
+    public void saveAll(List<Card> cards) {
         List<CardEntity> cardEntities = cards.stream()
             .map(cardEntityMapper::toEntity)
             .collect(Collectors.toList());
 
-        return cardEntityMapper.toDomain(cardJpaRepository.saveAll(cardEntities));
+        cardJpaRepository.saveAll(cardEntities);
     }
 
     @Override

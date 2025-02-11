@@ -88,6 +88,8 @@ public class LilysAiClient {
 			String thumbnailContent = thumbnail.path("data").path("data").path("summary").toString();
 			String thumbnailUrl = getVideoId(url);
 
+			System.out.println( mainContent.toString());
+
 			return LilysSummary.builder()
 				.contents(mainContent)
 				.thumbnailContent(thumbnailContent)
@@ -100,6 +102,7 @@ public class LilysAiClient {
 			throw new SummaryProcessingException("Failed to combine summary results", e);
 		}
 	}
+
 	// 일단 blogPost를 던져놓고 status가 뭔지 파악하는 함수
 	public CompletableFuture<String> checkStatus(String requestId) {
 		return getResult(requestId, "blogPost")
