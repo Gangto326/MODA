@@ -1,6 +1,7 @@
 package com.example.modapjt.screen2.search
 
 import android.util.Log
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -111,7 +112,11 @@ fun NewSearchScreen(
                     // 🔹 검색어 입력 시 자동완성 검색어 표시
                     item {
                         Log.d("UI_CHECK", "SearchSuggestions 표시됨!")
-                        SearchSuggestions(searchResults)
+                        SearchSuggestions(searchResults, onSearchSubmit = { query ->
+                            if (query.isNotBlank()) {
+                                navController.navigate("newSearchCardListScreen/$query") // ✅ 검색어와 함께 이동
+                            }
+                        })//SearchSuggestions 사용하는 화면에서 onSearchSubmit 넘겨줌
                     }
                 }
             }
@@ -120,7 +125,7 @@ fun NewSearchScreen(
 }
 
 @Composable
-fun SearchSuggestions(suggestions: List<String>) {
+fun SearchSuggestions(suggestions: List<String>, onSearchSubmit: (String) -> Unit ) {// ✅ 검색어를 전달하는 함수 추가
     Log.d("SearchSuggestions", "검색어 리스트 갱신됨: $suggestions")
 
     Column(
@@ -145,6 +150,10 @@ fun SearchSuggestions(suggestions: List<String>) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(8.dp)
+                        .clickable {
+                        Log.d("SearchSuggestions", "검색어 클릭됨: $suggestion")
+                        onSearchSubmit(suggestion) // ✅ 클릭된 검색어 전달
+                    }
                 )
             }
         }
