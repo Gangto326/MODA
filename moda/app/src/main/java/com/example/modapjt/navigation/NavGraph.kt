@@ -9,15 +9,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
+import com.example.modapjt.domain.viewmodel.AuthViewModel
 import com.example.modapjt.screen.SavedUrlsScreen
 import com.example.modapjt.screen.linkupload.LinkUploadScreen
 import com.example.modapjt.screen.recommend.RecommendScreen
 import com.example.modapjt.screen.settings.SettingsScreen
+import com.example.modapjt.screen2.auth.LoginScreen
+import com.example.modapjt.screen2.auth.SignUpScreen
 import com.example.modapjt.screen2.newCardListScreen
 import com.example.modapjt.screen2.newSearchCardListScreen
 import com.example.modapjt.screen2.search.NewSearchScreen
@@ -152,6 +156,8 @@ fun NavGraph(
     val currentRoute = navBackStackEntry?.destination?.route ?: "home"
     var isOverlayActive by remember { mutableStateOf(false) } // 오버레이 상태 추가
 
+    // AuthViewModel 인스턴스 생성
+    val authViewModel: AuthViewModel = viewModel()
 
     AnimatedNavHost(
         navController = navController,
@@ -240,6 +246,23 @@ fun NavGraph(
         ) { backStackEntry ->
             val cardId = backStackEntry.arguments?.getString("cardId") ?: "Unknown"
             newCardDetailScreen(navController, currentRoute = "cardDetail", cardId)
+        }
+
+
+
+        composable("login") {
+            LoginScreen(
+                viewModel = authViewModel,
+                onNavigateToSignUp = { navController.navigate("signup") },
+                onNavigateToHome = { navController.navigate("home") } // 로그인 성공 시 홈 이동
+            )
+        }
+
+        composable("signup") {
+            SignUpScreen(
+                viewModel = authViewModel,
+                onNavigateBack = { navController.navigateUp() }
+            )
         }
 
 

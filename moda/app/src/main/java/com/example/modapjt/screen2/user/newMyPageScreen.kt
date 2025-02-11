@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -44,19 +45,18 @@ import com.example.modapjt.domain.viewmodel.UserViewModel
 @Composable
 fun MyPageScreen(
     userId: String,
-    navController: NavController? = null,
+    navController: NavController,
     currentRoute: String = ""
 ) {
     val viewModel: UserViewModel = viewModel()
     val context = LocalContext.current
     var isOverlayActive by remember { mutableStateOf(false) } // 오버레이 상태 추가
+    var showLogoutDialog by remember { mutableStateOf(false) }
 
-    // ✅ API 호출하여 데이터 가져오기
     LaunchedEffect(userId) {
         viewModel.fetchUser(userId)
-        viewModel.fetchInterestKeywords(userId) // ✅ userId 기반으로 호출
+        viewModel.fetchInterestKeywords(userId)
     }
-
 
     val user by viewModel.user.collectAsState()
     val keywords by viewModel.interestKeywords.collectAsState(initial = emptyList())
@@ -91,8 +91,6 @@ fun MyPageScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
-
-
                 item {
                     Divider(
                         color = Color(0xFFDCDCDC),
@@ -102,13 +100,11 @@ fun MyPageScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                // ✅ 관심 키워드 컴포넌트 추가 (API 연동)
                 item {
                     InterestKeywords(keywords)
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                // ✅ 링크 저장 기능 (오버레이 설정 추가)
                 item {
                     Card(
                         modifier = Modifier
@@ -133,17 +129,14 @@ fun MyPageScreen(
                             )
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            // ✅ 오버레이 시작 버튼 (토글 기능 추가)
                             Button(
                                 onClick = {
-                                    isOverlayActive = !isOverlayActive // 상태 반전
-
-                                    // 오버레이 서비스 시작/종료
+                                    isOverlayActive = !isOverlayActive
                                     val serviceIntent = Intent(context, OverlayService::class.java)
                                     if (isOverlayActive) {
-                                        context.startService(serviceIntent) // 오버레이 시작
+                                        context.startService(serviceIntent)
                                     } else {
-                                        context.stopService(serviceIntent) // 오버레이 종료
+                                        context.stopService(serviceIntent)
                                     }
                                 },
                                 modifier = Modifier.fillMaxWidth(),
@@ -155,7 +148,6 @@ fun MyPageScreen(
                     }
                 }
 
-                // ✅ 설정 항목 리스트 추가
                 item {
                     Column(
                         modifier = Modifier
@@ -163,10 +155,43 @@ fun MyPageScreen(
                             .padding(16.dp)
                     ) {
                         SettingItem(title = "알림 설정") { /* TODO: 알림 설정 추가 */ }
-                        SettingItem(title = "로그아웃") { /* TODO: 로그아웃 기능 추가 */ }
+                        SettingItem(title = "로그아웃") { showLogoutDialog = true }
+                    }
+
+                    // ✅ LazyColumn 내부에서 다이얼로그 호출
+                    if (showLogoutDialog) {
+                        LogoutDialog(
+                            onConfirm = {
+                                showLogoutDialog = false
+                                navController.navigate("login") {
+                                    popUpTo("home") { inclusive = true }
+                                }
+                            },
+                            onDismiss = { showLogoutDialog = false }
+                        )
                     }
                 }
             }
         }
     }
+}
+
+// ✅ 별도 @Composable 함수로 로그아웃 다이얼로그 분리
+@Composable
+fun LogoutDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("로그아웃") },
+        text = { Text("로그아웃 하시겠습니까?") },
+        confirmButton = {
+            Button(onClick = onConfirm) {
+                Text("확인")
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss) {
+                Text("취소")
+            }
+        }
+    )
 }
