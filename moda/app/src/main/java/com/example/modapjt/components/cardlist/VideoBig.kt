@@ -1,4 +1,5 @@
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,13 +22,15 @@ fun VideoBig(
     videoId: String,
     title: String,
     isMine: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        shape = RoundedCornerShape(12.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clickable(onClick = onClick), // ✅ 클릭 가능하도록 설정
+    shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (!isMine) Color.Gray else Color.White // ✅ 배경색 적용
         ),

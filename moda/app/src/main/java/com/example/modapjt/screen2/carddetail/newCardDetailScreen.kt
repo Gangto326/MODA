@@ -10,7 +10,7 @@ import com.example.modapjt.components.bar.BottomBarComponent
 import com.example.modapjt.components.bar.HeaderBar
 
 @Composable
-fun newCardDetailScreen(navController: NavController, currentRoute: String) {
+fun newCardDetailScreen(navController: NavController, currentRoute: String, cardId: String) { // ✅ cardId 추가
     Scaffold(
         topBar = { HeaderBar(modifier = Modifier) },
         bottomBar = { BottomBarComponent(navController, currentRoute) }
@@ -20,7 +20,7 @@ fun newCardDetailScreen(navController: NavController, currentRoute: String) {
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            Text(text = "디테일 Screen Page")
+            Text(text = "디테일 Screen Page for Card ID: $cardId") // ✅ 카드 ID 표시
         }
     }
 }

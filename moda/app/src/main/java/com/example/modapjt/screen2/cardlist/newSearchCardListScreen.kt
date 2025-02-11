@@ -6,6 +6,8 @@ import ImageBig
 import NewsBig
 import TypeSelectBar
 import VideoBig
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -13,11 +15,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -28,10 +33,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.modapjt.R
 import com.example.modapjt.components.bar.BottomBarComponent
 import com.example.modapjt.components.cardtab.SwipableCardList
 import com.example.modapjt.domain.viewmodel.CardUiState
@@ -60,7 +67,8 @@ fun newSearchCardListScreen(
     }
 
     Scaffold(
-        topBar = { SearchBarComponent(query, onQueryChanged = { query = it }) }, // ✅ 검색창 추가
+//        topBar = { SearchBarComponent(query, onQueryChanged = { query = it }) }, // ✅ 검색창 추가
+        topBar = { SearchBarComponent(query = query, navController = navController) }, // ✅ 검색창 컴포넌트 수정
         bottomBar = { BottomBarComponent(navController, currentRoute) }
     ) { paddingValues ->
         Box(
@@ -215,25 +223,103 @@ fun newSearchCardListScreen(
 }
 
 // ✅ 검색창 컴포넌트 추가
+//@Composable
+//fun SearchBarComponent(
+//    query: String,
+//    onQueryChanged: (String) -> Unit
+//) {
+//    Box(
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .padding(16.dp)
+//    ) {
+//        androidx.compose.material3.TextField(
+//            value = query,
+//            onValueChange = onQueryChanged,
+//            modifier = Modifier.fillMaxWidth(),
+//            placeholder = { Text("검색어를 입력하세요") },
+//            singleLine = true
+//        )
+//    }
+//}
+//@Composable
+//fun SearchBarComponent(
+//    query: String,
+//    navController: NavController
+//) {
+//    Box(
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .padding(16.dp)
+//            .clickable { navController.navigate("search") } // ✅ 검색창 클릭 시 검색 화면으로 이동
+//    ) {
+//        Row(
+//            modifier = Modifier.fillMaxWidth(),
+//            verticalAlignment = Alignment.CenterVertically
+//        ) {
+//            TextField(
+//                value = query,
+//                onValueChange = {},
+//                modifier = Modifier.weight(1f),
+//                readOnly = true, // ✅ 검색어 입력 방지
+//                placeholder = { Text("검색어를 입력하세요") },
+//                singleLine = true
+//            )
+//
+//            IconButton(
+//                onClick = { navController.navigate("search") }, // ✅ 돋보기 클릭 시 검색 화면 이동
+//                modifier = Modifier.size(48.dp)
+//            ) {
+//                Image(
+//                    painter = painterResource(id = R.drawable.ic_search),
+//                    contentDescription = "Search Icon",
+//                    modifier = Modifier.size(24.dp)
+//                )
+//            }
+//        }
+//    }
+//}
 @Composable
 fun SearchBarComponent(
     query: String,
-    onQueryChanged: (String) -> Unit
+    navController: NavController
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
+            .clickable { navController.navigate("search") } // ✅ 검색창 클릭 시 검색 화면으로 이동
     ) {
-        androidx.compose.material3.TextField(
-            value = query,
-            onValueChange = onQueryChanged,
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("검색어를 입력하세요") },
-            singleLine = true
-        )
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TextField(
+                value = query,
+                onValueChange = {},
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable { navController.navigate("search") }, // ✅ 입력창 클릭 시 이동
+                readOnly = true, // ✅ 검색어 입력 방지
+                placeholder = { Text("검색어를 입력하세요") },
+                singleLine = true
+            )
+
+            IconButton(
+                onClick = { navController.navigate("search") }, // ✅ 돋보기 클릭 시 이동
+                modifier = Modifier.size(48.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_search),
+                    contentDescription = "Search Icon",
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
     }
 }
+
+
 
 // 공통으로 사용되는 빈 목록 메시지
 @Composable
