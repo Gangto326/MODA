@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import com.moda.moda_api.card.application.response.CardMainResponse;
+import com.moda.moda_api.card.application.response.HotTopicResponse;
 import com.moda.moda_api.card.presentation.request.CardBookmarkRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -152,5 +153,13 @@ public class CardController {
 	) {
 		CardMainResponse response = cardService.getMainKeywords(userId);
 		return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("/hot-topic")
+	public ResponseEntity<List<HotTopicResponse>> getHotTopics(
+			@RequestParam(defaultValue = "10") Integer limit
+	) {
+		List<HotTopicResponse> responseList = cardService.getHotTopics(limit);
+		return ResponseEntity.ok(responseList);
 	}
 }

@@ -9,6 +9,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import com.moda.moda_api.card.application.response.CardMainResponse;
+import com.moda.moda_api.card.application.response.HotTopicResponse;
 import com.moda.moda_api.card.domain.*;
 import com.moda.moda_api.card.presentation.request.CardBookmarkRequest;
 import org.springframework.data.domain.Slice;
@@ -48,6 +49,7 @@ public class CardService {
 	private final UserKeywordRepository userKeywordRepository;
 	private final VideoCreatorRepository videoCreatorRepository;
 	private final CardViewCountRepository cardViewCountRepository;
+	private final HotTopicRepository hotTopicRepository;
 	private final UrlCacheRepository urlCacheRepository;
 	private final SummaryService summaryService;
 	private final ImageStorageService imageStorageService;
@@ -423,5 +425,15 @@ public class CardService {
 				.topKeywords(userKeywordRepository.getTopKeywords(userIdObj, 5))
 				.creator(videoCreatorRepository.getCreatorByUserId(userIdObj))
 				.build();
+	}
+
+	/**
+	 * 최근 인기 토픽을 순위 변동 메타데이터와 함께 limit개를 반환합니다.
+	 * @param limit
+	 * @return
+	 */
+	public List<HotTopicResponse> getHotTopics(Integer limit) {
+
+		return hotTopicRepository.getTopKeywordsWithChange(limit);
 	}
 }
