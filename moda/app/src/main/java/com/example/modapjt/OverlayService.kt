@@ -10,7 +10,7 @@ import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
@@ -72,7 +72,7 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
             PixelFormat.TRANSLUCENT
         ).apply {
-            gravity = Gravity.CENTER
+            gravity = Gravity.TOP or Gravity.START
         }
 
         backgroundView = ComposeView(this).apply {
@@ -84,8 +84,7 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color.Gray.copy(alpha = 0.5f))
-                        .padding(bottom = 60.dp),
+                        .background(Color.Gray.copy(alpha = 0.5f)),
                     contentAlignment = Alignment.BottomCenter
                 ) {
                     Icon(
@@ -93,6 +92,7 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
                         contentDescription = "Termination Zone Icon",
                         modifier = Modifier
                             .size(60.dp)
+                            .offset(y = (-60).dp)
                             .alpha(0.5f),
                         tint = Color.Red,
                     )
@@ -166,8 +166,60 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
 
         windowManager?.updateViewLayout(overlayView, params)
 
+        Log.d("OverlayService", "${params.x}, ${params.y}")
 
+        if (
+            params.x in 501..699 &&
+            params.y in 2401..2449
+        )
+            Log.d("OverlayService", "겹침")
+        else
+            Log.d("OverlayService", "안겹침")
 
+//        val screenWidth = resources.displayMetrics.widthPixels
+//        val screenHeight = resources.displayMetrics.heightPixels
+//        val iconSize = 60 * resources.displayMetrics.density
+//
+//        // 오버레이 아이콘의 중심 좌표 계산
+//        val overlayIconCenterX = params.x + iconSize/2
+//        val overlayIconCenterY = params.y + iconSize/2
+//
+//        // 종료 영역의 중심 좌표 (백그라운드 뷰의 BottomCenter 기준)
+//        val terminationZoneCenterX = screenWidth/2
+//        val terminationZoneCenterY = screenHeight - iconSize
+//
+//        // 두 중심점 사이의 거리 계산
+//        val isOverlapping =
+//            Math.abs(overlayIconCenterX - terminationZoneCenterX) < iconSize &&
+//                    Math.abs(overlayIconCenterY - terminationZoneCenterY) < iconSize
+//
+//        Log.d("OverlayService", """
+//        오버레이 중심: ($overlayIconCenterX, $overlayIconCenterY)
+//        종료영역 중심: ($terminationZoneCenterX, $terminationZoneCenterY)
+//        겹침: $isOverlapping
+//    """.trimIndent())
+
+//        val metrics = resources.displayMetrics
+//        val screenWidth = resources.displayMetrics.widthPixels
+//        val screenHeight = resources.displayMetrics.heightPixels
+//        val iconSize = 60 * this.resources.displayMetrics.density // 60.dp icon size
+//        val paddingSize = 60 * this.resources.displayMetrics.density // 60.dp padding
+//        Log.d("OverlayService", "가로: $screenWidth, 세로: $screenHeight")
+//        Log.d("OverlayService", "=x좌표\n   ${screenWidth/2 - iconSize} < ${params.x} < ${screenWidth/2 + iconSize}\n" +
+//                "=y좌표\n   ${(screenHeight - paddingSize - iconSize / 2) - iconSize} < ${params.y} < ${(screenHeight - paddingSize - iconSize / 2) + iconSize}")
+//
+//        // OverlayIcon이 Close Icon 영역에 있는지 확인
+//        val isOverlapping = params.y > (screenHeight - paddingSize - iconSize / 2) - iconSize &&
+//                params.y < (screenHeight - paddingSize - iconSize / 2) + iconSize &&
+//                params.x > screenWidth/2 - iconSize &&
+//                params.x < screenWidth/2 + iconSize
+//
+//        if (isOverlapping) {
+//            Log.d("OverlayService", "겹침")
+//            // 여기서 원하는 동작 수행
+//        }
+//        else
+//            Log.d("OverlayService", "안겹침")
     }
 
     private fun showBackground() {
@@ -176,6 +228,12 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
 
     private fun hideBackground() {
         windowManager?.removeView(backgroundView)
+
+        if (
+            params.x in 501..699 &&
+            params.y in 2401..2449
+            )
+            onDestroy()
     }
 
     private fun showSuccessFeedback() {
@@ -257,8 +315,14 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
 
     override fun onDestroy() {
         super.onDestroy()
-        windowManager?.removeView(overlayView)
-        Log.d("OverlayService", "오버레이 서비스 종료됨") // 로그 추가
+        try {
+            if (overlayView?.isAttachedToWindow == true) {
+                windowManager?.removeView(overlayView)
+                Log.d("OverlayService", "오버레이 서비스 종료됨") // 로그 추가
+            }
+        } catch (e: Exception) {
+            Log.d("OverlayService", "오버레이 서비스 이미 종료되어 있음")
+        }
     }
 }
 
