@@ -22,6 +22,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.app.ui.theme.customTypography
 
 // NewsSmall: 뉴스 컨텐츠를 카드 형태로 표시하는 컴포저블 함수
 @Composable
@@ -45,14 +46,15 @@ fun NewsSmall(
     ) {
         // 상단 영역: 제목과 이미지를 가로로 배치
         Row(
-            verticalAlignment = Alignment.CenterVertically, // 세로 방향 중앙 정렬
-            horizontalArrangement = Arrangement.spacedBy(8.dp) // 요소 간 간격 8dp
+            verticalAlignment = Alignment.Top, // 상단 맞춤
+            horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.Start)
         ) {
             // 뉴스 제목 텍스트
             Text(
                 text = headline,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
+//                style = customTypography.titleMedium ,
                 maxLines = 2, // 최대 2줄까지 표시
                 overflow = TextOverflow.Ellipsis, // 넘치는 텍스트는 ...으로 표시
                 modifier = Modifier.weight(1f) // 남은 공간 모두 차지
@@ -64,7 +66,7 @@ fun NewsSmall(
                 contentDescription = null,
                 contentScale = ContentScale.Crop, // 이미지 비율 유지하며 채우기
                 modifier = Modifier
-                    .size(70.dp) // 70dp x 70dp 크기
+                    .size(84.dp) // 70dp x 70dp 크기
                     .clip(RoundedCornerShape(8.dp))// 이미지 모서리 둥글게
             )
         }
@@ -73,7 +75,7 @@ fun NewsSmall(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp), // 상단 여백 추가
+                .padding(top = 6.dp), // 상단 여백 추가
             horizontalArrangement = Arrangement.SpaceBetween, // 요소들을 양끝으로 정렬
             verticalAlignment = Alignment.CenterVertically // 세로 방향 중앙 정렬
         ) {
@@ -84,8 +86,9 @@ fun NewsSmall(
                 keywords.take(3).forEach { keyword ->
                     Text(
                         text = "# $keyword",
-                        fontSize = 12.sp,
-                        color = Color.Blue // 키워드는 파란색으로 표시
+//                        fontSize = 12.sp,
+                        style = customTypography.bodySmall ,
+                        color = Color(0xFFBAADA4), // 키워드는 파란색으로 표시( 고민 )
                     )
                 }
             }
@@ -95,7 +98,7 @@ fun NewsSmall(
                 Icon(
                     imageVector = Icons.Filled.Star,
                     contentDescription = "즐겨찾기됨",
-                    tint = Color(0xFFFFD700), // 노란색 별표 아이콘
+                    tint = Color(0xFFFFCD69), // 노란색 별표 아이콘
                     modifier = Modifier.size(20.dp) // 20dp x 20dp 크기
                 )
             }
