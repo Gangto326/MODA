@@ -7,7 +7,7 @@ data class CardDetailDTO(
     val categoryId: Int,
     val typeId: Int,
     val type: String,
-    val originalUrl: String,
+    val originalUrl: String? = null, // nullable로 변경
     val title: String,
     val content: String?,
     val thumbnailUrl: String?,
@@ -24,7 +24,7 @@ fun CardDetailDTO.toDomain(): CardDetail {
         categoryId = this.categoryId,
         typeId = this.typeId,
         type = this.type,
-        originalUrl = this.originalUrl,
+        originalUrl = this.originalUrl?: "" , // null일 경우 빈 문자열 사용
         title = this.title,
         content = this.content ?: "",
         thumbnailUrl = this.thumbnailUrl,
