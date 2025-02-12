@@ -10,6 +10,7 @@ import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.user.domain.UserId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Repository;
@@ -48,8 +49,14 @@ public class CardRepositoryImpl implements CardRepository {
 
     @Override
     public Optional<Card> findByUserIdAndCardId(UserId userId, CardId cardId) {
-        return cardJpaRepository.findByUserIdAndCardId(userId.getValue(), cardId.getValue())
-            .map(cardEntityMapper::toDomain);
+        Optional<CardEntity> entity = cardJpaRepository.findByUserIdAndCardId(userId.getValue(), cardId.getValue());
+
+        // 명시적 초기화
+        if (entity.isPresent()) {
+            Hibernate.initialize(entity.get().getUrlCache());
+        }
+
+        return entity.map(card -> cardEntityMapper.toDomain(card));
     }
 
     @Override

@@ -8,6 +8,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+import com.moda.moda_api.card.application.response.CardMainResponse;
 import com.moda.moda_api.card.domain.*;
 import com.moda.moda_api.card.presentation.request.CardBookmarkRequest;
 import org.springframework.data.domain.Slice;
@@ -45,6 +46,7 @@ public class CardService {
 	private final CardFactory cardFactory;
 	private final CardDtoMapper cardDtoMapper;
 	private final UserKeywordRepository userKeywordRepository;
+	private final VideoCreatorRepository videoCreatorRepository;
 	private final UrlCacheRepository urlCacheRepository;
 	private final SummaryService summaryService;
 	private final ImageStorageService imageStorageService;
@@ -403,5 +405,19 @@ public class CardService {
 		cardRepository.save(card);
 		cardSearchRepository.save(card);
 		return true;
+	}
+
+	/**
+	 * 메인 화면의 핵심 키워드 5개와 크리에이터 이름을 반환합니다.
+	 * @param userId
+	 * @return
+	 */
+	public CardMainResponse getMainKeywords(String userId) {
+		UserId userIdObj = new UserId(userId);
+
+		return CardMainResponse.builder()
+				.topKeywords(userKeywordRepository.getTopKeywords(userIdObj, 5))
+				.creator(videoCreatorRepository.getCreatorByUserId(userIdObj))
+				.build();
 	}
 }
