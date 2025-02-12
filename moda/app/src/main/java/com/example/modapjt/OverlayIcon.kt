@@ -4,7 +4,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material3.Icon
@@ -17,7 +17,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -56,7 +55,7 @@ fun OverlayIcon(
         imageVector = Icons.Default.AddCircle,
         contentDescription = "Overlay Icon",
         modifier = modifier
-            .size(60.dp)
+            .fillMaxSize()
             .alpha(0.3f) //투명도 설정
             .pointerInput(Unit) {
                 detectTapGestures(
@@ -67,6 +66,9 @@ fun OverlayIcon(
             }
             .pointerInput(Unit) {
                 detectDragGestures(
+                    onDragCancel = {
+                        onDragEnd()
+                    },
                     onDragStart = {
                         onDragStart()
                     },
