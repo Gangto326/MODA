@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ public class VideoCreatorScheduler {
         this.redisTemplate = redisTemplate;
     }
 
+    @Transactional(readOnly = true)
     @Scheduled(cron = "0 0 3 * * *")
     public void saveVideoCreators() {
         log.info("영상 제작자 정보 저장을 시작합니다...");
