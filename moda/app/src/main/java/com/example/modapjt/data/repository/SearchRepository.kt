@@ -1,9 +1,12 @@
 package com.example.modapjt.data.repository
 
 import android.util.Log
+import com.example.modapjt.data.api.RetrofitInstance
 import com.example.modapjt.data.api.SearchApiService
+import com.example.modapjt.data.dto.response.SearchResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+
 
 class SearchRepository(private val api: SearchApiService) {
 
@@ -34,6 +37,21 @@ class SearchRepository(private val api: SearchApiService) {
                 e.printStackTrace()
                 emptyList()
             }
+        }
+    }
+
+    /**
+     * 검색 API를 호출하여 데이터를 가져옴
+     * @param userId 사용자 ID
+     * @param onSuccess 성공 시 데이터를 반환하는 콜백 함수
+     * @param onFailure 실패 시 호출될 콜백 함수
+     */
+    suspend fun getSearchData(userId: String): SearchResponse? {
+        return try {
+            RetrofitInstance.searchApi.searchMain(userId) // ✅ suspend 함수로 직접 호출
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null // 실패 시 null 반환
         }
     }
 }
