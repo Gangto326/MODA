@@ -14,7 +14,7 @@ public class WebClientConfig {
 	@Value("${lilys.ai.api.key}")
 	private String lilysApiKey;
 
-	@Value("${PythonAI.api.url}")
+	@Value("${PYTHON_AI_API_URL}")
 	private String pythonURL;
 
 	private String youtubeUrl = "https://www.googleapis.com/youtube/v3";
