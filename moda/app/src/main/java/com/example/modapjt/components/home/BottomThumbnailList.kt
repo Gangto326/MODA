@@ -1,37 +1,60 @@
 package com.example.modapjt.components.home
 
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.example.modapjt.domain.viewmodel.SearchViewModel
+
+data class ThumbnailItem(
+    val cardId: String,
+    val thumbnailUrl: String,
+    val title: String,
+    val type: String,
+    val keywords: List<String>,
+    val bookmark: Boolean
+)
 
 @Composable
-fun BottomThumbnailList() {
-    val thumbnails = listOf(
-        Color(0xFFFFCDD2),
-        Color(0xFFC8E6C9),
-        Color(0xFFBBDEFB),
-        Color(0xFFFFF9C4),
-        Color(0xFFD1C4E9)
-    )
+fun BottomThumbnailList(navController: NavController, viewModel: SearchViewModel) {
+    val searchData by viewModel.searchData.collectAsState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-    ) {
-        Row(
+    searchData?.todays?.let { todays ->
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(horizontal = 16.dp)
         ) {
-            for (color in thumbnails) {
-                BottomThumbnail(backgroundColor = color)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                for (item in todays) {
+                    BottomThumbnail(
+                        cardId = item.cardId,
+                        thumbnailUrl = item.thumbnailUrl?: "",
+                        title = item.title?: "",
+                        type = item.type?: "",
+                        keywords = item.keywords?: emptyList(),
+                        bookmark = item.bookmark?: false,
+                        onClick = { cardId ->
+                            navController.navigate("newSearchCardListScreen/$cardId")
+                        }
+                    )
+                }
             }
         }
     }
 }
+

@@ -46,14 +46,12 @@ import com.example.modapjt.domain.viewmodel.SearchViewModel
 fun newHomeScreen(
     navController: NavController,
     currentRoute: String,
-
 ) {
     val listState = rememberLazyListState()
     var isHeaderVisible by remember { mutableStateOf(true) }
     var lastScrollOffset by remember { mutableStateOf(0) }
     val categoryViewModel: CategoryViewModel = viewModel()
     val searchViewModel: SearchViewModel = viewModel()
-
 
     val headerOffsetY by animateDpAsState(
         targetValue = if (isHeaderVisible) 0.dp else (-60).dp,
@@ -89,7 +87,6 @@ fun newHomeScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // 기존 `topBar`에서 제거된 헤더를 리스트의 첫 번째 `item`으로 추가
             item {
                 Box(
                     modifier = Modifier
@@ -139,8 +136,6 @@ fun newHomeScreen(
                 )
             }
 
-
-
             item {
                 KeywordList()
                 Spacer(modifier = Modifier.height(16.dp))
@@ -158,20 +153,20 @@ fun newHomeScreen(
                 )
             }
 
+            // ✅ `BottomThumbnailList` 분리하여 관리
             item {
-                BottomThumbnailList()
+                BottomThumbnailList(navController, searchViewModel)
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            // 이미지 추가
             item {
                 Image(
                     painter = painterResource(id = R.drawable.overlayad),
                     contentDescription = "광고 이미지",
-                    contentScale = ContentScale.FillWidth, // 가로 너비에 맞추기
+                    contentScale = ContentScale.FillWidth,
                     modifier = Modifier
-                        .fillMaxWidth() // 가로 전체 채우기
-                        .height(80.dp) // 원본 높이 유지
+                        .fillMaxWidth()
+                        .height(80.dp)
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -188,7 +183,6 @@ fun newHomeScreen(
                 Divider(color = Color(0xFFDCDCDC), thickness = 4.dp, modifier = Modifier.padding(horizontal = 0.dp))
                 Spacer(modifier = Modifier.height(16.dp))
             }
-
         }
     }
 }
