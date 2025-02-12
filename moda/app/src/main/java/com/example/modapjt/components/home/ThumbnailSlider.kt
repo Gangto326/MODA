@@ -1,64 +1,103 @@
 package com.example.modapjt.components.home
 
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
-import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import com.example.modapjt.domain.viewmodel.SearchViewModel
 import kotlinx.coroutines.delay
 
 @Composable
-fun ThumbnailSlider() {
-    val colors = listOf(
-        Color(0xFFFFCDD2),  // 연한 빨강
-        Color(0xFFC8E6C9),  // 연한 초록
-        Color(0xFFBBDEFB),  // 연한 파랑
-        Color(0xFFFFF9C4),  // 연한 노랑
-        Color(0xFFD1C4E9)   // 연한 보라
-    )
+fun ThumbnailSlider(
+    viewModel: SearchViewModel = viewModel(),
+    navController: NavController,
+    userId: String
+) {
+    val searchData by viewModel.searchData.collectAsState()
 
     var currentIndex by remember { mutableStateOf(0) }
     var dragOffset by remember { mutableStateOf(0f) }
-    val dragThreshold = 100f  // 슬라이드 감지 임계값
+    val dragThreshold = 100f
 
-    // 자동 슬라이드 기능
-    LaunchedEffect(Unit) {
+    // ✅ 홈 화면에서 API 자동 호출
+    LaunchedEffect(userId) {
+        viewModel.loadSearchData(userId)
+    }
+
+    // ✅ 4초마다 자동 슬라이드 추가
+    LaunchedEffect(currentIndex) {
         while (true) {
-            delay(4000)  // 4초마다 자동 슬라이드
-            currentIndex = (currentIndex + 1) % colors.size
+            delay(4000) // ✅ 4초마다 자동 슬라이드
+            searchData?.thumbnails?.let { thumbnails ->
+                if (thumbnails.isNotEmpty()) {
+                    currentIndex = (currentIndex + 1) % thumbnails.size
+                }
+            }
         }
     }
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .pointerInput(Unit) {
-                detectHorizontalDragGestures(
-                    onDragStart = { dragOffset = 0f },
-                    onDragEnd = {
-                        when {
-                            dragOffset > dragThreshold -> {
-                                // 오른쪽으로 드래그 → 이전 썸네일
-                                currentIndex = if (currentIndex == 0) colors.lastIndex else currentIndex - 1
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .pointerInput(Unit) {
+                    detectHorizontalDragGestures(
+                        onDragStart = { dragOffset = 0f },
+                        onDragEnd = {
+                            when {
+                                dragOffset > dragThreshold -> {
+                                    currentIndex = if (currentIndex == 0) searchData?.thumbnails?.lastIndex ?: 0 else currentIndex - 1
+                                }
+                                dragOffset < -dragThreshold -> {
+                                    currentIndex = (currentIndex + 1) % (searchData?.thumbnails?.size ?: 1)
+                                }
                             }
-                            dragOffset < -dragThreshold -> {
-                                // 왼쪽으로 드래그 → 다음 썸네일
-                                currentIndex = (currentIndex + 1) % colors.size
-                            }
+                            dragOffset = 0f
+                        },
+                        onHorizontalDrag = { _, dragAmount ->
+                            dragOffset += dragAmount
                         }
-                        dragOffset = 0f
-                    },
-                    onHorizontalDrag = { _, dragAmount ->
-                        dragOffset += dragAmount
-                    }
+                    )
+                }
+        ) {
+            searchData?.thumbnails?.let { thumbnails ->
+                if (thumbnails.isNotEmpty()) {
+                    val currentItem = thumbnails[currentIndex]
+                    TopThumbnail(
+                        imageUrl = currentItem.thumbnailUrl ?: "https://example.com/default.jpg",
+                        title = currentItem.title,
+                        content = currentItem.thumbnailContent,
+                        currentIndex = currentIndex, // ✅ 현재 인덱스 전달,
+                        totalItems = thumbnails.size, // ✅ 전체 개수 전달
+                        onClick = {
+                            navController.navigate("cardDetail/${currentItem.cardId}")
+                        }
+                    )
+                }
+            }
+        }
+
+        // ✅ ThumbnailIndicator 추가 (썸네일 개수 표시)
+        searchData?.thumbnails?.let { thumbnails ->
+            if (thumbnails.isNotEmpty()) {
+                ThumbnailIndicator(
+                    currentIndex = currentIndex,
+                    totalItems = thumbnails.size
                 )
             }
-    ) {
-        // 썸네일 표시
-        TopThumbnail(color = colors[currentIndex])
-
-        // 하단 인디케이터 표시
-        ThumbnailIndicator(currentIndex = currentIndex, totalItems = colors.size)
+        }
     }
 }

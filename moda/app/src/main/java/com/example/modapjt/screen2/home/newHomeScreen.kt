@@ -1,47 +1,59 @@
-import androidx.compose.animation.AnimatedVisibility
+
+// ... 기존 imports는 유지
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.runtime.*
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.compose.material3.*
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.modapjt.R
-import com.example.modapjt.components.bar.SearchBar
-import com.example.modapjt.components.home.BottomThumbnail
 import com.example.modapjt.components.bar.BottomBarComponent
+import com.example.modapjt.components.bar.HeaderBar
+import com.example.modapjt.components.bar.SearchBar
+import com.example.modapjt.components.home.BottomThumbnailList
 import com.example.modapjt.components.home.CategoryList
 import com.example.modapjt.components.home.HomeSmallTitle
-import com.example.modapjt.components.home.ThumbnailSlider
-import com.example.modapjt.components.home.WeeklyKeyword
-import com.example.modapjt.domain.viewmodel.CategoryViewModel
-// ... 기존 imports는 유지
-import com.example.modapjt.components.bar.HeaderBar  // HeaderBar import 추가
-import com.example.modapjt.components.home.BottomThumbnailList
 import com.example.modapjt.components.home.KeywordList
+import com.example.modapjt.components.home.ThumbnailSlider
+import com.example.modapjt.domain.viewmodel.CategoryViewModel
+import com.example.modapjt.domain.viewmodel.SearchViewModel
 
 @Composable
 fun newHomeScreen(
     navController: NavController,
     currentRoute: String,
+
 ) {
     val listState = rememberLazyListState()
     var isHeaderVisible by remember { mutableStateOf(true) }
     var lastScrollOffset by remember { mutableStateOf(0) }
-    val viewModel: CategoryViewModel = viewModel()
+    val categoryViewModel: CategoryViewModel = viewModel()
+    val searchViewModel: SearchViewModel = viewModel()
+
 
     val headerOffsetY by animateDpAsState(
         targetValue = if (isHeaderVisible) 0.dp else (-60).dp,
@@ -102,7 +114,7 @@ fun newHomeScreen(
             }
 
             item {
-                ThumbnailSlider()
+                ThumbnailSlider(viewModel = searchViewModel, navController = navController, userId = "user123")
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
@@ -112,7 +124,7 @@ fun newHomeScreen(
             }
 
             item {
-                CategoryList(navController = navController, viewModel = viewModel)
+                CategoryList(navController = navController, viewModel = categoryViewModel)
             }
 
             item {

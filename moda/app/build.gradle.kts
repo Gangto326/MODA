@@ -115,4 +115,13 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-messaging")
     implementation("com.google.firebase:firebase-messaging-ktx")
+
+    //새로고침 때문에
+    implementation ("com.google.accompanist:accompanist-swiperefresh:0.28.0")
+
+    implementation ("com.google.accompanist:accompanist-coil:0.15.0")
+
+    implementation("androidx.compose.foundation:foundation:1.4.0")
 }
+
+
