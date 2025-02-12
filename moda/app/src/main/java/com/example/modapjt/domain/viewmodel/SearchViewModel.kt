@@ -3,6 +3,7 @@ package com.example.modapjt.domain.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.modapjt.data.api.RetrofitInstance
+import com.example.modapjt.data.dto.response.KeywordSearchResponse
 import com.example.modapjt.data.dto.response.SearchResponse
 import com.example.modapjt.data.repository.SearchRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,6 +33,14 @@ class SearchViewModel : ViewModel() {
     private val _topKeywords = MutableStateFlow<List<String>>(emptyList())
     val topKeywords: StateFlow<List<String>> get() = _topKeywords
 
+    // ✅ 위의 두개를 한꺼번에 가지고 오는 것.
+    private val _selectedKeyword = MutableStateFlow<String?>(null)
+    val selectedKeyword: StateFlow<String?> = _selectedKeyword.asStateFlow()
+
+
+    // ✅ 키워드 검색 결과만 따로 저장
+    private val _keywordSearchData = MutableStateFlow<List<KeywordSearchResponse>>(emptyList())
+    val keywordSearchData: StateFlow<List<KeywordSearchResponse>> = _keywordSearchData.asStateFlow()
 
     // ✅ 자동완성 키워드 API 호출
     fun fetchAutoCompleteKeywords(query: String) {
@@ -70,4 +79,26 @@ class SearchViewModel : ViewModel() {
             }
         }
     }
+
+
+
+    // ✅ 키워드 검색 시 API 호출 (KeywordSearchResponse 저장)
+    fun updateKeywordAndFetchData(keyword: String, userId: String) {
+        if (_selectedKeyword.value == keyword) return // 이미 선택된 키워드면 무시
+        _selectedKeyword.value = keyword
+
+        viewModelScope.launch {
+            try {
+                println("[SearchViewModel] 키워드 검색 API 호출: $keyword")
+                val response = repository.getSearchDataByKeyword(keyword, userId)
+                _keywordSearchData.value = response ?: emptyList() // ✅ 키워드 검색 결과만 업데이트
+                println("[SearchViewModel] 키워드 검색 데이터 로드 완료")
+            } catch (e: Exception) {
+                _error.value = e.message
+                println("[SearchViewModel] 키워드 검색 오류 발생: ${e.message}")
+            }
+        }
+    }
+
+
 }

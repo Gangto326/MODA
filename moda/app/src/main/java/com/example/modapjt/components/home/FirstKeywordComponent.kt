@@ -26,9 +26,9 @@ data class FirstKeywordItem(
 
 @Composable
 fun FirstKeywordList(navController: NavController, viewModel: SearchViewModel) {
-    val searchData by viewModel.searchData.collectAsState()
+    val keywordSearchData by viewModel.keywordSearchData.collectAsState() // ✅ 변경된 StateFlow 사용
 
-    searchData?.keywords?.let { keywords ->
+    keywordSearchData.let { items ->
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -40,14 +40,14 @@ fun FirstKeywordList(navController: NavController, viewModel: SearchViewModel) {
                     .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                for (item in keywords) {
+                for (item in items) {
                     BottomThumbnail(
                         cardId = item.cardId,
-                        thumbnailUrl = item.thumbnailUrl?: "",
-                        title = item.title?: "",
-                        type = item.type?: "",
-                        keywords = item.keywords?: emptyList(),
-                        bookmark = item.bookmark?: false,
+                        thumbnailUrl = item.thumbnailUrl ?: "",
+                        title = item.title ?: "",
+                        type = item.type ?: "",
+                        keywords = item.keywords ?: emptyList(),
+                        bookmark = item.bookmark ?: false,
                         onClick = { cardId ->
                             navController.navigate("cardDetail/${item.cardId}")
                         }
@@ -57,4 +57,3 @@ fun FirstKeywordList(navController: NavController, viewModel: SearchViewModel) {
         }
     }
 }
-
