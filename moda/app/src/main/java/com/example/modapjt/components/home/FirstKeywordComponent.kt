@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.modapjt.domain.viewmodel.SearchViewModel
 
-data class ThumbnailItem(
+data class FirstKeywordItem(
     val cardId: String,
     val thumbnailUrl: String,
     val title: String,
@@ -25,10 +25,10 @@ data class ThumbnailItem(
 )
 
 @Composable
-fun BottomThumbnailList(navController: NavController, viewModel: SearchViewModel) {
+fun FirstKeywordList(navController: NavController, viewModel: SearchViewModel) {
     val searchData by viewModel.searchData.collectAsState()
 
-    searchData?.todays?.let { todays ->
+    searchData?.keywords?.let { keywords ->
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -40,7 +40,7 @@ fun BottomThumbnailList(navController: NavController, viewModel: SearchViewModel
                     .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                for (item in todays) {
+                for (item in keywords) {
                     BottomThumbnail(
                         cardId = item.cardId,
                         thumbnailUrl = item.thumbnailUrl?: "",

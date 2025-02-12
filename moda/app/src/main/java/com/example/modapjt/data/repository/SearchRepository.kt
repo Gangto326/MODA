@@ -3,6 +3,7 @@ package com.example.modapjt.data.repository
 import android.util.Log
 import com.example.modapjt.data.api.RetrofitInstance
 import com.example.modapjt.data.api.SearchApiService
+import com.example.modapjt.data.dto.response.HomeKeywordResponse
 import com.example.modapjt.data.dto.response.SearchResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -52,6 +53,15 @@ class SearchRepository(private val api: SearchApiService) {
         } catch (e: Exception) {
             e.printStackTrace()
             null // 실패 시 null 반환
+        }
+    }
+
+    suspend fun getHomeKeyword(userId: String): HomeKeywordResponse {
+        return try {
+            api.homeKeyword(userId) // 전체 HomeKeywordResponse 반환
+        } catch (e: Exception) {
+            Log.e("HomeKeywordRepository", "Error fetching home keyword", e)
+            HomeKeywordResponse(emptyList(), "") // 에러 발생 시 빈 데이터 반환
         }
     }
 }

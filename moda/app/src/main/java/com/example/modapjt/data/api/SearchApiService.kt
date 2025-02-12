@@ -1,5 +1,6 @@
 package com.example.modapjt.data.api
 
+import com.example.modapjt.data.dto.response.HomeKeywordResponse
 import com.example.modapjt.data.dto.response.SearchResponse
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -23,7 +24,10 @@ interface SearchApiService {
         @Query("userId") userId: String
     ): SearchResponse
 
-
+    @GET("api/card/main")
+    suspend fun homeKeyword(
+        @Query("userId") userId : String
+    ): HomeKeywordResponse
 
 }
 
