@@ -23,6 +23,7 @@ public class VideoCreatorRepositoryImpl implements VideoCreatorRepository {
     @Override
     public String getCreatorByUserId(UserId userId) {
         String key = VIDEO_CREATOR_KEY + userId;
-        return redisTemplate.opsForValue().get(key);
+        String value = redisTemplate.opsForValue().get(key);
+        return value == null? "": value;
     }
 }

@@ -353,7 +353,8 @@ public class SearchService {
 		);
 		
 		CompletableFuture<List<Card>> thumbnailFuture = CompletableFuture
-				.supplyAsync(() -> cardRepository.findByUserIdAndTypeIdIn(userIdObj, typeIds, pageable), executorService)
+				.supplyAsync(() -> cardRepository.findByUserIdAndTypeIdIn(
+						userIdObj, typeIds, pageable), executorService)
 				.orTimeout(2, TimeUnit.SECONDS)
 				.exceptionally(ex -> Collections.emptyList());
 

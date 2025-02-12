@@ -18,10 +18,10 @@ public interface CardJpaRepository extends JpaRepository<CardEntity, String> {
 
     Slice<CardEntity> findByUserIdAndCategoryId(String userId, Long categoryId, Pageable pageable);
 
-//    Optional<CardEntity> findByUserIdAndCardId(String userId, String cardId);
+    Optional<CardEntity> findByUserIdAndCardId(String userId, String cardId);
 
-    @Query("SELECT c FROM CardEntity c JOIN FETCH c.urlCache uc WHERE c.userId = :userId AND c.cardId = :cardId")
-    Optional<CardEntity> findByUserIdAndCardId(@Param("userId") String userId, @Param("cardId") String cardId);
+//    @Query("SELECT c FROM CardEntity c JOIN FETCH c.urlCache uc WHERE c.userId = :userId AND c.cardId = :cardId")
+//    Optional<CardEntity> findByUserIdAndCardId(@Param("userId") String userId, @Param("cardId") String cardId);
 
     @Query("SELECT c FROM CardEntity c WHERE c.urlCache.urlHash = :urlHash")
     Optional<CardEntity> findFirstByUrlHash(@Param("urlHash") String urlHash);
