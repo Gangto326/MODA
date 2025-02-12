@@ -6,6 +6,7 @@ import ImageBig
 import NewsBig
 import TypeSelectBar
 import VideoBig
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -82,6 +83,7 @@ fun newCardListScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .background(Color.White), // 배경 흰색으로 설정
         ) {
             when (uiState) {
                 is CardUiState.Loading -> {
