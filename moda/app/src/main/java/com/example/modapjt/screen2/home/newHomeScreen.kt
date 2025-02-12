@@ -63,6 +63,9 @@ fun newHomeScreen(
     // 🔹 API에서 받아올 creator 값 저장
     val creator by homeKeywordViewModel.creator.collectAsState()
 
+    // ✅ 로그인된 유저 ID를 가져온다고 가정 (예: SharedPreferences에서 가져오기)
+    val userId = remember { "user" } // 실제 앱에서는 여기를 로그인된 유저 ID로 변경해야 함
+
     LaunchedEffect(Unit) {
         homeKeywordViewModel.fetchHomeKeywords("user") // userId 전달
     }
@@ -130,10 +133,6 @@ fun newHomeScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            item {
-                Divider(color = Color(0xFFDCDCDC), thickness = 4.dp, modifier = Modifier.padding(horizontal = 0.dp))
-                Spacer(modifier = Modifier.height(16.dp))
-            }
 
             item {
                 CategoryList(navController = navController, viewModel = categoryViewModel)
@@ -152,7 +151,7 @@ fun newHomeScreen(
             }
 
             item {
-                WeeklyKeywordList(homeKeywordViewModel) // ✅ API에서 받아온 키워드 리스트 적용
+                WeeklyKeywordList(homeKeywordViewModel, userId = userId) // ✅ API에서 받아온 키워드 리스트 적용
                 Spacer(modifier = Modifier.height(16.dp))
             }
 

@@ -1,9 +1,9 @@
 package com.example.modapjt.data.repository
 
 import android.util.Log
-import com.example.modapjt.data.api.RetrofitInstance
 import com.example.modapjt.data.api.SearchApiService
 import com.example.modapjt.data.dto.response.HomeKeywordResponse
+import com.example.modapjt.data.dto.response.KeywordSearchResponse
 import com.example.modapjt.data.dto.response.SearchResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -49,10 +49,10 @@ class SearchRepository(private val api: SearchApiService) {
      */
     suspend fun getSearchData(userId: String): SearchResponse? {
         return try {
-            RetrofitInstance.searchApi.searchMain(userId) // ✅ suspend 함수로 직접 호출
+            api.searchMain(userId)
         } catch (e: Exception) {
             e.printStackTrace()
-            null // 실패 시 null 반환
+            null
         }
     }
 
@@ -64,4 +64,19 @@ class SearchRepository(private val api: SearchApiService) {
             HomeKeywordResponse(emptyList(), "") // 에러 발생 시 빈 데이터 반환
         }
     }
+
+    suspend fun getSearchDataByKeyword(keyword: String, userId: String): List<KeywordSearchResponse>? {
+        return try {
+            api.getSearchDataByKeyword(keyword, userId) // ✅ API 응답을 리스트로 받음
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
+    }
+
+
+
+
+
+
 }
