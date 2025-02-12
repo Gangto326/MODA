@@ -22,8 +22,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         // 오버레이 및 접근성 서비스를 위한 권한 요청
-        checkOverlayPermission()
         checkAccessibilityPermission()
+        checkOverlayPermission()
 
         setContent {
             ModapjtTheme {
