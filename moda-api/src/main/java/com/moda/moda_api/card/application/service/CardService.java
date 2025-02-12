@@ -47,6 +47,7 @@ public class CardService {
 	private final CardDtoMapper cardDtoMapper;
 	private final UserKeywordRepository userKeywordRepository;
 	private final VideoCreatorRepository videoCreatorRepository;
+	private final CardViewCountRepository cardViewCountRepository;
 	private final UrlCacheRepository urlCacheRepository;
 	private final SummaryService summaryService;
 	private final ImageStorageService imageStorageService;
@@ -276,6 +277,9 @@ public class CardService {
 	public CardDetailResponse getCardDetail(String userId, String cardId) {
 		UserId userIdObj = new UserId(userId);
 		CardId cardIdObj = new CardId(cardId);
+		
+		// 조회수 증가 로직
+		cardViewCountRepository.incrementViewCount(cardIdObj);
 
 		// 카드 탐색
 		Card card = findCard(userIdObj, cardIdObj);

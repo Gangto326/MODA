@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Range;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -42,4 +43,8 @@ public interface CardJpaRepository extends JpaRepository<CardEntity, String> {
     Slice<CardEntity> findByUserIdAndBookmarkTrueAndTypeIdAndDeletedAtIsNull(String userId, Integer typeId, Pageable pageable);
 
     List<CardEntity> findAllByTypeId(Integer typeId);
+
+    @Modifying
+    @Query("UPDATE CardEntity c SET c.viewCount = c.viewCount + :increment WHERE c.cardId = :cardId")
+    void updateViewCount(@Param("cardId") String cardId, @Param("increment") int increment);
 }

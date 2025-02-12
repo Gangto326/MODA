@@ -205,7 +205,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
     }
 
     /**
-     * 키워드 기준 검색
+     * 키워드 기준 검색. 내 것만 나옵니다.
      * @param keyword
      * @return
      */
@@ -228,21 +228,15 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                                                 .collect(Collectors.toList())
                                 )))
                         )
-                ));
+                ))
 
-        // userId에 대한 should 조건 매칭
-        boolQuery.must(Query.of(query -> query
-                .bool(bool -> bool
-                        .should(Query.of(q -> q
-                                // userId는 term 조건으로 매칭 후 가중치 추가
-                                .term(term -> term
-                                        .field("userId")
-                                        .value(userId.getValue())
-                                        .boost(1.5f)
-                                )
-                        ))
-                )
-        ));
+                // userId에 대한 must 조건 매칭
+                .must(Query.of(query -> query
+                            .term(term -> term
+                                    .field("userId")
+                                    .value(userId.getValue())
+                            )
+                ));
 
         NativeQuery query = NativeQuery.builder()
                 .withQuery(boolQuery.build()._toQuery())
