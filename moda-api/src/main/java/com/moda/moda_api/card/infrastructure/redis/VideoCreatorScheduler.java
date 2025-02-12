@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 @Component
 @Slf4j
 public class VideoCreatorScheduler {
+    private static final String VIDEO_CREATOR_KEY = "user:creator:";
     private final CardJpaRepository cardJpaRepository;
     private final RedisTemplate<String, String> redisTemplate;
 
@@ -29,6 +30,7 @@ public class VideoCreatorScheduler {
 
     @Transactional(readOnly = true)
     @Scheduled(cron = "0 0 3 * * *")
+//    @Scheduled(cron = "0 */1 * * * *")
     public void saveVideoCreators() {
         log.info("영상 제작자 정보 저장을 시작합니다...");
 
@@ -58,7 +60,7 @@ public class VideoCreatorScheduler {
                     String selectedCreator = creators.get(randomIndex);
 
                     // 레디스에 저장할 Key값 생성
-                    String key = "user:creator:" + userId;
+                    String key = VIDEO_CREATOR_KEY + userId;
 
                     // 해당 Key 값으로 크리에이터 저장
                     redisTemplate.opsForValue().set(key, selectedCreator);
