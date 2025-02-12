@@ -95,7 +95,7 @@ public class CardEntity {
 	@JoinColumn(name = "type_id", insertable = false, updatable = false)
 	private ContentTypeEntity contentType;
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "url_hash", insertable = false, updatable = false)
 	private UrlCacheEntity urlCache;
 }

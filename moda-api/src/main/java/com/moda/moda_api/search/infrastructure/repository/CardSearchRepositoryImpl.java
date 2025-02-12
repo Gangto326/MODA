@@ -136,7 +136,9 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
      * @return
      */
     @Override
-    public List<CardDocument> findAutoCompleteSuggestions(UserId userId, List<String> completeKeywords, String prefixKeyword) {
+    public List<CardDocument> findAutoCompleteSuggestions(
+            UserId userId, List<String> completeKeywords, String prefixKeyword) {
+
         // 쿼리 빌더
         BoolQuery.Builder boolQuery = new BoolQuery.Builder();
 
@@ -151,44 +153,44 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
         if (!completeKeywords.isEmpty()) {
             BoolQuery.Builder shouldQuery = new BoolQuery.Builder();
             for (String keyword : completeKeywords) {
-                shouldQuery.should(Query.of(query -> query
+                boolQuery.should(Query.of(query -> query
                         .fuzzy(fuzzy -> fuzzy
-                                .field("keywords.keyword")
+                                .field("keywords.ngram")
                                 .value(keyword)
-                                .fuzziness("AUTO")
+                                .fuzziness("2")
                         )));
             }
             boolQuery.must(Query.of(query -> query.bool(shouldQuery.build())));
         }
 
         // 마지막 입력 중인 String에 대한 매칭
-        if (prefixKeyword != null && !prefixKeyword.isEmpty()) {
-            boolQuery.must(Query.of(query -> query
-                    .bool(bool -> bool
-                            .must(must -> must
-                                    .term(term -> term
-                                            .field("userId")
-                                            .value(userId.getValue())
-                                    ))
-                            .must(must -> must
-                                    .bool(b -> b
-                                            .should(should -> should
-                                                    .match(match -> match
-                                                            .field("keywords.ngram")
-                                                            .query(prefixKeyword)
-                                                            .boost(2.0f)
-                                                    ))
-                                            .should(should -> should
-                                                    .fuzzy(fuzzy -> fuzzy
-                                                            .field("keywords")
-                                                            .value(prefixKeyword)
-                                                            .fuzziness("AUTO")
-                                                            .boost(1.0f)
-                                                    ))
-                                            .minimumShouldMatch("1")
-                                    ))
-                    )));
-        }
+//        if (prefixKeyword != null && !prefixKeyword.isEmpty()) {
+//            boolQuery.must(Query.of(query -> query
+//                    .bool(bool -> bool
+//                            .must(must -> must
+//                                    .term(term -> term
+//                                            .field("userId")
+//                                            .value(userId.getValue())
+//                                    ))
+//                            .must(must -> must
+//                                    .bool(b -> b
+//                                            .should(should -> should
+//                                                    .match(match -> match
+//                                                            .field("keywords.ngram")
+//                                                            .query(prefixKeyword)
+//                                                            .boost(2.0f)
+//                                                    ))
+//                                            .should(should -> should
+//                                                    .fuzzy(fuzzy -> fuzzy
+//                                                            .field("keywords")
+//                                                            .value(prefixKeyword)
+//                                                            .fuzziness("AUTO")
+//                                                            .boost(1.0f)
+//                                                    ))
+//                                            .minimumShouldMatch("1")
+//                                    ))
+//                    )));
+//        }
 
         NativeQuery query = NativeQuery.builder()
                 .withQuery(boolQuery.build()._toQuery())
