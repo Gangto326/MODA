@@ -18,6 +18,7 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,23 +37,35 @@ import com.example.modapjt.components.bar.HeaderBar
 import com.example.modapjt.components.bar.SearchBar
 import com.example.modapjt.components.home.BottomThumbnailList
 import com.example.modapjt.components.home.CategoryList
+import com.example.modapjt.components.home.FirstKeywordList
+import com.example.modapjt.components.home.ForgottenContentItem
 import com.example.modapjt.components.home.HomeSmallTitle
-import com.example.modapjt.components.home.KeywordList
+import com.example.modapjt.components.home.ImageListComponent
 import com.example.modapjt.components.home.ThumbnailSlider
+import com.example.modapjt.components.home.VideoListComponent
+import com.example.modapjt.components.home.WeeklyKeywordList
 import com.example.modapjt.domain.viewmodel.CategoryViewModel
 import com.example.modapjt.domain.viewmodel.SearchViewModel
+
 
 @Composable
 fun newHomeScreen(
     navController: NavController,
     currentRoute: String,
-
+    homeKeywordViewModel: SearchViewModel = viewModel()
 ) {
     val listState = rememberLazyListState()
     var isHeaderVisible by remember { mutableStateOf(true) }
     var lastScrollOffset by remember { mutableStateOf(0) }
     val categoryViewModel: CategoryViewModel = viewModel()
     val searchViewModel: SearchViewModel = viewModel()
+
+    // 🔹 API에서 받아올 creator 값 저장
+    val creator by homeKeywordViewModel.creator.collectAsState()
+
+    LaunchedEffect(Unit) {
+        homeKeywordViewModel.fetchHomeKeywords("user") // userId 전달
+    }
 
 
     val headerOffsetY by animateDpAsState(
@@ -67,15 +80,15 @@ fun newHomeScreen(
         label = "Header Alpha"
     )
 
-    LaunchedEffect(listState.firstVisibleItemIndex, listState.firstVisibleItemScrollOffset) {
-        val currentOffset = listState.firstVisibleItemScrollOffset
-        val isScrollingDown = currentOffset > lastScrollOffset
+    LaunchedEffect(listState.firstVisibleItemIndex, listState.firstVisibleItemScrollOffset, ) {
+            val currentOffset = listState.firstVisibleItemScrollOffset
+            val isScrollingDown = currentOffset > lastScrollOffset
 
-        isHeaderVisible = if (listState.firstVisibleItemIndex == 0) {
-            true
-        } else {
-            !isScrollingDown
-        }
+            isHeaderVisible = if (listState.firstVisibleItemIndex == 0) {
+                true
+            } else {
+                !isScrollingDown
+            }
 
         lastScrollOffset = currentOffset
     }
@@ -89,7 +102,6 @@ fun newHomeScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // 기존 `topBar`에서 제거된 헤더를 리스트의 첫 번째 `item`으로 추가
             item {
                 Box(
                     modifier = Modifier
@@ -139,12 +151,16 @@ fun newHomeScreen(
                 )
             }
 
-
-
             item {
-                KeywordList()
+                WeeklyKeywordList(homeKeywordViewModel) // ✅ API에서 받아온 키워드 리스트 적용
                 Spacer(modifier = Modifier.height(16.dp))
             }
+
+            item{
+                FirstKeywordList(navController, searchViewModel)
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
 
             item {
                 Divider(color = Color(0xFFDCDCDC), thickness = 4.dp, modifier = Modifier.padding(horizontal = 0.dp))
@@ -158,20 +174,20 @@ fun newHomeScreen(
                 )
             }
 
+            // ✅ `BottomThumbnailList` 분리하여 관리
             item {
-                BottomThumbnailList()
+                BottomThumbnailList(navController, searchViewModel)
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            // 이미지 추가
             item {
                 Image(
                     painter = painterResource(id = R.drawable.overlayad),
                     contentDescription = "광고 이미지",
-                    contentScale = ContentScale.FillWidth, // 가로 너비에 맞추기
+                    contentScale = ContentScale.FillWidth,
                     modifier = Modifier
-                        .fillMaxWidth() // 가로 전체 채우기
-                        .height(80.dp) // 원본 높이 유지
+                        .fillMaxWidth()
+                        .height(80.dp)
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -179,15 +195,57 @@ fun newHomeScreen(
 
             item {
                 HomeSmallTitle(
-                    title = "여유로운 토요일 저녁",
+                    title = if (creator.isNotEmpty()) "$creator 영상 어때요?" else "영상 어때요?",
                     description = ""
                 )
+            }
+
+            item {
+                VideoListComponent(navController, searchViewModel)
+                Spacer(modifier = Modifier.height(16.dp))
             }
 
             item {
                 Divider(color = Color(0xFFDCDCDC), thickness = 4.dp, modifier = Modifier.padding(horizontal = 0.dp))
                 Spacer(modifier = Modifier.height(16.dp))
             }
+
+            item {
+                HomeSmallTitle(
+                    title = "이미지 보고가세요",
+                    description = "| 해당 컨텐츠들에 대한 설명"
+                )
+            }
+
+            item{
+                ImageListComponent(navController, searchViewModel)
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+
+            item {
+                Divider(color = Color(0xFFDCDCDC), thickness = 4.dp, modifier = Modifier.padding(horizontal = 0.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            item {
+                HomeSmallTitle(
+                    title = "잊고있던 컨텐츠",
+                    description = "| 해당 컨텐츠들에 대한 설명"
+                )
+            }
+
+
+            item {
+                ForgottenContentItem(navController, searchViewModel)
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            item {
+                Divider(color = Color(0xFFDCDCDC), thickness = 4.dp, modifier = Modifier.padding(horizontal = 0.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
 
         }
     }
