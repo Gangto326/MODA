@@ -14,6 +14,8 @@ import java.util.Set;
 @Repository
 public class UserKeywordRepositoryImpl implements UserKeywordRepository {
     private final RedisTemplate<String, String> redisTemplate;
+    private static final String KEYWORD_COUNT_KEY = "user:keywords:count:";
+    private static final String KEYWORD_DATE_KEY = "user:keywords:date:";
 
     public UserKeywordRepositoryImpl(@Qualifier("keywordRedisTemplate") RedisTemplate<String, String> redisTemplate) {
         this.redisTemplate = redisTemplate;
@@ -26,8 +28,8 @@ public class UserKeywordRepositoryImpl implements UserKeywordRepository {
      */
     @Override
     public void saveKeywords(UserId userId, String[] keywords) {
-        String countKey = "user:keywords:count:" + userId.getValue();
-        String dateKey = "user:keywords:date:" + userId.getValue();
+        String countKey = KEYWORD_COUNT_KEY + userId.getValue();
+        String dateKey = KEYWORD_DATE_KEY + userId.getValue();
         double currentTime = System.currentTimeMillis();
 
         for (String keyword : keywords) {
@@ -55,7 +57,7 @@ public class UserKeywordRepositoryImpl implements UserKeywordRepository {
      */
     @Override
     public List<String> getTopKeywords(UserId userId, int limit) {
-        String key = "user:keywords:count:" + userId.getValue();
+        String key = KEYWORD_COUNT_KEY + userId.getValue();
 
         // reverseRange로 높은 score로 정렬
         Set<String> keywords = redisTemplate.opsForZSet().reverseRange(key, 0, limit - 1);

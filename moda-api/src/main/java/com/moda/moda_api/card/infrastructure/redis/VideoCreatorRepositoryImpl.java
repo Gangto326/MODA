@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class VideoCreatorRepositoryImpl implements VideoCreatorRepository {
     private final RedisTemplate<String, String> redisTemplate;
+    private static final String VIDEO_CREATOR_KEY = "user:creator:";
 
     public VideoCreatorRepositoryImpl(@Qualifier("videoRedisTemplate") RedisTemplate<String, String> redisTemplate) {
         this.redisTemplate = redisTemplate;
@@ -21,7 +22,7 @@ public class VideoCreatorRepositoryImpl implements VideoCreatorRepository {
      */
     @Override
     public String getCreatorByUserId(UserId userId) {
-        String key = "user:creator:" + userId;
+        String key = VIDEO_CREATOR_KEY + userId;
         return redisTemplate.opsForValue().get(key);
     }
 }

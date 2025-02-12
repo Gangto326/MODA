@@ -74,6 +74,15 @@ public class RedisConfig {
 		return redisTemplate;
 	}
 
+	@Bean // 조회수 기록
+	public RedisTemplate<String, String> viewCountRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
+		RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
+		redisTemplate.setConnectionFactory(redisConnectionFactory);
+		redisTemplate.setKeySerializer(new StringRedisSerializer());
+		redisTemplate.setValueSerializer(new StringRedisSerializer());
+		return redisTemplate;
+	}
+
 	@Bean
 	public RedisConnectionFactory redisConnectionFactory() {
 		RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(host, port);
