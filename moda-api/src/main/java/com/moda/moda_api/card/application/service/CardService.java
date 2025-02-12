@@ -190,7 +190,7 @@ public class CardService {
 						.userId(userIdObj)
 						.categoryId(aiAnalysisResponseDTO.getCategoryId())
 						.typeId(4) // 이미지 타입
-						.urlHash(urlHash)
+						.urlHash(null)
 						.title("ImageTitle")
 						.content(aiAnalysisResponseDTO.getContent())
 						.thumbnailContent(aiAnalysisResponseDTO.getThumbnailContent())
