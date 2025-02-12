@@ -13,7 +13,8 @@ data class CardDTO(
     val keywords: List<String>?,
     val excludedKeywords: List<String>?,
     val isMine: Boolean,
-    val score: Float?
+    val score: Float?,
+    val bookmark: Boolean
 )
 
 // DTO → 도메인 모델 변환 함수
@@ -29,6 +30,7 @@ fun CardDTO.toDomain(): Card {
         keywords = this.keywords ?: emptyList(),
         excludedKeywords = this.excludedKeywords ?: emptyList(),
         isMine = this.isMine,
-        score = this.score
+        score = this.score,
+        bookMark = this.bookmark
     )
 }
