@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -87,6 +88,10 @@ fun KeywordRankList(viewModel: SearchViewModel, navController: NavController) {
                     Spacer(modifier = Modifier.height(8.dp))
                 }
             }
+
+            // ✅ 여백 추가
+            Spacer(modifier = Modifier.width(16.dp))
+
             Column(modifier = Modifier.weight(1f)) {
                 rightTopics.forEach { topic ->
                     KeywordRankItem(
@@ -99,5 +104,6 @@ fun KeywordRankList(viewModel: SearchViewModel, navController: NavController) {
                 }
             }
         }
+
     }
 }
