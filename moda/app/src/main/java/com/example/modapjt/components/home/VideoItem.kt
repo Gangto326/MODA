@@ -1,11 +1,8 @@
 package com.example.modapjt.components.home
 
-import android.view.ViewGroup
-import android.webkit.WebChromeClient
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,46 +18,36 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
+import com.example.modapjt.components.video.YouTubePlayer
 
 @Composable
-fun VideoItem(
-    videoUrl: String,
-    title: String,
-    cardId: String,
-    navController: NavController
-) {
+fun VideoItem(videoUrl: String, title: String, cardId: String, navController: NavController) {
+    // 영상 ID 추출
+    val videoId = getYouTubeVideoId(videoUrl)
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // ✅ YouTube 영상 자동 재생 + 소리 ON (`mute=0`)
-        AndroidView(
-            factory = { context ->
-                WebView(context).apply {
-                    layoutParams = ViewGroup.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT
-                    )
-                    settings.javaScriptEnabled = true
-                    settings.mediaPlaybackRequiresUserGesture = false
-                    webChromeClient = WebChromeClient()
-                    webViewClient = WebViewClient()
-                    loadUrl("https://www.youtube.com/embed/${getYouTubeVideoId(videoUrl)}?autoplay=1&mute=0")
-                }
-            },
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp)
                 .background(Color.Black)
-        )
+        ) {
+            YouTubePlayer(
+                videoId = videoId,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+            )
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // ✅ 제목 클릭 시 상세 페이지 이동
         Text(
             text = title,
             fontSize = 14.sp,
@@ -79,7 +66,7 @@ fun VideoItem(
     }
 }
 
-// ✅ YouTube URL에서 Video ID 추출
-fun getYouTubeVideoId(url: String): String {
+// YouTube URL에서 Video ID 추출
+private fun getYouTubeVideoId(url: String): String {
     return url.substringAfter("v=").substringBefore("&")
 }
