@@ -101,6 +101,9 @@ public class CardService {
 		// 유저별 핵심 키워드 저장 (Redis)
 		userKeywordRepository.saveKeywords(userIdObj, card.getKeywords());
 
+		// 핫 토픽 키워드 저장 (Redis)
+		hotTopicRepository.incrementKeywordScore(card.getKeywords());
+
 		cardRepository.save(card);
 		cardSearchRepository.save(card);
 
@@ -158,6 +161,9 @@ public class CardService {
 
 				// 유저별 핵심 키워드 저장 (Redis)
 				userKeywordRepository.saveKeywords(userIdObj, card.getKeywords());
+
+				// 핫 토픽 키워드 저장 (Redis)
+				hotTopicRepository.incrementKeywordScore(card.getKeywords());
 
 				cardRepository.save(card);
 				cardSearchRepository.save(card);
