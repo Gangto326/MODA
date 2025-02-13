@@ -297,6 +297,9 @@ public class CardService {
 		// Card 삭제 권한 검증
 		cardsToDelete.forEach(card -> card.validateOwnership(userIdObj));
 
+		// ES에서 카드 삭제
+		cardSearchRepository.deleteAllById(cardIdList);
+
 		// 카드 삭제
 		return cardRepository.deleteAll(cardsToDelete);
 	}
@@ -427,7 +430,7 @@ public class CardService {
 	 */
 	public CardMainResponse getMainKeywords(String userId) {
 		UserId userIdObj = new UserId(userId);
-		System.out.println(videoCreatorRepository.getCreatorByUserId(userIdObj));
+
 		return CardMainResponse.builder()
 				.topKeywords(userKeywordRepository.getTopKeywords(userIdObj, 5))
 				.creator(videoCreatorRepository.getCreatorByUserId(userIdObj))
