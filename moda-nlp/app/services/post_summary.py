@@ -11,7 +11,7 @@ from app.services.embedding import Embedding
 
 class PostSummary:
     MAX_CATEGORY_TRIES = 10
-    MODEL = 'hf.co/teddylee777/Llama-3-Open-Ko-8B-gguf:Q8_0'
+    MODEL = 'qwen2.5'
 
     def __init__(self, origin_content: str):
         self.origin_content = origin_content
