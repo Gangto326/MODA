@@ -38,5 +38,7 @@ out/
 
 ### application properties ###
 src/main/resources/application-*.properties
-
 src/main/resources/moda-app-42206-firebase-adminsdk-fbsvc-37c9aa54d2.json
+
+## 
+.env

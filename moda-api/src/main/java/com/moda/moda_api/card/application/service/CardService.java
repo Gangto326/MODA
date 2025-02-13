@@ -64,7 +64,7 @@ public class CardService {
 	 */
 	@Transactional
 	public CompletableFuture<Boolean> createCard(String userId, String url) {
-		UserId userIdObj = new UserId("user123");
+		UserId userIdObj = new UserId("user");
 		String urlHash = UrlCache.generateHash(url);
 
 		return urlCacheRepository.findByUrlHash(urlHash)

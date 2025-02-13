@@ -3,9 +3,6 @@ package com.moda.moda_api.card.presentation.controller;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import com.moda.moda_api.card.application.response.CardMainResponse;
-import com.moda.moda_api.card.application.response.HotTopicResponse;
-import com.moda.moda_api.card.presentation.request.CardBookmarkRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -23,8 +20,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.moda.moda_api.card.application.response.CardDetailResponse;
 import com.moda.moda_api.card.application.response.CardListResponse;
+import com.moda.moda_api.card.application.response.CardMainResponse;
+import com.moda.moda_api.card.application.response.HotTopicResponse;
 import com.moda.moda_api.card.application.service.CardService;
-import com.moda.moda_api.card.application.service.ImageValidService;
+import com.moda.moda_api.card.presentation.request.CardBookmarkRequest;
 import com.moda.moda_api.card.presentation.request.CardRequest;
 import com.moda.moda_api.card.presentation.request.MoveCardRequest;
 import com.moda.moda_api.card.presentation.request.UpdateCardRequest;
@@ -40,7 +39,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api/card")
 public class CardController {
 	private final CardService cardService;
-	private final ImageValidService imageValidService;
 
 	// Json으로 날라올 때
 	@PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -65,15 +63,6 @@ public class CardController {
 			return CompletableFuture.completedFuture(
 				ResponseEntity.badRequest().body(false)
 			);
-		}
-
-		// 각 파일 검증
-		for (MultipartFile file : files) {
-			if (imageValidService.validateFile(file)) {
-				return CompletableFuture.completedFuture(
-					ResponseEntity.badRequest().body(false)
-				);
-			}
 		}
 
 		return CompletableFuture.supplyAsync(() -> {

@@ -29,8 +29,6 @@ public class NotificationApplicationService {
 	// 알림 전송
 	public void sendNotification(String userId, NotificationType type, String contentId, String content) {
 
-
-
 		notificationService.sendNotification(userId, type, contentId, content);
 	}
 
