@@ -83,7 +83,9 @@ fun newCardListScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(Color.White), // 배경 흰색으로 설정
+                /////////////////////////////////////////
+                .background(color = Color.White), // 수정해야하는부분
+            /////////////////////////////////////////////////////
         ) {
             when (uiState) {
                 is CardUiState.Loading -> {
@@ -95,10 +97,10 @@ fun newCardListScreen(
 
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        verticalArrangement = Arrangement.spacedBy(0.dp) // 수정완료( 카테고리 선택바 랑 alltabcard 사이 공간 )
                     ) {
                         item {
-                            TypeSelectBar(
+                            TypeSelectBar( // 상단 타입 선택하는 바
 //                                selectedCategory = selectedCategory,
 //                                onCategorySelected = { selectedCategory = it }
                                 selectedCategory = selectedCategory,
