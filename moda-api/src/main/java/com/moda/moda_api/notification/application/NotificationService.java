@@ -30,28 +30,13 @@ public class NotificationService {
 	// 알림 저장 및 FCM 전송
 	@Transactional
 	public void sendNotification(String userId, NotificationType type, String contentId, String content) {
-		// 1. 알림 저장
-		saveNotification(userId, type, contentId, content);
-		// 2. FCM 발송
-
+		// 1. FCM 발송
 		sendFCMNotification(userId, type, content);
-	}
-
-	// 알림 저장
-	private Notification saveNotification(String userId, NotificationType type, String contentId, String content) {
-		Notification notification = Notification.builder()
-			.userId(userId)
-			.type(type)
-			.contentId(contentId)
-			.content(content)
-			.build();
-		return notificationRepository.save(notification);
 	}
 
 	// FCM 발송
 	private void sendFCMNotification(String userId, NotificationType type, String content) {
 		// 유저 토큰 가져오기.
-		// 해당 유저Id에 해당하는 토큰 2개 이상을 가져와라~
 		Set<String> tokens = fcmTokenService.getUserTokens(userId);
 
 		tokens.forEach(token -> {
@@ -67,18 +52,17 @@ public class NotificationService {
 					.setNotification(AndroidNotification.builder()
 						.setIcon("moda_logo")
 						.setColor("#FFFFFF")
-						// 추가 가능한 개선사항들
-						.setClickAction("OPEN_ACTIVITY")  // 클릭 시 액션 설정
-						.setDefaultVibrateTimings(true)  // 기본 진동 설정
-						.setDefaultSound(true)           // 기본 알림음 사용
-						.setNotificationCount(1)         // 알림 개수 설정
+						.setClickAction("OPEN_ACTIVITY")
+						.setDefaultVibrateTimings(true)
+						.setDefaultSound(true)
+						.setNotificationCount(1)
 						.build())
 					.build())
 				.build();
 			try {
 				firebaseMessaging.send(message);
 			} catch (FirebaseMessagingException e) {
-				e.printStackTrace();
+				handleFCMException(e, token);
 			}
 		});
 	}
@@ -89,6 +73,7 @@ public class NotificationService {
 		}
 		log.error("FCM 발송 실패", e);
 	}
+
 
 	// 알림 조회
 	public List<Notification> getNotifications(String userId, boolean unreadOnly) {
