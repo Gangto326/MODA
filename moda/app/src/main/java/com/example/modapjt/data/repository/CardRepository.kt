@@ -109,4 +109,57 @@ class CardRepository {
         }
     }
 
+    // 즐겨찾기 전체탭 카드 리스트 가져오기 (api/search/bookmark)
+    suspend fun getAllTabBookMarkCards(userId: String): Result<List<Card>> {
+        return try {
+            println("[CardRepository] 전체탭 API 요청: userId=$userId")
+
+            val response = api.getAllTabBookMarkCardList(userId)
+            println("[CardRepository] 전체탭 응답 코드: ${response.code()}, 메시지: ${response.message()}")
+
+            if (response.isSuccessful) {
+                val body = response.body()
+                println("[CardRepository] 전체탭 응답 데이터: $body")
+
+                Result.success(body?.toDomain() ?: emptyList()) // ✅ 전체탭 응답 변환 적용
+            } else {
+                println("[CardRepository] 전체탭 응답 실패: ${response.errorBody()?.string()}")
+                Result.failure(Exception("전체탭 카드 리스트 불러오기 실패 - ${response.message()}"))
+            }
+        } catch (e: IOException) {
+            println("[CardRepository] 네트워크 오류 발생: ${e.message}")
+            Result.failure(Exception("네트워크 오류 발생: ${e.message}"))
+        } catch (e: Exception) {
+            println("[CardRepository] 전체탭 API 요청 예외 발생: ${e.message}")
+            Result.failure(e)
+        }
+    }
+
+    // 즐겨찾기 특정탭(이미지, 블로그, 뉴스, 영상) 카드 리스트 가져오기 (api/search)
+    suspend fun getTabBookMarkCards(userId: String, typeId: Int, page: Int, size: Int, sortDirection: String): Result<List<Card>> {
+        return try {
+            println("[CardRepository] 특정탭 API 요청: userId=$userId, typeId=$typeId, page=$page, size=$size, sortDirection=$sortDirection")
+
+            val response = api.getTabBookMarkCardList(userId, typeId, page, size, sortDirection = sortDirection) // sortDirection 추가됨
+
+            println("[CardRepository] 특정탭 응답 코드: ${response.code()}, 메시지: ${response.message()}")
+
+            if (response.isSuccessful) {
+                val body = response.body()
+                println("[CardRepository] 특정탭 응답 데이터: $body")
+
+                Result.success(body?.toDomain() ?: emptyList()) // ✅ 특정탭 응답 변환 적용
+            } else {
+                println("[CardRepository] 특정탭 응답 실패: ${response.errorBody()?.string()}")
+                Result.failure(Exception("특정탭 카드 리스트 불러오기 실패 - ${response.message()}"))
+            }
+        } catch (e: IOException) {
+            println("[CardRepository] 네트워크 오류 발생: ${e.message}")
+            Result.failure(Exception("네트워크 오류 발생: ${e.message}"))
+        } catch (e: Exception) {
+            println("[CardRepository] 특정탭 API 요청 예외 발생: ${e.message}")
+            Result.failure(e)
+        }
+    }
+
 }
