@@ -1,6 +1,7 @@
 package com.example.modapjt.data.api
 
 import com.example.modapjt.data.dto.response.HomeKeywordResponse
+import com.example.modapjt.data.dto.response.HotTopicItem
 import com.example.modapjt.data.dto.response.KeywordSearchResponse
 import com.example.modapjt.data.dto.response.SearchResponse
 import retrofit2.http.GET
@@ -35,6 +36,10 @@ interface SearchApiService {
         @Path("keyword") keyword: String,
         @Query("userId") userId: String
     ): List<KeywordSearchResponse>
+
+    @GET("api/card/hot-topic")
+    suspend fun getHotTopics(@Query("limit") limit: Int): List<HotTopicItem>
+
 
 }
 

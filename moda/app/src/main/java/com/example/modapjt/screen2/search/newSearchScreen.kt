@@ -35,7 +35,6 @@ import androidx.navigation.NavController
 import com.example.modapjt.components.search.KeywordRankList
 import com.example.modapjt.components.search.SearchKeywordList
 import com.example.modapjt.components.search.SearchScreenBar
-import com.example.modapjt.components.search.SearchSubtitle
 import com.example.modapjt.datastore.SearchKeywordDataStore
 import com.example.modapjt.domain.viewmodel.SearchViewModel
 import kotlinx.coroutines.Dispatchers
@@ -108,8 +107,7 @@ fun NewSearchScreen(
                 if (searchQuery.isEmpty()) {
                     // 🔹 검색어가 없을 때 최근 검색어 & 인기 검색어 표시
                     item { SearchKeywordList(context, navController = navController) }
-                    item { SearchSubtitle(title = "인기 검색어", date = "25.02.02 기준") }
-                    item { KeywordRankList() }
+                    item { KeywordRankList(viewModel = viewModel(),navController = navController) }
                 }
 
                 if (searchQuery.isNotEmpty()) {
