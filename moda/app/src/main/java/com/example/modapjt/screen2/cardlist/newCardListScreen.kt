@@ -95,7 +95,7 @@ fun newCardListScreen(
 
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         item {
                             TypeSelectBar(
