@@ -17,9 +17,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
@@ -37,6 +37,7 @@ fun ImageList(navController: NavController, images: List<ImageItem>) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
+            .clip(RoundedCornerShape(16.dp)) // 🔥 외곽 둥글게 만들기
     ) {
         // ✅ 가로 스크롤 가능하게 설정 (한 줄 정렬)
         Row(
@@ -56,8 +57,9 @@ fun ImageList(navController: NavController, images: List<ImageItem>) {
 fun ImageThumbnail(image: ImageItem, navController: NavController) {
     Box(
         modifier = Modifier
-            .size(120.dp)
-            .background(Color.LightGray, shape = RoundedCornerShape(12.dp))
+            .size(120.dp) // ✅ 크기 조정
+            .background(Color.LightGray, shape = RoundedCornerShape(12.dp)) // ✅ 라운딩 추가
+            .clip(RoundedCornerShape(16.dp)) // 🔥 외곽 둥글게 만들기
             .clickable { navController.navigate("cardDetail/${image.cardId}") }
     ) {
         Image(
@@ -66,12 +68,12 @@ fun ImageThumbnail(image: ImageItem, navController: NavController) {
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White, shape = RoundedCornerShape(12.dp))
+                .background(Color.White, shape = RoundedCornerShape(12.dp)) // ✅ 내부도 라운딩 맞추기
         )
 
-        // 🔥 북마크 아이콘 추가
+        // 🔥 북마크 아이콘 추가 (true/false에 따라 변경)
         androidx.compose.material3.Icon(
-            painter = painterResource(
+            painter = androidx.compose.ui.res.painterResource(
                 if (image.bookmark) R.drawable.ic_bookmark_filled else R.drawable.ic_bookmark_outline
             ),
             contentDescription = "Bookmark Icon",
@@ -83,3 +85,4 @@ fun ImageThumbnail(image: ImageItem, navController: NavController) {
         )
     }
 }
+
