@@ -4,6 +4,7 @@ package com.example.modapjt.components.bar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
@@ -74,6 +75,25 @@ fun BottomBarComponent(navController: NavController, currentRoute: String) {
             },
             colors = NavigationBarItemDefaults.colors(
                 indicatorColor = if (currentRoute == "file_upload_test") Color(0xFFFFF9C4) else Color.Transparent
+            )
+        )
+
+        // 검색 탭
+        NavigationBarItem(
+            icon = {
+                Icon(Icons.Default.Search, contentDescription = "검색", tint = Color(0xFF000000))
+            },
+            label = { Text("검색", color = Color(0xFF000000)) },
+            selected = currentRoute == "search",
+            onClick = {
+                if (currentRoute != "search") {
+                    navController.navigate("search") {
+                        popUpTo("home")
+                    }
+                }
+            },
+            colors = NavigationBarItemDefaults.colors(
+                indicatorColor = if (currentRoute == "search") Color(0xFFFFF9C4) else Color.Transparent
             )
         )
 
