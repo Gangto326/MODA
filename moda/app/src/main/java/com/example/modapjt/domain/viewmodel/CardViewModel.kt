@@ -181,18 +181,18 @@ class CardViewModel : ViewModel() {
 
 
     // 카드 삭제 기능 추가
-    fun deleteCard(card: Card) {
+    fun deleteCard(cardIds: List<String>) {
         viewModelScope.launch {
-            val result = repository.deleteCard(card.cardId)
+            val result = repository.deleteCard(cardIds)
 
             if (result.isSuccess) {
                 val currentState = _uiState.value
                 if (currentState is CardUiState.Success) {
                     _uiState.value = currentState.copy(
-                        images = currentState.images.filter { it.cardId != card.cardId },
-                        videos = currentState.videos.filter { it.cardId != card.cardId },
-                        blogs = currentState.blogs.filter { it.cardId != card.cardId },
-                        news = currentState.news.filter { it.cardId != card.cardId }
+                        images = currentState.images.filterNot { it.cardId in cardIds },
+                        videos = currentState.videos.filterNot { it.cardId in cardIds },
+                        blogs = currentState.blogs.filterNot { it.cardId in cardIds },
+                        news = currentState.news.filterNot { it.cardId in cardIds }
                     )
                 }
             } else {
@@ -200,6 +200,7 @@ class CardViewModel : ViewModel() {
             }
         }
     }
+
 }
 
 sealed class CardUiState {

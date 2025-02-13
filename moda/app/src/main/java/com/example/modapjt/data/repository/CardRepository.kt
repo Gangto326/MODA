@@ -87,11 +87,12 @@ class CardRepository {
     }
 
     // 카드 삭제 기능 추가
-    suspend fun deleteCard(cardId: String): Result<Boolean> {
+    suspend fun deleteCard(cardIds: List<String>): Result<Boolean> {
         return try {
-            println("[CardRepository] 카드 삭제 요청: cardId=$cardId")
+            val cardIdString = cardIds.joinToString(",") // "id1,id2,id3" 형태로 변환
+            println("[CardRepository] 카드 삭제 요청: cardIds=$cardIdString")
 
-            val response = api.deleteCard(cardId)
+            val response = api.deleteCard(cardIdString)
             println("[CardRepository] 카드 삭제 응답 코드: ${response.code()}, 메시지: ${response.message()}")
 
             if (response.isSuccessful) {
@@ -107,4 +108,5 @@ class CardRepository {
             Result.failure(e)
         }
     }
+
 }
