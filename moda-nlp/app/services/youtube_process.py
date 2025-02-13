@@ -11,7 +11,7 @@ from app.services.embedding import Embedding
 
 class YoutubeProcess:
     MAX_CATEGORY_TRIES = 10
-    MODEL = 'qwen2.5'
+    MODEL = 'deepseek-r1:14b'
 
     def __init__(self, origin_paragraph: List[TitleAndContent]):
         self.origin_content = json.dumps([p.model_dump() for p in origin_paragraph], ensure_ascii=False)

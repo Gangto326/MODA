@@ -11,7 +11,7 @@ from app.services.embedding import Embedding
 
 class PostSummary:
     MAX_CATEGORY_TRIES = 10
-    MODEL = 'qwen2.5'
+    MODEL = 'deepseek-r1:14b'
 
     def __init__(self, origin_content: str):
         self.origin_content = origin_content
