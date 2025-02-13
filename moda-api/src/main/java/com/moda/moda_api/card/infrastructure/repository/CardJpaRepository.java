@@ -109,4 +109,6 @@ public interface CardJpaRepository extends JpaRepository<CardEntity, String> {
     @Modifying
     @Query("UPDATE CardEntity c SET c.viewCount = c.viewCount + :increment WHERE c.cardId = :cardId")
     void updateViewCount(@Param("cardId") String cardId, @Param("increment") int increment);
+
+    Boolean existsByUserIdAndUrlHashAndDeletedAtIsNull(String value, String urlHash);
 }

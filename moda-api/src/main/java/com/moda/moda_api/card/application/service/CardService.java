@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 import com.moda.moda_api.card.application.response.CardMainResponse;
 import com.moda.moda_api.card.application.response.HotTopicResponse;
 import com.moda.moda_api.card.domain.*;
+import com.moda.moda_api.card.exception.DuplicateCardException;
+import com.moda.moda_api.card.exception.InvalidCardContentException;
 import com.moda.moda_api.card.presentation.request.CardBookmarkRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -66,6 +68,10 @@ public class CardService {
 	public CompletableFuture<Boolean> createCard(String userId, String url) {
 		UserId userIdObj = new UserId("user");
 		String urlHash = UrlCache.generateHash(url);
+
+		if (cardRepository.existsByUserIdAndUrlHashAndDeletedAtIsNull(userIdObj, urlHash)) {
+			throw new DuplicateCardException("같은 URL을 가진 카드가 이미 존재합니다.");
+		}
 
 		return urlCacheRepository.findByUrlHash(urlHash)
 			.map(cache -> createCardFromCache(userIdObj, urlHash))

@@ -123,4 +123,9 @@ public class CardRepositoryImpl implements CardRepository {
 
         return cardEntities.map(cardEntityMapper::toDomain);
     }
+
+    @Override
+    public Boolean existsByUserIdAndUrlHashAndDeletedAtIsNull(UserId userId, String urlHash) {
+        return cardJpaRepository.existsByUserIdAndUrlHashAndDeletedAtIsNull(userId.getValue(), urlHash);
+    }
 }
