@@ -98,7 +98,8 @@ public class CardService {
 			cache.getCachedTitle(),
 			cache.getCachedContent(),
 			cache.getCachedThumbnailContent(),
-			cache.getCachedThumbnailContent(),
+			// TODO: 2-14 종원 확인 필요
+			cache.getCachedThumbnailUrl(),
 			cache.getCachedEmbedding(),
 			cache.getCachedKeywords(),
 			cache.getCachedSubContents()
