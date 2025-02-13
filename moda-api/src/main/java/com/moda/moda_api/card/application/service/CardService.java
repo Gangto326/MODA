@@ -55,6 +55,7 @@ public class CardService {
 	private final ImageStorageService imageStorageService;
 	private final PythonAiClient pythonAiClient;
 	private final CardSearchRepository cardSearchRepository;
+
 	/**
 	 * URL을 입력 받고 새로운 카드 생성 후 알맞은 보드로 이동합니다.
 	 * @param userId
@@ -420,7 +421,7 @@ public class CardService {
 	 */
 	public CardMainResponse getMainKeywords(String userId) {
 		UserId userIdObj = new UserId(userId);
-
+		System.out.println(videoCreatorRepository.getCreatorByUserId(userIdObj));
 		return CardMainResponse.builder()
 				.topKeywords(userKeywordRepository.getTopKeywords(userIdObj, 5))
 				.creator(videoCreatorRepository.getCreatorByUserId(userIdObj))
