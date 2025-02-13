@@ -64,7 +64,7 @@ public class CardService {
 	 */
 	@Transactional
 	public CompletableFuture<Boolean> createCard(String userId, String url) {
-		UserId userIdObj = new UserId("user123");
+		UserId userIdObj = new UserId("user");
 		String urlHash = UrlCache.generateHash(url);
 
 		return urlCacheRepository.findByUrlHash(urlHash)
@@ -297,6 +297,9 @@ public class CardService {
 		// Card 삭제 권한 검증
 		cardsToDelete.forEach(card -> card.validateOwnership(userIdObj));
 
+		// ES에서 카드 삭제
+		cardSearchRepository.deleteAllById(cardIdList);
+
 		// 카드 삭제
 		return cardRepository.deleteAll(cardsToDelete);
 	}
@@ -427,7 +430,7 @@ public class CardService {
 	 */
 	public CardMainResponse getMainKeywords(String userId) {
 		UserId userIdObj = new UserId(userId);
-		System.out.println(videoCreatorRepository.getCreatorByUserId(userIdObj));
+
 		return CardMainResponse.builder()
 				.topKeywords(userKeywordRepository.getTopKeywords(userIdObj, 5))
 				.creator(videoCreatorRepository.getCreatorByUserId(userIdObj))

@@ -4,6 +4,7 @@ import com.moda.moda_api.card.domain.Card;
 import com.moda.moda_api.card.domain.CardId;
 import com.moda.moda_api.card.domain.CardRepository;
 import com.moda.moda_api.card.exception.CardNotFoundException;
+import com.moda.moda_api.card.infrastructure.entity.CardDtoEntity;
 import com.moda.moda_api.card.infrastructure.entity.CardEntity;
 import com.moda.moda_api.card.infrastructure.mapper.CardEntityMapper;
 import com.moda.moda_api.category.domain.CategoryId;
@@ -50,12 +51,6 @@ public class CardRepositoryImpl implements CardRepository {
     @Override
     public Optional<Card> findByUserIdAndCardId(UserId userId, CardId cardId) {
         Optional<CardEntity> entity = cardJpaRepository.findByUserIdAndCardId(userId.getValue(), cardId.getValue());
-
-        // 명시적 초기화
-        if (entity.isPresent()) {
-            Hibernate.initialize(entity.get().getUrlCache());
-        }
-
         return entity.map(card -> cardEntityMapper.toDomain(card));
     }
 
@@ -93,7 +88,7 @@ public class CardRepositoryImpl implements CardRepository {
 
     @Override
     public List<Card> findByUserIdAndTypeIdIn(UserId userIdObj, List<Integer> typeIds, Pageable pageable) {
-        List<CardEntity> cardEntities = cardJpaRepository.findByUserIdAndTypeIdInAndDeletedAtIsNull(
+        List<CardDtoEntity> cardEntities = cardJpaRepository.findByUserIdAndTypeIdInAndDeletedAtIsNull(
                 userIdObj.getValue(), typeIds, pageable);
 
         return cardEntities.stream()
@@ -103,7 +98,7 @@ public class CardRepositoryImpl implements CardRepository {
 
     @Override
     public List<Card> findRandomCards(UserId userIdObj, LocalDateTime startDate, LocalDateTime endDate, List<Integer> typeIds, Pageable toDaysPage) {
-        List<CardEntity> cardEntities = cardJpaRepository.findRandomCards(
+        List<CardDtoEntity> cardEntities = cardJpaRepository.findRandomCards(
                 userIdObj.getValue(), startDate, endDate, typeIds, toDaysPage);
 
         return cardEntities.stream()
@@ -113,7 +108,7 @@ public class CardRepositoryImpl implements CardRepository {
 
     @Override
     public List<Card> findByUserIdAndViewCountAndTypeIdIn(UserId userId, Integer viewCount, List<Integer> typeIds, Pageable pageable) {
-        List<CardEntity> cardEntities = cardJpaRepository.findByUserIdAndViewCountAndTypeIdIn(
+        List<CardDtoEntity> cardEntities = cardJpaRepository.findByUserIdAndViewCountAndTypeIdIn(
                 userId.getValue(), viewCount, typeIds, pageable);
 
         return cardEntities.stream()
@@ -123,7 +118,7 @@ public class CardRepositoryImpl implements CardRepository {
 
     @Override
     public Slice<Card> findByUserIdAndBookmarkTrueAndTypeIdAndDeletedAtIsNull(UserId userId, Integer typeId, Pageable pageable) {
-        Slice<CardEntity> cardEntities = cardJpaRepository.findByUserIdAndBookmarkTrueAndTypeIdAndDeletedAtIsNull(
+        Slice<CardDtoEntity> cardEntities = cardJpaRepository.findByUserIdAndBookmarkTrueAndTypeIdAndDeletedAtIsNull(
                 userId.getValue(), typeId, pageable);
 
         return cardEntities.map(cardEntityMapper::toDomain);

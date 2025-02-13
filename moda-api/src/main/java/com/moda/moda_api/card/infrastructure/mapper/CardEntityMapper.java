@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import com.moda.moda_api.card.domain.Card;
 import com.moda.moda_api.card.domain.CardId;
 import com.moda.moda_api.card.domain.EmbeddingVector;
+import com.moda.moda_api.card.infrastructure.entity.CardDtoEntity;
 import com.moda.moda_api.card.infrastructure.entity.CardEntity;
 import com.moda.moda_api.card.infrastructure.entity.UrlCacheEntity;
 import com.moda.moda_api.category.domain.CategoryId;
@@ -74,4 +75,26 @@ public class CardEntityMapper {
             .collect(Collectors.toList());
     }
 
+    public Card toDomain(CardDtoEntity dto) {
+        return Card.builder()
+                .cardId(new CardId(dto.getCardId()))
+                .userId(new UserId(dto.getUserId()))
+                .categoryId(new CategoryId(dto.getCategoryId()))
+                .typeId(dto.getTypeId())
+                .urlHash(dto.getUrlHash())
+                .originalUrl(dto.getOriginalUrl())
+                .title(dto.getTitle())
+                .content(dto.getContent())
+                .thumbnailContent(dto.getThumbnailContent())
+                .thumbnailUrl(dto.getThumbnailUrl())
+                .embedding(new EmbeddingVector(dto.getEmbedding()))
+                .viewCount(dto.getViewCount())
+                .keywords(dto.getKeywords())
+                .subContents(dto.getSubContents())
+                .bookmark(dto.getBookmark())
+                .createdAt(dto.getCreatedAt())
+                .updatedAt(dto.getUpdatedAt())
+                .deletedAt(dto.getDeletedAt())
+                .build();
+    }
 }
