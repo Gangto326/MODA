@@ -35,15 +35,13 @@ import com.example.modapjt.R
 import com.example.modapjt.components.bar.BottomBarComponent
 import com.example.modapjt.components.bar.HeaderBar
 import com.example.modapjt.components.bar.SearchBar
-import com.example.modapjt.components.home.BottomThumbnailList
 import com.example.modapjt.components.home.CategoryList
-import com.example.modapjt.components.home.FirstKeywordList
-import com.example.modapjt.components.home.ForgottenContentItem
-import com.example.modapjt.components.home.HomeSmallTitle
-import com.example.modapjt.components.home.ImageListComponent
 import com.example.modapjt.components.home.ThumbnailSlider
-import com.example.modapjt.components.home.VideoListComponent
-import com.example.modapjt.components.home.WeeklyKeywordList
+import com.example.modapjt.components.home.section.ForgottenContentSection
+import com.example.modapjt.components.home.section.ImageSection
+import com.example.modapjt.components.home.section.TodayContentSection
+import com.example.modapjt.components.home.section.VideoSection
+import com.example.modapjt.components.home.section.WeeklyKeywordSection
 import com.example.modapjt.domain.viewmodel.CategoryViewModel
 import com.example.modapjt.domain.viewmodel.SearchViewModel
 
@@ -144,39 +142,20 @@ fun newHomeScreen(
             }
 
             item {
-                HomeSmallTitle(
-                    title = "이번주 주요 키워드",
-                    description = "| 이번주 사용자가 많이 저장한 키워드"
+                WeeklyKeywordSection(
+                    homeKeywordViewModel = homeKeywordViewModel,
+                    userId = userId,
+                    navController = navController,
+                    searchViewModel = searchViewModel
                 )
             }
 
-            item {
-                WeeklyKeywordList(homeKeywordViewModel, userId = userId) // ✅ API에서 받아온 키워드 리스트 적용
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
-            item{
-                FirstKeywordList(navController, searchViewModel)
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
 
             item {
-                Divider(color = Color(0xFFDCDCDC), thickness = 4.dp, modifier = Modifier.padding(horizontal = 0.dp))
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
-            item {
-                HomeSmallTitle(
-                    title = "오늘의 컨텐츠",
-                    description = " | 해당 컨텐츠에 대한 설명"
+                TodayContentSection(
+                    navController = navController,
+                    searchViewModel = searchViewModel
                 )
-            }
-
-            // ✅ `BottomThumbnailList` 분리하여 관리
-            item {
-                BottomThumbnailList(navController, searchViewModel)
-                Spacer(modifier = Modifier.height(16.dp))
             }
 
             item {
@@ -193,59 +172,28 @@ fun newHomeScreen(
             }
 
             item {
-                HomeSmallTitle(
-                    title = if (creator.isNotEmpty()) "$creator 영상 어때요?" else "영상 어때요?",
-                    description = ""
-                )
-            }
-
-            item {
-                VideoListComponent(navController, searchViewModel)
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
-            item {
-                Divider(color = Color(0xFFDCDCDC), thickness = 4.dp, modifier = Modifier.padding(horizontal = 0.dp))
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
-            item {
-                HomeSmallTitle(
-                    title = "이미지 보고가세요",
-                    description = "| 해당 컨텐츠들에 대한 설명"
-                )
-            }
-
-            item{
-                ImageListComponent(navController, searchViewModel)
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
-
-            item {
-                Divider(color = Color(0xFFDCDCDC), thickness = 4.dp, modifier = Modifier.padding(horizontal = 0.dp))
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
-            item {
-                HomeSmallTitle(
-                    title = "잊고있던 컨텐츠",
-                    description = "| 해당 컨텐츠들에 대한 설명"
+                VideoSection(
+                    navController = navController,
+                    homeKeywordViewModel = homeKeywordViewModel,
+                    searchViewModel = searchViewModel
                 )
             }
 
 
             item {
-                ForgottenContentItem(navController, searchViewModel)
-                Spacer(modifier = Modifier.height(16.dp))
+                ImageSection(
+                    navController = navController,
+                    searchViewModel = searchViewModel
+                )
             }
+
 
             item {
-                Divider(color = Color(0xFFDCDCDC), thickness = 4.dp, modifier = Modifier.padding(horizontal = 0.dp))
-                Spacer(modifier = Modifier.height(16.dp))
+                ForgottenContentSection(
+                    navController = navController,
+                    searchViewModel = searchViewModel
+                )
             }
-
-
         }
     }
 }
