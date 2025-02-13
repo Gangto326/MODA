@@ -11,7 +11,7 @@ from app.services.embedding import Embedding
 
 class YoutubeProcess:
     MAX_CATEGORY_TRIES = 10
-    MODEL = 'qwen2.5'
+    MODEL = 'ollama run hf.co/heegyu/EEVE-Korean-Instruct-10.8B-v1.0-GGUF:Q4_K_M'
 
     def __init__(self, origin_paragraph: List[TitleAndContent]):
         self.origin_content = json.dumps([p.model_dump() for p in origin_paragraph], ensure_ascii=False)
