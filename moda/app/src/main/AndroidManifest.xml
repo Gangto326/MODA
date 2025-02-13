@@ -51,13 +51,13 @@
 
         <!-- 오버레이 서비스 추가 -->
         <service
-            android:name=".OverlayService"
+            android:name=".overlay.OverlayService"
             android:enabled="true"
             android:exported="false" />
 
         <!-- 접근성 서비스 추가 -->
         <service
-            android:name=".BrowserAccessibilityService"
+            android:name=".overlay.BrowserAccessibilityService"
             android:exported="false"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>

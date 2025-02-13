@@ -1,9 +1,8 @@
-package com.example.modapjt
+package com.example.modapjt.overlay
 
 import android.accessibilityservice.AccessibilityService
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
-import android.view.accessibility.AccessibilityNodeInfo
 
 class BrowserAccessibilityService : AccessibilityService() {
     companion object {

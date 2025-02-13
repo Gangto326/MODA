@@ -1,4 +1,4 @@
-package com.example.modapjt
+package com.example.modapjt.overlay
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween

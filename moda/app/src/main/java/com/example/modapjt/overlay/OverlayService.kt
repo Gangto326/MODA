@@ -1,4 +1,4 @@
-package com.example.modapjt
+package com.example.modapjt.overlay
 
 import android.content.Intent
 import android.graphics.PixelFormat
@@ -40,6 +40,7 @@ import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
+import com.example.modapjt.R
 import com.example.modapjt.data.repository.CardRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -78,7 +79,7 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
 
     private val screenWidth by lazy { resources.displayMetrics.widthPixels.toFloat() }
     private val screenHeight by lazy { resources.displayMetrics.heightPixels.toFloat() }
-    private val duration = 800
+    private val duration = 1000
     private val easing = EaseInOutCirc
     private val iconSize by lazy { screenWidth.roundToInt() / 6 }
 
@@ -257,6 +258,8 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
         _targetXState.value = params.x
         _targetYState.value = params.y
         _isCollapsedState.value = isPointInCollapsedTrash(params.x, params.y)
+
+        Log.d("OverlayService", if (_isCollapsedState.value) "겹침" else "안겹침")
 
         windowManager?.updateViewLayout(overlayView, params)
     }
