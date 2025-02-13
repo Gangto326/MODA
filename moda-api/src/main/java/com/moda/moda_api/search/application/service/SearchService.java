@@ -500,9 +500,9 @@ public class SearchService {
 				).stream()
 						// 가져온 20개의 이미지 데이터를 생성일 기준으로 재정렬
 						.sorted(Comparator.comparing(Card::getCreatedAt))
-						.collect(Collectors.toList()), executorService);
-//				.orTimeout(2, TimeUnit.SECONDS)
-//				.exceptionally(ex -> Collections.emptyList());
+						.collect(Collectors.toList()), executorService)
+				.orTimeout(2, TimeUnit.SECONDS)
+				.exceptionally(ex -> Collections.emptyList());
 
 		/**
 		 * 잊고 있던 컨텐츠
