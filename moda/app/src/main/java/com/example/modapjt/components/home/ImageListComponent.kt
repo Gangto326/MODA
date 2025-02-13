@@ -17,7 +17,8 @@ fun ImageListComponent(navController: NavController, viewModel: SearchViewModel)
                 images = images.map {
                     ImageItem(
                         cardId = it.cardId,
-                        thumbnailUrl = it.thumbnailUrl?: ""
+                        thumbnailUrl = it.thumbnailUrl?: "",
+                        bookmark = it.bookmark ?: false  // 🔥 북마크 필드 추가
                     )
                 }
             )
