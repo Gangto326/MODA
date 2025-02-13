@@ -96,6 +96,15 @@ public class CardEntity {
 	private ContentTypeEntity contentType;
 
 	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "url_hash", insertable = false, updatable = false)
+	@JoinColumn(name = "url_hash", insertable = false, updatable = false, nullable = true)
 	private UrlCacheEntity urlCache;
+
+
+	public UrlCacheEntity getUrlCache() {
+		return urlCache;
+	}
+
+	public boolean hasUrlCache() {
+		return urlCache != null;
+	}
 }

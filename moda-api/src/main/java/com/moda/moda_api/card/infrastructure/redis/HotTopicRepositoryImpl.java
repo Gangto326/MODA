@@ -24,14 +24,26 @@ public class HotTopicRepositoryImpl implements HotTopicRepository {
     }
 
     @Override
-    public void incrementKeywordScore(String keyword) {
-        // 전체 순위에 추가/증가
-        redisTemplate.opsForZSet().incrementScore(HOT_TOPIC_KEY, keyword, 1);
+    public void incrementKeywordScore(String[] keywords) {
+        // null 또는 빈 배열인 경우 아무 작업도 수행하지 않음
+        if (keywords == null || keywords.length == 0) {
+            return;
+        }
 
-        // 일별 순위에 추가/증가
+        // 현재 날짜의 일별 키
         String dailyKey = "trending:keywords:daily:" +
                 LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        redisTemplate.opsForZSet().incrementScore(dailyKey, keyword, 1);
+
+        // 배열의 각 키워드에 대해 점수 증가
+        for (String keyword : keywords) {
+            if (keyword != null && !keyword.isEmpty()) {
+                // 전체 순위에 추가/증가
+                redisTemplate.opsForZSet().incrementScore(HOT_TOPIC_KEY, keyword, 1);
+
+                // 일별 순위에 추가/증가
+                redisTemplate.opsForZSet().incrementScore(dailyKey, keyword, 1);
+            }
+        }
     }
 
     /**
@@ -43,6 +55,11 @@ public class HotTopicRepositoryImpl implements HotTopicRepository {
     public void savePreviousTop() {
         Set<String> currentTop = redisTemplate.opsForZSet()
                 .reverseRange(HOT_TOPIC_KEY, 0, 9);
+
+        // 현재 top 키워드가 없으면 아무 작업도 수행하지 않음
+        if (currentTop == null || currentTop.isEmpty()) {
+            return;
+        }
 
         // 기존 리스트 삭제 후 새로 저장
         redisTemplate.delete(PREVIOUS_TOP_KEY);

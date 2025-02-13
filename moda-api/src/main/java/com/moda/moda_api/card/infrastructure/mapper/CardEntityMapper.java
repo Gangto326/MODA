@@ -38,6 +38,9 @@ public class CardEntityMapper {
     }
 
     public Card toDomain(CardEntity entity) {
+
+        UrlCacheEntity urlCache = entity.hasUrlCache() ? entity.getUrlCache() : null;
+
         return Card.builder()
                 .cardId(new CardId(entity.getCardId()))
                 .userId(new UserId(entity.getUserId()))
@@ -46,9 +49,9 @@ public class CardEntityMapper {
                 .urlHash(entity.getUrlHash())
 //                .originalUrl(entity.getUrlCache().getOriginalUrl())
                 .originalUrl(
-                        Optional.ofNullable(entity.getUrlCache())
-                                .map(UrlCacheEntity::getOriginalUrl)
-                                .orElse(null)
+                        urlCache != null
+                                ? urlCache.getOriginalUrl()
+                                : null
                 )
                 .title(entity.getTitle())
                 .content(entity.getContent())
