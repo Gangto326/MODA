@@ -1,6 +1,7 @@
 package com.moda.moda_api.search.domain;
 
 import com.moda.moda_api.card.domain.Card;
+import com.moda.moda_api.card.domain.CardId;
 import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.user.domain.UserId;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +23,8 @@ public interface CardSearchRepository {
     Slice<CardDocument> searchByAllCategoryAndType(Integer typeId, UserId userId, Pageable pageable);
 
     CardDocument save(Card card);
+
+    void deleteAllById(List<CardId> cardIds);
 
     List<CardDocument> saveAll(List<Card> cards);
 

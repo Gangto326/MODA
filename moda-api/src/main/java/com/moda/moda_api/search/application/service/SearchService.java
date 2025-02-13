@@ -11,10 +11,7 @@ import java.util.stream.Stream;
 
 import com.moda.moda_api.card.domain.*;
 import com.moda.moda_api.user.domain.User;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -108,7 +105,7 @@ public class SearchService {
 		List<Integer> targetTypes = List.of(1, 2, 3, 4);
 
 		// IMG(4) 타입은 10개
-		Map<Integer, Integer> typeSizes = Map.of(1, 5, 2, 5, 3, 5, 4, 10);
+		Map<Integer, Integer> typeSizes = Map.of(1, 10, 2, 10, 3, 10, 4, 15);
 
 		// 쿼리 기준 검색인 경우
 		if (categoryId == 0L) {
@@ -201,8 +198,32 @@ public class SearchService {
 				typeId, userIdObj, searchText, sliceRequestDto.toPageable()
 			);
 
+			List<CardDocument> filteredContent = cardDocuments.getContent().stream()
+					// title 기준으로 그룹화하고 owner 우선 선택 (중복 데이터 제거)
+					.collect(Collectors.groupingBy(CardDocument::getTitle))
+					.values()
+					.stream()
+					.map(sameGroupDocs -> sameGroupDocs.stream()
+							.filter(doc -> doc.isOwnedBy(userIdObj))
+							.findFirst()
+							.orElseGet(() -> sameGroupDocs.get(0)))
+					.collect(Collectors.toList());
+
+			// 결과를 score 기준으로 정렬
+			filteredContent.sort((doc1, doc2) -> Float.compare(
+					doc2.getScore() != null ? doc2.getScore() : Float.MIN_VALUE,
+					doc1.getScore() != null ? doc1.getScore() : Float.MIN_VALUE
+			));
+
+			// 필터링된 content로 새로운 Slice 생성
+			Slice<CardDocument> filteredSlice = new SliceImpl<>(
+					filteredContent,
+					cardDocuments.getPageable(),
+					cardDocuments.hasNext()
+			);
+
 			return SliceResponseDto.of(
-				cardDocuments.map(cardDocument -> cardSearchDtoMapper.toListResponse(
+					filteredSlice.map(cardDocument -> cardSearchDtoMapper.toListResponse(
 					cardDocument, searchText, userIdObj)
 				)
 			);
@@ -244,10 +265,48 @@ public class SearchService {
 				// 타입별 데이터 가져오기
 				Slice<CardDocument> results = cardSearchRepository.searchComplex(
 					typeId, userId, searchText, pageRequest);
+
+				List<CardDocument> content;
+
+				if (typeId != 4) {  // 이미지가 아닌 경우만 실행
+					// title 기준으로 그룹화하고 owner 우선 선택 (중복 제거)
+					content = results.getContent().stream()
+							.collect(Collectors.groupingBy(CardDocument::getTitle))
+							.values()
+							.stream()
+							.map(sameGroupDocs -> sameGroupDocs.stream()
+									.filter(doc -> doc.isOwnedBy(userId))
+									.findFirst()
+									.orElseGet(() -> sameGroupDocs.get(0)))
+							.collect(Collectors.toList());
+
+					// score 기준으로 정렬
+					content.sort((doc1, doc2) -> Float.compare(
+							doc2.getScore() != null ? doc2.getScore() : Float.MIN_VALUE,
+							doc1.getScore() != null ? doc1.getScore() : Float.MIN_VALUE
+					));
+
+				} else { // 이미지의 경우 ThumbnailUrl로 판단
+					content = results.getContent().stream()
+							.collect(Collectors.groupingBy(CardDocument::getThumbnailUrl))
+							.values()
+							.stream()
+							.map(sameGroupDocs -> sameGroupDocs.stream()
+									.filter(doc -> doc.isOwnedBy(userId))
+									.findFirst()
+									.orElseGet(() -> sameGroupDocs.get(0)))
+							.collect(Collectors.toList());
+
+					// score 기준으로 정렬
+					content.sort((doc1, doc2) -> Float.compare(
+							doc2.getScore() != null ? doc2.getScore() : Float.MIN_VALUE,
+							doc1.getScore() != null ? doc1.getScore() : Float.MIN_VALUE
+					));
+				}
+
 				return Map.entry(
 					CardContentType.from(typeId),
-					results.getContent().stream()
-						.toList()
+						content
 				);
 			}))
 			.toList();

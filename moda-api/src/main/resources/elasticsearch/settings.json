@@ -2,7 +2,8 @@
   "analysis": {
     "analyzer": {
       "korean": {
-        "type": "nori"
+        "type": "nori",
+        "decompound_mode": "mixed"
       },
       "korean_completion": {
         "type": "custom",
@@ -22,7 +23,8 @@
       "ngram_tokenizer": {
         "type": "ngram",
         "min_gram": 2,
-        "max_gram": 10
+        "max_gram": 10,
+        "token_chars": ["letter", "digit"]
       }
     },
     "filter": {

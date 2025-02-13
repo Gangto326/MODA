@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import co.elastic.clients.elasticsearch._types.SortOptionsBuilders;
-import co.elastic.clients.elasticsearch._types.query_dsl.FunctionBoostMode;
+import co.elastic.clients.elasticsearch._types.query_dsl.*;
+import com.moda.moda_api.card.domain.CardId;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
@@ -27,16 +27,13 @@ import com.moda.moda_api.search.infrastructure.mapper.CardDocumentMapper;
 import com.moda.moda_api.user.domain.UserId;
 
 import co.elastic.clients.elasticsearch._types.FieldValue;
-import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
-import co.elastic.clients.elasticsearch._types.query_dsl.Query;
-import co.elastic.clients.elasticsearch._types.query_dsl.TermsQueryField;
 import lombok.RequiredArgsConstructor;
 
 
 @Repository
 @RequiredArgsConstructor
 public class CardSearchRepositoryImpl implements CardSearchRepository {
-    private static final float MIN_SCORE = 0.7f;
+    private static final float MIN_SCORE = 1.43f;
 
     private final ElasticsearchOperations elasticsearchOperations;
     private final CardSearchJpaRepository cardSearchJpaRepository;
@@ -46,8 +43,16 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
     @Override
     public CardDocument save(Card card) {
         CardDocumentEntity entity = cardDocumentMapper.toEntity(card);
-        System.out.println(entity.toString());
+//        System.out.println(entity.toString());
         return cardDocumentMapper.toDomain(elasticsearchOperations.save(entity));
+    }
+
+    // 카드 Delete
+    @Override
+    public void deleteAllById(List<CardId> cardIds) {
+        cardSearchJpaRepository.deleteAllById(cardIds.stream()
+                .map(card -> card.getValue())
+                .collect(Collectors.toList()));
     }
 
     // CardDocument 리스트 생성
@@ -287,14 +292,24 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                                 .term(term -> term
                                         .field("userId")
                                         .value(userId.getValue())
-                                        .boost(1.6f)
+                                        .boost(1.8f)
                                 )
                         ))
                         .should(Query.of(q -> q
                                 // 검색어는 키워드, 제목, 콘텐츠 순으로 가중치 차등 지급
                                 .multiMatch(multiMatch -> multiMatch
                                         .query(searchText)
-                                        .fields("keywords.keyword^0.8", "title^0.5", "content^0.3")
+                                                .fields(
+                                                        "keywords^0.25",
+                                                        "keywords.ngram^0.55",
+                                                        "title^0.4",
+                                                        "title.ngram^0.4",
+                                                        "content^0.35",
+                                                        "content.ngram^0.3"
+                                                )
+                                                .type(TextQueryType.BestFields)
+                                                .operator(Operator.Or)
+//                                        .fields("keywords.ngram^0.7", "title.ngram^0.5", "content.ngram^0.3")
                                 )
                         ))
                         .minimumShouldMatch("1")
@@ -334,6 +349,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                         .term(term -> term
                                 .field("userId")
                                 .value(userId.getValue())
+                                .boost(3.0f)
                         )
                 ));
 
@@ -363,6 +379,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                         .term(term -> term
                                 .field("userId")
                                 .value(userId.getValue())
+                                .boost(3.0f)
                         )
                 ));
 

@@ -40,5 +40,8 @@ out/
 src/main/resources/application-*.properties
 src/main/resources/moda-app-42206-firebase-adminsdk-fbsvc-37c9aa54d2.json
 
+## SERVER 전용 ##
+src/main/java/com/moda/moda_api/common/config/WebDriverConfig
+
 ## 
 .env

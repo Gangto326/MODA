@@ -13,7 +13,7 @@ public class HotTopicRankingScheduler {
         this.hotTopicRepositoryImpl = hotTopicRepositoryImpl;
     }
 
-    @Scheduled(cron = "0 0 */3 * * *")  // 30분마다 실행
+    @Scheduled(cron = "0 0 0 * * *")  // 매일 자정에 실행
     public void saveCurrentRanking() {
         log.info("핫 토픽 랭킹을 갱신합니다...");
         hotTopicRepositoryImpl.savePreviousTop();

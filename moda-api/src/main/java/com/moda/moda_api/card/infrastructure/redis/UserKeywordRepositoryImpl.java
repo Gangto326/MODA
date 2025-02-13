@@ -50,7 +50,7 @@ public class UserKeywordRepositoryImpl implements UserKeywordRepository {
     }
 
     /**
-     * user별 count가 가장 높은 키워드를 가져옵니다.
+     * user별 7일 이내 count가 가장 높은 키워드를 가져옵니다.
      * @param userId
      * @param limit
      * @return

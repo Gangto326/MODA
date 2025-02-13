@@ -36,4 +36,6 @@ public interface CardRepository {
     List<Card> findByUserIdAndViewCountAndTypeIdIn(UserId userId, Integer viewCount, List<Integer> typeIds, Pageable pageable);
 
     Slice<Card> findByUserIdAndBookmarkTrueAndTypeIdAndDeletedAtIsNull(UserId userId, Integer typeId, Pageable pageable);
+
+    Boolean existsByUserIdAndUrlHashAndDeletedAtIsNull(UserId userId, String urlHash);
 }

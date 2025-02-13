@@ -14,16 +14,18 @@ import com.moda.moda_api.summary.infrastructure.dto.TitleAndContent;
 import com.moda.moda_api.summary.infrastructure.dto.YoutubeAPIResponseDTO;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PythonAnalysisService {
 	private final PythonAiClient pythonAiClient;
-	private final YoutubeApiClient youtubeApiClient;
 
 	public AIAnalysisResponseDTO youtubeAnalyze(List<TitleAndContent> titleAndContents) {
 		// AI 분석 키워드를 받고.
-
+		log.info("파이썬 분석하기직전");
 		return pythonAiClient.youtubeAnalysis(AiYoutubeRequestDTO.builder()
 			.paragraph(titleAndContents)
 			.build());

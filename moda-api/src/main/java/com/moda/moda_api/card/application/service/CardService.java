@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 import com.moda.moda_api.card.application.response.CardMainResponse;
 import com.moda.moda_api.card.application.response.HotTopicResponse;
 import com.moda.moda_api.card.domain.*;
+import com.moda.moda_api.card.exception.DuplicateCardException;
+import com.moda.moda_api.card.exception.InvalidCardContentException;
 import com.moda.moda_api.card.presentation.request.CardBookmarkRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -67,6 +69,10 @@ public class CardService {
 		UserId userIdObj = new UserId("user");
 		String urlHash = UrlCache.generateHash(url);
 
+		if (cardRepository.existsByUserIdAndUrlHashAndDeletedAtIsNull(userIdObj, urlHash)) {
+			throw new DuplicateCardException("같은 URL을 가진 카드가 이미 존재합니다.");
+		}
+
 		return urlCacheRepository.findByUrlHash(urlHash)
 			.map(cache -> createCardFromCache(userIdObj, urlHash))
 			.orElseGet(() -> {
@@ -92,7 +98,8 @@ public class CardService {
 			cache.getCachedTitle(),
 			cache.getCachedContent(),
 			cache.getCachedThumbnailContent(),
-			cache.getCachedThumbnailContent(),
+			// TODO: 2-14 종원 확인 필요
+			cache.getCachedThumbnailUrl(),
 			cache.getCachedEmbedding(),
 			cache.getCachedKeywords(),
 			cache.getCachedSubContents()
@@ -183,16 +190,16 @@ public class CardService {
 					String urlHash = UrlCache.generateHash(s3Url);
 
 					// 실제 AI 분석
-					// AIAnalysisResponseDTO aiAnalysisResponseDTO = pythonAiClient.imageAnalysis(new AiImageRequestDTO(s3Url));
+					AIAnalysisResponseDTO aiAnalysisResponseDTO = pythonAiClient.imageAnalysis(new AiImageRequestDTO(s3Url));
 
 					// AI Test생성
-					AIAnalysisResponseDTO aiAnalysisResponseDTO = AIAnalysisResponseDTO.builder()
-						.keywords(new String[] {"3차"})
-						.embeddingVector(new EmbeddingVector(null))
-						.categoryId(new CategoryId(1L))
-						.content("AIContnet")
-						.thumbnailContent("abcd")
-						.build();
+					// AIAnalysisResponseDTO aiAnalysisResponseDTO = AIAnalysisResponseDTO.builder()
+					// 	.keywords(new String[] {"3차"})
+					// 	.embeddingVector(new EmbeddingVector(null))
+					// 	.categoryId(new CategoryId(1L))
+					// 	.content("AIContnet")
+					// 	.thumbnailContent("abcd")
+					// 	.build();
 
 					return Card.builder()
 						.cardId(new CardId(UUID.randomUUID().toString()))
@@ -296,6 +303,9 @@ public class CardService {
 
 		// Card 삭제 권한 검증
 		cardsToDelete.forEach(card -> card.validateOwnership(userIdObj));
+
+		// ES에서 카드 삭제
+		cardSearchRepository.deleteAllById(cardIdList);
 
 		// 카드 삭제
 		return cardRepository.deleteAll(cardsToDelete);
@@ -427,7 +437,7 @@ public class CardService {
 	 */
 	public CardMainResponse getMainKeywords(String userId) {
 		UserId userIdObj = new UserId(userId);
-		System.out.println(videoCreatorRepository.getCreatorByUserId(userIdObj));
+
 		return CardMainResponse.builder()
 				.topKeywords(userKeywordRepository.getTopKeywords(userIdObj, 5))
 				.creator(videoCreatorRepository.getCreatorByUserId(userIdObj))

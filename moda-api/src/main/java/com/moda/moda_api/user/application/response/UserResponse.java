@@ -14,10 +14,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 public class UserResponse {
-    private String userId;
     private String email;
+    private String userName;
     private String nickname;
-    private String profileImage;
     private String status;
     private LocalDateTime createdAt;
 }
