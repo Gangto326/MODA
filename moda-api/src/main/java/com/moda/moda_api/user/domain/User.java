@@ -12,8 +12,6 @@ import java.time.LocalDateTime;
  */
 @Getter
 public class User {
-
-
     /**
      * 빌더 패턴을 사용한 User 객체 생성을 위한 생성자입니다.
      * createdAt은 객체 생성 시점에 자동으로 설정되며,
@@ -26,50 +24,24 @@ public class User {
      * @param nickname 사용자 닉네임
      * @param status 사용자 상태
      */
-    private String userId;
+    private UserId userId;
     private String email;
     private String password;
-    private String profileImage;
+    private String userName;
     private String nickname;
-    private String status;
     private LocalDateTime createdAt;
     private LocalDateTime deletedAt;
 
     @Builder
-    public User(String userId, String email, String password, String profileImage,
-                String nickname, String status) {
+    public User(UserId userId, String email, String password, String userName,
+        String nickname, LocalDateTime createdAt, LocalDateTime deletedAt) {
         this.userId = userId;
         this.email = email;
         this.password = password;
-        this.profileImage = profileImage;
+        this.userName = userName;
         this.nickname = nickname;
-        this.status = status;
-        this.createdAt = LocalDateTime.now();
-    }
-
-    // Entity -> Domain 변환 시 사용할 별도의 정적 메서드
-    public static User withId(String userId, String email, String password,
-                              String profileImage, String nickname, String status,
-                              LocalDateTime createdAt, LocalDateTime deletedAt) {
-        User user = User.builder()
-                .userId(userId)
-                .email(email)
-                .password(password)
-                .profileImage(profileImage)
-                .nickname(nickname)
-                .status(status)
-                .build();
-        user.createdAt = createdAt;
-        user.deletedAt = deletedAt;
-        return user;
-    }
-    /**
-     * 사용자의 프로필 정보(닉네임, 이미지)를 수정합니다.
-     * 프로필 수정 시에만 사용되어야 합니다.
-     */
-    public void updateProfile(String nickname, String profileImage) {
-        this.nickname = nickname;
-        this.profileImage = profileImage;
+        this.createdAt = createdAt != null ? createdAt : LocalDateTime.now();
+        this.deletedAt = deletedAt;
     }
 
     /**

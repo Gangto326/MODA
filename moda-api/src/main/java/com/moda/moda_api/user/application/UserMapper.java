@@ -3,6 +3,8 @@ package com.moda.moda_api.user.application;
 import com.moda.moda_api.user.application.response.UserProfileResponse;
 import com.moda.moda_api.user.application.response.UserResponse;
 import com.moda.moda_api.user.domain.User;
+import com.moda.moda_api.user.domain.UserId;
+import com.moda.moda_api.user.infrastructure.PasswordEncrypt;
 import com.moda.moda_api.user.presentation.request.LoginRequest;
 import com.moda.moda_api.user.presentation.request.SignupRequest;
 import com.moda.moda_api.user.presentation.request.UpdateProfileRequest;
@@ -25,11 +27,8 @@ public class UserMapper {
      */
     public UserResponse toUserResponse(User user) {
         return UserResponse.builder()
-                .userId(user.getUserId())
                 .email(user.getEmail())
                 .nickname(user.getNickname())
-                .profileImage(user.getProfileImage())
-                .status(user.getStatus())
                 .createdAt(user.getCreatedAt())
                 .build();
     }
@@ -41,11 +40,9 @@ public class UserMapper {
      */
     public UserProfileResponse toUserProfileResponse(User user) {
         return UserProfileResponse.builder()
-                .userId(user.getUserId())
+                .userId(user.getUserId().getValue())
                 .email(user.getEmail())
                 .nickname(user.getNickname())
-                .profileImage(user.getProfileImage())
-                .status(user.getStatus())
                 .createdAt(user.getCreatedAt())
                 .isDeleted(user.isDeleted())
                 .build();
@@ -57,12 +54,12 @@ public class UserMapper {
      * @param request 회원가입 요청 DTO
      * @return 변환된 User 도메인 객체
      */
-    public User toUser(SignupRequest request) {
+    public User signupRequestToUser(SignupRequest request) {
         return User.builder()
-                .userId(UUID.randomUUID().toString())
+                .userId(new UserId(UUID.randomUUID().toString()))
                 .email(request.getEmail())
-                .password(request.getPassword())
-                .status("ACTIVE")
+                .userName(request.getUserName())
+                .password(PasswordEncrypt.encrypt(request.getPassword()))
                 .build();
     }
 
@@ -72,15 +69,15 @@ public class UserMapper {
      * @param user 업데이트할 User 도메인 객체
      * @param request 업데이트 요청 정보를 담은 DTO
      */
-    public void updateUser(User user, UpdateProfileRequest request) {
-        // null이 아닌 필드만 업데이트
-        if (request.getNickname() != null) {
-            user.updateProfile(request.getNickname(), request.getProfileImage());
-        }
-        if (request.getPassword() != null) {
-            user.updatePassword(request.getPassword());
-        }
-    }
+    // public void updateUser(User user, UpdateProfileRequest request) {
+    //     // null이 아닌 필드만 업데이트
+    //     if (request.getNickname() != null) {
+    //         user.updateProfile(request.getNickname(), request.getProfileImage());
+    //     }
+    //     if (request.getPassword() != null) {
+    //         user.updatePassword(request.getPassword());
+    //     }
+    // }
 
 
     /**
