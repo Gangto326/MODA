@@ -190,16 +190,16 @@ public class CardService {
 					String urlHash = UrlCache.generateHash(s3Url);
 
 					// 실제 AI 분석
-					// AIAnalysisResponseDTO aiAnalysisResponseDTO = pythonAiClient.imageAnalysis(new AiImageRequestDTO(s3Url));
+					AIAnalysisResponseDTO aiAnalysisResponseDTO = pythonAiClient.imageAnalysis(new AiImageRequestDTO(s3Url));
 
 					// AI Test생성
-					AIAnalysisResponseDTO aiAnalysisResponseDTO = AIAnalysisResponseDTO.builder()
-						.keywords(new String[] {"3차"})
-						.embeddingVector(new EmbeddingVector(null))
-						.categoryId(new CategoryId(1L))
-						.content("AIContnet")
-						.thumbnailContent("abcd")
-						.build();
+					// AIAnalysisResponseDTO aiAnalysisResponseDTO = AIAnalysisResponseDTO.builder()
+					// 	.keywords(new String[] {"3차"})
+					// 	.embeddingVector(new EmbeddingVector(null))
+					// 	.categoryId(new CategoryId(1L))
+					// 	.content("AIContnet")
+					// 	.thumbnailContent("abcd")
+					// 	.build();
 
 					return Card.builder()
 						.cardId(new CardId(UUID.randomUUID().toString()))

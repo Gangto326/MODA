@@ -74,12 +74,7 @@ public class LilysSummaryService {
 					.thenApply(v -> {
 						AIAnalysisResponseDTO aiAnalysis = aiAnalysisFuture.join();
 						YoutubeAPIResponseDTO youtubeAPI = youtubeApiFuture.join();
-
-						String[] keyWords = Stream.concat(
-							Arrays.stream(youtubeAPI.getTags()),
-							Arrays.stream(aiAnalysis.getKeywords())
-						).toArray(String[]::new);
-
+						String[] keywords = getKeyWords(aiAnalysis,youtubeAPI);
 						String[] subContents = getSubContents(lilysSummary, youtubeAPI);
 
 						return SummaryResultDto.builder()
@@ -90,11 +85,20 @@ public class LilysSummaryService {
 							.embeddingVector(aiAnalysis.getEmbeddingVector())
 							.categoryId(aiAnalysis.getCategoryId())
 							.thumbnailUrl(lilysSummary.getThumbnailUrl())
-							.keywords(keyWords)
+							.keywords(keywords)
 							.subContent(subContents)
 							.build();
 					});
 			});
+	}
+	private String[] getKeyWords(AIAnalysisResponseDTO aiAnalysis, YoutubeAPIResponseDTO youtubeAPI ){
+		return Stream.of(
+				new String[]{youtubeAPI.getChannelTitle()},
+				aiAnalysis.getKeywords(),
+				youtubeAPI.getTags()
+			)
+			.flatMap(Stream::of)
+			.toArray(String[]::new);
 	}
 
 	private String[] getSubContents(LilysSummary lilysSummary, YoutubeAPIResponseDTO youtubeAPIResponseDTO) {

@@ -39,8 +39,8 @@ public class LilysAiClient {
 		System.out.println(url);
 
 		// return CompletableFuture.completedFuture(
-		// 	new LilysRequestIdResponse("0709fcc3-0baa-4da8-a984-841948466ca4")
-		// );
+		// 	new LilysRequestIdResponse("0709fcc3-0baa-4da8-a984-841948466ca4")).join();
+
 
 		return lilysWebClient.post()
 			.uri(lilysUrl)
@@ -88,7 +88,7 @@ public class LilysAiClient {
 			String thumbnailContent = thumbnail.path("data").path("data").path("summary").toString();
 			String thumbnailUrl = getVideoId(url);
 
-			System.out.println( mainContent.toString());
+			System.out.println(mainContent.toString());
 
 			return LilysSummary.builder()
 				.contents(mainContent)

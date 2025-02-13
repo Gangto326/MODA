@@ -26,6 +26,8 @@ public class YoutubeApiClient {
 	private String youtubeApiKey;
 
 	public YoutubeAPIResponseDTO getVideoData(String videoId) {
+		log.info("유튜브 분석하기직전");
+
 		JsonNode videoData = getVideoInfo(videoId);
 		JsonNode channelData = getChannelData(extractChannelId(videoData));
 
