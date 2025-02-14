@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">modapjt</string>
+    <string name="app_name">모다</string>
         <string name="accessibility_service_description">웹 브라우저의 URL을 감지하는 접근성 서비스입니다.</string>
 </resources>
