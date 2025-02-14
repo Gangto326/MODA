@@ -352,7 +352,17 @@ fun VideoDetailScreen(cardDetail: CardDetail) {
                         modifier = Modifier.padding(bottom = 4.dp)
                     )
 
+                    // 채널명
+                    Text(
+                        text = cardDetail.keywords.firstOrNull() ?: "-", // 리스트가 비어있으면 빈 문자열 반환
+                        style = MaterialTheme.typography.headlineMedium,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+
+                    // 동영상 관련 키워드
+                    
                     // 키워드
+
                     val limitedKeywords = cardDetail.keywords.take(3).joinToString(", ")
                     Text(
                         text = "키워드: $limitedKeywords",
