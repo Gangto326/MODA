@@ -349,7 +349,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                         .term(term -> term
                                 .field("userId")
                                 .value(userId.getValue())
-                                .boost(3.0f)
+                                .boost(5.0f)
                         )
                 ));
 
@@ -379,7 +379,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                         .term(term -> term
                                 .field("userId")
                                 .value(userId.getValue())
-                                .boost(3.0f)
+                                .boost(10.0f)
                         )
                 ));
 
@@ -401,7 +401,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
         NativeQuery query = NativeQuery.builder()
                 .withQuery(boolQuery.build()._toQuery())
                 .withPageable(pageable)
-                .withMinScore(MIN_SCORE)
+//                .withMinScore(MIN_SCORE)
                 .withTrackScores(true)  // 점수 추적 활성화
                 .withSort(Sort.by(Sort.Direction.DESC, "_score"))
                 .build();
@@ -421,11 +421,18 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                 ))
                 .collect(Collectors.toList());
 
+        // 실제 요청한 사이즈 (pageSize - 1)
+        int originalPage = pageable.getPageNumber() + 1;
+        int originalSize = pageable.getPageSize();
+
+        // content의 크기가 originalSize보다 크면 다음 페이지 존재
+        boolean hasNext = searchHits.getTotalHits() > (long)(originalPage * originalSize);
+
         // Slice 객체로 변경 후 반환
         return new SliceImpl<>(
                 content,
                 pageable,
-                searchHits.getTotalHits() > (long) pageable.getPageNumber() * pageable.getPageSize()
+                hasNext
         );
     }
 }
