@@ -1,9 +1,11 @@
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -21,7 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.modapjt.domain.model.Card
-import com.example.modapjt.screen2.EmptyMessage
+
 
 @Composable
 fun AllTabCard(
@@ -158,7 +160,7 @@ fun AllTabCard(
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             SectionHeader("동영상") // 섹션 제목
             if (videoCards.isEmpty()) {
-                EmptyMessage("저장된 영상이 없습니다")
+                EmptyMessageall("저장된 영상이 없습니다")
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     videoCards.take(3).forEach { card ->
@@ -345,5 +347,24 @@ private fun SectionAdd(
                 color = Color.Black
             )
         }
+    }
+}
+
+
+
+//// 공통으로 사용되는 빈 목록 메시지
+@Composable
+fun EmptyMessageall(message: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(20.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = message,
+            color = Color.Gray,
+            textAlign = TextAlign.Center
+        )
     }
 }
