@@ -83,7 +83,9 @@ fun newCardListScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(Color.White), // 배경 흰색으로 설정
+                /////////////////////////////////////////
+                .background(color = Color.White), // 수정해야하는부분
+            /////////////////////////////////////////////////////
         ) {
             when (uiState) {
                 is CardUiState.Loading -> {
@@ -95,10 +97,10 @@ fun newCardListScreen(
 
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                        verticalArrangement = Arrangement.spacedBy(0.dp) // 수정완료( 카테고리 선택바 랑 alltabcard 사이 공간 )
                     ) {
                         item {
-                            TypeSelectBar(
+                            TypeSelectBar( // 상단 타입 선택하는 바
 //                                selectedCategory = selectedCategory,
 //                                onCategorySelected = { selectedCategory = it }
                                 selectedCategory = selectedCategory,
@@ -140,7 +142,8 @@ fun newCardListScreen(
                                                 Box(modifier = Modifier.weight(1f)) {
                                                     SwipableCardList(
                                                         cards = listOf(card),
-                                                        onDelete = { viewModel.deleteCard(it) }
+//                                                        onDelete = { viewModel.deleteCard(it) }
+                                                        onDelete = { viewModel.deleteCard(listOf(it.cardId)) }
                                                     ) {
                                                         ImageBig(
                                                             imageUrl = card.thumbnailUrl ?: "",
@@ -168,7 +171,8 @@ fun newCardListScreen(
                                     items(data.blogs) { card ->
                                         SwipableCardList(
                                             cards = listOf(card),
-                                            onDelete = { viewModel.deleteCard(it) }
+//                                            onDelete = { viewModel.deleteCard(it) }
+                                            onDelete = { viewModel.deleteCard(listOf(it.cardId)) }
                                         ) {
                                             BlogBig(
                                                 title = card.title,
@@ -190,7 +194,8 @@ fun newCardListScreen(
                                     items(data.videos) { card ->
                                         SwipableCardList(
                                             cards = listOf(card),
-                                            onDelete = { viewModel.deleteCard(it) }
+//                                            onDelete = { viewModel.deleteCard(it) }
+                                            onDelete = { viewModel.deleteCard(listOf(it.cardId)) }
                                         ) {
                                             VideoBig(
                                                 videoId = card.thumbnailUrl ?: "",
@@ -212,7 +217,8 @@ fun newCardListScreen(
                                     items(data.news) { card ->
                                         SwipableCardList(
                                             cards = listOf(card),
-                                            onDelete = { viewModel.deleteCard(it) }
+//                                            onDelete = { viewModel.deleteCard(it) }
+                                            onDelete = { viewModel.deleteCard(listOf(it.cardId)) }
                                         ) {
                                             NewsBig(
                                                 title = card.title,

@@ -16,6 +16,7 @@ import com.example.modapjt.navigation.NavGraph
 import com.example.modapjt.ui.theme.ModapjtTheme
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 
+
 @OptIn(ExperimentalAnimationApi::class)
 class MainActivity : ComponentActivity() {
 

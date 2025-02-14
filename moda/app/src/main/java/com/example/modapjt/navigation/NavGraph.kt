@@ -23,13 +23,13 @@ import com.example.modapjt.screen.recommend.RecommendScreen
 import com.example.modapjt.screen.settings.SettingsScreen
 import com.example.modapjt.screen2.auth.LoginScreen
 import com.example.modapjt.screen2.auth.SignUpScreen
+import com.example.modapjt.screen2.newCardDetailScreen
 import com.example.modapjt.screen2.newCardListScreen
 import com.example.modapjt.screen2.newSearchCardListScreen
 import com.example.modapjt.screen2.search.NewSearchScreen
 import com.example.modapjt.screen2.user.MyPageScreen
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
-import newCardDetailScreen
 import newHomeScreen
 import newLinkUploadScreen
 

@@ -1,4 +1,5 @@
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -52,7 +53,7 @@ fun SectionBlock(title: String, items: List<Card>, isImage: Boolean, onMoreClick
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(20.dp),
+            .padding(horizontal = 20.dp, vertical = 10.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp) // ✅ 섹션 간 간격 유지
     ) {
         SectionHeader(title)
@@ -101,6 +102,7 @@ fun SectionBlock(title: String, items: List<Card>, isImage: Boolean, onMoreClick
                                 onClick = {},
                                 isMine = card.isMine,
                                 bookMark = card.bookMark,
+                                thumbnailContent = card.thumbnailContent ?:"",
                                 keywords = card.keywords.take(3)
                             )
 
@@ -155,14 +157,17 @@ fun SectionDivider() {
 
 //        padding(20.dp),
 
-        )
+    )
 }
 
 // ✅ 섹션 제목 컴포넌트
 @Composable
 private fun SectionHeader(title: String) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White) // 🔥수정해야하는 부분
+            .height(IntrinsicSize.Min), // 🔥 높이를 내부 요소에 맞춤 (불필요한 공간 제거)
         verticalAlignment = Alignment.CenterVertically, // 아이콘과 텍스트를 세로 중앙 정렬
         horizontalArrangement = Arrangement.Start
     ) {
@@ -180,8 +185,8 @@ private fun SectionHeader(title: String) {
                 painter = painterResource(id = it),
                 contentDescription = "$title 아이콘",
                 modifier = Modifier
-                    .size(30.dp) // 아이콘 크기 조정
-                    .padding(end = 8.dp) // 텍스트와 간격 추가
+                    .size(24.dp) // 아이콘 크기 조정
+                    .padding(end = 6.dp) // 텍스트와 간격 추가
             )
         }
 
@@ -189,7 +194,9 @@ private fun SectionHeader(title: String) {
         Text(
             text = title,
             color = Color(0xFF2B2826),
-            style = customTypography.titleMedium
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold
+//            style = customTypography.titleMedium
         )
     }
 }
@@ -211,8 +218,8 @@ private fun SectionAdd(text: String, onMoreClick: () -> Unit) {
         ) {
             Text(
                 text = text,
-                fontSize = 14.sp,
-                color = Color.Black
+                fontSize = 12.sp,
+                color = Color(0xFF2B2826)
             )
         }
     }

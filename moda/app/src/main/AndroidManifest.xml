@@ -22,6 +22,8 @@
     <!--BIND_ACCESSIBILITY_SERVICE 권한은 시스템 앱만 사용할 수 있어서 발생하는 오류입니다. 일반 앱에서는 이 권한을 manifest에 직접 선언할 수 없습니다.
     대신 사용자가 설정에서 접근성 서비스를 직접 활성화하도록 해야 합니다. Manifest를 다음과 같이 수정해주세요:-->
 
+    <!-- 이미지 저장 기능 구현 | Android 13 이상 -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
     <!--    android:usesCleartextTraffic="true" : HTTP 요청 허용 -->
     <application

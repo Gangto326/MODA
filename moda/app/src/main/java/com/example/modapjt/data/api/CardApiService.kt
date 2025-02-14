@@ -60,8 +60,8 @@ interface CardApiService {
     ): Response<Boolean>
 
     // 카드 삭제 API
-    @DELETE("api/card/{cardId}")
+    @DELETE("api/card/{cardIds}")
     suspend fun deleteCard(
-        @Path("cardId") cardId: String
+        @Path("cardIds") cardIds: String // "id1,id2,id3" 형태로 전달
     ): Response<Boolean>
 }
