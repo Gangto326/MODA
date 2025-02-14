@@ -1,6 +1,8 @@
 package com.example.modapjt.screen2.user
 
 import android.content.Intent
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,13 +36,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.modapjt.OverlayService
 import com.example.modapjt.components.bar.BottomBarComponent
 import com.example.modapjt.components.setting.SettingItem
 import com.example.modapjt.components.user.InterestKeywords
 import com.example.modapjt.components.user.MyPageHeader
 import com.example.modapjt.components.user.UserProfileCard
 import com.example.modapjt.domain.viewmodel.UserViewModel
+import com.example.modapjt.overlay.OverlayService
 
 @Composable
 fun MyPageScreen(
@@ -123,7 +125,7 @@ fun MyPageScreen(
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "다른 앱에서 링크를 빠르게 저장할 수 있습니다.",
+                                text = "클릭 시 브라우저로 이동합니다.",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color.Gray
                             )
@@ -134,7 +136,16 @@ fun MyPageScreen(
                                     isOverlayActive = !isOverlayActive
                                     val serviceIntent = Intent(context, OverlayService::class.java)
                                     if (isOverlayActive) {
+                                        // 기본 브라우저 실행
+                                        Toast.makeText(context, "기본 브라우저가 실행됩니다.", Toast.LENGTH_SHORT).show()
+                                        val intent = Intent(Intent.ACTION_MAIN)
+                                        intent.addCategory(Intent.CATEGORY_APP_BROWSER)
+                                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                        context.startActivity(intent)
+                                        Log.d("OverlayService", "기본 브라우저 실행")
+
                                         context.startService(serviceIntent)
+
                                     } else {
                                         context.stopService(serviceIntent)
                                     }
