@@ -75,8 +75,8 @@ fun CategoryItem(category: Category, navController: NavController) {
         )
         Text(
             text = categoryName,
-            fontSize = 11.sp,  // 폰트 크기 약간 축소
-            color = Color.Black,
+            fontSize = 12.sp,  // 폰트 크기 약간 축소
+            color = Color(0xFF665F5B),
             maxLines = 1,  // 한 줄로 제한
             overflow = TextOverflow.Ellipsis  // 길이가 길면 ...으로 표시
         )

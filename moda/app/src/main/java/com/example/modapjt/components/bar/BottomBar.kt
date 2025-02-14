@@ -16,8 +16,8 @@ fun BottomBar() {
     ) {
         Text(
             text = "하단 바 고정",
-            fontSize = 14.sp,
-            color = Color.Black
+            fontSize = 12.sp,
+            color = Color(0xFF665F5B)
         )
     }
 }
