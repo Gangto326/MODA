@@ -3,6 +3,7 @@ package com.example.modapjt.navigation
 //import com.google.accompanist.navigation.animation.AnimatedNavHost
 //import com.google.accompanist.navigation.animation.composable
 //import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+//import newCardListScreen
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,15 +24,14 @@ import com.example.modapjt.screen.recommend.RecommendScreen
 import com.example.modapjt.screen.settings.SettingsScreen
 import com.example.modapjt.screen2.auth.LoginScreen
 import com.example.modapjt.screen2.auth.SignUpScreen
+import com.example.modapjt.screen2.cardlist.newSearchCardListScreen
 import com.example.modapjt.screen2.newBookMarkCardListScreen
 import com.example.modapjt.screen2.newCardDetailScreen
 import com.example.modapjt.screen2.newCardListScreen
-import com.example.modapjt.screen2.newSearchCardListScreen
 import com.example.modapjt.screen2.search.NewSearchScreen
 import com.example.modapjt.screen2.user.MyPageScreen
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
-//import newCardListScreen
 import newHomeScreen
 import newLinkUploadScreen
 
