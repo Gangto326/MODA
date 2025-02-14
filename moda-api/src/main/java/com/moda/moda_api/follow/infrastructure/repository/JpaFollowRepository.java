@@ -17,74 +17,74 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class JpaFollowRepository implements FollowRepository {
 
-    private final SpringDataFollowRepository repository;
-
-    @Override
-    public Follow save(Follow follow) {
-        FollowEntity entity = FollowEntity.fromDomain(follow);
-        FollowEntity savedEntity = repository.save(entity);
-        return savedEntity.toDomain();
-    }
-
-    @Override
-    public Follow findById(String followId) {
-        return repository.findById(followId)
-                .map(FollowEntity::toDomain)
-                .orElse(null);
-    }
-
-    @Override
-    public List<Follow> findAllFollowersByUserId(String userId) {
-        // findByFollowingId -> findFollowersWithProfile로 변경
-        return repository.findFollowersWithProfile(userId)
-                .stream()
-                .map(FollowEntity::toDomain)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<Follow> findAllFollowingsByUserId(String userId) {
-        // findByFollowerId -> findFollowingsWithProfile로 변경
-        return repository.findFollowingsWithProfile(userId)
-                .stream()
-                .map(FollowEntity::toDomain)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public Follow findByFollowerIdAndFollowingId(String followerId, String followingId) {
-        FollowEntity entity = repository.findByFollowerIdAndFollowingId(followerId, followingId);
-        return entity != null ? entity.toDomain() : null;
-    }
-
-    @Override
-    public void delete(String followId) {
-        repository.deleteById(followId);
-    }
-
-    @Override
-    public long countFollowersByUserId(String userId) {
-        return repository.countByFollowingId(userId);
-    }
-
-    @Override
-    public long countFollowingsByUserId(String userId) {
-        return repository.countByFollowerId(userId);
-    }
-
-    @Override
-    public List<Follow> searchFollowersByKeyword(String userId, String keyword) {
-        return repository.searchFollowersByKeyword(userId, keyword)
-                .stream()
-                .map(FollowEntity::toDomain)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<Follow> searchFollowingsByKeyword(String userId, String keyword) {
-        return repository.searchFollowingsByKeyword(userId, keyword)
-                .stream()
-                .map(FollowEntity::toDomain)
-                .collect(Collectors.toList());
-    }
+    // private final SpringDataFollowRepository repository;
+    //
+    // @Override
+    // public Follow save(Follow follow) {
+    //     FollowEntity entity = FollowEntity.fromDomain(follow);
+    //     FollowEntity savedEntity = repository.save(entity);
+    //     return savedEntity.toDomain();
+    // }
+    //
+    // @Override
+    // public Follow findById(String followId) {
+    //     return repository.findById(followId)
+    //             .map(FollowEntity::toDomain)
+    //             .orElse(null);
+    // }
+    //
+    // @Override
+    // public List<Follow> findAllFollowersByUserId(String userId) {
+    //     // findByFollowingId -> findFollowersWithProfile로 변경
+    //     return repository.findFollowersWithProfile(userId)
+    //             .stream()
+    //             .map(FollowEntity::toDomain)
+    //             .collect(Collectors.toList());
+    // }
+    //
+    // @Override
+    // public List<Follow> findAllFollowingsByUserId(String userId) {
+    //     // findByFollowerId -> findFollowingsWithProfile로 변경
+    //     return repository.findFollowingsWithProfile(userId)
+    //             .stream()
+    //             .map(FollowEntity::toDomain)
+    //             .collect(Collectors.toList());
+    // }
+    //
+    // @Override
+    // public Follow findByFollowerIdAndFollowingId(String followerId, String followingId) {
+    //     FollowEntity entity = repository.findByFollowerIdAndFollowingId(followerId, followingId);
+    //     return entity != null ? entity.toDomain() : null;
+    // }
+    //
+    // @Override
+    // public void delete(String followId) {
+    //     repository.deleteById(followId);
+    // }
+    //
+    // @Override
+    // public long countFollowersByUserId(String userId) {
+    //     return repository.countByFollowingId(userId);
+    // }
+    //
+    // @Override
+    // public long countFollowingsByUserId(String userId) {
+    //     return repository.countByFollowerId(userId);
+    // }
+    //
+    // @Override
+    // public List<Follow> searchFollowersByKeyword(String userId, String keyword) {
+    //     return repository.searchFollowersByKeyword(userId, keyword)
+    //             .stream()
+    //             .map(FollowEntity::toDomain)
+    //             .collect(Collectors.toList());
+    // }
+    //
+    // @Override
+    // public List<Follow> searchFollowingsByKeyword(String userId, String keyword) {
+    //     return repository.searchFollowingsByKeyword(userId, keyword)
+    //             .stream()
+    //             .map(FollowEntity::toDomain)
+    //             .collect(Collectors.toList());
+    // }
 }

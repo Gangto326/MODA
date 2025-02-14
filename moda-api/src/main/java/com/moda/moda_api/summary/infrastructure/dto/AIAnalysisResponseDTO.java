@@ -35,6 +35,6 @@ public class AIAnalysisResponseDTO {
 		this.keywords = Objects.requireNonNullElse(keywords, new String[0]);
 		this.thumbnailContent = Objects.requireNonNullElse(thumbnailContent, "");
 		this.content = Objects.requireNonNullElse(content, "");
-		this.embeddingVector = Objects.requireNonNullElse(embeddingVector, new EmbeddingVector(new float[768]));
+		this.embeddingVector = Objects.requireNonNullElse(embeddingVector, new EmbeddingVector(null));
 	}
 }

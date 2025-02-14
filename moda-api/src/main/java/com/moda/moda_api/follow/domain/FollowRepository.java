@@ -13,80 +13,80 @@ public interface FollowRepository {
      *
      * @param follow 저장할 팔로우 엔티티
      * @return 저장된 팔로우 엔티티
-     */
-    Follow save(Follow follow);
-
-    /**
-     * ID로 팔로우 관계를 조회합니다.
-     *
-     * @param followId 조회할 팔로우 관계의 ID
-     * @return 조회된 팔로우 관계, 없으면 null
-     */
-    Follow findById(String followId);
-
-    /**
-     * 특정 사용자의 팔로워 목록을 조회합니다.
-     *
-     * @param userId 팔로워를 조회할 사용자의 ID
-     * @return 해당 사용자를 팔로우하는 팔로워 목록
-     */
-    List<Follow> findAllFollowersByUserId(String userId);
-
-    /**
-     * 특정 사용자의 팔로잉 목록을 조회합니다.
-     *
-     * @param userId 팔로잉을 조회할 사용자의 ID
-     * @return 해당 사용자가 팔로우하는 사용자 목록
-     */
-    List<Follow> findAllFollowingsByUserId(String userId);
-
-    /**
-     * 두 사용자 간의 팔로우 관계를 조회합니다.
-     *
-     * @param followerId 팔로워 ID
-     * @param followingId 팔로잉 ID
-     * @return 존재하는 팔로우 관계, 없으면 null
-     */
-    Follow findByFollowerIdAndFollowingId(String followerId, String followingId);
-
-    /**
-     * 팔로우 관계를 삭제합니다.
-     *
-     * @param followId 삭제할 팔로우 관계의 ID
-     */
-    void delete(String followId);
-
-    /**
-     * 특정 사용자의 팔로워 수를 조회합니다.
-     *
-     * @param userId 팔로워 수를 조회할 사용자의 ID
-     * @return 해당 사용자의 팔로워 수
-     */
-    long countFollowersByUserId(String userId);
-
-    /**
-     * 특정 사용자의 팔로잉 수를 조회합니다.
-     *
-     * @param userId 팔로잉 수를 조회할 사용자의 ID
-     * @return 해당 사용자의 팔로잉 수
-     */
-    long countFollowingsByUserId(String userId);
-
-    /**
-     * 특정 사용자의 팔로워 중 키워드로 검색합니다.
-     *
-     * @param userId 팔로워를 검색할 사용자의 ID
-     * @param keyword 검색 키워드 (닉네임)
-     * @return 검색된 팔로워 목록
-     */
-    List<Follow> searchFollowersByKeyword(String userId, String keyword);
-
-    /**
-     * 특정 사용자의 팔로잉 중 키워드로 검색합니다.
-     *
-     * @param userId 팔로잉을 검색할 사용자의 ID
-     * @param keyword 검색 키워드 (닉네임)
-     * @return 검색된 팔로잉 목록
-     */
-    List<Follow> searchFollowingsByKeyword(String userId, String keyword);
+    //  */
+    // Follow save(Follow follow);
+    //
+    // /**
+    //  * ID로 팔로우 관계를 조회합니다.
+    //  *
+    //  * @param followId 조회할 팔로우 관계의 ID
+    //  * @return 조회된 팔로우 관계, 없으면 null
+    //  */
+    // Follow findById(String followId);
+    //
+    // /**
+    //  * 특정 사용자의 팔로워 목록을 조회합니다.
+    //  *
+    //  * @param userId 팔로워를 조회할 사용자의 ID
+    //  * @return 해당 사용자를 팔로우하는 팔로워 목록
+    //  */
+    // List<Follow> findAllFollowersByUserId(String userId);
+    //
+    // /**
+    //  * 특정 사용자의 팔로잉 목록을 조회합니다.
+    //  *
+    //  * @param userId 팔로잉을 조회할 사용자의 ID
+    //  * @return 해당 사용자가 팔로우하는 사용자 목록
+    //  */
+    // List<Follow> findAllFollowingsByUserId(String userId);
+    //
+    // /**
+    //  * 두 사용자 간의 팔로우 관계를 조회합니다.
+    //  *
+    //  * @param followerId 팔로워 ID
+    //  * @param followingId 팔로잉 ID
+    //  * @return 존재하는 팔로우 관계, 없으면 null
+    //  */
+    // Follow findByFollowerIdAndFollowingId(String followerId, String followingId);
+    //
+    // /**
+    //  * 팔로우 관계를 삭제합니다.
+    //  *
+    //  * @param followId 삭제할 팔로우 관계의 ID
+    //  */
+    // void delete(String followId);
+    //
+    // /**
+    //  * 특정 사용자의 팔로워 수를 조회합니다.
+    //  *
+    //  * @param userId 팔로워 수를 조회할 사용자의 ID
+    //  * @return 해당 사용자의 팔로워 수
+    //  */
+    // long countFollowersByUserId(String userId);
+    //
+    // /**
+    //  * 특정 사용자의 팔로잉 수를 조회합니다.
+    //  *
+    //  * @param userId 팔로잉 수를 조회할 사용자의 ID
+    //  * @return 해당 사용자의 팔로잉 수
+    //  */
+    // long countFollowingsByUserId(String userId);
+    //
+    // /**
+    //  * 특정 사용자의 팔로워 중 키워드로 검색합니다.
+    //  *
+    //  * @param userId 팔로워를 검색할 사용자의 ID
+    //  * @param keyword 검색 키워드 (닉네임)
+    //  * @return 검색된 팔로워 목록
+    //  */
+    // List<Follow> searchFollowersByKeyword(String userId, String keyword);
+    //
+    // /**
+    //  * 특정 사용자의 팔로잉 중 키워드로 검색합니다.
+    //  *
+    //  * @param userId 팔로잉을 검색할 사용자의 ID
+    //  * @param keyword 검색 키워드 (닉네임)
+    //  * @return 검색된 팔로잉 목록
+    //  */
+    // List<Follow> searchFollowingsByKeyword(String userId, String keyword);
 }

@@ -33,7 +33,7 @@ import lombok.RequiredArgsConstructor;
 @Repository
 @RequiredArgsConstructor
 public class CardSearchRepositoryImpl implements CardSearchRepository {
-    private static final float MIN_SCORE = 1.43f;
+    private static final float MIN_SCORE = 1.4f;
 
     private final ElasticsearchOperations elasticsearchOperations;
     private final CardSearchJpaRepository cardSearchJpaRepository;
@@ -349,7 +349,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                         .term(term -> term
                                 .field("userId")
                                 .value(userId.getValue())
-                                .boost(5.0f)
+                                .boost(1000.0f)
                         )
                 ));
 
@@ -379,7 +379,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                         .term(term -> term
                                 .field("userId")
                                 .value(userId.getValue())
-                                .boost(10.0f)
+                                .boost(1000.0f)
                         )
                 ));
 

@@ -51,21 +51,21 @@ public class LilysSummaryService {
 
 				// 서버 전용
 				// getSummaryResults 완료 후 병렬로 실행 가능한 작업들
-				CompletableFuture<AIAnalysisResponseDTO> aiAnalysisFuture =
-					CompletableFuture.supplyAsync(() ->
-						pythonAnalysisService.youtubeAnalyze(lilysSummary.getContents())
-					);
+				// CompletableFuture<AIAnalysisResponseDTO> aiAnalysisFuture =
+				// 	CompletableFuture.supplyAsync(() ->
+				// 		pythonAnalysisService.youtubeAnalyze(lilysSummary.getContents())
+				// 	);
 
 				// 로컬 전용
-				// CompletableFuture<AIAnalysisResponseDTO> aiAnalysisFuture = CompletableFuture.completedFuture(
-				// 	AIAnalysisResponseDTO.builder()
-				// 		.categoryId(new CategoryId(1L))  // null 허용
-				// 		.keywords(new String[0])
-				// 		.thumbnailContent("")
-				// 		.content("")
-				// 		.embeddingVector(null)
-				// 		.build()
-				// );
+				CompletableFuture<AIAnalysisResponseDTO> aiAnalysisFuture = CompletableFuture.completedFuture(
+					AIAnalysisResponseDTO.builder()
+						.categoryId(new CategoryId(2L))  // null 허용
+						.keywords(new String[]{"키오드","쌈플"})
+						.thumbnailContent("썸네일 컨튼츠")
+						.content("내영 셈플 ")
+						.embeddingVector(null)
+						.build()
+				);
 
 				CompletableFuture<YoutubeAPIResponseDTO> youtubeApiFuture =
 					CompletableFuture.supplyAsync(() ->
@@ -132,10 +132,10 @@ public class LilysSummaryService {
 					return CompletableFuture.completedFuture(status);
 				}
 				if ("pending".equals(status)) {
-					log.info("Summary is still pending. Will retry in 15 seconds. Attempt: {}", attempt + 1);
+					log.info("Summary is still pending. Will retry in 60 seconds. Attempt: {}", attempt + 1);
 					return CompletableFuture.supplyAsync(
 						() -> checkStatusWithRetry(requestId, attempt + 1),
-						CompletableFuture.delayedExecutor(15, TimeUnit.SECONDS)
+						CompletableFuture.delayedExecutor(60, TimeUnit.SECONDS)
 					).thenCompose(future -> future);
 				}
 				return CompletableFuture.failedFuture(

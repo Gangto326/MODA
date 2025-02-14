@@ -50,17 +50,17 @@ public class FollowEntity {
      * JPA 엔티티를 도메인 모델로 변환합니다.
      * 인프라스트럭처 계층과 도메인 계층의 경계에서 사용됩니다.
      */
-    public Follow toDomain() {
-        return Follow.builder()
-                .followId(this.followId)
-                .followerId(this.followerId)
-                .followingId(this.followingId)
-                .followerNickname(this.follower != null ? this.follower.getNickname() : null)
-                .followerProfileImage(this.follower != null ? this.follower.getProfileImage() : null)
-                .followingNickname(this.following != null ? this.following.getNickname() : null)
-                .followingProfileImage(this.following != null ? this.following.getProfileImage() : null)
-                .build();
-    }
+    // public Follow toDomain() {
+    //     return Follow.builder()
+    //             .followId(this.followId)
+    //             .followerId(this.followerId)
+    //             .followingId(this.followingId)
+    //             .followerNickname(this.follower != null ? this.follower.getNickname() : null)
+    //             .followerProfileImage(this.follower != null ? this.follower.getProfileImage() : null)
+    //             .followingNickname(this.following != null ? this.following.getNickname() : null)
+    //             .followingProfileImage(this.following != null ? this.following.getProfileImage() : null)
+    //             .build();
+    // }
 
     // Domain -> Entity
     /**
