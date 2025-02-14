@@ -10,6 +10,10 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
@@ -19,12 +23,6 @@ import com.example.modapjt.domain.model.CardDetail
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-/**
- * 블로그 글의 상세 내용을 보여주는 화면 컴포저블
- * LazyColumn을 사용하여 긴 컨텐츠를 스크롤 가능하게 표시
- *
- * @param cardDetail 표시할 블로그 글의 상세 정보를 담은 객체
- */
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun BlogDetailScreen(cardDetail: CardDetail) {
@@ -32,21 +30,31 @@ fun BlogDetailScreen(cardDetail: CardDetail) {
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     val formattedDate = LocalDateTime.parse(cardDetail.createdAt).format(formatter)
 
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        // 상단 고정 이미지 슬라이더
-        cardDetail.subContents.takeIf { it.isNotEmpty() }?.let { images ->
-            ImageSlider(imageUrls = images)
+    var showImage by remember { mutableStateOf(true) } // 이미지 표시 여부 상태
+
+    Column(modifier = Modifier.fillMaxSize()) {
+
+        // 🔘 이미지 토글 버튼
+        Button(
+            onClick = { showImage = !showImage },
+            modifier = Modifier.padding(8.dp)
+        ) {
+            Text(if (showImage) "이미지 숨기기" else "이미지 보기")
         }
 
-        // 스크롤 가능한 콘텐츠
+
+        // 🖼 이미지 슬라이더 (토글에 따라 표시)
+        if (showImage && cardDetail.subContents.isNotEmpty()) {
+            ImageSlider(imageUrls = cardDetail.subContents)
+        }
+
+
+        // 📜 본문 내용
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            // 블로그 글 제목
             item {
                 Text(
                     text = cardDetail.title,
@@ -55,7 +63,6 @@ fun BlogDetailScreen(cardDetail: CardDetail) {
                 )
             }
 
-            // 관련 키워드
             item {
                 val limitedKeywords = cardDetail.keywords.take(3).joinToString(", ")
                 Text(
@@ -65,7 +72,6 @@ fun BlogDetailScreen(cardDetail: CardDetail) {
                 )
             }
 
-            // 본문 내용
             item {
                 MarkdownText(
                     markdown = cardDetail.content,
@@ -74,7 +80,6 @@ fun BlogDetailScreen(cardDetail: CardDetail) {
                 Divider(color = Color.Gray, thickness = 1.dp)
             }
 
-            // 원본 글 링크
             item {
                 Button(
                     onClick = { uriHandler.openUri(cardDetail.originalUrl) },
@@ -84,7 +89,6 @@ fun BlogDetailScreen(cardDetail: CardDetail) {
                 }
             }
 
-            // 작성 날짜
             item {
                 Text(
                     text = "생성 날짜: $formattedDate",
