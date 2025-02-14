@@ -417,8 +417,10 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
         } catch (e: Exception) {
             Log.d("OverlayService", "오버레이 서비스 이미 종료되어 있음")
         }
-
         super.onDestroy()
+
+        OverlayStateManager.setOverlayActive(false)
+
         Log.d("OverlayService", "오버레이 서비스 종료됨")
     }
 }
