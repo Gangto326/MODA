@@ -26,12 +26,6 @@ public class NotificationApplicationService {
 		fcmTokenService.saveToken(userId, token);
 	}
 
-	// 알림 전송
-	public void sendNotification(String userId, NotificationType type, String contentId, String content) {
-
-		notificationService.sendNotification(userId, type, contentId, content);
-	}
-
 	// 사용자의 알림 목록 조회
 	public List<NotificationResponse> getUserNotifications(String userId, boolean unreadOnly) {
 		return notificationService.getNotifications(userId, unreadOnly)

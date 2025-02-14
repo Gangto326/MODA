@@ -26,6 +26,7 @@ public class CrawlingSummaryService {
 		return CompletableFuture.supplyAsync(() -> {
 				try {
 					// 1단계: 크롤링 수행
+					System.out.println("크롤링하기 직전");
 					return crawlingService.crawlByUrl(url);
 				} catch (Exception e) {
 					throw new CompletionException("Crawling failed", e);

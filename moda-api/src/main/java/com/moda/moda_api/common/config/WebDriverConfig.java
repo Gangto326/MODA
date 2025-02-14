@@ -35,9 +35,9 @@ public class WebDriverConfig {
 		options.addArguments("--headless");
 
 		//Server 배포 전용 : ChromeDriver → RemoteWebDriver
-		// return new RemoteWebDriver(new URL("http://selenium-server:4444/wd/hub"), options);
+		return new RemoteWebDriver(new URL("http://selenium-server:4444/wd/hub"), options);
 
 		//local 전용
-		return new ChromeDriver(options);
+		// return new ChromeDriver(options);
 	}
 }

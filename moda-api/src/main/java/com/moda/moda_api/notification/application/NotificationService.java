@@ -11,6 +11,8 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.MessagingErrorCode;
+import com.moda.moda_api.card.domain.Card;
+import com.moda.moda_api.card.domain.CardContentType;
 import com.moda.moda_api.notification.domain.Notification;
 import com.moda.moda_api.notification.domain.NotificationType;
 import com.moda.moda_api.notification.infrastructure.NotificationRepository;
@@ -27,41 +29,47 @@ public class NotificationService {
 	private final FirebaseMessaging firebaseMessaging;
 	private final NotificationRepository notificationRepository;
 
-	// 알림 저장 및 FCM 전송
-	@Transactional
-	public void sendNotification(String userId, NotificationType type, String contentId, String content) {
-		// 1. FCM 발송
-		sendFCMNotification(userId, type, content);
-	}
 
 	// FCM 발송
-	private void sendFCMNotification(String userId, NotificationType type, String content) {
+	@Transactional
+	public void sendFCMNotification(String userId, NotificationType type, Card card) {
 		// 유저 토큰 가져오기.
 		Set<String> tokens = fcmTokenService.getUserTokens(userId);
+		String imageUrl = card.getTypeId().equals(1) ?
+			String.format("https://img.youtube.com/vi/%s/default.jpg", card.getThumbnailUrl()) : card.getThumbnailUrl();
+
+		System.out.println("userId : " + userId);
+		System.out.println("NotificationType : " +type);
+		System.out.println();
+		tokens.forEach(System.out::println);
 
 		tokens.forEach(token -> {
 			Message message = Message.builder()
 				.setToken(token)
 				.setNotification(com.google.firebase.messaging.Notification.builder()
-					.setTitle(type.getDescription())
-					.setBody(content)
-					.setImage("https://a805bucket.s3.ap-northeast-2.amazonaws.com/images/logo/download.jpg")
+					.setTitle( "카드가 생성이 되었습니다. 모다모다~")
+					.setBody(CardContentType.getContentTypeString(card.getTypeId()))
 					.build())
 				.setAndroidConfig(AndroidConfig.builder()
 					.setTtl(3600 * 1000)
 					.setNotification(AndroidNotification.builder()
-						.setIcon("moda_logo")
 						.setColor("#FFFFFF")
+						.setIcon("icon_round.webp")
 						.setClickAction("OPEN_ACTIVITY")
+						.setImage(imageUrl)  // 이미지 URL을 여기에 설정
 						.setDefaultVibrateTimings(true)
 						.setDefaultSound(true)
 						.setNotificationCount(1)
-						.build())
 					.build())
+				.build())
 				.build();
 			try {
-				firebaseMessaging.send(message);
+				System.out.println("메시지 전송 시도: " + token);
+				String response = firebaseMessaging.send(message);
+				System.out.println("전송 성공. Response: " + response);
 			} catch (FirebaseMessagingException e) {
+				System.out.println("전송 실패. 에러: " + e.getMessage());
+				e.printStackTrace();
 				handleFCMException(e, token);
 			}
 		});

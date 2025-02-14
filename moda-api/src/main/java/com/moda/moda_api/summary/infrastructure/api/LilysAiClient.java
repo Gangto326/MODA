@@ -1,7 +1,6 @@
 package com.moda.moda_api.summary.infrastructure.api;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,8 +11,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.moda.moda_api.crawling.infrastructure.crawl.TitleExtractor;
 import com.moda.moda_api.summary.exception.SummaryProcessingException;
 import com.moda.moda_api.summary.infrastructure.dto.LilysRequestIdResponse;
 import com.moda.moda_api.summary.infrastructure.dto.LilysSummary;
