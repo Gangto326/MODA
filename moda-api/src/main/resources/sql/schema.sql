@@ -135,8 +135,12 @@ FOREIGN KEY (user_id) REFERENCES users(user_id)
 
 
 
-INSERT INTO users (user_id, email, password, profile_image, nickname, role) VALUES
-('user', 'jongwon', '1234', 'https://img1.daumcdn.net/thumb/R1280x0.fjpg/?fname=http://t1.daumcdn.net/brunch/service/user/cnoC/image/XqjxGakdgqypZUy-BrrP5nq70AQ.jpg', '키티', 'USER');
+INSERT INTO users (user_id, email, password, user_name, nickname, created_at) VALUES
+('user1', 'jongwon@email.com', '1234', '종원', '키티', CURRENT_TIMESTAMP),
+('user2', 'minsu@email.com', '1234', '민수', '강하늘', CURRENT_TIMESTAMP),
+('user3', 'sora@email.com', '1234', '소라', '바다', CURRENT_TIMESTAMP),
+('user4', 'jieun@email.com', '1234', '지은', '구름', CURRENT_TIMESTAMP),
+('user5', 'hyunwoo@email.com', '1234', '현우', '산', CURRENT_TIMESTAMP);
 
 INSERT INTO content_type (type_id, type) VALUES
 (1, 'YOUTUBE'),
