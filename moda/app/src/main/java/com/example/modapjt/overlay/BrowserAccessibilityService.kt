@@ -14,9 +14,6 @@ class BrowserAccessibilityService : AccessibilityService() {
 
         private val ALLOWED_PACKAGES = listOf(
             "com.android.chrome",
-            "org.mozilla.firefox",
-            "com.microsoft.emmx",
-            "com.sec.android.app.sbrowser",
             "com.example.modapjt"
         )
     }

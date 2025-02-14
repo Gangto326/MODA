@@ -138,17 +138,23 @@ fun MyPageScreen(
                                     val serviceIntent = Intent(context, OverlayService::class.java)
 
                                     if (!isOverlayActive) {
-                                        // 기본 브라우저 실행
-                                        Toast.makeText(context, "기본 브라우저가 실행됩니다.", Toast.LENGTH_SHORT).show()
-                                        val browserIntent = Intent(Intent.ACTION_MAIN)
-                                        browserIntent.addCategory(Intent.CATEGORY_APP_BROWSER)
-                                        browserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                        context.startActivity(browserIntent)
-                                        Log.d("OverlayService", "기본 브라우저 실행")
+                                        try {
+                                            // 기본 브라우저 실행
+                                            Toast.makeText(context, "크롬 브라우저가 실행됩니다.", Toast.LENGTH_SHORT).show()
+                                            val chromeIntent = Intent(Intent.ACTION_MAIN)
+                                            chromeIntent.setPackage("com.android.chrome")
+                                            chromeIntent.addCategory(Intent.CATEGORY_APP_BROWSER)
+                                            chromeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                            context.startActivity(chromeIntent)
+                                            Log.d("OverlayService", "크롬 브라우저 실행")
 
-                                        //오버레이 서비스 실행
-                                        OverlayStateManager.setOverlayActive(true)
-                                        context.startService(serviceIntent)
+                                            //오버레이 서비스 실행
+                                            OverlayStateManager.setOverlayActive(true)
+                                            context.startService(serviceIntent)
+                                        } catch (e: Exception) {
+                                            // 크롬이 설치되어 있지 않은 경우 알림 설정
+                                            Toast.makeText(context, "크롬 브라우저를 사용할 수 없습니다.", Toast.LENGTH_SHORT).show()
+                                        }
                                     } else {
                                         context.stopService(serviceIntent)
                                     }
