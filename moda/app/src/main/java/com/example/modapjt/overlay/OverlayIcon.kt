@@ -2,21 +2,20 @@ package com.example.modapjt.overlay
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntOffset
+import com.example.modapjt.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -51,12 +50,11 @@ fun OverlayIcon(
         }
     }
 
-    Icon(
-        imageVector = Icons.Default.AddCircle,
+    Image(
+        painter = painterResource(R.drawable.icon_round),
         contentDescription = "Overlay Icon",
         modifier = modifier
             .fillMaxSize()
-            .alpha(0.3f) //투명도 설정
             .pointerInput(Unit) {
                 detectTapGestures(
                     onDoubleTap = {
@@ -81,6 +79,5 @@ fun OverlayIcon(
                     }
                 )
             },
-        tint = iconColor
     )
 }
