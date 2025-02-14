@@ -404,8 +404,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                 .withMinScore(MIN_SCORE)
                 .withTrackScores(true)  // 점수 추적 활성화
                 .withSort(Sort.by(
-                        Sort.Order.desc("_score"),
-                        Sort.Order.desc("createdAt")
+                        Sort.Order.desc("_score")
                 ))
                 .build();
 
@@ -414,6 +413,14 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                 query,
                 CardDocumentEntity.class
         );
+
+//        // 검색된 데이터 로깅
+//        searchHits.forEach(hit -> {
+//            CardDocumentEntity entity = hit.getContent();
+//            System.out.println("Title: " + entity.getTitle() +
+//                    ", Created At: " + entity.getCreatedAt() +
+//                    ", Score: " + hit.getScore());
+//        });
 
         // Entity를 Domain으로 변환
         List<CardDocument> content = searchHits.stream()

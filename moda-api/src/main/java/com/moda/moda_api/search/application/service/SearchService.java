@@ -281,7 +281,9 @@ public class SearchService {
 		return targetTypes.stream()
 			.map(typeId -> CompletableFuture.supplyAsync(() -> {
 				// 각 타입별 가져올 갯수를 PageRequest로 생성
-				PageRequest pageRequest = PageRequest.of(0, typeSizes.get(typeId));
+				PageRequest pageRequest = PageRequest.of(
+						0, typeSizes.get(typeId), Sort.by(Sort.Direction.DESC, "createdAt")
+				);
 
 				// 타입별 데이터 가져오기
 				Slice<CardDocument> results = cardSearchRepository.searchComplex(
@@ -347,7 +349,9 @@ public class SearchService {
 		return targetTypes.stream()
 			.map(typeId -> CompletableFuture.supplyAsync(() -> {
 				// 각 타입별 가져올 갯수를 PageRequest로 생성
-				PageRequest pageRequest = PageRequest.of(0, typeSizes.get(typeId));
+				PageRequest pageRequest = PageRequest.of(
+						0, typeSizes.get(typeId), Sort.by(Sort.Direction.DESC, "createdAt")
+				);
 
 				// 타입별 카테고리 기준 데이터 가져오기
 				Slice<CardDocument> results = categoryId.equals(CategoryId.all())
