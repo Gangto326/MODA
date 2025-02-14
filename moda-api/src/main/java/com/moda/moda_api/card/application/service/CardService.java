@@ -14,6 +14,7 @@ import com.moda.moda_api.card.domain.*;
 import com.moda.moda_api.card.exception.DuplicateCardException;
 import com.moda.moda_api.card.exception.InvalidCardContentException;
 import com.moda.moda_api.card.presentation.request.CardBookmarkRequest;
+
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +31,7 @@ import com.moda.moda_api.common.infrastructure.ImageStorageService;
 import com.moda.moda_api.common.pagination.SliceRequestDto;
 import com.moda.moda_api.common.pagination.SliceResponseDto;
 import com.moda.moda_api.notification.application.NotificationService;
+import com.moda.moda_api.notification.domain.NotificationType;
 import com.moda.moda_api.search.domain.CardSearchRepository;
 import com.moda.moda_api.summary.application.service.SummaryService;
 import com.moda.moda_api.summary.infrastructure.api.PythonAiClient;
@@ -57,6 +59,7 @@ public class CardService {
 	private final ImageStorageService imageStorageService;
 	private final PythonAiClient pythonAiClient;
 	private final CardSearchRepository cardSearchRepository;
+	private final NotificationService notificationService;
 
 	/**
 	 * URL을 입력 받고 새로운 카드 생성 후 알맞은 보드로 이동합니다.
@@ -69,9 +72,8 @@ public class CardService {
 		UserId userIdObj = new UserId("user");
 		String urlHash = UrlCache.generateHash(url);
 
-		if (cardRepository.existsByUserIdAndUrlHashAndDeletedAtIsNull(userIdObj, urlHash)) {
+		if (cardRepository.existsByUserIdAndUrlHashAndDeletedAtIsNull(userIdObj, urlHash))
 			throw new DuplicateCardException("같은 URL을 가진 카드가 이미 존재합니다.");
-		}
 
 		return urlCacheRepository.findByUrlHash(urlHash)
 			.map(cache -> createCardFromCache(userIdObj, urlHash))
@@ -113,6 +115,7 @@ public class CardService {
 
 		cardRepository.save(card);
 		cardSearchRepository.save(card);
+		notificationService.sendFCMNotification(userIdObj.getValue(), NotificationType.card,card);
 
 		return CompletableFuture.completedFuture(true);
 	}
@@ -175,6 +178,9 @@ public class CardService {
 				cardRepository.save(card);
 				cardSearchRepository.save(card);
 
+				notificationService.sendFCMNotification(userIdObj.getValue(), NotificationType.card,card);
+
+
 				return true;
 			});
 	}
@@ -190,7 +196,8 @@ public class CardService {
 					String urlHash = UrlCache.generateHash(s3Url);
 
 					// 실제 AI 분석
-					AIAnalysisResponseDTO aiAnalysisResponseDTO = pythonAiClient.imageAnalysis(new AiImageRequestDTO(s3Url));
+					AIAnalysisResponseDTO aiAnalysisResponseDTO = pythonAiClient.imageAnalysis(
+						new AiImageRequestDTO(s3Url));
 
 					// AI Test생성
 					// AIAnalysisResponseDTO aiAnalysisResponseDTO = AIAnalysisResponseDTO.builder()
@@ -200,6 +207,7 @@ public class CardService {
 					// 	.content("AIContnet")
 					// 	.thumbnailContent("abcd")
 					// 	.build();
+
 
 					return Card.builder()
 						.cardId(new CardId(UUID.randomUUID().toString()))
@@ -216,6 +224,7 @@ public class CardService {
 						.subContents(null)
 						.build();
 
+
 				} catch (Exception e) {
 					throw new RuntimeException("Failed to process image", e);
 				}
@@ -225,6 +234,9 @@ public class CardService {
 		cards.forEach(System.out::println);
 		cardRepository.saveAll(cards);
 		cardSearchRepository.save(cards.get(0));
+
+		notificationService.sendFCMNotification(userIdObj.getValue(), NotificationType.card,cards.get(0));
+
 		return true;
 	}
 
@@ -276,7 +288,7 @@ public class CardService {
 	public CardDetailResponse getCardDetail(String userId, String cardId) {
 		UserId userIdObj = new UserId(userId);
 		CardId cardIdObj = new CardId(cardId);
-		
+
 		// 조회수 증가 로직
 		cardViewCountRepository.incrementViewCount(cardIdObj);
 
@@ -439,9 +451,9 @@ public class CardService {
 		UserId userIdObj = new UserId(userId);
 
 		return CardMainResponse.builder()
-				.topKeywords(userKeywordRepository.getTopKeywords(userIdObj, 5))
-				.creator(videoCreatorRepository.getCreatorByUserId(userIdObj))
-				.build();
+			.topKeywords(userKeywordRepository.getTopKeywords(userIdObj, 5))
+			.creator(videoCreatorRepository.getCreatorByUserId(userIdObj))
+			.build();
 	}
 
 	/**

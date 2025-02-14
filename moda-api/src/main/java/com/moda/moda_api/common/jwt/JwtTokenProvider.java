@@ -19,14 +19,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JwtTokenProvider {
 	// private final long ACCESS_TOKEN_EXPIRE_TIME = 1000L * 60 * 15;  // 15분
-	// private final long REFRESH_TOKEN_EXPIRE_TIME = 1000L * 60 * 60 * 6;  // 6시간
-	//
-	// @Value("${jwt.secret}")
-	// private String secretKey;
-	//
-	// private SecretKey getSecretKey(TokenType tokenType) {
-	// 	String keyValue = (tokenType == TokenType.ACCESS) ? secretKey + "_access" : secretKey + "_refresh";
-	// 	return Keys.hmacShaKeyFor(Base64.getDecoder().decode(keyValue));
+	// 	// private final long REFRESH_TOKEN_EXPIRE_TIME = 1000L * 60 * 60 * 6;  // 6시간
+	// 	//
+	// 	// @Value("${jwt.secret}")
+	// 	// private String secretKey;
+	// 	//
+	// 	// private SecretKey getSecretKey(TokenType tokenType) {
+	// 	// 	String keyValue = (tokenType == TokenType.ACCESS) ? secretKey + "_access" : secretKey + "_refresh";
+	// 	// 	return Keys.hmacShaKeyFor(Base64.getDecoder().decode(keyValue));
 	// }
 	//
 	// public TokenDto generateToken(User user, TokenType tokenType) {

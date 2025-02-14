@@ -37,7 +37,9 @@ public class UrlCacheEntityMapper {
 			.cachedContent(domain.getCachedContent())
 			.cachedThumbnailUrl(domain.getCachedThumbnailUrl())
 			.cachedThumbnailContent(domain.getCachedThumbnailContent())
+
 			.cachedEmbedding(domain.getCachedEmbedding().getValues())
+
 			.cachedKeywords(domain.getCachedKeywords())
 			.cachedSubContents(domain.getCachedSubContents())
 			.createdAt(domain.getCreatedAt())

@@ -1,5 +1,7 @@
 package com.moda.moda_api.card.infrastructure.entity;
 
+import com.moda.moda_api.card.infrastructure.converter.VectorConverter;
+import jakarta.persistence.Convert;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -18,6 +20,7 @@ public class CardDtoEntity {
     private final String content;
     private final String thumbnailContent;
     private final String thumbnailUrl;
+    @Convert(converter = VectorConverter.class)
     private final float[] embedding;
     private final Integer viewCount;
     private final String[] keywords;
@@ -29,24 +32,24 @@ public class CardDtoEntity {
 
     public CardDtoEntity(CardEntity card, String originalUrl) {
         this(
-                card.getCardId(),
-                card.getUserId(),
-                card.getCategoryId(),
-                card.getTypeId(),
-                card.getUrlHash(),
-                originalUrl,
-                card.getTitle(),
-                card.getContent(),
-                card.getThumbnailContent(),
-                card.getThumbnailUrl(),
-                card.getEmbedding(),
-                card.getViewCount(),
-                card.getKeywords(),
-                card.getSubContents(),
-                card.getBookmark(),
-                card.getCreatedAt(),
-                card.getUpdatedAt(),
-                card.getDeletedAt()
+            card.getCardId(),
+            card.getUserId(),
+            card.getCategoryId(),
+            card.getTypeId(),
+            card.getUrlHash(),
+            originalUrl,
+            card.getTitle(),
+            card.getContent(),
+            card.getThumbnailContent(),
+            card.getThumbnailUrl(),
+            card.getEmbedding(),
+            card.getViewCount(),
+            card.getKeywords(),
+            card.getSubContents(),
+            card.getBookmark(),
+            card.getCreatedAt(),
+            card.getUpdatedAt(),
+            card.getDeletedAt()
         );
     }
 }

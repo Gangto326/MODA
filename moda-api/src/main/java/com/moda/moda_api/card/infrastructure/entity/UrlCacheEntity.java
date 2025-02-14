@@ -2,7 +2,10 @@ package com.moda.moda_api.card.infrastructure.entity;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.ColumnTransformer;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Type;
+import org.hibernate.type.SqlTypes;
 
 import com.moda.moda_api.card.infrastructure.converter.VectorConverter;
 
@@ -52,6 +55,7 @@ public class UrlCacheEntity {
 
 	@Column(name = "cached_embedding", columnDefinition = "VECTOR(768)")
 	@Convert(converter = VectorConverter.class)
+	@ColumnTransformer(write = "?::vector(768)")
 	private float[] cachedEmbedding;
 
 	@Type(StringArrayType.class)

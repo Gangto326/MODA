@@ -1,6 +1,7 @@
 package com.moda.moda_api.card.domain;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import com.moda.moda_api.card.exception.InvalidCardContentException;
 import com.moda.moda_api.card.exception.InvalidCardTitleException;
@@ -44,7 +45,7 @@ public class Card {
     private Boolean bookmark = false;
 
     @Builder.Default
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
 
 
     public void changeContent(String content) {

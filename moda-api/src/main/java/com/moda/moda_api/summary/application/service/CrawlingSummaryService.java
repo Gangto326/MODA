@@ -26,6 +26,7 @@ public class CrawlingSummaryService {
 		return CompletableFuture.supplyAsync(() -> {
 				try {
 					// 1단계: 크롤링 수행
+					System.out.println("크롤링하기 직전");
 					return crawlingService.crawlByUrl(url);
 				} catch (Exception e) {
 					throw new CompletionException("Crawling failed", e);
@@ -35,27 +36,27 @@ public class CrawlingSummaryService {
 				log.info(crawledContent.getExtractedContent().getText());
 
 				// 2단계: Python 분석과 이미지 URL 가져오기를 병렬로 실행
-				CompletableFuture<AIAnalysisResponseDTO> pythonAnalysisFuture =
-					CompletableFuture.supplyAsync(() -> {
-						try {
-							return pythonAnalysisService.articleAnalyze(
-								crawledContent.getExtractedContent().getText()
-							);
-						} catch (Exception e) {
-							throw new CompletionException("Python analysis failed", e);
-						}
-					});
+				// CompletableFuture<AIAnalysisResponseDTO> pythonAnalysisFuture =
+				// 	CompletableFuture.supplyAsync(() -> {
+				// 		try {
+				// 			return pythonAnalysisService.articleAnalyze(
+				// 				crawledContent.getExtractedContent().getText()
+				// 			);
+				// 		} catch (Exception e) {
+				// 			throw new CompletionException("Python analysis failed", e);
+				// 		}
+				// 	});
 
 				// AI TEST용
-				// CompletableFuture<AIAnalysisResponseDTO> pythonAnalysisFuture = CompletableFuture.completedFuture(
-				// 	AIAnalysisResponseDTO.builder()
-				// 		.categoryId(new CategoryId(2L))  // null 허용
-				// 		.keywords(new String[]{"한윤지_바보"})
-				// 		.thumbnailContent("sample")
-				// 		.content("sample")
-				// 		.embeddingVector(new EmbeddingVector(null))
-				// 		.build()
-				// );
+				CompletableFuture<AIAnalysisResponseDTO> pythonAnalysisFuture = CompletableFuture.completedFuture(
+					AIAnalysisResponseDTO.builder()
+						.categoryId(new CategoryId(2L))  // null 허용
+						.keywords(new String[]{"한윤지_바보"})
+						.thumbnailContent("sample")
+						.content("sample")
+						.embeddingVector(new EmbeddingVector(null))
+						.build()
+				);
 
 				CompletableFuture<String> thumbnailUrlFuture =
 					CompletableFuture.supplyAsync(() ->

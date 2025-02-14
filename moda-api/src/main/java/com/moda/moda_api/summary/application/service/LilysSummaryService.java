@@ -49,20 +49,20 @@ public class LilysSummaryService {
 			})
 			.thenCompose(lilysSummary -> {
 				// getSummaryResults 완료 후 병렬로 실행 가능한 작업들
-				CompletableFuture<AIAnalysisResponseDTO> aiAnalysisFuture =
-					CompletableFuture.supplyAsync(() ->
-						pythonAnalysisService.youtubeAnalyze(lilysSummary.getContents())
-					);
+				// CompletableFuture<AIAnalysisResponseDTO> aiAnalysisFuture =
+				// 	CompletableFuture.supplyAsync(() ->
+				// 		pythonAnalysisService.youtubeAnalyze(lilysSummary.getContents())
+				// 	);
 
-				// CompletableFuture<AIAnalysisResponseDTO> aiAnalysisFuture = CompletableFuture.completedFuture(
-				// 	AIAnalysisResponseDTO.builder()
-				// 		.categoryId(new CategoryId(1L))  // null 허용
-				// 		.keywords(new String[0])
-				// 		.thumbnailContent("")
-				// 		.content("")
-				// 		.embeddingVector(new EmbeddingVector(new float[768]))
-				// 		.build()
-				// );
+				CompletableFuture<AIAnalysisResponseDTO> aiAnalysisFuture = CompletableFuture.completedFuture(
+					AIAnalysisResponseDTO.builder()
+						.categoryId(new CategoryId(1L))  // null 허용
+						.keywords(new String[0])
+						.thumbnailContent("")
+						.content("")
+						.embeddingVector(null)
+						.build()
+				);
 
 				CompletableFuture<YoutubeAPIResponseDTO> youtubeApiFuture =
 					CompletableFuture.supplyAsync(() ->
