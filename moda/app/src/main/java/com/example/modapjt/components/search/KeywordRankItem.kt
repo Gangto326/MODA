@@ -8,33 +8,42 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.modapjt.datastore.SearchKeywordDataStore
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 @Composable
 fun KeywordRankItem(rank: Int, keyword: String, change: Int, navController: NavController) {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // 🔹 랭킹 번호 (고정 너비)
+        // 랭킹 번호
         Text(
             text = "$rank.",
             style = MaterialTheme.typography.bodyMedium.copy(
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold
             ),
-            modifier = Modifier.width(28.dp) // ✅ 숫자 + 점(.) 포함한 공간 확보
+            modifier = Modifier.width(28.dp)
         )
 
-        // 🔹 키워드 (클릭 시 네비게이션 이동)
+        // 키워드
         Text(
             text = keyword,
             style = MaterialTheme.typography.bodyMedium.copy(
@@ -42,18 +51,25 @@ fun KeywordRankItem(rank: Int, keyword: String, change: Int, navController: NavC
                 fontWeight = FontWeight.Normal
             ),
             modifier = Modifier
-                .weight(1f) // ✅ 왼쪽 정렬 (가장 넓은 공간 차지)
+                .weight(1f)
                 .clickable {
-                    navController.navigate("newSearchCardListScreen/$keyword") // ✅ 클릭 시 이동
+                    // 최근 검색어에 저장
+                    coroutineScope.launch(Dispatchers.IO) {
+                        val currentKeywords = SearchKeywordDataStore.getKeywords(context).first()
+                        val updatedKeywords = (listOf(keyword) + currentKeywords).distinct().take(10)
+                        SearchKeywordDataStore.saveKeywords(context, updatedKeywords)
+                    }
+                    // 검색 결과 화면으로 이동
+                    navController.navigate("newSearchCardListScreen/$keyword")
                 }
         )
 
-        // 🔹 변화 아이콘 (오른쪽 정렬)
+        // 변화 아이콘
         val changeSymbol = when {
-            change == 100 -> "NEW"  // 🔹 100이면 "NEW"
-            change > 0 -> "▲ $change"  // 🔹 양수면 위쪽 화살표
-            change < 0 -> "▼ ${-change}"  // 🔹 음수면 아래쪽 화살표
-            else -> "━"  // 🔹 0이면 "-"
+            change == 100 -> "NEW"
+            change > 0 -> "▲ $change"
+            change < 0 -> "▼ ${-change}"
+            else -> "━"
         }
 
         Text(
@@ -63,10 +79,10 @@ fun KeywordRankItem(rank: Int, keyword: String, change: Int, navController: NavC
                 fontWeight = FontWeight.Bold
             ),
             color = when {
-                change == 100 -> Color.Green  // 🔹 NEW는 초록색
-                change > 0 -> Color.Red  // 🔹 상승은 빨간색
-                change < 0 -> Color.Blue  // 🔹 하락은 파란색
-                else -> Color.Gray  // 🔹 변동 없음
+                change == 100 -> Color.Green
+                change > 0 -> Color.Red
+                change < 0 -> Color.Blue
+                else -> Color.Gray
             }
         )
     }

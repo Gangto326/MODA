@@ -79,13 +79,8 @@ fun NewSearchScreen(
                     }
                 },
                 onBackPressed = {
-                    if (isSearchActive) {
-                        isSearchActive = false
-                        searchQuery = ""
-                        keyboardController?.hide()
-                    } else {
-                        navController.navigate("home")
-                    }
+                    // 단순히 이전 화면으로 돌아가기
+                    navController.navigateUp()
                 },
                 context = context
             )

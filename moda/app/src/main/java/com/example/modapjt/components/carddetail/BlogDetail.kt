@@ -1,33 +1,19 @@
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImagePainter
-import coil.compose.rememberAsyncImagePainter
+import com.example.modapjt.components.carddetail.ImageSlider
 import com.example.modapjt.domain.model.CardDetail
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -65,50 +51,10 @@ fun BlogDetailScreen(cardDetail: CardDetail) {
 //                )
 //            }
 //        }
+        // 블로그 상세 화면 내부에서 subContents 표시
         item {
-            cardDetail.thumbnailUrl?.let { url ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .background(
-                            color = MaterialTheme.colorScheme.surfaceVariant,
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                ) {
-                    var isLoading by remember { mutableStateOf(true) }
-                    var isError by remember { mutableStateOf(false) }
-
-                    Image(
-                        painter = rememberAsyncImagePainter(
-                            model = url,
-                            onState = { state ->
-                                isLoading = state is AsyncImagePainter.State.Loading
-                                isError = state is AsyncImagePainter.State.Error
-                            }
-                        ),
-                        contentDescription = "썸네일",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-
-                    // 로딩 중 표시
-                    if (isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.align(Alignment.Center)
-                        )
-                    }
-
-                    // 에러 표시
-                    if (isError) {
-                        Text(
-                            text = "이미지를 불러올 수 없습니다",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.align(Alignment.Center)
-                        )
-                    }
-                }
+            cardDetail.subContents.takeIf { it.isNotEmpty() }?.let { images ->
+                ImageSlider(imageUrls = images)
             }
         }
 
@@ -131,6 +77,9 @@ fun BlogDetailScreen(cardDetail: CardDetail) {
                 modifier = Modifier.padding(vertical = 4.dp)
             )
         }
+
+
+
 
         // 마크다운 형식의 본문 내용을 렌더링
         item {
