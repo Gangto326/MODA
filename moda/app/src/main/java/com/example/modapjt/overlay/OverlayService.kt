@@ -35,6 +35,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LifecycleService
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
@@ -249,6 +250,25 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
 
         windowManager?.addView(captureView, captureParams)
         windowManager?.addView(overlayView, params)
+
+        lifecycleScope.launch {
+            BrowserAccessibilityService.canOverlayState.collect { canOverlay ->
+                if (canOverlay) {
+                    params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    overlayView?.alpha = 1f
+                } else {
+                    params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                            WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                    overlayView?.alpha = 0f
+                }
+
+                overlayView?.let { view ->
+                    if (view.isAttachedToWindow) {
+                        windowManager?.updateViewLayout(view, params)
+                    }
+                }
+            }
+        }
     }
 
     private fun movePosition(offset: IntOffset) {
@@ -274,7 +294,7 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
             windowManager?.removeView(backgroundView)
 
         if (isCollapsedState.value) {
-            onDestroy()
+            stopSelf()
         }
     }
 
@@ -397,8 +417,10 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
         } catch (e: Exception) {
             Log.d("OverlayService", "오버레이 서비스 이미 종료되어 있음")
         }
-
         super.onDestroy()
+
+        OverlayStateManager.setOverlayActive(false)
+
         Log.d("OverlayService", "오버레이 서비스 종료됨")
     }
 }

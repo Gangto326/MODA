@@ -24,7 +24,7 @@ class MainActivity : ComponentActivity() {
 //        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         // 오버레이 및 접근성 서비스를 위한 권한 요청
-//        checkAccessibilityPermission()
+        checkAccessibilityPermission()
         checkOverlayPermission()
 
         setContent {

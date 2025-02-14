@@ -43,6 +43,7 @@ import com.example.modapjt.components.user.MyPageHeader
 import com.example.modapjt.components.user.UserProfileCard
 import com.example.modapjt.domain.viewmodel.UserViewModel
 import com.example.modapjt.overlay.OverlayService
+import com.example.modapjt.overlay.OverlayStateManager
 
 @Composable
 fun MyPageScreen(
@@ -52,7 +53,8 @@ fun MyPageScreen(
 ) {
     val viewModel: UserViewModel = viewModel()
     val context = LocalContext.current
-    var isOverlayActive by remember { mutableStateOf(false) } // 오버레이 상태 추가
+
+    val isOverlayActive by OverlayStateManager.isOverlayActive.collectAsState()
     var showLogoutDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(userId) {
@@ -133,9 +135,9 @@ fun MyPageScreen(
 
                             Button(
                                 onClick = {
-                                    isOverlayActive = !isOverlayActive
                                     val serviceIntent = Intent(context, OverlayService::class.java)
-                                    if (isOverlayActive) {
+
+                                    if (!isOverlayActive) {
                                         // 기본 브라우저 실행
                                         Toast.makeText(context, "기본 브라우저가 실행됩니다.", Toast.LENGTH_SHORT).show()
                                         val browserIntent = Intent(Intent.ACTION_MAIN)
@@ -144,8 +146,9 @@ fun MyPageScreen(
                                         context.startActivity(browserIntent)
                                         Log.d("OverlayService", "기본 브라우저 실행")
 
+                                        //오버레이 서비스 실행
+                                        OverlayStateManager.setOverlayActive(true)
                                         context.startService(serviceIntent)
-
                                     } else {
                                         context.stopService(serviceIntent)
                                     }
