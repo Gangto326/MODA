@@ -163,13 +163,13 @@ INSERT INTO category (category_id, category) VALUES
 (10, 'Health');
 
 INSERT INTO public.category_order (category_id, user_id, position) VALUES
-(1, 'user',1),
-(2, 'user',2),
-(3, 'user',3),
-(4, 'user',4),
-(5, 'user',5),
-(6, 'user',6),
-(7, 'user',7),
-(8, 'user',8),
-(9,'user',9),
-(10, 'user',10);
+(1, 'user1',1),
+(2, 'user1',2),
+(3, 'user1',3),
+(4, 'user1',4),
+(5, 'user1',5),
+(6, 'user1',6),
+(7, 'user1',7),
+(8, 'user1',8),
+(9,'user1',9),
+(10, 'user1',10);
