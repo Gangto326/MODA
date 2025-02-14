@@ -1,6 +1,7 @@
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -27,87 +28,70 @@ import java.time.format.DateTimeFormatter
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun BlogDetailScreen(cardDetail: CardDetail) {
-    val uriHandler = LocalUriHandler.current // URL 처리를 위한 핸들러
-
-    // 날짜 포맷 변경 (년-월-일)
+    val uriHandler = LocalUriHandler.current
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     val formattedDate = LocalDateTime.parse(cardDetail.createdAt).format(formatter)
 
-
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()  // 전체 화면 크기 사용
-            .padding(16.dp) // 전체 컨텐츠에 패딩 적용
+    Column(
+        modifier = Modifier.fillMaxSize()
     ) {
-        // 썸네일 이미지 표시
-//        item {
-//            cardDetail.thumbnailUrl?.let {
-//                Image(
-//                    painter = rememberAsyncImagePainter(it),
-//                    contentDescription = "썸네일",
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .height(200.dp)
-//                )
-//            }
-//        }
-        // 블로그 상세 화면 내부에서 subContents 표시
-        item {
-            cardDetail.subContents.takeIf { it.isNotEmpty() }?.let { images ->
-                ImageSlider(imageUrls = images)
+        // 상단 고정 이미지 슬라이더
+        cardDetail.subContents.takeIf { it.isNotEmpty() }?.let { images ->
+            ImageSlider(imageUrls = images)
+        }
+
+        // 스크롤 가능한 콘텐츠
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            // 블로그 글 제목
+            item {
+                Text(
+                    text = cardDetail.title,
+                    style = MaterialTheme.typography.headlineMedium,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
             }
-        }
 
-        // 블로그 글 제목
-        item {
-            Text(
-                text = cardDetail.title,
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-        }
-
-        // 관련 키워드들을 쉼표로 구분하여 표시
-        item {
-            // 키워드 3개까지만 표시
-            val limitedKeywords = cardDetail.keywords.take(3).joinToString(", ")
-            Text(
-                text = "키워드: $limitedKeywords",
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(vertical = 4.dp)
-            )
-        }
-
-
-
-
-        // 마크다운 형식의 본문 내용을 렌더링
-        item {
-            MarkdownText(
-                markdown = cardDetail.content,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-            Divider(color = Color.Gray, thickness = 1.dp) // 컨텐츠 구분을 위한 구분선
-        }
-
-        // 원본 글 링크
-        item {
-            // URL을 버튼으로 변경
-            Button(
-                onClick = { uriHandler.openUri(cardDetail.originalUrl) },
-                modifier = Modifier.padding(vertical = 8.dp)
-            ) {
-                Text("원문 보기")
+            // 관련 키워드
+            item {
+                val limitedKeywords = cardDetail.keywords.take(3).joinToString(", ")
+                Text(
+                    text = "키워드: $limitedKeywords",
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(vertical = 4.dp)
+                )
             }
-        }
 
-        // 작성 날짜 정보
-        item {
-            Text(
-                text = "생성 날짜: $formattedDate",
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(top = 8.dp)
-            )
+            // 본문 내용
+            item {
+                MarkdownText(
+                    markdown = cardDetail.content,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+                Divider(color = Color.Gray, thickness = 1.dp)
+            }
+
+            // 원본 글 링크
+            item {
+                Button(
+                    onClick = { uriHandler.openUri(cardDetail.originalUrl) },
+                    modifier = Modifier.padding(vertical = 8.dp)
+                ) {
+                    Text("원문 보기")
+                }
+            }
+
+            // 작성 날짜
+            item {
+                Text(
+                    text = "생성 날짜: $formattedDate",
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
         }
     }
 }
