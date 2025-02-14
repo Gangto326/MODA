@@ -138,10 +138,10 @@ fun MyPageScreen(
                                     if (isOverlayActive) {
                                         // 기본 브라우저 실행
                                         Toast.makeText(context, "기본 브라우저가 실행됩니다.", Toast.LENGTH_SHORT).show()
-                                        val intent = Intent(Intent.ACTION_MAIN)
-                                        intent.addCategory(Intent.CATEGORY_APP_BROWSER)
-                                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                        context.startActivity(intent)
+                                        val browserIntent = Intent(Intent.ACTION_MAIN)
+                                        browserIntent.addCategory(Intent.CATEGORY_APP_BROWSER)
+                                        browserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                        context.startActivity(browserIntent)
                                         Log.d("OverlayService", "기본 브라우저 실행")
 
                                         context.startService(serviceIntent)
