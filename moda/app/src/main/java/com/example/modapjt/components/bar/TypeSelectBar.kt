@@ -1,137 +1,79 @@
-//import androidx.compose.foundation.background
-//import androidx.compose.foundation.clickable
-//import androidx.compose.foundation.layout.*
-//import androidx.compose.foundation.lazy.LazyRow
-//import androidx.compose.foundation.lazy.items
-//import androidx.compose.foundation.shape.RoundedCornerShape
-//import androidx.compose.material3.Text
-//import androidx.compose.runtime.*
-//import androidx.compose.ui.Alignment
-//import androidx.compose.ui.Modifier
-//import androidx.compose.ui.draw.clip
-//import androidx.compose.ui.graphics.Color
-//import androidx.compose.ui.text.font.FontWeight
-//import androidx.compose.ui.unit.dp
-//import androidx.compose.ui.unit.sp
-//
-//
-//@Composable
-//fun TypeSelectBar(
-//    selectedCategory: String, // 선택된 카테고리를 외부에서 전달받음
-//    modifier: Modifier = Modifier,
-//    onCategorySelected: (String) -> Unit
-//) {
-//    val categories = listOf("전체", "이미지", "동영상", "블로그", "뉴스")
-//
-//    LazyRow(
-//        modifier = modifier
-//            .fillMaxWidth()
-//            .background(Color.White)
-//            .padding(horizontal = 16.dp, vertical = 8.dp),
-//        horizontalArrangement = Arrangement.spacedBy(8.dp)
-//    ) {
-//        items(categories) { category ->
-//            CategoryTab(
-//                title = category,
-//                isSelected = selectedCategory == category, // 외부에서 전달받은 상태 사용
-//                onClick = { onCategorySelected(category) } // 선택 이벤트 외부로 전달
-//            )
-//        }
-//    }
-//}
-//
-//
-//
-//
-//@Composable
-//private fun CategoryTab(
-//    title: String,
-//    isSelected: Boolean,
-//    onClick: () -> Unit
-//) {
-//    Box(
-//        modifier = Modifier
-//            .clip(RoundedCornerShape(20.dp))
-//            .background(
-//                if (isSelected) Color(0xFF4A90E2)  // 선택된 탭 파란색 배경
-//                else Color(0xFFF5F5F5)  // 선택되지 않은 탭 회색 배경
-//            )
-//            .clickable(onClick = onClick)
-//            .padding(horizontal = 16.dp, vertical = 8.dp),
-//        contentAlignment = Alignment.Center
-//    ) {
-//        Text(
-//            text = title,
-//            color = if (isSelected) Color.White else Color.Black,
-//            fontSize = 14.sp,
-//            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-//        )
-//    }
-//}
-
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-//import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Text
-import androidx.compose.runtime.*
-//import androidx.compose.ui.Alignment
-//import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-//import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.app.ui.theme.customTypography
+import com.example.modapjt.R  // 아이콘 리소스가 위치한 패키지
 
 @Composable
-fun TypeSelectBar(
+fun TypeSelectBar( // 상단 타입 선택 바
     selectedCategory: String,
+    selectedSort: String, // 추가: 현재 선택된 정렬
     modifier: Modifier = Modifier,
-    onCategorySelected: (String) -> Unit
+    onCategorySelected: (String) -> Unit,
+    onSortSelected: (String) -> Unit // 정렬 선택 이벤트 추가
 ) {
     val categories = listOf("전체", "이미지", "동영상", "블로그", "뉴스")
-    var selectedSort by remember { mutableStateOf("최신순") } // 기본 정렬 상태
+//    var selectedSort by remember { mutableStateOf("최신순") } // 기본 정렬 상태
 
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(Color.White)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .background(Color.White) // 수정완료
+            .padding(horizontal = 16.dp, vertical = 10.dp), // 수정완료( 상단 타입 선택바 세로 길이 )
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         // 카테고리 탭 (왼쪽 정렬)
         LazyRow(
             modifier = Modifier.weight(1f),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             items(categories) { category ->
                 CategoryTab(
                     title = category,
                     isSelected = selectedCategory == category,
                     onClick = {
-                        selectedSort = "최신순"  // 탭 변경 시 정렬 초기화
                         onCategorySelected(category)
+                        onSortSelected("최신순") // 카테고리 변경 시 정렬 초기화
                     }
                 )
             }
@@ -142,8 +84,10 @@ fun TypeSelectBar(
         if (selectedCategory != "전체") {
             SortDropdown(
                 selectedSort = selectedSort,
-                onSortSelected = { selectedSort = it },
-                modifier = Modifier.align(Alignment.CenterVertically) // 오른쪽 끝에 위치
+                onSortSelected = onSortSelected
+//                selectedSort = selectedSort,
+//                onSortSelected = { selectedSort = it },
+//                modifier = Modifier.align(Alignment.CenterVertically) // 오른쪽 끝에 위치
             )
         }
     }
@@ -156,27 +100,75 @@ private fun CategoryTab(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
+    val iconResId = when (title) {
+        "이미지" -> R.drawable.ic_image
+        "동영상" -> R.drawable.ic_video
+        "블로그" -> R.drawable.ic_blog
+        "뉴스" -> R.drawable.ic_news
+        else -> null
+    }
+
+    var rowWidth by remember { mutableStateOf(0) } // 🔥 Row 전체 너비 저장
+    val density = LocalDensity.current // 🔥 DP 변환을 위한 density 객체
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .clickable(onClick = onClick)
+            .padding(horizontal = 4.dp) // 🔹 선택된 탭의 여백 조정 (필요시 수정)
     ) {
-        Text(
-            text = title,
-            color = if (isSelected) Color.Black else Color(0xFFBDBDBD), // 선택된 경우 검정, 아닐 경우 회색 (#BDBDBD)
-            fontSize = 18.sp,
-            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-        )
+        // 🔹 아이콘 + 텍스트를 감싸는 Row (너비 측정 대상)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .onGloballyPositioned { layoutCoordinates ->
+                    rowWidth = layoutCoordinates.size.width // 🔹 Row의 너비 저장
+                }
+        ) {
+            // 🔹 선택된 경우만 아이콘 표시
+            if (isSelected && iconResId != null) {
+                Image(
+                    painter = painterResource(id = iconResId),
+                    contentDescription = "$title 아이콘",
+                    modifier = Modifier
+                        .size(20.dp) // 아이콘 크기 조정
+                        .padding(end = 6.dp) // 텍스트와 간격
+
+                )
+            }
+
+            // 🔹 카테고리 텍스트
+            Text(
+                text = title,
+                color = if (isSelected) Color(0xFF665F5B) else Color(0xFFBAADA4),
+                fontSize = 16.sp, // 🔥 폰트 크기 설정 (sp 단위)
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+//                fontWeight = FontWeight.Bold // 🔥 폰트 굵기 설정
+//                style = customTypography.headlineSmall
+            )
+        }
+
+        Spacer(modifier = Modifier.height(6.dp)) // 🔹 텍스트와 밑줄 간격 추가
+
+        // 🔹 밑줄 (아이콘 포함한 Row 기준으로 너비 설정)
         if (isSelected) {
             Box(
                 modifier = Modifier
-                    .width(20.dp)
+                    .width(with(density) { rowWidth.toDp() } + 12.dp) // 🔥 아이콘 포함한 Row 길이로 설정 + 12dp
                     .height(2.dp)
-                    .background(Color(0xFFFFCC80)) // 밑줄 색상: 주황색 (#FFCC80)
+                    .background(Color(0xFFFFCD69))
             )
         }
     }
 }
+
+
+
+
+
+
+
+
 
 @Composable
 fun SortDropdown(

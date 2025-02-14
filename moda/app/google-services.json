@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "798304860646",
+    "project_id": "moda-app-42206",
+    "storage_bucket": "moda-app-42206.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:798304860646:android:8fc19af86d9c61309c3e27",
+        "android_client_info": {
+          "package_name": "com.example.modapjt"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyByTuWCW_UiImNKPOVZgjZ4tdI_3Ad298I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

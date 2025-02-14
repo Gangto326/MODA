@@ -7,22 +7,48 @@ import android.util.Log
 import android.view.Gravity
 import android.view.WindowManager
 import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBox
+import androidx.compose.material3.Icon
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
-import androidx.lifecycle.LifecycleService
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.setViewTreeLifecycleOwner
-import androidx.savedstate.setViewTreeSavedStateRegistryOwner
-import androidx.compose.runtime.*
-import kotlinx.coroutines.*
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
+import androidx.savedstate.setViewTreeSavedStateRegistryOwner
+import com.example.modapjt.data.repository.CardRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class OverlayService : LifecycleService(), SavedStateRegistryOwner {
     private var windowManager: WindowManager? = null
     private var overlayView: ComposeView? = null
+    private lateinit var params: WindowManager.LayoutParams
 
-    private val repository by lazy { (application as ModapApplication).repository }
+    private var backgroundView: ComposeView? = null
+    private var backgroundParams: WindowManager.LayoutParams? = null
+
+    private val repository = CardRepository()
     private val savedStateRegistryController = SavedStateRegistryController.create(this)
 
     override val savedStateRegistry: SavedStateRegistry
@@ -37,6 +63,57 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
     }
 
     private fun setupOverlayView() {
+        backgroundParams = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.MATCH_PARENT,
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+            else WindowManager.LayoutParams.TYPE_PHONE,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            PixelFormat.TRANSLUCENT
+        ).apply {
+            gravity = Gravity.TOP or Gravity.START
+        }
+
+        backgroundView = ComposeView(this).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setViewTreeLifecycleOwner(this@OverlayService)
+            setViewTreeSavedStateRegistryOwner(this@OverlayService)
+
+            setContent {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Gray.copy(alpha = 0.5f)),
+                    contentAlignment = Alignment.BottomCenter
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AccountBox,
+                        contentDescription = "Termination Zone Icon",
+                        modifier = Modifier
+                            .size(60.dp)
+                            .offset(y = (-60).dp)
+                            .alpha(0.5f),
+                        tint = Color.Red,
+                    )
+                }
+            }
+        }
+
+        params = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+            else WindowManager.LayoutParams.TYPE_PHONE,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            PixelFormat.TRANSLUCENT
+        ).apply {
+            gravity = Gravity.TOP or Gravity.START
+            x = 40
+            y = 80
+        }
+
         overlayView = ComposeView(this).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setViewTreeLifecycleOwner(this@OverlayService)
@@ -48,6 +125,11 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
 
                 OverlayIcon(
                     onDoubleTab = { captureUrl() },
+                    onDrag = { offset ->
+                        movePosition(offset)
+                    },
+                    onDragStart = { showBackground() },
+                    onDragEnd = { hideBackground() },
                     isSuccess = isSuccess,
                     isError = isError,
                     onAnimationComplete = {
@@ -56,20 +138,6 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
                     }
                 )
             }
-        }
-
-        val params = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)
-                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-            else WindowManager.LayoutParams.TYPE_PHONE,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-            PixelFormat.TRANSLUCENT
-        ).apply {
-            gravity = Gravity.TOP or Gravity.START
-            x = 0
-            y = 100
         }
 
         windowManager?.addView(overlayView, params)
@@ -88,8 +156,84 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
             url = url ?: "Unknown URL"
             Log.d("OverlayService", "최종 URL 저장: $url") // 로그 추가
 
-            saveToLocalDatabase(url)
+            saveToDatabase(url)
         }
+    }
+
+    private fun movePosition(offset: IntOffset) {
+        params.x += offset.x
+        params.y += offset.y
+
+        windowManager?.updateViewLayout(overlayView, params)
+
+        Log.d("OverlayService", "${params.x}, ${params.y}")
+
+        if (
+            params.x in 501..699 &&
+            params.y in 2401..2449
+        )
+            Log.d("OverlayService", "겹침")
+        else
+            Log.d("OverlayService", "안겹침")
+
+//        val screenWidth = resources.displayMetrics.widthPixels
+//        val screenHeight = resources.displayMetrics.heightPixels
+//        val iconSize = 60 * resources.displayMetrics.density
+//
+//        // 오버레이 아이콘의 중심 좌표 계산
+//        val overlayIconCenterX = params.x + iconSize/2
+//        val overlayIconCenterY = params.y + iconSize/2
+//
+//        // 종료 영역의 중심 좌표 (백그라운드 뷰의 BottomCenter 기준)
+//        val terminationZoneCenterX = screenWidth/2
+//        val terminationZoneCenterY = screenHeight - iconSize
+//
+//        // 두 중심점 사이의 거리 계산
+//        val isOverlapping =
+//            Math.abs(overlayIconCenterX - terminationZoneCenterX) < iconSize &&
+//                    Math.abs(overlayIconCenterY - terminationZoneCenterY) < iconSize
+//
+//        Log.d("OverlayService", """
+//        오버레이 중심: ($overlayIconCenterX, $overlayIconCenterY)
+//        종료영역 중심: ($terminationZoneCenterX, $terminationZoneCenterY)
+//        겹침: $isOverlapping
+//    """.trimIndent())
+
+//        val metrics = resources.displayMetrics
+//        val screenWidth = resources.displayMetrics.widthPixels
+//        val screenHeight = resources.displayMetrics.heightPixels
+//        val iconSize = 60 * this.resources.displayMetrics.density // 60.dp icon size
+//        val paddingSize = 60 * this.resources.displayMetrics.density // 60.dp padding
+//        Log.d("OverlayService", "가로: $screenWidth, 세로: $screenHeight")
+//        Log.d("OverlayService", "=x좌표\n   ${screenWidth/2 - iconSize} < ${params.x} < ${screenWidth/2 + iconSize}\n" +
+//                "=y좌표\n   ${(screenHeight - paddingSize - iconSize / 2) - iconSize} < ${params.y} < ${(screenHeight - paddingSize - iconSize / 2) + iconSize}")
+//
+//        // OverlayIcon이 Close Icon 영역에 있는지 확인
+//        val isOverlapping = params.y > (screenHeight - paddingSize - iconSize / 2) - iconSize &&
+//                params.y < (screenHeight - paddingSize - iconSize / 2) + iconSize &&
+//                params.x > screenWidth/2 - iconSize &&
+//                params.x < screenWidth/2 + iconSize
+//
+//        if (isOverlapping) {
+//            Log.d("OverlayService", "겹침")
+//            // 여기서 원하는 동작 수행
+//        }
+//        else
+//            Log.d("OverlayService", "안겹침")
+    }
+
+    private fun showBackground() {
+        windowManager?.addView(backgroundView, backgroundParams)
+    }
+
+    private fun hideBackground() {
+        windowManager?.removeView(backgroundView)
+
+        if (
+            params.x in 501..699 &&
+            params.y in 2401..2449
+            )
+            onDestroy()
     }
 
     private fun showSuccessFeedback() {
@@ -97,6 +241,11 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
             var isSuccess by remember { mutableStateOf(true) }
             OverlayIcon(
                 onDoubleTab = { captureUrl() },
+                onDrag = { offset ->
+                    movePosition(offset)
+                },
+                onDragStart = { showBackground() },
+                onDragEnd = { hideBackground() },
                 isSuccess = isSuccess,
                 isError = false,
                 onAnimationComplete = { isSuccess = false }
@@ -109,6 +258,11 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
             var isError by remember { mutableStateOf(true) }
             OverlayIcon(
                 onDoubleTab = { captureUrl() },
+                onDrag = { offset ->
+                    movePosition(offset)
+                },
+                onDragStart = { showBackground() },
+                onDragEnd = { hideBackground() },
                 isSuccess = false,
                 isError = isError,
                 onAnimationComplete = { isError = false }
@@ -116,7 +270,7 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
         }
     }
 
-    private fun saveToLocalDatabase(url: String) {
+    private fun saveToDatabase(url: String) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 var finalUrl = url
@@ -134,7 +288,7 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
                     return@launch
                 }
 
-                repository.insert(finalUrl) // 데이터베이스에 저장
+                repository.createCard(finalUrl) // 백엔드 서버와 통신하여 카드 저장
                 Log.d("OverlayService", "URL 저장 완료: $finalUrl") // 저장 로그 추가
 
                 withContext(Dispatchers.Main) {
@@ -148,7 +302,6 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
                 withContext(Dispatchers.Main) {
                     showErrorFeedback()
                     Toast.makeText(applicationContext, "URL 저장 실패", Toast.LENGTH_SHORT).show() // 실패 시에도 Toast 추가
-
                 }
             }
         }
@@ -162,8 +315,14 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
 
     override fun onDestroy() {
         super.onDestroy()
-        windowManager?.removeView(overlayView)
-        Log.d("OverlayService", "오버레이 서비스 종료됨") // 로그 추가
+        try {
+            if (overlayView?.isAttachedToWindow == true) {
+                windowManager?.removeView(overlayView)
+                Log.d("OverlayService", "오버레이 서비스 종료됨") // 로그 추가
+            }
+        } catch (e: Exception) {
+            Log.d("OverlayService", "오버레이 서비스 이미 종료되어 있음")
+        }
     }
 }
 

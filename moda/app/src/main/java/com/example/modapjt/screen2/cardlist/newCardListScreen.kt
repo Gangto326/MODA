@@ -6,13 +6,26 @@ import ImageBig
 import NewsBig
 import TypeSelectBar
 import VideoBig
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,12 +33,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.modapjt.components.cardtab.SwipableCardList
-import com.example.modapjt.domain.viewmodel.CardViewModel
-import com.example.modapjt.domain.viewmodel.CategoryViewModel
 import com.example.modapjt.components.bar.BottomBarComponent
 import com.example.modapjt.components.bar.CategoryHeaderBar
+import com.example.modapjt.components.cardtab.SwipableCardList
 import com.example.modapjt.domain.viewmodel.CardUiState
+import com.example.modapjt.domain.viewmodel.CardViewModel
+import com.example.modapjt.domain.viewmodel.CategoryViewModel
 
 
 @Composable
@@ -37,14 +50,27 @@ fun newCardListScreen(
     categoryViewModel: CategoryViewModel = viewModel()
 ) {
     var selectedCategory by remember { mutableStateOf("전체") }
+    var selectedSort by remember { mutableStateOf("최신순") } // ✅ 정렬 상태 추가
     val uiState by viewModel.uiState.collectAsState()
     val userId = "user" // 실제 사용자 ID로 교체 필요
     val categoryName by categoryViewModel.categoryName.collectAsState()
 
-    LaunchedEffect(categoryId) {
+    // 카테고리 및 선택된 탭에 따라 API 호출
+//    LaunchedEffect(categoryId) {
+//        categoryViewModel.loadCategories(userId) // 카테고리 먼저 로드
+//        categoryId?.let {
+//            viewModel.loadCards(userId, it)
+//            categoryViewModel.updateCategoryName(it) // 카테고리 로드 후 카테고리 이름 업데이트
+//        }
+//    }
+    // 데이터 로드
+    LaunchedEffect(categoryId, selectedCategory, selectedSort) {
+        val sortDirection = if (selectedSort == "최신순") "DESC" else "ASC"
+        println("[newCardListScreen] 선택된 탭: $selectedCategory, 정렬: $selectedSort ($sortDirection)")
+
         categoryViewModel.loadCategories(userId) // 카테고리 먼저 로드
         categoryId?.let {
-            viewModel.loadCards(userId, it)
+            viewModel.loadCards(userId, it, selectedCategory, sortDirection) // selectedCategory 추가
             categoryViewModel.updateCategoryName(it) // 카테고리 로드 후 카테고리 이름 업데이트
         }
     }
@@ -57,6 +83,9 @@ fun newCardListScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                /////////////////////////////////////////
+                .background(color = Color.White), // 수정해야하는부분
+            /////////////////////////////////////////////////////
         ) {
             when (uiState) {
                 is CardUiState.Loading -> {
@@ -68,12 +97,16 @@ fun newCardListScreen(
 
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        verticalArrangement = Arrangement.spacedBy(0.dp) // 수정완료( 카테고리 선택바 랑 alltabcard 사이 공간 )
                     ) {
                         item {
-                            TypeSelectBar(
+                            TypeSelectBar( // 상단 타입 선택하는 바
+//                                selectedCategory = selectedCategory,
+//                                onCategorySelected = { selectedCategory = it }
                                 selectedCategory = selectedCategory,
-                                onCategorySelected = { selectedCategory = it }
+                                selectedSort = selectedSort, // ✅ 정렬 상태 추가
+                                onCategorySelected = { selectedCategory = it },
+                                onSortSelected = { selectedSort = it } // ✅ 정렬 변경
                             )
                         }
 
@@ -82,12 +115,12 @@ fun newCardListScreen(
                                 item {
                                     AllTabCard(
                                         imageCards = data.images,
-                                        videoCards = data.videos,
                                         blogCards = data.blogs,
+                                        videoCards = data.videos,
                                         newsCards = data.news,
                                         onImageMoreClick = { selectedCategory = "이미지" },
-                                        onVideoMoreClick = { selectedCategory = "동영상" },
                                         onBlogMoreClick = { selectedCategory = "블로그" },
+                                        onVideoMoreClick = { selectedCategory = "동영상" },
                                         onNewsMoreClick = { selectedCategory = "뉴스" }
                                     )
                                 }
@@ -109,11 +142,14 @@ fun newCardListScreen(
                                                 Box(modifier = Modifier.weight(1f)) {
                                                     SwipableCardList(
                                                         cards = listOf(card),
-                                                        onDelete = { viewModel.deleteCard(it) }
+//                                                        onDelete = { viewModel.deleteCard(it) }
+                                                        onDelete = { viewModel.deleteCard(listOf(it.cardId)) }
                                                     ) {
                                                         ImageBig(
                                                             imageUrl = card.thumbnailUrl ?: "",
-                                                            onClick = {},
+//                                                            onClick = {},
+                                                            onClick = { navController.navigate("cardDetail/${card.cardId}") }, // ✅ 카드 ID 전달
+                                                                    isMine = card.isMine, // ✅ isMine 전달
                                                             modifier = Modifier.fillMaxWidth()
                                                         )
                                                     }
@@ -128,6 +164,28 @@ fun newCardListScreen(
                                 }
                             }
 
+                            "블로그" -> {
+                                if (data.blogs.isEmpty()) {
+                                    item { EmptyMessage("저장된 블로그가 없습니다") }
+                                } else {
+                                    items(data.blogs) { card ->
+                                        SwipableCardList(
+                                            cards = listOf(card),
+//                                            onDelete = { viewModel.deleteCard(it) }
+                                            onDelete = { viewModel.deleteCard(listOf(it.cardId)) }
+                                        ) {
+                                            BlogBig(
+                                                title = card.title,
+                                                description = card.thumbnailContent ?: "",
+                                                imageUrl = card.thumbnailUrl ?: "",
+                                                isMine = card.isMine, // ✅ isMine 전달
+//                                                onClick = {},
+                                                onClick = { navController.navigate("cardDetail/${card.cardId}") }, // ✅ 카드 ID 전달
+                                            )
+                                        }
+                                    }
+                                }
+                            }
 
                             "동영상" -> {
                                 if (data.videos.isEmpty()) {
@@ -136,38 +194,21 @@ fun newCardListScreen(
                                     items(data.videos) { card ->
                                         SwipableCardList(
                                             cards = listOf(card),
-                                            onDelete = { viewModel.deleteCard(it) }
+//                                            onDelete = { viewModel.deleteCard(it) }
+                                            onDelete = { viewModel.deleteCard(listOf(it.cardId)) }
                                         ) {
                                             VideoBig(
                                                 videoId = card.thumbnailUrl ?: "",
                                                 title = card.title,
-                                                // onClick = { navController.navigate("videoDetail/${card.id}")} // 비디오 상세 페이지 이동
+                                                isMine = card.isMine, // ✅ isMine 전달
+                                                onClick = { navController.navigate("cardDetail/${card.cardId}") }, // ✅ 카드 ID 전달
                                             )
                                         }
                                     }
                                 }
                             }
 
-                            "블로그" -> {
-                                if (data.blogs.isEmpty()) {
-                                    item { EmptyMessage("저장된 블로그가 없습니다") }
-                                } else {
-                                    items(data.blogs) { card ->
-                                        SwipableCardList(
-                                            cards = listOf(card),
-                                            onDelete = { viewModel.deleteCard(it) }
-                                        ) {
-                                            BlogBig(
-                                                title = card.title,
-                                                description = card.thumbnailContent ?: "",
-                                                imageUrl = card.thumbnailUrl ?: "",
-                                                onClick = {},
-                                                // onClick = { navController.navigate("blogDetail/${card.id}") } // 블로그 상세 페이지 이동
-                                            )
-                                        }
-                                    }
-                                }
-                            }
+
 
                             "뉴스" -> {
                                 if (data.news.isEmpty()) {
@@ -176,14 +217,16 @@ fun newCardListScreen(
                                     items(data.news) { card ->
                                         SwipableCardList(
                                             cards = listOf(card),
-                                            onDelete = { viewModel.deleteCard(it) }
+//                                            onDelete = { viewModel.deleteCard(it) }
+                                            onDelete = { viewModel.deleteCard(listOf(it.cardId)) }
                                         ) {
                                             NewsBig(
                                                 title = card.title,
                                                 keywords = card.keywords,
                                                 imageUrl = card.thumbnailUrl ?: "",
-                                                onClick = {},
-                                                // onClick = { navController.navigate("newsDetail/${card.id}") } // 뉴스 상세 페이지 이동
+                                                isMine = card.isMine, // ✅ isMine 전달
+//                                                onClick = {},
+                                                onClick = { navController.navigate("cardDetail/${card.cardId}") }, // ✅ 카드 ID 전달
                                             )
                                         }
                                     }

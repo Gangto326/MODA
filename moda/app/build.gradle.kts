@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("kotlin-kapt")  // 이 줄 추가
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -51,6 +52,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.generativeai)
+    implementation(libs.firebase.messaging.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -107,7 +109,37 @@ dependencies {
 
     implementation("androidx.navigation:navigation-compose:2.7.5") // 최신 버전 확인 후 사용
     implementation("com.google.accompanist:accompanist-navigation-animation:0.32.0") // AnimatedNavHost 관련
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
 
+    implementation(platform("com.google.firebase:firebase-bom:33.9.0"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-messaging")
+    implementation("com.google.firebase:firebase-messaging-ktx")
 
+    //새로고침 때문에
+    implementation ("com.google.accompanist:accompanist-swiperefresh:0.28.0")
+
+    implementation ("com.google.accompanist:accompanist-coil:0.15.0")
+
+    implementation("androidx.compose.foundation:foundation:1.4.0")
+
+//    implementation("com.google.accompanist:accompanist-markdown:0.30.1") // 최신 버전 확인 필요, Markdown 자동 변환 표시
+//
+//    implementation("io.noties.markwon:core:4.6.2") // 기본 마크다운
+//    implementation("io.noties.markwon:ext-strikethrough:4.6.2") // 취소선
+//    implementation("io.noties.markwon:ext-tasklist:4.6.2") // 체크리스트
+//    implementation("io.noties.markwon:ext-tables:4.6.2") // 테이블 렌더링
+//    implementation("io.noties.markwon:html:4.6.2") // HTML 태그 지원
+
+//
+//
+////    // compose-richtext : Jetpack Compose에서 마크다운을 쉽게 렌더링할 수 있는 라이브러리
+//    implementation("io.github.halilozercan:compose-richtext-ui:0.17.0")
+//    implementation("io.github.halilozercan:compose-richtext-commonmark:0.17.0")
+//    implementation("io.github.halilozercan:compose-richtext-material3:0.17.0")
+    implementation("org.commonmark:commonmark:0.21.0")
+
+//    implementation("org.commonmark:commonmark:0.21.0")
+//    implementation("com.github.jeziellago:compose-markdown:0.5.6")
 
 }
