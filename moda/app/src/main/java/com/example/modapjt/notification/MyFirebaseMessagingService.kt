@@ -38,9 +38,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         }
     }
 
-
-
-
     override fun onDestroy() {
         super.onDestroy()
         serviceScope.cancel()

@@ -181,18 +181,18 @@ class CardViewModel : ViewModel() {
 
 
     // 카드 삭제 기능 추가
-    fun deleteCard(card: Card) {
+    fun deleteCard(cardIds: List<String>) {
         viewModelScope.launch {
-            val result = repository.deleteCard(card.cardId)
+            val result = repository.deleteCard(cardIds)
 
             if (result.isSuccess) {
                 val currentState = _uiState.value
                 if (currentState is CardUiState.Success) {
                     _uiState.value = currentState.copy(
-                        images = currentState.images.filter { it.cardId != card.cardId },
-                        videos = currentState.videos.filter { it.cardId != card.cardId },
-                        blogs = currentState.blogs.filter { it.cardId != card.cardId },
-                        news = currentState.news.filter { it.cardId != card.cardId }
+                        images = currentState.images.filterNot { it.cardId in cardIds },
+                        videos = currentState.videos.filterNot { it.cardId in cardIds },
+                        blogs = currentState.blogs.filterNot { it.cardId in cardIds },
+                        news = currentState.news.filterNot { it.cardId in cardIds }
                     )
                 }
             } else {
@@ -200,6 +200,41 @@ class CardViewModel : ViewModel() {
             }
         }
     }
+
+
+    // ✅ 즐겨찾기 카드 리스트 불러오기
+    fun loadBookmarkedCards(userId: String, selectedTab: String, sortDirection: String) {
+        viewModelScope.launch {
+            _uiState.value = CardUiState.Loading
+            try {
+                println("[CardViewModel] 즐겨찾기 $selectedTab 탭 데이터 로드 시작 (정렬: $sortDirection)")
+
+                val result = if (selectedTab == "전체") {
+                    repository.getAllTabBookMarkCards(userId)
+                } else {
+                    val typeId = when (selectedTab) {
+                        "이미지" -> 4
+                        "블로그" -> 2
+                        "뉴스" -> 3
+                        "동영상" -> 1
+                        else -> 0
+                    }
+                    repository.getTabBookMarkCards(userId, typeId, 1, 15, sortDirection)
+                }
+
+                if (result.isSuccess) {
+                    val cards = result.getOrNull() ?: emptyList()
+                    println("[CardViewModel] 즐겨찾기 데이터 개수: ${cards.size}")
+                    _uiState.value = createCardUiState(cards, selectedTab)
+                } else {
+                    _uiState.value = CardUiState.Error("즐겨찾기 데이터를 불러오는데 실패했습니다.")
+                }
+            } catch (e: Exception) {
+                _uiState.value = CardUiState.Error(e.message ?: "알 수 없는 오류가 발생했습니다.")
+            }
+        }
+    }
+
 }
 
 sealed class CardUiState {

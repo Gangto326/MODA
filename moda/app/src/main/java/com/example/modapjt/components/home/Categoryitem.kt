@@ -2,11 +2,22 @@ package com.example.modapjt.components.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -35,15 +46,15 @@ fun CategoryItem(category: Category, navController: NavController) {
 
     val iconVector = when (category.category) {
         "All" -> Icons.Default.AccountBox
-        "Trends" -> Icons.Default.AccountBox
-        "Entertainment" -> Icons.Default.AccountBox
-        "Finance" -> Icons.Default.AccountBox
-        "Travel" -> Icons.Default.AccountBox
-        "Food" -> Icons.Default.Add
-        "IT" -> Icons.Default.Add
-        "Design" -> Icons.Default.Add
-        "Society" -> Icons.Default.Add
-        "Health" -> Icons.Default.Add
+        "Trends" -> Icons.Default.Call
+        "Entertainment" -> Icons.Default.Info
+        "Finance" -> Icons.Default.Star
+        "Travel" -> Icons.Default.ThumbUp
+        "Food" -> Icons.Default.Menu
+        "IT" -> Icons.Default.Lock
+        "Design" -> Icons.Default.Face
+        "Society" -> Icons.Default.Email
+        "Health" -> Icons.Default.Create
         else -> Icons.Default.Done
     }
 

@@ -1,0 +1,88 @@
+package com.example.modapjt.components.home
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
+import com.example.modapjt.R
+
+data class ImageItem(
+    val cardId: String,
+    val thumbnailUrl: String,
+    val bookmark: Boolean = false
+)
+
+@Composable
+fun ImageList(navController: NavController, images: List<ImageItem>) {
+    val limitedImages = images.take(20) // 최대 20개까지만 표시
+
+    LazyRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        itemsIndexed(limitedImages.chunked(2)) { _, rowImages -> // 2개씩 묶어서 한 Column으로 배치
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp) // 2줄 간격 조절
+            ) {
+                rowImages.forEach { image ->
+                    ImageThumbnail(image, navController)
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun ImageThumbnail(image: ImageItem, navController: NavController) {
+    Box(
+        modifier = Modifier
+            .size(120.dp) // ✅ 크기 조정
+            .background(Color.LightGray, shape = RoundedCornerShape(12.dp)) // ✅ 라운딩 추가
+            .clip(RoundedCornerShape(16.dp)) // 🔥 외곽 둥글게 만들기
+            .clickable { navController.navigate("cardDetail/${image.cardId}") }
+    ) {
+        Image(
+            painter = rememberAsyncImagePainter(model = image.thumbnailUrl),
+            contentDescription = "Thumbnail Image",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White, shape = RoundedCornerShape(12.dp)) // ✅ 내부도 라운딩 맞추기
+        )
+
+        // 🔥 북마크 아이콘 추가 (true/false에 따라 변경)
+        androidx.compose.material3.Icon(
+            painter = androidx.compose.ui.res.painterResource(
+                if (image.bookmark) R.drawable.ic_bookmark_filled else R.drawable.ic_bookmark_outline
+            ),
+            contentDescription = "Bookmark Icon",
+            tint = if (image.bookmark) Color(0xFFFFA500) else Color.White,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(8.dp)
+                .size(24.dp)
+        )
+    }
+}
+

@@ -23,13 +23,14 @@ import com.example.modapjt.screen.recommend.RecommendScreen
 import com.example.modapjt.screen.settings.SettingsScreen
 import com.example.modapjt.screen2.auth.LoginScreen
 import com.example.modapjt.screen2.auth.SignUpScreen
+import com.example.modapjt.screen2.newBookMarkCardListScreen
+import com.example.modapjt.screen2.newCardDetailScreen
 import com.example.modapjt.screen2.newCardListScreen
 import com.example.modapjt.screen2.newSearchCardListScreen
 import com.example.modapjt.screen2.search.NewSearchScreen
 import com.example.modapjt.screen2.user.MyPageScreen
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
-import newCardDetailScreen
 import newHomeScreen
 import newLinkUploadScreen
 
@@ -269,6 +270,10 @@ fun NavGraph(
             )
         }
 
+        // 즐겨찾기 카드 페이지
+        composable("bookmarkScreen") {
+            newBookMarkCardListScreen(navController = navController, currentRoute = "bookmarkScreen")
+        }
 
 //        composable("favorite_card_list") {
 //            newFavoriteCardListScreen(

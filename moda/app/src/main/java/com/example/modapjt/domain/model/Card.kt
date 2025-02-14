@@ -13,5 +13,6 @@ data class Card(
 //    val createdAt: String,
     val excludedKeywords: List<String>?,
     val isMine: Boolean,
-    val score: Float?
+    val score: Float?,
+    val bookMark: Boolean
 )

@@ -6,6 +6,7 @@ import ImageBig
 import NewsBig
 import TypeSelectBar
 import VideoBig
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -82,6 +83,7 @@ fun newCardListScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .background(Color.White), // 배경 흰색으로 설정
         ) {
             when (uiState) {
                 is CardUiState.Loading -> {
@@ -138,7 +140,8 @@ fun newCardListScreen(
                                                 Box(modifier = Modifier.weight(1f)) {
                                                     SwipableCardList(
                                                         cards = listOf(card),
-                                                        onDelete = { viewModel.deleteCard(it) }
+//                                                        onDelete = { viewModel.deleteCard(it) }
+                                                        onDelete = { viewModel.deleteCard(listOf(it.cardId)) }
                                                     ) {
                                                         ImageBig(
                                                             imageUrl = card.thumbnailUrl ?: "",
@@ -166,7 +169,8 @@ fun newCardListScreen(
                                     items(data.blogs) { card ->
                                         SwipableCardList(
                                             cards = listOf(card),
-                                            onDelete = { viewModel.deleteCard(it) }
+//                                            onDelete = { viewModel.deleteCard(it) }
+                                            onDelete = { viewModel.deleteCard(listOf(it.cardId)) }
                                         ) {
                                             BlogBig(
                                                 title = card.title,
@@ -188,7 +192,8 @@ fun newCardListScreen(
                                     items(data.videos) { card ->
                                         SwipableCardList(
                                             cards = listOf(card),
-                                            onDelete = { viewModel.deleteCard(it) }
+//                                            onDelete = { viewModel.deleteCard(it) }
+                                            onDelete = { viewModel.deleteCard(listOf(it.cardId)) }
                                         ) {
                                             VideoBig(
                                                 videoId = card.thumbnailUrl ?: "",
@@ -210,7 +215,8 @@ fun newCardListScreen(
                                     items(data.news) { card ->
                                         SwipableCardList(
                                             cards = listOf(card),
-                                            onDelete = { viewModel.deleteCard(it) }
+//                                            onDelete = { viewModel.deleteCard(it) }
+                                            onDelete = { viewModel.deleteCard(listOf(it.cardId)) }
                                         ) {
                                             NewsBig(
                                                 title = card.title,
