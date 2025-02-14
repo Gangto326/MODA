@@ -19,9 +19,9 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun ThumbnailIndicator(currentIndex: Int, totalItems: Int) {
-    val defaultSize = 8.dp
-    val selectedSize = 10.dp
-    val spacing = 4.dp // ✅ 간격 조정
+    val defaultSize = 11.dp
+    val selectedSize = 11.dp
+    val spacing = 8.dp // ✅ 간격 조정
 
     Row(
         modifier = Modifier
