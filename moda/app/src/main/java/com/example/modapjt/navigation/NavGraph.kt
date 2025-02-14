@@ -31,6 +31,7 @@ import com.example.modapjt.screen2.search.NewSearchScreen
 import com.example.modapjt.screen2.user.MyPageScreen
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+//import newCardListScreen
 import newHomeScreen
 import newLinkUploadScreen
 

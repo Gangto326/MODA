@@ -78,7 +78,7 @@ interface CardApiService {
         @Query("userId") userId: String,
         @Query("typeId") typeId: Int,
         @Query("page") page: Int,
-        @Query("size") size: Int, // 15개
+        @Query("size") size: Int = 15, // 15개씩 불러오기
         @Query("sortBy") sortBy: String = "createdAt",
         @Query("sortDirection") sortDirection: String // 동적으로 반영
     ): Response<TabCardApiResponse>

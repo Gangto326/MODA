@@ -36,9 +36,9 @@ import androidx.compose.ui.unit.sp
 fun TypeSelectBar(
     selectedCategory: String,
     selectedSort: String, // 추가: 현재 선택된 정렬
-    modifier: Modifier = Modifier,
     onCategorySelected: (String) -> Unit,
-    onSortSelected: (String) -> Unit // 정렬 선택 이벤트 추가
+    onSortSelected: (String) -> Unit, // 정렬 선택 이벤트 추가
+    modifier: Modifier = Modifier,
 ) {
     val categories = listOf("전체", "이미지", "동영상", "블로그", "뉴스")
 //    var selectedSort by remember { mutableStateOf("최신순") } // 기본 정렬 상태
