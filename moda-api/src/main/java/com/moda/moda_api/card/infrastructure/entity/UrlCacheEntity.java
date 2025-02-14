@@ -55,7 +55,6 @@ public class UrlCacheEntity {
 
 	@Column(name = "cached_embedding", columnDefinition = "VECTOR(768)")
 	@Convert(converter = VectorConverter.class)
-	@ColumnTransformer(write = "?::vector(768)")
 	private float[] cachedEmbedding;
 
 	@Type(StringArrayType.class)
