@@ -54,11 +54,11 @@ fun ImageSmall(
             Icon(
                 imageVector = Icons.Filled.Star, // 별 모양 아이콘
                 contentDescription = "즐겨찾기됨",
-                tint = Color(0xFFFFD700), // 노란색 별표
+                tint = Color(0xFFFFCD69), // 노란색 별표
                 modifier = Modifier
                     .size(20.dp) // 아이콘 크기
                     .align(Alignment.BottomEnd) // 우측 하단에 배치
-                    .padding(4.dp) // 여백 추가
+                    .padding(6.dp) // 여백 추가
             )
         }
     }

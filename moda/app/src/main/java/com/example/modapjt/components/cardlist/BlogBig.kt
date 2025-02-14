@@ -24,6 +24,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.app.ui.theme.customTypography
 
 @Composable
 fun BlogBig(
@@ -64,8 +65,9 @@ fun BlogBig(
                 )
                 Text(
                     text = title, // 블로그 제목
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
+//                    fontSize = 16.sp,
+//                    fontWeight = FontWeight.Medium,
+                    style = customTypography.headlineMedium,
                     maxLines = 1, // 한 줄까지만 표시
                     overflow = TextOverflow.Ellipsis, // 길면 ...으로 생략
                     modifier = Modifier.weight(1f) // 남은 공간을 최대한 차지
@@ -74,7 +76,8 @@ fun BlogBig(
             // 블로그 설명 (요약)
             Text(
                 text = description,
-                fontSize = 14.sp,
+//                fontSize = 14.sp,
+                style = customTypography.bodyMedium,
                 color = Color.Gray,
                 maxLines = 2, // 최대 2줄까지만 표시
                 overflow = TextOverflow.Ellipsis, // 길면 ...으로 생략

@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.core.view.WindowCompat
 import com.example.modapjt.navigation.NavGraph
 import com.example.modapjt.ui.theme.ModapjtTheme
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
@@ -22,11 +23,16 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // 전체화면 활성화
+//        WindowCompat.setDecorFitsSystemWindows(window, false)
+
         // 오버레이 및 접근성 서비스를 위한 권한 요청
         checkOverlayPermission()
         checkAccessibilityPermission()
 
         setContent {
+
+
             ModapjtTheme {
                 val navController = rememberAnimatedNavController()
                 NavGraph(
