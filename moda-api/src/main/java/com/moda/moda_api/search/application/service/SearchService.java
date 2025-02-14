@@ -198,26 +198,47 @@ public class SearchService {
 				typeId, userIdObj, searchText, sliceRequestDto.toPageable()
 			);
 
-			List<CardDocument> filteredContent = cardDocuments.getContent().stream()
-					// title 기준으로 그룹화하고 owner 우선 선택 (중복 데이터 제거)
-					.collect(Collectors.groupingBy(CardDocument::getTitle))
-					.values()
-					.stream()
-					.map(sameGroupDocs -> sameGroupDocs.stream()
-							.filter(doc -> doc.isOwnedBy(userIdObj))
-							.findFirst()
-							.orElseGet(() -> sameGroupDocs.get(0)))
-					.collect(Collectors.toList());
+			List<CardDocument> content = null;
 
-			// 결과를 score 기준으로 정렬
-			filteredContent.sort((doc1, doc2) -> Float.compare(
-					doc2.getScore() != null ? doc2.getScore() : Float.MIN_VALUE,
-					doc1.getScore() != null ? doc1.getScore() : Float.MIN_VALUE
-			));
+			if (typeId != 4) {  // 이미지가 아닌 경우만 실행
+				// title 기준으로 그룹화하고 owner 우선 선택 (중복 제거)
+				content = cardDocuments.getContent().stream()
+						.collect(Collectors.groupingBy(CardDocument::getTitle))
+						.values()
+						.stream()
+						.map(sameGroupDocs -> sameGroupDocs.stream()
+								.filter(doc -> doc.isOwnedBy(userIdObj))
+								.findFirst()
+								.orElseGet(() -> sameGroupDocs.get(0)))
+						.collect(Collectors.toList());
+
+				// score 기준으로 정렬
+				content.sort((doc1, doc2) -> Float.compare(
+						doc2.getScore() != null ? doc2.getScore() : Float.MIN_VALUE,
+						doc1.getScore() != null ? doc1.getScore() : Float.MIN_VALUE
+				));
+
+			} else { // 이미지의 경우 ThumbnailUrl로 판단
+				content = cardDocuments.getContent().stream()
+						.collect(Collectors.groupingBy(CardDocument::getThumbnailUrl))
+						.values()
+						.stream()
+						.map(sameGroupDocs -> sameGroupDocs.stream()
+								.filter(doc -> doc.isOwnedBy(userIdObj))
+								.findFirst()
+								.orElseGet(() -> sameGroupDocs.get(0)))
+						.collect(Collectors.toList());
+
+				// score 기준으로 정렬
+				content.sort((doc1, doc2) -> Float.compare(
+						doc2.getScore() != null ? doc2.getScore() : Float.MIN_VALUE,
+						doc1.getScore() != null ? doc1.getScore() : Float.MIN_VALUE
+				));
+			}
 
 			// 필터링된 content로 새로운 Slice 생성
 			Slice<CardDocument> filteredSlice = new SliceImpl<>(
-					filteredContent,
+					content,
 					cardDocuments.getPageable(),
 					cardDocuments.hasNext()
 			);

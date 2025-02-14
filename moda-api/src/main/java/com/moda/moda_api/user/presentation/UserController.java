@@ -1,19 +1,20 @@
 package com.moda.moda_api.user.presentation;
 
+import com.moda.moda_api.common.util.HeaderUtil;
 import com.moda.moda_api.user.application.UserService;
-import com.moda.moda_api.user.application.response.UserProfileResponse;
-import com.moda.moda_api.user.application.response.UserResponse;
+import com.moda.moda_api.user.application.response.*;
 import com.moda.moda_api.user.presentation.request.DeleteUserRequest;
-import com.moda.moda_api.user.application.response.ErrorResponse;
 import com.moda.moda_api.user.presentation.request.LoginRequest;
 import com.moda.moda_api.user.presentation.request.SignupRequest;
-import com.moda.moda_api.user.application.response.SuccessResponse;
 import com.moda.moda_api.user.presentation.request.UpdateProfileRequest;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -51,11 +52,31 @@ public class UserController {
      * @param request 로그인에 필요한 정보를 담은 요청 객체
      * @return 로그인된 사용자의 정보
      */
-    // @PostMapping("/login")
-    // public ResponseEntity<UserResponse> login(@RequestBody LoginRequest request) {
-    //     UserResponse response = userService.login(request);
-    //     return ResponseEntity.ok(response);
-    // }
+     @PostMapping("/login")
+     public ResponseEntity<Boolean> login(
+             @RequestBody LoginRequest request,
+             HttpServletRequest servletRequest) {
+
+         AuthResponse authResponse = userService.login(request);
+
+         HttpHeaders httpHeaders = new HttpHeaders();
+         httpHeaders.add(HeaderUtil.getAuthorizationHeaderName(), HeaderUtil.getTokenPrefix() + authResponse.getAccessToken());
+
+         // RefreshToken을 HttpOnly Cookie로 전달.
+         ResponseCookie responseCookie = ResponseCookie
+                 .from(HeaderUtil.getRefreshCookieName(), authResponse.getRefreshToken())
+                 .path("/") // 위 사이트에서 쿠키를 허용할 경로를 설정.
+                 .httpOnly(true) // HTTP 통신을 위해서만 사용하도록 설정.
+//                 .secure(true) // Set-Cookie 설정.
+                 .maxAge(authResponse.getMaxAge() / 1000) // RefreshToken과 동일한 만료 시간으로 설정.
+                 .build();
+
+         return ResponseEntity.ok()
+                 .headers(httpHeaders)
+                 .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
+                 .header("Access-Control-Expose-Headers", "Set-Cookie")
+                 .body(true);
+     }
 
     /**
      * 사용자 프로필 정보를 조회합니다.

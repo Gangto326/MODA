@@ -3,6 +3,7 @@ package com.moda.moda_api.user.application;
 import com.moda.moda_api.common.jwt.JwtTokenProvider;
 import com.moda.moda_api.common.jwt.TokenDto;
 import com.moda.moda_api.common.jwt.TokenType;
+import com.moda.moda_api.user.application.response.AuthResponse;
 import com.moda.moda_api.user.application.response.UserLoginResponse;
 import com.moda.moda_api.user.application.response.UserProfileResponse;
 import com.moda.moda_api.user.application.response.UserResponse;
@@ -59,30 +60,27 @@ public class UserService {
      * @return 로그인된 사용자의 정보
      * @throws IllegalArgumentException 이메일이나 비밀번호가 일치하지 않는 경우
      */
-    // public UserLoginResponse login(LoginRequest request) {
-    //     User user = userRepository.findByEmail(request.getEmail())
-    //         .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 이메일입니다."));
-    //
-    //     // 사용자 상태 체크
-    //     if (user.isDeleted()) {
-    //         throw new IllegalArgumentException("탈퇴한 계정입니다.");
-    //     }
-    //
-    //     // 비밀번호 체크
-    //     if (!passwordEncrypt.verifyPassword(request.getPassword(), user.getPassword())) {
-    //         throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-    //     }
-    //
-    //     TokenDto accessToken = jwtTokenProvider.generateToken(user, TokenType.ACCESS);
-    //     TokenDto refreshToken = jwtTokenProvider.generateToken(user, TokenType.REFRESH);
-    //
-    //
-    //     return UserLoginResponse.builder()
-    //         .email(user)
-    //         .accessToken(accessToken.getToken())
-    //         .refreshToken(refreshToken.getToken())
-    //         .build();
-    // }
+     public AuthResponse login(LoginRequest request) {
+
+//         User user = userRepository.findByEmail(request.getEmail())
+//             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 이메일입니다."));
+//
+//         // 사용자 상태 체크
+//         if (user.isDeleted()) {
+//             throw new IllegalArgumentException("탈퇴한 계정입니다.");
+//         }
+//
+//         // 비밀번호 체크
+//         if (!passwordEncrypt.verifyPassword(request.getPassword(), user.getPassword())) {
+//             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+//         }
+//
+//         TokenDto accessToken = jwtTokenProvider.generateToken(user, TokenType.ACCESS);
+//         TokenDto refreshToken = jwtTokenProvider.generateToken(user, TokenType.REFRESH);
+
+
+         return null;
+     }
 
 
     /**

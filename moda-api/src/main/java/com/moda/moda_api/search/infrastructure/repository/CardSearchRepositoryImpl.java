@@ -401,9 +401,12 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
         NativeQuery query = NativeQuery.builder()
                 .withQuery(boolQuery.build()._toQuery())
                 .withPageable(pageable)
-//                .withMinScore(MIN_SCORE)
+                .withMinScore(MIN_SCORE)
                 .withTrackScores(true)  // 점수 추적 활성화
-                .withSort(Sort.by(Sort.Direction.DESC, "_score"))
+                .withSort(Sort.by(
+                        Sort.Order.desc("_score"),
+                        Sort.Order.desc("createdAt")
+                ))
                 .build();
 
         // DB 탐색

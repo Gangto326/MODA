@@ -27,17 +27,19 @@ public class User {
     private UserId userId;
     private String email;
     private String password;
+    private String hashedPassword;
     private String userName;
     private String nickname;
     private LocalDateTime createdAt;
     private LocalDateTime deletedAt;
 
     @Builder
-    public User(UserId userId, String email, String password, String userName,
+    public User(UserId userId, String email, String password, String hashedPassword, String userName,
         String nickname, LocalDateTime createdAt, LocalDateTime deletedAt) {
         this.userId = userId;
         this.email = email;
         this.password = password;
+        this.hashedPassword = hashedPassword;
         this.userName = userName;
         this.nickname = nickname;
         this.createdAt = createdAt != null ? createdAt : LocalDateTime.now();
