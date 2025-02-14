@@ -9,8 +9,9 @@ import VideoBig
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -40,7 +41,7 @@ import com.example.modapjt.domain.viewmodel.CardUiState
 import com.example.modapjt.domain.viewmodel.CardViewModel
 import com.example.modapjt.domain.viewmodel.CategoryViewModel
 
-
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun newCardListScreen(
     navController: NavController,
@@ -50,28 +51,20 @@ fun newCardListScreen(
     categoryViewModel: CategoryViewModel = viewModel()
 ) {
     var selectedCategory by remember { mutableStateOf("전체") }
-    var selectedSort by remember { mutableStateOf("최신순") } // ✅ 정렬 상태 추가
+    var selectedSort by remember { mutableStateOf("최신순") }
     val uiState by viewModel.uiState.collectAsState()
-    val userId = "user" // 실제 사용자 ID로 교체 필요
+    val loadingMore by viewModel.loadingMore.collectAsState()
+    val userId = "user"
     val categoryName by categoryViewModel.categoryName.collectAsState()
 
-    // 카테고리 및 선택된 탭에 따라 API 호출
-//    LaunchedEffect(categoryId) {
-//        categoryViewModel.loadCategories(userId) // 카테고리 먼저 로드
-//        categoryId?.let {
-//            viewModel.loadCards(userId, it)
-//            categoryViewModel.updateCategoryName(it) // 카테고리 로드 후 카테고리 이름 업데이트
-//        }
-//    }
-    // 데이터 로드
+    // 카테고리나 정렬 변경시 페이지네이션 리셋
     LaunchedEffect(categoryId, selectedCategory, selectedSort) {
+        viewModel.resetPagination()
         val sortDirection = if (selectedSort == "최신순") "DESC" else "ASC"
-        println("[newCardListScreen] 선택된 탭: $selectedCategory, 정렬: $selectedSort ($sortDirection)")
-
-        categoryViewModel.loadCategories(userId) // 카테고리 먼저 로드
+        categoryViewModel.loadCategories(userId)
         categoryId?.let {
-            viewModel.loadCards(userId, it, selectedCategory, sortDirection) // selectedCategory 추가
-            categoryViewModel.updateCategoryName(it) // 카테고리 로드 후 카테고리 이름 업데이트
+            viewModel.loadCards(userId, it, selectedCategory, sortDirection)
+            categoryViewModel.updateCategoryName(it)
         }
     }
 
@@ -83,30 +76,24 @@ fun newCardListScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                /////////////////////////////////////////
-                .background(color = Color.White), // 수정해야하는부분
-            /////////////////////////////////////////////////////
+                .background(Color.White)
         ) {
-            when (uiState) {
+            when (val state = uiState) {
                 is CardUiState.Loading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
 
                 is CardUiState.Success -> {
-                    val data = uiState as CardUiState.Success
-
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(0.dp) // 수정완료( 카테고리 선택바 랑 alltabcard 사이 공간 )
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         item {
-                            TypeSelectBar( // 상단 타입 선택하는 바
-//                                selectedCategory = selectedCategory,
-//                                onCategorySelected = { selectedCategory = it }
+                            TypeSelectBar(
                                 selectedCategory = selectedCategory,
-                                selectedSort = selectedSort, // ✅ 정렬 상태 추가
+                                selectedSort = selectedSort,
                                 onCategorySelected = { selectedCategory = it },
-                                onSortSelected = { selectedSort = it } // ✅ 정렬 변경
+                                onSortSelected = { selectedSort = it }
                             )
                         }
 
@@ -114,10 +101,10 @@ fun newCardListScreen(
                             "전체" -> {
                                 item {
                                     AllTabCard(
-                                        imageCards = data.images,
-                                        blogCards = data.blogs,
-                                        videoCards = data.videos,
-                                        newsCards = data.news,
+                                        imageCards = state.images,
+                                        blogCards = state.blogs,
+                                        videoCards = state.videos,
+                                        newsCards = state.news,
                                         onImageMoreClick = { selectedCategory = "이미지" },
                                         onBlogMoreClick = { selectedCategory = "블로그" },
                                         onVideoMoreClick = { selectedCategory = "동영상" },
@@ -126,108 +113,166 @@ fun newCardListScreen(
                                 }
                             }
 
-                            // SwipableCardList 적용
-                            "이미지" -> {
-                                if (data.images.isEmpty()) {
-                                    item { EmptyMessage("저장된 이미지가 없습니다") }
-                                } else {
-                                    val chunkedImages = data.images.chunked(2) // 2개씩 묶어서 새로운 리스트 생성
-
-                                    items(chunkedImages) { rowImages ->
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.spacedBy(8.dp) // 카드 간격 추가
-                                        ) {
-                                            rowImages.forEach { card ->
-                                                Box(modifier = Modifier.weight(1f)) {
-                                                    SwipableCardList(
-                                                        cards = listOf(card),
-//                                                        onDelete = { viewModel.deleteCard(it) }
-                                                        onDelete = { viewModel.deleteCard(listOf(it.cardId)) }
-                                                    ) {
+                            else -> {
+                                when (selectedCategory) {
+//                                    "이미지" -> {
+//                                        if (state.images.isEmpty() && !loadingMore) {
+//                                            item { EmptyMessage("저장된 이미지가 없습니다") }
+//                                        } else {
+//                                            items(state.images) { card ->
+//                                                SwipableCardList(
+//                                                    cards = listOf(card),
+//                                                    onDelete = { viewModel.deleteCard(listOf(card.cardId)) }
+//                                                ) {
+//                                                    ImageBig(
+//                                                        imageUrl = card.thumbnailUrl ?: "",
+//                                                        isMine = card.isMine,
+//                                                        onClick = { navController.navigate("cardDetail/${card.cardId}") }
+//                                                    )
+//                                                }
+//
+//                                                if (card == state.images.lastOrNull() && !loadingMore) {
+//                                                    LaunchedEffect(Unit) {
+//                                                        val sortDirection = if (selectedSort == "최신순") "DESC" else "ASC"
+//                                                        categoryId?.let {
+//                                                            viewModel.loadCards(userId, it, selectedCategory, sortDirection, true)
+//                                                        }
+//                                                    }
+//                                                }
+//                                            }
+//                                        }
+//                                    }
+                                    "이미지" -> {
+                                        if (state.images.isEmpty() && !loadingMore) {
+                                            item { EmptyMessage("저장된 이미지가 없습니다") }
+                                        } else {
+                                            item {
+                                                FlowRow(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    horizontalArrangement = Arrangement.SpaceBetween, // ✅ 아이템 간격 균등 배치
+                                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                                ) {
+                                                    state.images.forEachIndexed { index, card ->
                                                         ImageBig(
                                                             imageUrl = card.thumbnailUrl ?: "",
-//                                                            onClick = {},
-                                                            onClick = { navController.navigate("cardDetail/${card.cardId}") }, // ✅ 카드 ID 전달
-                                                                    isMine = card.isMine, // ✅ isMine 전달
-                                                            modifier = Modifier.fillMaxWidth()
+                                                            isMine = card.isMine,
+                                                            modifier = Modifier
+                                                                .fillMaxWidth(0.5f) // ✅ 한 줄에 2개씩 배치
+                                                                .aspectRatio(1f), // ✅ 정사각형 유지
+                                                            onClick = { navController.navigate("cardDetail/${card.cardId}") }
                                                         )
+                                                    }
+
+                                                    // ✅ 마지막 아이템이 홀수라면 빈 Spacer 추가
+                                                    if (state.images.size % 2 != 0) {
+                                                        Box(modifier = Modifier.fillMaxWidth(0.5f)) // ✅ 빈 공간 확보
                                                     }
                                                 }
                                             }
-                                            // 홀수 개라면 빈 공간 차지
-                                            if (rowImages.size == 1) {
-                                                Spacer(modifier = Modifier.weight(1f))
+                                        }
+                                    }
+
+
+
+
+
+                                    "블로그" -> {
+                                        if (state.blogs.isEmpty() && !loadingMore) {
+                                            item { EmptyMessage("저장된 블로그가 없습니다") }
+                                        } else {
+                                            items(state.blogs) { card ->
+                                                SwipableCardList(
+                                                    cards = listOf(card),
+                                                    onDelete = { viewModel.deleteCard(listOf(card.cardId)) }
+                                                ) {
+                                                    BlogBig(
+                                                        title = card.title,
+                                                        description = card.thumbnailContent ?: "",
+                                                        imageUrl = card.thumbnailUrl ?: "",
+                                                        isMine = card.isMine,
+                                                        onClick = { navController.navigate("cardDetail/${card.cardId}") }
+                                                    )
+                                                }
+
+                                                if (card == state.blogs.lastOrNull() && !loadingMore) {
+                                                    LaunchedEffect(Unit) {
+                                                        val sortDirection = if (selectedSort == "최신순") "DESC" else "ASC"
+                                                        categoryId?.let {
+                                                            viewModel.loadCards(userId, it, selectedCategory, sortDirection, true)
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    "동영상" -> {
+                                        if (state.videos.isEmpty() && !loadingMore) {
+                                            item { EmptyMessage("저장된 영상이 없습니다") }
+                                        } else {
+                                            items(state.videos) { card ->
+                                                SwipableCardList(
+                                                    cards = listOf(card),
+                                                    onDelete = { viewModel.deleteCard(listOf(card.cardId)) }
+                                                ) {
+                                                    VideoBig(
+                                                        videoId = card.thumbnailUrl ?: "",
+                                                        title = card.title,
+                                                        isMine = card.isMine,
+                                                        onClick = { navController.navigate("cardDetail/${card.cardId}") }
+                                                    )
+                                                }
+
+                                                if (card == state.videos.lastOrNull() && !loadingMore) {
+                                                    LaunchedEffect(Unit) {
+                                                        val sortDirection = if (selectedSort == "최신순") "DESC" else "ASC"
+                                                        categoryId?.let {
+                                                            viewModel.loadCards(userId, it, selectedCategory, sortDirection, true)
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    "뉴스" -> {
+                                        if (state.news.isEmpty() && !loadingMore) {
+                                            item { EmptyMessage("저장된 뉴스가 없습니다") }
+                                        } else {
+                                            items(state.news) { card ->
+                                                SwipableCardList(
+                                                    cards = listOf(card),
+                                                    onDelete = { viewModel.deleteCard(listOf(card.cardId)) }
+                                                ) {
+                                                    NewsBig(
+                                                        title = card.title,
+                                                        keywords = card.keywords,
+                                                        imageUrl = card.thumbnailUrl ?: "",
+                                                        isMine = card.isMine,
+                                                        onClick = { navController.navigate("cardDetail/${card.cardId}") }
+                                                    )
+                                                }
+
+                                                if (card == state.news.lastOrNull() && !loadingMore) {
+                                                    LaunchedEffect(Unit) {
+                                                        val sortDirection = if (selectedSort == "최신순") "DESC" else "ASC"
+                                                        categoryId?.let {
+                                                            viewModel.loadCards(userId, it, selectedCategory, sortDirection, true)
+                                                        }
+                                                    }
+                                                }
                                             }
                                         }
                                     }
                                 }
-                            }
 
-                            "블로그" -> {
-                                if (data.blogs.isEmpty()) {
-                                    item { EmptyMessage("저장된 블로그가 없습니다") }
-                                } else {
-                                    items(data.blogs) { card ->
-                                        SwipableCardList(
-                                            cards = listOf(card),
-//                                            onDelete = { viewModel.deleteCard(it) }
-                                            onDelete = { viewModel.deleteCard(listOf(it.cardId)) }
+                                if (loadingMore) {
+                                    item {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(16.dp),
+                                            contentAlignment = Alignment.Center
                                         ) {
-                                            BlogBig(
-                                                title = card.title,
-                                                description = card.thumbnailContent ?: "",
-                                                imageUrl = card.thumbnailUrl ?: "",
-                                                isMine = card.isMine, // ✅ isMine 전달
-//                                                onClick = {},
-                                                onClick = { navController.navigate("cardDetail/${card.cardId}") }, // ✅ 카드 ID 전달
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-
-                            "동영상" -> {
-                                if (data.videos.isEmpty()) {
-                                    item { EmptyMessage("저장된 영상이 없습니다") }
-                                } else {
-                                    items(data.videos) { card ->
-                                        SwipableCardList(
-                                            cards = listOf(card),
-//                                            onDelete = { viewModel.deleteCard(it) }
-                                            onDelete = { viewModel.deleteCard(listOf(it.cardId)) }
-                                        ) {
-                                            VideoBig(
-                                                videoId = card.thumbnailUrl ?: "",
-                                                title = card.title,
-                                                isMine = card.isMine, // ✅ isMine 전달
-                                                onClick = { navController.navigate("cardDetail/${card.cardId}") }, // ✅ 카드 ID 전달
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-
-
-
-                            "뉴스" -> {
-                                if (data.news.isEmpty()) {
-                                    item { EmptyMessage("저장된 뉴스가 없습니다") }
-                                } else {
-                                    items(data.news) { card ->
-                                        SwipableCardList(
-                                            cards = listOf(card),
-//                                            onDelete = { viewModel.deleteCard(it) }
-                                            onDelete = { viewModel.deleteCard(listOf(it.cardId)) }
-                                        ) {
-                                            NewsBig(
-                                                title = card.title,
-                                                keywords = card.keywords,
-                                                imageUrl = card.thumbnailUrl ?: "",
-                                                isMine = card.isMine, // ✅ isMine 전달
-//                                                onClick = {},
-                                                onClick = { navController.navigate("cardDetail/${card.cardId}") }, // ✅ 카드 ID 전달
-                                            )
+                                            CircularProgressIndicator()
                                         }
                                     }
                                 }
@@ -238,7 +283,7 @@ fun newCardListScreen(
 
                 is CardUiState.Error -> {
                     Text(
-                        text = (uiState as CardUiState.Error).message,
+                        text = state.message,
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
@@ -247,7 +292,6 @@ fun newCardListScreen(
     }
 }
 
-// 공통으로 사용되는 빈 목록 메시지
 @Composable
 fun EmptyMessage(message: String) {
     Box(
@@ -263,24 +307,3 @@ fun EmptyMessage(message: String) {
         )
     }
 }
-
-
-
-// -> 1/3 지점으로 조정 필요 시 사용
-//if (data.images.isEmpty()) {
-//    item {
-//        Box(
-//            modifier = Modifier
-//                .fillParentMaxSize()
-//                .fillMaxWidth()
-//                .padding(bottom = 200.dp),  // 위에서 1/3 지점으로 조정
-//            contentAlignment = Alignment.Center
-//        ) {
-//            Text(
-//                text = "저장된 이미지가 없습니다",
-//                color = Color.Gray,
-//                textAlign = TextAlign.Center
-//            )
-//        }
-//    }
-//}

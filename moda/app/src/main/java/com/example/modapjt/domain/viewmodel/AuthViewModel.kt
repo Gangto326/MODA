@@ -26,8 +26,8 @@ class AuthViewModel : ViewModel() {
 
     fun onLoginEvent(event: LoginEvent) {
         when (event) {
-            is LoginEvent.EmailChanged -> {
-                _loginState.value = _loginState.value.copy(email = event.email)
+            is LoginEvent.UsernameChanged -> {
+                _loginState.value = _loginState.value.copy(username = event.username)
             }
             is LoginEvent.PasswordChanged -> {
                 _loginState.value = _loginState.value.copy(password = event.password)
@@ -39,10 +39,16 @@ class AuthViewModel : ViewModel() {
     }
 
     private fun login() {
-        val email = _loginState.value.email
+        val username = _loginState.value.username
         val password = _loginState.value.password
 
-        if (email == "user" && password == "1234") {
+        if (username.isEmpty() || password.isEmpty()) {
+            _loginState.value = _loginState.value.copy(error = "아이디와 비밀번호를 입력해주세요.")
+            return
+        }
+
+        // 임시 로그인 로직 (실제로는 API 호출로 대체)
+        if (username == "user" && password == "1234") {
             _loginState.value = _loginState.value.copy(isLoading = true)
 
             viewModelScope.launch {
@@ -51,7 +57,7 @@ class AuthViewModel : ViewModel() {
                 onLoginSuccess()
             }
         } else {
-            _loginState.value = _loginState.value.copy(error = "이메일 또는 비밀번호가 잘못되었습니다.")
+            _loginState.value = _loginState.value.copy(error = "아이디 또는 비밀번호가 잘못되었습니다.")
         }
     }
 
@@ -60,7 +66,7 @@ class AuthViewModel : ViewModel() {
             is SignUpEvent.EmailChanged -> {
                 _signUpState.value = _signUpState.value.copy(
                     email = event.email,
-                    isEmailVerified = false  // 이메일이 변경되면 인증 상태 초기화
+                    isEmailVerified = false
                 )
             }
             is SignUpEvent.PasswordChanged -> {
@@ -72,56 +78,129 @@ class AuthViewModel : ViewModel() {
             is SignUpEvent.NameChanged -> {
                 _signUpState.value = _signUpState.value.copy(name = event.name)
             }
+            is SignUpEvent.UsernameChanged -> {
+                _signUpState.value = _signUpState.value.copy(
+                    username = event.username,
+                    isUsernameVerified = false
+                )
+            }
+            is SignUpEvent.EmailVerificationCodeChanged -> {
+                _signUpState.value = _signUpState.value.copy(
+                    emailVerificationCode = event.code
+                )
+            }
+            is SignUpEvent.VerifyUsername -> {
+                verifyUsername()
+            }
+            is SignUpEvent.SendEmailVerification -> {
+                sendEmailVerification()
+            }
+            is SignUpEvent.VerifyEmailCode -> {
+                verifyEmailCode()
+            }
             is SignUpEvent.Submit -> {
                 submitSignUp()
-            }
-            is SignUpEvent.NextPage -> {
-                if (canMoveToNextPage()) {
-                    _signUpState.value = _signUpState.value.copy(currentPage = 2)
-                }
-            }
-            is SignUpEvent.PreviousPage -> {
-                _signUpState.value = _signUpState.value.copy(currentPage = 1)
-            }
-            is SignUpEvent.VerifyEmail -> {
-                verifyEmail()
             }
         }
     }
 
-    private fun canMoveToNextPage(): Boolean {
-        return _signUpState.value.isEmailVerified &&
-                _signUpState.value.name.isNotEmpty() &&
-                _signUpState.value.email.isNotEmpty()
-    }
+    private fun verifyUsername() {
+        val username = _signUpState.value.username
+        if (username.isEmpty()) {
+            _signUpState.value = _signUpState.value.copy(error = "아이디를 입력해주세요.")
+            return
+        }
 
-    private fun verifyEmail() {
         viewModelScope.launch {
             _signUpState.value = _signUpState.value.copy(isLoading = true)
             delay(1000) // 실제로는 API 호출로 대체될 부분
 
             // 임시로 항상 사용 가능하다고 가정
             _signUpState.value = _signUpState.value.copy(
+                isUsernameVerified = true,
+                isLoading = false,
+                error = null
+            )
+        }
+    }
+
+    private fun sendEmailVerification() {
+        val email = _signUpState.value.email
+        if (email.isEmpty()) {
+            _signUpState.value = _signUpState.value.copy(error = "이메일을 입력해주세요.")
+            return
+        }
+
+        viewModelScope.launch {
+            _signUpState.value = _signUpState.value.copy(isLoading = true)
+            delay(1000) // 실제로는 API 호출로 대체될 부분
+
+            _signUpState.value = _signUpState.value.copy(
+                isEmailVerificationSent = true,
+                isLoading = false,
+                error = null
+            )
+        }
+    }
+
+    private fun verifyEmailCode() {
+        val code = _signUpState.value.emailVerificationCode
+        if (code.isEmpty()) {
+            _signUpState.value = _signUpState.value.copy(error = "인증번호를 입력해주세요.")
+            return
+        }
+
+        viewModelScope.launch {
+            _signUpState.value = _signUpState.value.copy(isLoading = true)
+            delay(1000) // 실제로는 API 호출로 대체될 부분
+
+            _signUpState.value = _signUpState.value.copy(
                 isEmailVerified = true,
-                isLoading = false
+                isLoading = false,
+                error = null
             )
         }
     }
 
     private fun submitSignUp() {
-        _signUpState.value = _signUpState.value.copy(isLoading = true)
+        val state = _signUpState.value
 
-        if (_signUpState.value.password != _signUpState.value.confirmPassword) {
-            _signUpState.value = _signUpState.value.copy(
-                error = "비밀번호가 일치하지 않습니다.",
-                isLoading = false
-            )
-            return
+        when {
+            state.name.isEmpty() -> {
+                _signUpState.value = state.copy(error = "닉네임을 입력해주세요.")
+                return
+            }
+            state.username.isEmpty() -> {
+                _signUpState.value = state.copy(error = "아이디를 입력해주세요.")
+                return
+            }
+            !state.isUsernameVerified -> {
+                _signUpState.value = state.copy(error = "아이디 중복확인을 해주세요.")
+                return
+            }
+            state.email.isEmpty() -> {
+                _signUpState.value = state.copy(error = "이메일을 입력해주세요.")
+                return
+            }
+            !state.isEmailVerified -> {
+                _signUpState.value = state.copy(error = "이메일 인증을 완료해주세요.")
+                return
+            }
+            state.password.isEmpty() -> {
+                _signUpState.value = state.copy(error = "비밀번호를 입력해주세요.")
+                return
+            }
+            state.password != state.confirmPassword -> {
+                _signUpState.value = state.copy(error = "비밀번호가 일치하지 않습니다.")
+                return
+            }
         }
+
+        _signUpState.value = state.copy(isLoading = true)
 
         viewModelScope.launch {
             delay(1000) // 실제로는 API 호출로 대체될 부분
-            _signUpState.value = _signUpState.value.copy(isLoading = false, error = null)
+            _signUpState.value = state.copy(isLoading = false, error = null)
             // TODO: 회원가입 성공 처리 (예: 로그인 화면으로 이동)
         }
     }

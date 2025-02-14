@@ -3,6 +3,7 @@ package com.example.modapjt.data.repository
 import android.util.Log
 import com.example.modapjt.data.api.SearchApiService
 import com.example.modapjt.data.dto.response.HomeKeywordResponse
+import com.example.modapjt.data.dto.response.HotTopicItem
 import com.example.modapjt.data.dto.response.KeywordSearchResponse
 import com.example.modapjt.data.dto.response.SearchResponse
 import kotlinx.coroutines.Dispatchers
@@ -73,6 +74,16 @@ class SearchRepository(private val api: SearchApiService) {
             emptyList()
         }
     }
+
+    suspend fun getHotTopics(limit: Int): List<HotTopicItem> {
+        return try {
+            api.getHotTopics(limit)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
+    }
+
 
 
 

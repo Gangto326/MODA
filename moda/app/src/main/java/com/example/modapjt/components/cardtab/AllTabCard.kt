@@ -15,10 +15,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.app.ui.theme.customTypography
 import com.example.modapjt.domain.model.Card
 import com.example.modapjt.screen2.EmptyMessage
-import com.example.modapjt.R  // 아이콘 리소스가 위치한 패키지
+import com.example.modapjt.R
 
 @Composable
 fun AllTabCard(
@@ -32,29 +31,56 @@ fun AllTabCard(
     onNewsMoreClick: () -> Unit = {}
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth() // 전체 너비 유지
+        modifier = Modifier
+            .fillMaxWidth()
+//            .padding(16.dp),
+//        verticalArrangement = Arrangement.spacedBy(24.dp) // 섹션 간 간격 설정
     ) {
-        SectionBlock(title = "이미지", items = imageCards, isImage = true, onMoreClick = onImageMoreClick)
-        SectionDivider()
+        // 이미지 섹션
+        SectionBlock(
+            title = "이미지",
+            items = imageCards,
+            isImage = true,
+            onMoreClick = onImageMoreClick
+        )
+        SectionDivider() // 이미지 섹션 후 구분선
 
-        SectionBlock(title = "동영상", items = videoCards, isImage = false, onMoreClick = onVideoMoreClick)
-        SectionDivider()
+        // 동영상 섹션
+        SectionBlock(
+            title = "동영상",
+            items = videoCards,
+            isImage = false,
+            onMoreClick = onVideoMoreClick
+        )
+        SectionDivider() // 동영상 섹션 후 구분선
 
-        SectionBlock(title = "블로그", items = blogCards, isImage = false, onMoreClick = onBlogMoreClick)
-        SectionDivider()
+        // 블로그 섹션
+        SectionBlock(
+            title = "블로그",
+            items = blogCards,
+            isImage = false,
+            onMoreClick = onBlogMoreClick
+        )
+        SectionDivider() // 블로그 섹션 후 구분선
 
-        SectionBlock(title = "뉴스", items = newsCards, isImage = false, onMoreClick = onNewsMoreClick)
+        // 뉴스 섹션
+        SectionBlock(
+            title = "뉴스",
+            items = newsCards,
+            isImage = false,
+            onMoreClick = onNewsMoreClick
+        )
     }
 }
 
-// ✅ 각 섹션을 공통적으로 처리하는 컴포넌트
+// 각 섹션을 공통적으로 처리하는 컴포넌트
 @Composable
 fun SectionBlock(title: String, items: List<Card>, isImage: Boolean, onMoreClick: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp, vertical = 10.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp) // ✅ 섹션 간 간격 유지
+        verticalArrangement = Arrangement.spacedBy(16.dp) // 섹션 간 간격 유지
     ) {
         SectionHeader(title)
 
@@ -62,14 +88,14 @@ fun SectionBlock(title: String, items: List<Card>, isImage: Boolean, onMoreClick
             EmptyMessage("저장된 $title 가 없습니다")
         } else {
             if (isImage) {
-                // ✅ 이미지 섹션 (3x2 레이아웃, 간격 8dp 적용)
+                // 이미지 섹션 (3x2 레이아웃, 간격 8dp 적용)
                 val rows = items.take(6).chunked(3) // 3개씩 나누어 2줄 생성
 
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) { // ✅ 이미지 행(row) 간 간격 8dp 유지
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) { // 이미지 행(row) 간 간격 8dp 유지
                     rows.forEach { rowItems ->
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp) // ✅ 이미지 간 간격 8dp 유지
+                            horizontalArrangement = Arrangement.spacedBy(8.dp) // 이미지 간 간격 8dp 유지
                         ) {
                             rowItems.forEach { card ->
                                 ImageSmall(
@@ -83,7 +109,7 @@ fun SectionBlock(title: String, items: List<Card>, isImage: Boolean, onMoreClick
                                 )
                             }
 
-                            // 빈 공간을 채우기 위해 Spacer 추가 (3개가 안될 경우)
+                            // 빈 공간을 채우기 위한 Spacer 추가 (3개가 안될 경우)
                             repeat(3 - rowItems.size) {
                                 Spacer(modifier = Modifier.weight(1f))
                             }
@@ -91,7 +117,7 @@ fun SectionBlock(title: String, items: List<Card>, isImage: Boolean, onMoreClick
                     }
                 }
             } else {
-                // ✅ 동영상, 블로그, 뉴스 섹션 (각 아이템 간 간격 20dp 유지)
+                // 동영상, 블로그, 뉴스 섹션
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     items.take(3).forEachIndexed { index, card ->
                         when (title) {
@@ -102,7 +128,7 @@ fun SectionBlock(title: String, items: List<Card>, isImage: Boolean, onMoreClick
                                 onClick = {},
                                 isMine = card.isMine,
                                 bookMark = card.bookMark,
-                                thumbnailContent = card.thumbnailContent ?:"",
+                                thumbnailContent = card.thumbnailContent ?: "",
                                 keywords = card.keywords.take(3)
                             )
 
@@ -126,7 +152,7 @@ fun SectionBlock(title: String, items: List<Card>, isImage: Boolean, onMoreClick
                             )
                         }
 
-                        // ✅ 뉴스, 블로그, 동영상에는 아이템 간 Divider 적용
+                        // 뉴스, 블로그, 동영상 아이템 간 Divider 적용
                         if (index < 2) {
                             Divider(
                                 modifier = Modifier.fillMaxWidth(),
@@ -143,9 +169,7 @@ fun SectionBlock(title: String, items: List<Card>, isImage: Boolean, onMoreClick
     }
 }
 
-
-
-// ✅ 섹션 간 구분선
+// 섹션 구분선
 @Composable
 fun SectionDivider() {
     Divider(
@@ -153,10 +177,7 @@ fun SectionDivider() {
             .fillMaxWidth()
             .padding(vertical = 10.dp), // 패딩 추가
         color = Color(0xFFF1F1F1),
-        thickness = 6.dp
-
-//        padding(20.dp),
-
+        thickness = 6.dp // 구분선 두께 설정
     )
 }
 
@@ -166,12 +187,12 @@ private fun SectionHeader(title: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White) // 🔥수정해야하는 부분
-            .height(IntrinsicSize.Min), // 🔥 높이를 내부 요소에 맞춤 (불필요한 공간 제거)
+            .background(Color.White) // 배경 색
+            .height(IntrinsicSize.Min), // 높이를 내부 요소에 맞춤 (불필요한 공간 제거)
         verticalAlignment = Alignment.CenterVertically, // 아이콘과 텍스트를 세로 중앙 정렬
-        horizontalArrangement = Arrangement.Start
+        horizontalArrangement = Arrangement.Start // 텍스트는 왼쪽 정렬
     ) {
-        // 🔽 섹션별 아이콘 추가
+        // 섹션별 아이콘 추가
         val iconResId = when (title) {
             "이미지" -> R.drawable.ic_image // 이미지 섹션 아이콘
             "동영상" -> R.drawable.ic_video // 동영상 섹션 아이콘
@@ -180,35 +201,38 @@ private fun SectionHeader(title: String) {
             else -> null
         }
 
+        // 아이콘이 있을 경우, 아이콘을 왼쪽에 추가
         iconResId?.let {
             Image(
                 painter = painterResource(id = it),
                 contentDescription = "$title 아이콘",
                 modifier = Modifier
                     .size(24.dp) // 아이콘 크기 조정
-                    .padding(end = 6.dp) // 텍스트와 간격 추가
+                    .padding(end = 8.dp) // 아이콘과 텍스트 간의 간격
             )
         }
 
-        // 🔽 섹션 제목 텍스트
+        // 섹션 제목 텍스트
         Text(
             text = title,
             color = Color(0xFF2B2826),
             fontSize = 14.sp,
-            fontWeight = FontWeight.Bold
-//            style = customTypography.titleMedium
+            fontWeight = FontWeight.Bold // 텍스트는 굵게 설정
         )
     }
 }
 
 // ✅ 더보기 버튼
 @Composable
-private fun SectionAdd(text: String, onMoreClick: () -> Unit) {
+private fun SectionAdd(
+    text: String,
+    onMoreClick: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(44.dp)
-            .border(1.dp, Color(0xFFFFC107), shape = RoundedCornerShape(16.dp)),
+            .height(48.dp)
+            .border(1.dp, Color(0xFFFFC107), shape = RoundedCornerShape(12.dp)), // 테두리 추가
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {

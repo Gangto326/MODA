@@ -1,8 +1,10 @@
 package com.example.modapjt.domain.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.modapjt.data.api.RetrofitInstance
+import com.example.modapjt.data.dto.response.HotTopicItem
 import com.example.modapjt.data.dto.response.KeywordSearchResponse
 import com.example.modapjt.data.dto.response.SearchResponse
 import com.example.modapjt.data.repository.SearchRepository
@@ -99,6 +101,19 @@ class SearchViewModel : ViewModel() {
             }
         }
     }
+
+    private val _hotTopics = MutableStateFlow<List<HotTopicItem>>(emptyList())
+    val hotTopics: StateFlow<List<HotTopicItem>> = _hotTopics.asStateFlow()
+
+    fun fetchHotTopics(limit: Int) {
+        viewModelScope.launch {
+            Log.d("SearchViewModel", "🔥 fetchHotTopics 실행됨 (limit=$limit)")
+            val topics = repository.getHotTopics(limit)
+            Log.d("SearchViewModel", "🔥 API 응답 받음: $topics")
+            _hotTopics.value = topics
+        }
+    }
+
 
 
 }

@@ -64,4 +64,22 @@ interface CardApiService {
     suspend fun deleteCard(
         @Path("cardIds") cardIds: String // "id1,id2,id3" 형태로 전달
     ): Response<Boolean>
+
+
+    // 즐겨찾기 전체탭 카드 리스트 API
+    @GET("api/search/bookmark")
+    suspend fun getAllTabBookMarkCardList(
+        @Query("userId") userId: String,
+    ): Response<AllTabCardApiResponse>
+
+    // 즐겨찾기 그 외 탭(이미지탭, 블로그탭, .. ) 카드 리스트 API 재설정
+    @GET("api/search/bookmark/type")
+    suspend fun getTabBookMarkCardList(
+        @Query("userId") userId: String,
+        @Query("typeId") typeId: Int,
+        @Query("page") page: Int,
+        @Query("size") size: Int = 15, // 15개씩 불러오기
+        @Query("sortBy") sortBy: String = "createdAt",
+        @Query("sortDirection") sortDirection: String // 동적으로 반영
+    ): Response<TabCardApiResponse>
 }
