@@ -294,7 +294,7 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
             windowManager?.removeView(backgroundView)
 
         if (isCollapsedState.value) {
-            onDestroy()
+            stopSelf()
         }
     }
 

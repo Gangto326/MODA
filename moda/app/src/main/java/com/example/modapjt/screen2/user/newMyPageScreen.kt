@@ -146,13 +146,12 @@ fun MyPageScreen(
                                         context.startActivity(browserIntent)
                                         Log.d("OverlayService", "기본 브라우저 실행")
 
-                                        context.stopService(serviceIntent)
+                                        //오버레이 서비스 실행
+                                        OverlayStateManager.setOverlayActive(true)
                                         context.startService(serviceIntent)
                                     } else {
                                         context.stopService(serviceIntent)
                                     }
-
-                                    OverlayStateManager.setOverlayActive(!isOverlayActive)
                                 },
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFCC80))
