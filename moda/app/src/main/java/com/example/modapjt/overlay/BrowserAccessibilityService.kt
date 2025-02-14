@@ -22,14 +22,12 @@ class BrowserAccessibilityService : AccessibilityService() {
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
-        when (event.eventType) {
-            AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED -> {
-                _canOverlayState.value = ALLOWED_PACKAGES.contains(rootInActiveWindow?.packageName?.toString())
-                Log.d(
-                    "BrowserAccessibilityService",
-                    "현재 앱: ${event.packageName?.toString()}, 오버레이 여부: ${_canOverlayState.value}"
-                )
-            }
+        if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            _canOverlayState.value = ALLOWED_PACKAGES.contains(rootInActiveWindow?.packageName?.toString())
+            Log.d(
+                "BrowserAccessibilityService",
+                "현재 앱: ${event.packageName?.toString()}, 오버레이 표시 여부: ${_canOverlayState.value}"
+            )
         }
 
         if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED ||
