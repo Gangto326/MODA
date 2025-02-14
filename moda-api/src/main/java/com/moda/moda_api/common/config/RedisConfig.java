@@ -56,6 +56,15 @@ public class RedisConfig {
 		return redisTemplate;
 	}
 
+	@Bean // JWT 엑세스 토큰 저장
+	public RedisTemplate<String, String> jwtRedisTemplate() {
+		RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
+		redisTemplate.setConnectionFactory(redisConnectionFactory());
+		redisTemplate.setKeySerializer(new StringRedisSerializer());
+		redisTemplate.setValueSerializer(new StringRedisSerializer());
+		return redisTemplate;
+	}
+
 	@Bean // Keyword
 	public RedisTemplate<String, String> keywordRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
 		RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();

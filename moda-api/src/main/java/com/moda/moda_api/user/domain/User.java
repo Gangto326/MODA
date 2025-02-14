@@ -19,14 +19,13 @@ public class User {
      *
      * @param userId 사용자 식별자
      * @param email 사용자 이메일
-     * @param password 암호화된 비밀번호
+     * @param hashedPassword 암호화된 비밀번호
      * @param profileImage 프로필 이미지 URL
      * @param nickname 사용자 닉네임
      * @param status 사용자 상태
      */
     private UserId userId;
     private String email;
-    private String password;
     private String hashedPassword;
     private String userName;
     private String nickname;
@@ -34,11 +33,10 @@ public class User {
     private LocalDateTime deletedAt;
 
     @Builder
-    public User(UserId userId, String email, String password, String hashedPassword, String userName,
+    public User(UserId userId, String email, String hashedPassword, String userName,
         String nickname, LocalDateTime createdAt, LocalDateTime deletedAt) {
         this.userId = userId;
         this.email = email;
-        this.password = password;
         this.hashedPassword = hashedPassword;
         this.userName = userName;
         this.nickname = nickname;
@@ -53,7 +51,7 @@ public class User {
      * @param newPassword 새로운 암호화된 비밀번호
      */
     public void updatePassword(String newPassword) {
-        this.password = newPassword;
+        this.hashedPassword = newPassword;
     }
 
     /**

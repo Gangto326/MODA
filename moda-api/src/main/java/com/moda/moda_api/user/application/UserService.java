@@ -1,21 +1,14 @@
 package com.moda.moda_api.user.application;
 
-import com.moda.moda_api.common.jwt.JwtTokenProvider;
+import com.moda.moda_api.common.infrastructure.TokenService;
+import com.moda.moda_api.common.jwt.JwtUtil;
 import com.moda.moda_api.common.jwt.TokenDto;
-import com.moda.moda_api.common.jwt.TokenType;
 import com.moda.moda_api.user.application.response.AuthResponse;
-import com.moda.moda_api.user.application.response.UserLoginResponse;
-import com.moda.moda_api.user.application.response.UserProfileResponse;
-import com.moda.moda_api.user.application.response.UserResponse;
 import com.moda.moda_api.user.domain.User;
 import com.moda.moda_api.user.domain.UserRepository;
 import com.moda.moda_api.user.infrastructure.PasswordEncrypt;
-import com.moda.moda_api.user.presentation.request.DeleteUserRequest;
 import com.moda.moda_api.user.presentation.request.LoginRequest;
-import com.moda.moda_api.user.presentation.request.SignupRequest;
-import com.moda.moda_api.user.presentation.request.UpdateProfileRequest;
 
-import io.jsonwebtoken.security.Password;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,10 +18,12 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-    // private final UserRepository userRepository;
+    private final UserRepository userRepository;
     private final UserMapper userMapper;
-    // private final JwtTokenProvider jwtTokenProvider;
-    // private final PasswordEncrypt passwordEncrypt;
+    private final JwtUtil jwtUtil;
+    private final PasswordEncrypt passwordEncrypt;
+    private final TokenService tokenService;
+
 
     /**
      * 회원가입을 처리합니다.
@@ -61,25 +56,31 @@ public class UserService {
      * @throws IllegalArgumentException 이메일이나 비밀번호가 일치하지 않는 경우
      */
      public AuthResponse login(LoginRequest request) {
+         User user = userRepository.findByEmail(request.getEmail())
+             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 이메일입니다."));
 
-//         User user = userRepository.findByEmail(request.getEmail())
-//             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 이메일입니다."));
-//
-//         // 사용자 상태 체크
-//         if (user.isDeleted()) {
-//             throw new IllegalArgumentException("탈퇴한 계정입니다.");
-//         }
-//
-//         // 비밀번호 체크
-//         if (!passwordEncrypt.verifyPassword(request.getPassword(), user.getPassword())) {
-//             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-//         }
-//
-//         TokenDto accessToken = jwtTokenProvider.generateToken(user, TokenType.ACCESS);
-//         TokenDto refreshToken = jwtTokenProvider.generateToken(user, TokenType.REFRESH);
+         // 사용자 상태 체크
+         if (user.isDeleted()) {
+             throw new IllegalArgumentException("탈퇴한 계정입니다.");
+         }
 
+         // 비밀번호 체크
+         if (!passwordEncrypt.verifyPassword(request.getPassword(), user.getHashedPassword())) {
+             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+         }
 
-         return null;
+         TokenDto accessToken = jwtUtil.generateToken(user, "AccessToken");
+         TokenDto refreshToken = jwtUtil.generateToken(user, "RefreshToken");
+
+         // 토큰 저장
+         tokenService.saveAccessToken(user.getUserName(), accessToken.getTokenValue());
+         tokenService.saveRefreshToken(user.getUserName(), refreshToken);
+
+         return AuthResponse.builder()
+                 .accessToken(accessToken.getTokenValue())
+                 .refreshToken(refreshToken.getTokenValue())
+                 .maxAge(refreshToken.getExpiresAt())
+                 .build();
      }
 
 

@@ -53,9 +53,7 @@ public class UserController {
      * @return 로그인된 사용자의 정보
      */
      @PostMapping("/login")
-     public ResponseEntity<Boolean> login(
-             @RequestBody LoginRequest request,
-             HttpServletRequest servletRequest) {
+     public ResponseEntity<Boolean> login(@RequestBody LoginRequest request) {
 
          AuthResponse authResponse = userService.login(request);
 
@@ -67,7 +65,7 @@ public class UserController {
                  .from(HeaderUtil.getRefreshCookieName(), authResponse.getRefreshToken())
                  .path("/") // 위 사이트에서 쿠키를 허용할 경로를 설정.
                  .httpOnly(true) // HTTP 통신을 위해서만 사용하도록 설정.
-//                 .secure(true) // Set-Cookie 설정.
+                 .secure(true) // Set-Cookie 설정.
                  .maxAge(authResponse.getMaxAge() / 1000) // RefreshToken과 동일한 만료 시간으로 설정.
                  .build();
 
