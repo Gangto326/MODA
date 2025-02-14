@@ -1,5 +1,6 @@
 package com.moda.moda_api.user.presentation;
 
+import com.moda.moda_api.common.jwt.TokenDto;
 import com.moda.moda_api.common.util.HeaderUtil;
 import com.moda.moda_api.user.application.UserService;
 import com.moda.moda_api.user.application.response.*;
@@ -75,6 +76,49 @@ public class UserController {
                  .header("Access-Control-Expose-Headers", "Set-Cookie")
                  .body(true);
      }
+
+    @DeleteMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletRequest request) {
+
+        // HTTP Header의 Authorization (AccessToken) 추출.
+        String accessToken = HeaderUtil.getAccessToken(request);
+
+        userService.logout(accessToken);
+
+        // maxAge(0)으로 RefreshToken 삭제.
+        HttpHeaders httpHeaders = new HttpHeaders();
+        ResponseCookie responseCookie = ResponseCookie
+                .from(HeaderUtil.getRefreshCookieName(), "")
+                .path("/")
+                .httpOnly(true)
+                .secure(true)
+                .maxAge(0)
+                .build();
+
+        return ResponseEntity.ok()
+                .headers(httpHeaders).header(HttpHeaders.SET_COOKIE, responseCookie.toString())
+                .body(null);
+    }
+
+
+    @GetMapping("/refresh")
+    public ResponseEntity<Boolean> refresh(HttpServletRequest httpServletRequest) {
+
+        // Client에서 withCredentials 옵션으로 설정하여 전송된 경우, RefreshToken을 받을 수 있다.
+        String refreshToken = HeaderUtil.getRefreshToken(httpServletRequest);
+
+        // RefreshToken을 바탕으로 새로운 AccessToken을 발급.
+        TokenDto newAccessToken = userService.reGenerateToken(refreshToken);
+
+        // 새로운 Accesstoken을 Header에 추가.
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add(HeaderUtil.getAuthorizationHeaderName(), HeaderUtil.getTokenPrefix() + newAccessToken.getTokenValue());
+
+        // 새로운 AccessToken을 전송.
+        return ResponseEntity.ok()
+                .headers(httpHeaders)
+                .body(true);
+    }
 
     /**
      * 사용자 프로필 정보를 조회합니다.

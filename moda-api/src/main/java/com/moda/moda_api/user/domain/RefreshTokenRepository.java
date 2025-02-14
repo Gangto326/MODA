@@ -12,5 +12,7 @@ public interface RefreshTokenRepository {
 
 	void deleteExpiredTokens(LocalDateTime dateTime);
 
-//	Stream findByTokenAndIsActiveTrue(String token);
+	Optional<RefreshToken> findByTokenAndUserNameAndIsActiveTrue(String token, UserId userId);
+
+	Optional<RefreshToken> findByTokenAndIsActiveTrue(String token);
 }

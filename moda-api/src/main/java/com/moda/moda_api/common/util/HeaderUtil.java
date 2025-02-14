@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class HeaderUtil {
-
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String REFRESH_COOKIE = "RefreshToken";
     private static final String TOKEN_PREFIX = "Bearer ";
@@ -35,6 +34,12 @@ public class HeaderUtil {
     }
 
     public static String getRefreshToken(HttpServletRequest httpServletRequest) {
+        
+        // 헤더에서 REFRESH_COOKIE 받아오기
+        String refreshToken = httpServletRequest.getHeader(REFRESH_COOKIE);
+        if (refreshToken != null) {
+            return refreshToken;
+        }
 
         Cookie[] cookieList = httpServletRequest.getCookies();
 

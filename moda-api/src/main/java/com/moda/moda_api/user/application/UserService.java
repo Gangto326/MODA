@@ -1,10 +1,11 @@
 package com.moda.moda_api.user.application;
 
 import com.moda.moda_api.common.infrastructure.TokenService;
-import com.moda.moda_api.common.jwt.JwtUtil;
+import com.moda.moda_api.common.util.JwtUtil;
 import com.moda.moda_api.common.jwt.TokenDto;
 import com.moda.moda_api.user.application.response.AuthResponse;
 import com.moda.moda_api.user.domain.User;
+import com.moda.moda_api.user.domain.UserId;
 import com.moda.moda_api.user.domain.UserRepository;
 import com.moda.moda_api.user.infrastructure.PasswordEncrypt;
 import com.moda.moda_api.user.presentation.request.LoginRequest;
@@ -73,8 +74,8 @@ public class UserService {
          TokenDto refreshToken = jwtUtil.generateToken(user, "RefreshToken");
 
          // 토큰 저장
-         tokenService.saveAccessToken(user.getUserName(), accessToken.getTokenValue());
-         tokenService.saveRefreshToken(user.getUserName(), refreshToken);
+         tokenService.saveAccessToken(user.getUserId(), accessToken.getTokenValue());
+         tokenService.saveRefreshToken(user.getUserId(), refreshToken);
 
          return AuthResponse.builder()
                  .accessToken(accessToken.getTokenValue())
@@ -82,6 +83,44 @@ public class UserService {
                  .maxAge(refreshToken.getExpiresAt())
                  .build();
      }
+
+    /**
+     * 로그아웃 합니다.
+     *
+     * Redis의 엑세스 토큰를 삭제하고, RefreshToken을 비활성화 합니다.
+     * @param accessToken
+     */
+    public void logout(String accessToken) {
+        UserId userId = new UserId(jwtUtil.getUserId(accessToken, "AccessToken"));
+
+        tokenService.invalidateAccessToken(userId);
+        tokenService.invalidateRefreshToken(
+                userId,
+                accessToken
+        );
+    }
+
+    /**
+     * RefreshToken을 받고, AccessToken을 재생성합니다.
+     * @param refreshToken
+     * @return
+     */
+    public TokenDto reGenerateToken(String refreshToken) {
+        UserId userId = new UserId(jwtUtil.getUserId(refreshToken, "RefreshToken"));
+
+        tokenService.validateRefreshToken(refreshToken);
+
+        User user = userRepository.findById(userId.getValue())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+        // 새로운 Access Token 생성
+        TokenDto newAccessToken = jwtUtil.generateToken(user, "AccessToken");
+
+        // Redis에 새로운 Access Token 저장
+        tokenService.saveAccessToken(userId, newAccessToken.getTokenValue());
+
+        return newAccessToken;
+    }
 
 
     /**

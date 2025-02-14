@@ -1,10 +1,11 @@
-package com.moda.moda_api.common.jwt;
+package com.moda.moda_api.common.util;
 
 import java.util.Base64;
 import java.util.Date;
 
 import javax.crypto.SecretKey;
 
+import com.moda.moda_api.common.jwt.TokenDto;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SignatureException;
 import lombok.NoArgsConstructor;
