@@ -36,8 +36,9 @@ fun CategoryList(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),  // 전체 여백 증가
-        verticalArrangement = Arrangement.spacedBy(16.dp)  // 상하 Row 사이 간격
+//                top = 10.dp
+            .padding(start = 30.dp, end = 30.dp, bottom = 30.dp),  // 전체 여백 증가
+        verticalArrangement = Arrangement.spacedBy(12.dp)  // 상하 Row 사이 간격
     ) {
         // 상단 카테고리 Row
         Row(
@@ -79,10 +80,10 @@ fun CategoryList(
                 }
         }
     }
-    Spacer(modifier = Modifier.height(8.dp))
+//    Spacer(modifier = Modifier.height(8.dp))
 
 
-    Divider(color = Color(0xFFDCDCDC), thickness = 4.dp, modifier = Modifier.padding(horizontal = 0.dp))
-    Spacer(modifier = Modifier.height(16.dp))
+    Divider(color = Color(0xFFF1F1F1), thickness = 6.dp, modifier = Modifier.padding(horizontal = 0.dp))
+    Spacer(modifier = Modifier.height(30.dp))
 
 }

@@ -14,15 +14,17 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import java.lang.reflect.Modifier
 
 
 @Composable
 fun BottomBarComponent(navController: NavController, currentRoute: String) {
     NavigationBar(
-        containerColor = Color(0xFFFFFFFF), // 흰색 배경 (#FFFFFF)
-        contentColor = Color(0xFF000000), // 아이콘과 텍스트를 검정색 (#000000)
-//        modifier = Modifier.height(56.dp) // 바텀바 높이 줄이기
+        containerColor = Color.Black, // 흰색 배경 (#FFFFFF)
+        contentColor = Color(0xFF665F5B), // 아이콘과 텍스트를 검정색 (#000000)
+//        modifier = Modifier.height(56.dp) // 바텀바 높이 설정
     ) {
         NavigationBarItem(
             icon = {

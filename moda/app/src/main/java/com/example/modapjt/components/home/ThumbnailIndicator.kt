@@ -19,14 +19,14 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun ThumbnailIndicator(currentIndex: Int, totalItems: Int) {
-    val defaultSize = 11.dp
-    val selectedSize = 11.dp
-    val spacing = 8.dp // ✅ 간격 조정
+    val defaultSize = 8.dp
+    val selectedSize = 8.dp
+    val spacing = 10.dp // ✅ 간격 조정
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 12.dp),
+            .padding(vertical = 16.dp),
         horizontalArrangement = Arrangement.Center
     ) {
         repeat(totalItems) { index ->
@@ -34,7 +34,7 @@ fun ThumbnailIndicator(currentIndex: Int, totalItems: Int) {
                 modifier = Modifier
                     .size(if (index == currentIndex) selectedSize else defaultSize) // 크기 조정
                     .background(
-                        if (index == currentIndex) Color(0xFFFFA500) else Color.Gray,
+                        if (index == currentIndex) Color(0xFFFFCD69) else Color(0xFFD9D9D9),
                         CircleShape
                     )
             )
