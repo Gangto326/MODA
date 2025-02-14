@@ -15,7 +15,7 @@ CREATE TABLE refresh_tokens (
     token TEXT NOT NULL,
     expires_at TIMESTAMP NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    user_name VARCHAR(255) NOT NULL,
+    user_id VARCHAR(255) NOT NULL,
     is_active BOOLEAN DEFAULT TRUE
 );
 
