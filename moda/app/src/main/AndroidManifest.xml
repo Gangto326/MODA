@@ -8,9 +8,6 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- 안드로이드에서는 PACKAGE_USAGE_STATS가 보호된 권한이라, tools:ignore="ProtectedPermissions"을 추가-->
     <uses-permission
         android:name="android.permission.PACKAGE_USAGE_STATS"
@@ -24,6 +21,10 @@
 
     <!-- 이미지 저장 기능 구현 | Android 13 이상 -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!--    android:usesCleartextTraffic="true" : HTTP 요청 허용 -->
     <application
@@ -54,6 +55,7 @@
         <!-- 오버레이 서비스 추가 -->
         <service
             android:name=".overlay.OverlayService"
+            android:foregroundServiceType="mediaProjection"
             android:enabled="true"
             android:exported="false" />
 

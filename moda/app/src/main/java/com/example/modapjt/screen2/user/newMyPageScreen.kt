@@ -1,8 +1,15 @@
 package com.example.modapjt.screen2.user
 
+import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.media.projection.MediaProjectionManager
+import android.os.Build
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -45,6 +52,7 @@ import com.example.modapjt.domain.viewmodel.UserViewModel
 import com.example.modapjt.overlay.OverlayService
 import com.example.modapjt.overlay.OverlayStateManager
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MyPageScreen(
     userId: String,
@@ -56,6 +64,46 @@ fun MyPageScreen(
 
     val isOverlayActive by OverlayStateManager.isOverlayActive.collectAsState()
     var showLogoutDialog by remember { mutableStateOf(false) }
+
+    val mediaProjectionManager = context.getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+
+    val screenCaptureContract = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            result.data?.let { data ->
+                // 권한 승인 후 서비스 시작
+                val serviceIntent = Intent(context, OverlayService::class.java)
+                    .apply {
+                        putExtra(OverlayService.EXTRA_RESULT_CODE, result.resultCode)
+                        putExtra(OverlayService.EXTRA_DATA, data)
+                    }
+                OverlayStateManager.setOverlayActive(true)
+                context.startForegroundService(serviceIntent)
+
+                // 크롬 브라우저 실행
+                Toast.makeText(context, "크롬 브라우저가 실행됩니다.", Toast.LENGTH_SHORT).show()
+                val chromeIntent = Intent(Intent.ACTION_MAIN)
+                chromeIntent.setPackage("com.android.chrome")
+                chromeIntent.addCategory(Intent.CATEGORY_APP_BROWSER)
+                chromeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                context.startActivity(chromeIntent)
+                Log.d("OverlayService", "크롬 브라우저 실행")
+            }
+        }
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val allGranted = permissions.entries.all { it.value }
+        if (allGranted) {
+            // 권한이 모두 승인되면 미디어 프로젝션 권한 요청
+            screenCaptureContract.launch(mediaProjectionManager.createScreenCaptureIntent())
+        } else {
+            Toast.makeText(context, "필요한 권한이 승인되지 않았습니다.", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     LaunchedEffect(userId) {
         viewModel.fetchUser(userId)
@@ -135,22 +183,24 @@ fun MyPageScreen(
 
                             Button(
                                 onClick = {
-                                    val serviceIntent = Intent(context, OverlayService::class.java)
-
                                     if (!isOverlayActive) {
-                                        // 기본 브라우저 실행
-                                        Toast.makeText(context, "기본 브라우저가 실행됩니다.", Toast.LENGTH_SHORT).show()
-                                        val browserIntent = Intent(Intent.ACTION_MAIN)
-                                        browserIntent.addCategory(Intent.CATEGORY_APP_BROWSER)
-                                        browserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                        context.startActivity(browserIntent)
-                                        Log.d("OverlayService", "기본 브라우저 실행")
-
-                                        //오버레이 서비스 실행
-                                        OverlayStateManager.setOverlayActive(true)
-                                        context.startService(serviceIntent)
+                                        try {
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                            permissionLauncher.launch(arrayOf(
+                                                android.Manifest.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION
+                                            ))
+                                            } else {
+                                                // 권한이 필요없는 경우 바로 미디어 프로젝션 권한 요청
+                                                screenCaptureContract.launch(mediaProjectionManager.createScreenCaptureIntent())
+                                            }
+                                        } catch (e: Exception) {
+                                            // 크롬이 설치되어 있지 않은 경우 알림 설정
+                                            Toast.makeText(context, "크롬 브라우저를 사용할 수 없습니다.", Toast.LENGTH_SHORT).show()
+                                        }
                                     } else {
+                                        val serviceIntent = Intent(context, OverlayService::class.java)
                                         context.stopService(serviceIntent)
+                                        OverlayStateManager.setOverlayActive(false)
                                     }
                                 },
                                 modifier = Modifier.fillMaxWidth(),

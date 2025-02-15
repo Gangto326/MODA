@@ -1,5 +1,6 @@
 package com.example.modapjt
 
+import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -10,6 +11,8 @@ import androidx.activity.compose.setContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.core.view.WindowCompat
 import com.example.modapjt.navigation.NavGraph
+import com.example.modapjt.overlay.BrowserAccessibilityService
+import com.example.modapjt.overlay.OverlayService
 import com.example.modapjt.ui.theme.ModapjtTheme
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 
@@ -20,10 +23,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // 전체화면 활성화
-//        WindowCompat.setDecorFitsSystemWindows(window, false)
-
-        // 오버레이 및 접근성 서비스를 위한 권한 요청
+        // 권한 요청
         checkAccessibilityPermission()
         checkOverlayPermission()
 
@@ -41,9 +41,8 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private val OVERLAY_PERMISSION_REQUEST_CODE = 1234
-
     // 오버레이 권한 요청 함수
+    private val OVERLAY_PERMISSION_REQUEST_CODE = 1234
     private fun checkOverlayPermission() {
         if (!Settings.canDrawOverlays(this)) {
             val intent = Intent(
@@ -59,15 +58,19 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // 접근성 서비스 권한이 있는지 확인하고 요청하는 함수 (변경 없음)
-    private fun checkAccessibilityPermission() {
-        val accessibilityEnabled = Settings.Secure.getInt(
+    // 접근성 서비스 권한이 있는지 확인하는 함수
+    private fun isAccessibilityServiceEnabled(): Boolean {
+        val enabledServices = Settings.Secure.getString(
             contentResolver,
-            Settings.Secure.ACCESSIBILITY_ENABLED, 0
+            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
         )
+        val serviceComponent = ComponentName(packageName, BrowserAccessibilityService::class.java.name)
+        return enabledServices?.contains(serviceComponent.flattenToString()) == true
+    }
 
-        if (accessibilityEnabled == 0) {
-            // 접근성 설정 화면으로 이동
+    // 접근성 서비스 권한을 요청하는 함수
+    private fun checkAccessibilityPermission() {
+        if (!isAccessibilityServiceEnabled()) {
             startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
             })
@@ -77,5 +80,10 @@ class MainActivity : ComponentActivity() {
                 Toast.LENGTH_LONG
             ).show()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        stopService(Intent(this, OverlayService::class.java))
     }
 }

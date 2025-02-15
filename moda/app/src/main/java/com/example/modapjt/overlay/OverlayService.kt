@@ -1,12 +1,24 @@
 package com.example.modapjt.overlay
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.graphics.PixelFormat
+import android.hardware.display.DisplayManager
+import android.hardware.display.VirtualDisplay
+import android.media.ImageReader
+import android.media.projection.MediaProjection
+import android.media.projection.MediaProjectionManager
+import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import android.view.Gravity
 import android.view.WindowManager
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.EaseInOutCirc
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateIntAsState
@@ -28,12 +40,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.setViewTreeLifecycleOwner
@@ -41,8 +54,8 @@ import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
-import com.example.modapjt.R
 import com.example.modapjt.data.repository.CardRepository
+import com.example.modapjt.overlay.ScreenCaptureManager.capturedBitmap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -84,12 +97,96 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
     private val easing = EaseInOutCirc
     private val iconSize by lazy { screenWidth.roundToInt() / 6 }
 
+    private var mediaProjection: MediaProjection? = null
+    private var virtualDisplay: VirtualDisplay? = null
+
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate() {
         super.onCreate()
         savedStateRegistryController.performRestore(null)
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         setupOverlayView()
+        startForeground(
+            NOTIFICATION_ID,
+            createNotification()
+        )
         Log.d("OverlayService", "오버레이 서비스 시작됨") // 로그 추가
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        super.onStartCommand(intent, flags, startId)
+        intent?.let {
+            val resultCode = it.getIntExtra(EXTRA_RESULT_CODE, 0)
+            val data = it.getParcelableExtra<Intent>(EXTRA_DATA)
+
+            if (resultCode != 0 && data != null) {
+                startProjection(resultCode, data)
+            }
+        }
+        return START_NOT_STICKY
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun createNotification(): Notification {
+        val channelId = "screen_capture_service"
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        // Create notification channel
+        val channel = NotificationChannel(
+            channelId,
+            "Screen Capture Service",
+            NotificationManager.IMPORTANCE_DEFAULT
+        )
+        notificationManager.createNotificationChannel(channel)
+
+        return NotificationCompat.Builder(this, channelId)
+            .setContentTitle("Screen Capture Service")
+            .setContentText("Recording your screen")
+            .setSmallIcon(android.R.drawable.ic_menu_camera)
+            .build()
+    }
+
+    fun startProjection(resultCode: Int, data: Intent) {
+        val mediaProjectionManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+        mediaProjection = mediaProjectionManager.getMediaProjection(resultCode, data)
+
+        // Register callback before starting capture
+        mediaProjection?.registerCallback(object : MediaProjection.Callback() {
+            override fun onStop() {
+                virtualDisplay?.release()
+                mediaProjection = null
+            }
+        }, null)
+
+        setupVirtualDisplay()
+    }
+
+    private fun setupVirtualDisplay() {
+        val metrics = Resources.getSystem().displayMetrics
+        val screenWidth = metrics.widthPixels
+        val screenHeight = metrics.heightPixels
+        val screenDensity = metrics.densityDpi
+
+        val imageReader = ImageReader.newInstance(
+            screenWidth, screenHeight,
+            PixelFormat.RGBA_8888, 1
+        )
+
+        virtualDisplay = mediaProjection?.createVirtualDisplay(
+            "ScreenCapture",
+            screenWidth, screenHeight, screenDensity,
+            DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
+            imageReader.surface, null, null
+        )
+
+        imageReader.setOnImageAvailableListener({ reader ->
+            val image = reader.acquireLatestImage()
+
+            image?.let {
+                ScreenCaptureManager.saveImage(image)
+                it.close()
+            }
+        }, null)
     }
 
     private fun setupOverlayView() {
@@ -197,14 +294,16 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
 
                 if (isCaptured) {
                     Box() {
-                        Image(
-                            painter = painterResource(id = R.drawable.wallpaper),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(sizeX.dp, sizeY.dp)
-                                .clip(RoundedCornerShape(corner)),
-                            contentScale = ContentScale.Crop
-                        )
+                        capturedBitmap?.let { bmp ->
+                            Image(
+                                bitmap = bmp.asImageBitmap(),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(sizeX.dp, sizeY.dp)
+                                    .clip(RoundedCornerShape(corner)),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
                     }
                 }
             }
@@ -220,6 +319,8 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
+            x = (screenWidth * 0.05).toInt()
+            y = (screenHeight * 0.08).toInt()
         }
 
         overlayView = ComposeView(this).apply {
@@ -340,10 +441,12 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
     private fun captureUrl() {
         CoroutineScope(Dispatchers.IO).launch {
             withContext(Dispatchers.Main) {
+                ScreenCaptureManager.captureBitmap() // 현재 화면을 캡처
                 _isCapturedState.value = true
                 delay(duration.toLong())
                 _isCapturedState.value = false
                 delay(duration.toLong())
+                ScreenCaptureManager.clearCapturedBitmap() // 캡처된 비트맵 정리
             }
 
             var url: String? = null
@@ -404,6 +507,10 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
     }
 
     override fun onDestroy() {
+        virtualDisplay?.release()
+        mediaProjection?.stop()
+        ScreenCaptureManager.clearCapturedBitmap()
+
         try {
             if (overlayView?.isAttachedToWindow == true) {
                 windowManager?.removeView(overlayView)
@@ -422,6 +529,12 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
         OverlayStateManager.setOverlayActive(false)
 
         Log.d("OverlayService", "오버레이 서비스 종료됨")
+    }
+
+    companion object {
+        private const val NOTIFICATION_ID = 1
+        const val EXTRA_RESULT_CODE = "extra_result_code"
+        const val EXTRA_DATA = "extra_data"
     }
 }
 
