@@ -144,7 +144,7 @@ fun newCardDetailScreen(
                         title = title,
                         isBookmarked = cardDetail.bookmark,
                         onBackClick = { navController.popBackStack() },
-                        onBookmarkClick = { /* viewModel.toggleBookmark(cardId) */ },
+                        onBookmarkClick = { viewModel.toggleBookmark(cardId) },
                         onEditClick = { /* 수정 로직 */ }, // 수정 대신 다른 기능될 듯
                         onDeleteClick = { /* 삭제 로직 */ }
                     )
