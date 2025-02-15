@@ -3,6 +3,11 @@ package com.moda.moda_api.user.infrastructure;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import org.springframework.stereotype.Component;
+
+import jakarta.persistence.Column;
+
+@Component
 public class PasswordEncrypt {
 	public static String encrypt(String password) {
 		try {

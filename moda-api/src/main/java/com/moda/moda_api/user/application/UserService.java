@@ -1,17 +1,19 @@
 package com.moda.moda_api.user.application;
 
+import org.springframework.stereotype.Service;
+
 import com.moda.moda_api.common.infrastructure.TokenService;
-import com.moda.moda_api.common.util.JwtUtil;
 import com.moda.moda_api.common.jwt.TokenDto;
+import com.moda.moda_api.common.util.JwtUtil;
 import com.moda.moda_api.user.application.response.AuthResponse;
 import com.moda.moda_api.user.domain.User;
 import com.moda.moda_api.user.domain.UserId;
 import com.moda.moda_api.user.domain.UserRepository;
 import com.moda.moda_api.user.infrastructure.PasswordEncrypt;
 import com.moda.moda_api.user.presentation.request.LoginRequest;
+import com.moda.moda_api.user.presentation.request.SignupRequest;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 /**
  * User 도메인과 관련된 핵심 비즈니스 로직을 수행하는 서비스 클래스입니다.
@@ -33,21 +35,13 @@ public class UserService {
      * @return 생성된 사용자의 정보
      * @throws IllegalArgumentException 이메일이 이미 존재하는 경우
      */
-    // public boolean signup(SignupRequest request) {
-        //
-        // if (userRepository.existsByEmail(request.getEmail())) {
-        //     throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
-        // }
-        //
-        // // 닉네임 중복 검사
-        // if (userRepository.existsByNickname(request.getNickname())) {
-        //     throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
-        // }
-        //
-        // userRepository.save(userMapper.signupRequestToUser(request));
-        //
-        // return true;
-    // }
+    public boolean signup(SignupRequest request) {
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+        }
+        userRepository.save(userMapper.signupRequestToUser(request));
+        return true;
+    }
 
     /**
      * 로그인을 처리합니다.
@@ -57,8 +51,12 @@ public class UserService {
      * @throws IllegalArgumentException 이메일이나 비밀번호가 일치하지 않는 경우
      */
      public AuthResponse login(LoginRequest request) {
+         // 이메일로 있는 User인지 체크
          User user = userRepository.findByEmail(request.getEmail())
              .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 이메일입니다."));
+
+
+
 
          // 사용자 상태 체크
          if (user.isDeleted()) {
@@ -120,6 +118,10 @@ public class UserService {
         tokenService.saveAccessToken(userId, newAccessToken.getTokenValue());
 
         return newAccessToken;
+    }
+
+    public boolean isUserNameAvailable(String userName) {
+        return !userRepository.existsByUserName(userName);
     }
 
 

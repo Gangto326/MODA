@@ -2,9 +2,12 @@ package com.moda.moda_api.user.presentation;
 
 import com.moda.moda_api.common.jwt.TokenDto;
 import com.moda.moda_api.common.util.HeaderUtil;
+import com.moda.moda_api.user.application.EmailService;
 import com.moda.moda_api.user.application.UserService;
 import com.moda.moda_api.user.application.response.*;
 import com.moda.moda_api.user.presentation.request.DeleteUserRequest;
+import com.moda.moda_api.user.presentation.request.EmailRequest;
+import com.moda.moda_api.user.presentation.request.EmailVerifyRequest;
 import com.moda.moda_api.user.presentation.request.LoginRequest;
 import com.moda.moda_api.user.presentation.request.SignupRequest;
 import com.moda.moda_api.user.presentation.request.UpdateProfileRequest;
@@ -35,17 +38,17 @@ public class UserController {
      * @param request 회원가입에 필요한 정보를 담은 요청 객체
      * @return 생성된 사용자의 정보
      */
-    // @PostMapping("/signup")
-    // public ResponseEntity<?> signup(@Valid @RequestBody SignupRequest request) {
-    //     try {
-    //         userService.signup(request);
-    //         return ResponseEntity.status(HttpStatus.CREATED)
-    //             .body(new SuccessResponse("회원가입이 완료되었습니다."));
-    //     } catch (IllegalArgumentException e) {
-    //         return ResponseEntity.badRequest()
-    //             .body(new ErrorResponse(e.getMessage()));
-    //     }
-    // }
+    @PostMapping("/signup")
+    public ResponseEntity<?> signup(@Valid @RequestBody SignupRequest request) {
+        try {
+            userService.signup(request);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new SuccessResponse("회원가입이 완료되었습니다."));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                .body(new ErrorResponse(e.getMessage()));
+        }
+    }
 
     /**
      * 로그인 요청을 처리합니다.
@@ -59,6 +62,7 @@ public class UserController {
          AuthResponse authResponse = userService.login(request);
 
          HttpHeaders httpHeaders = new HttpHeaders();
+
          httpHeaders.add(HeaderUtil.getAuthorizationHeaderName(), HeaderUtil.getTokenPrefix() + authResponse.getAccessToken());
 
          // RefreshToken을 HttpOnly Cookie로 전달.
@@ -118,6 +122,12 @@ public class UserController {
         return ResponseEntity.ok()
                 .headers(httpHeaders)
                 .body(true);
+    }
+
+    @GetMapping("/check-user-name/{userName}")
+    public ResponseEntity<Boolean> checkUserName(@PathVariable String userName) {
+        boolean isAvailable = userService.isUserNameAvailable(userName);
+        return ResponseEntity.ok(isAvailable);
     }
 
     /**

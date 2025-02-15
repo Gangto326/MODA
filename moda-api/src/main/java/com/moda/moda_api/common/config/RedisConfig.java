@@ -107,4 +107,13 @@ public class RedisConfig {
 		config.setPassword(password);
 		return new LettuceConnectionFactory(config);
 	}
+
+	@Bean // 이메일 인증 코드
+	public RedisTemplate<String, String> emailRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
+		RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
+		redisTemplate.setConnectionFactory(redisConnectionFactory);
+		redisTemplate.setKeySerializer(new StringRedisSerializer());
+		redisTemplate.setValueSerializer(new StringRedisSerializer());
+		return redisTemplate;
+	}
 }

@@ -38,7 +38,7 @@ public class RefreshTokenRepositoryImpl implements RefreshTokenRepository {
 
 	@Override
 	public Optional<RefreshToken> findByTokenAndUserNameAndIsActiveTrue(String token, UserId userId) {
-		return refreshTokenJpaRepository.findByTokenAndUserIdAndIsActiveTrue(token, userId.getValue())
+		return refreshTokenJpaRepository.findByTokenAndUserNameAndIsActiveTrue(token, userId.getValue())
 				.map(refreshTokenMapper::toDomain);
 	}
 
