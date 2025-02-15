@@ -4,10 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.modapjt.data.repository.CardRepository
 import com.example.modapjt.domain.model.Card
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class CardViewModel : ViewModel() {
     private val repository = CardRepository()
@@ -67,12 +69,14 @@ class CardViewModel : ViewModel() {
                     val (cards, hasNext) = result.getOrNull()!!
                     hasNextPage = hasNext
 
-                    if (isLoadMore) {
-                        currentPage++
-                        appendCards(cards, typeId)
-                    } else {
-                        currentPage = 1
-                        setInitialCards(cards, typeId)
+                    withContext(Dispatchers.Main) { // UI 업데이트를 메인 스레드에서 수행
+                        if (isLoadMore) {
+                            currentPage++
+                            appendCards(cards, typeId)
+                        } else {
+                            currentPage = 1
+                            setInitialCards(cards, typeId)
+                        }
                     }
                 } else {
                     _uiState.value = CardUiState.Error("데이터를 불러오는데 실패했습니다.")
