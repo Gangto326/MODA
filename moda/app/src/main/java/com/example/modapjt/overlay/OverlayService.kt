@@ -319,6 +319,8 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
+            x = (screenWidth * 0.05).toInt()
+            y = (screenHeight * 0.08).toInt()
         }
 
         overlayView = ComposeView(this).apply {
