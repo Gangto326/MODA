@@ -57,8 +57,10 @@ dependencies {
     implementation 'org.mindrot:jbcrypt:0.4'
     implementation 'org.postgresql:postgresql'
 
+    implementation 'io.github.cdimascio:java-dotenv:5.2.2'
 }
 
 tasks.named('test') {
     useJUnitPlatform()
 }
+
