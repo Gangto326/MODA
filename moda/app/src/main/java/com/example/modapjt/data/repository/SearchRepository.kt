@@ -84,9 +84,9 @@ class SearchRepository(private val api: SearchApiService) {
         }
     }
 
-
-
-
+    fun getKeywordUrl(keyword: String) {
+        Log.d("SearchRepository", "Clicked keyword: $keyword")
+    }
 
 
 
