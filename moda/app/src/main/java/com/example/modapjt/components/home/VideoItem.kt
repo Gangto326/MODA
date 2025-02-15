@@ -60,8 +60,8 @@ fun VideoItem(videoUrl: String, title: String, cardId: String, navController: Na
         // ✅ 제목 텍스트
         Text(
             text = title, // 영상 제목
-            fontSize = 16.sp,
-            lineHeight = 24.sp,
+            fontSize = 14.sp,
+            lineHeight = 22.sp,
 //            fontWeight = FontWeight(700),
             color = Color(0xFF2B2826),
 

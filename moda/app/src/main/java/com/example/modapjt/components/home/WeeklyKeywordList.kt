@@ -63,7 +63,7 @@ fun WeeklyKeywordList(
                                 it.border(1.dp, Color(0xFFB8ACA5), shape = RoundedCornerShape(50))
                             }
                         }
-                        .padding(horizontal = 14.dp, vertical = 4.dp)
+                        .padding(horizontal = 14.dp, vertical = 2.dp)
                         .clickable {
                             homeKeywordViewModel.updateKeywordAndFetchData(keyword, userId)
                         },
@@ -71,7 +71,7 @@ fun WeeklyKeywordList(
                 ) {
                     Text(
                         text = keyword,
-                        fontSize = 14.sp,
+                        fontSize = 12.sp,
                         color = if (isSelected) Color.White else Color(0xFF665F5B) // 선택된 키워드 색상은 흰색, 나머지는 검은색
                     )
                 }

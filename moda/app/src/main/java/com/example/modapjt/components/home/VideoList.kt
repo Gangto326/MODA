@@ -35,7 +35,9 @@ fun VideoList(navController: NavController, videos: List<VideoItemData>) {
     var currentIndex by remember { mutableStateOf(0) }
 
     Column(
-        modifier = Modifier.fillMaxWidth().padding(10.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (videos.isNotEmpty()) {
@@ -82,18 +84,18 @@ fun VideoList(navController: NavController, videos: List<VideoItemData>) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = "${currentIndex + 1}",
-                        fontSize = 16.sp,
+                        fontSize = 14.sp,
                         color = Color(0xFF665F5B), // 현재 페이지 숫자 색상
                         fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
                     )
                     Text(
                         text = " / ",
-                        fontSize = 16.sp,
+                        fontSize = 14.sp,
                         color = Color(0xFFBAADA4) // 구분자 색상
                     )
                     Text(
                         text = "${videos.size}",
-                        fontSize = 16.sp,
+                        fontSize = 14.sp,
                         color = Color(0xFFBAADA4) // 전체 페이지 숫자 색상
                     )
                 }

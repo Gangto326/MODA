@@ -45,6 +45,7 @@ fun VideoSection(
         Divider( // 구분선
             color = Color(0xFFF1F1F1),
             thickness = 6.dp,
+
             modifier = Modifier
 //            .padding(horizontal = 0.dp)
 //            .background(Color.Green) // ✅ Divider 배경색 (초록)

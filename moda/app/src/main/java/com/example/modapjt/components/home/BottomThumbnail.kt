@@ -71,7 +71,7 @@ fun BottomThumbnail(
                 tint = if (bookmark) Color(0xFFFFA500) else Color.White,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(8.dp)
+                    .padding(6.dp)
                     .size(24.dp)
             )
         }
@@ -79,7 +79,7 @@ fun BottomThumbnail(
         // 제목 (두 줄 초과하면 '...' 처리)
         Text(
             text = title,
-            fontSize = 16.sp,
+            fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
             maxLines = 2,  // ✅ 최대 2줄 표시
             overflow = TextOverflow.Ellipsis,  // ✅ 2줄 초과 시 ... 처리
