@@ -3,10 +3,22 @@ package com.example.modapjt.components.cardtab
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -15,16 +27,31 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun <T> SwipableCardList(
     cards: List<T>,
     onDelete: (T) -> Unit,
     content: @Composable (T) -> Unit
 ) {
-    val offsetMap = remember { mutableStateMapOf<T, MutableState<Float>>() }
-    val deleteStateMap = remember { mutableStateMapOf<T, MutableState<Boolean>>() }
+    val scope = rememberCoroutineScope() // 추가
+    val offsetMap = remember(cards) { // cards를 key로 추가
+        mutableStateMapOf<T, MutableState<Float>>().apply {
+            cards.forEach { card ->
+                this[card] = mutableStateOf(0f)
+            }
+        }
+    }
+    val deleteStateMap = remember(cards) { // cards를 key로 추가
+        mutableStateMapOf<T, MutableState<Boolean>>().apply {
+            cards.forEach { card ->
+                this[card] = mutableStateOf(false)
+            }
+        }
+    }
 
     Column(
         modifier = Modifier.fillMaxWidth()
@@ -36,15 +63,17 @@ fun <T> SwipableCardList(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .pointerInput(Unit) {
+                    .pointerInput(card) { // card를 key로 추가
                         detectHorizontalDragGestures(
                             onDragEnd = {
-                                if (offsetX.value < -100f) {
-                                    offsetX.value = -140f
-                                    showDeleteButton.value = true
-                                } else {
-                                    offsetX.value = 0f
-                                    showDeleteButton.value = false
+                                scope.launch { // coroutineScope 사용
+                                    if (offsetX.value < -100f) {
+                                        offsetX.value = -140f
+                                        showDeleteButton.value = true
+                                    } else {
+                                        offsetX.value = 0f
+                                        showDeleteButton.value = false
+                                    }
                                 }
                             }
                         ) { _, dragAmount ->
@@ -62,20 +91,24 @@ fun <T> SwipableCardList(
                             .background(Color.Red, shape = RoundedCornerShape(8.dp)),
                         contentAlignment = Alignment.Center
                     ) {
-                        TextButton(onClick = {
-                            // 삭제할 때 상태를 초기화하여 다른 카드가 영향을 받지 않도록 처리
-                            offsetMap.remove(card)
-                            deleteStateMap.remove(card)
-                            onDelete(card)
+                        TextButton(
+                            onClick = {
+                                scope.launch { // coroutineScope 사용
+                                    // 삭제할 때 상태를 초기화하여 다른 카드가 영향을 받지 않도록 처리
+                                    offsetMap.remove(card)
+                                    deleteStateMap.remove(card)
+                                    onDelete(card)
 
-                            // 모든 카드들의 상태를 초기화하여 정상적으로 드래그 가능하도록 설정
-                            offsetMap.keys.forEach { remainingCard ->
-                                offsetMap[remainingCard]?.value = 0f
+                                    // 모든 카드들의 상태를 초기화
+                                    offsetMap.keys.forEach { remainingCard ->
+                                        offsetMap[remainingCard]?.value = 0f
+                                    }
+                                    deleteStateMap.keys.forEach { remainingCard ->
+                                        deleteStateMap[remainingCard]?.value = false
+                                    }
+                                }
                             }
-                            deleteStateMap.keys.forEach { remainingCard ->
-                                deleteStateMap[remainingCard]?.value = false
-                            }
-                        }) {
+                        ) {
                             Text(
                                 "삭제",
                                 color = Color.White,
