@@ -157,12 +157,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -172,6 +174,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import org.commonmark.node.BulletList
 import org.commonmark.node.Code
@@ -190,24 +193,42 @@ import org.commonmark.parser.Parser
 fun MarkdownText(
     markdown: String,
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colorScheme.onSurface
+    keywords: List<String>,
+    color: Color = MaterialTheme.colorScheme.onSurface,
+    onKeywordClick: (String) -> Unit
 ) {
     val parser = remember { Parser.builder().build() }
     val document = remember(markdown) { parser.parse(markdown) }
-    val annotatedString = remember(document) { document.toAnnotatedString() }
+    val annotatedString =  remember(document, keywords) {
+        document.toAnnotatedString(keywords)
+    }
 
+//    Column(modifier = modifier) {
+//        Text(
+//            text = annotatedString,
+//            color = color,
+//            style = MaterialTheme.typography.bodyLarge
+//        )
+//    }
     Column(modifier = modifier) {
-        Text(
+        ClickableText(
             text = annotatedString,
-            color = color,
-            style = MaterialTheme.typography.bodyLarge
+            style = MaterialTheme.typography.bodyLarge.copy(color = color),
+            onClick = { offset ->
+                annotatedString
+                    .getStringAnnotations("CLICKABLE", offset, offset)
+                    .firstOrNull()?.let { annotation ->
+                        onKeywordClick(annotation.item)
+                    }
+            }
         )
     }
 }
 
-private fun Node.toAnnotatedString(): AnnotatedString {
+private fun Node.toAnnotatedString(keywords: List<String>): AnnotatedString {
+
     return buildAnnotatedString {
-        processNode(this@toAnnotatedString)
+        processNode(this@toAnnotatedString, keywords = keywords)
     }
 }
 
@@ -225,7 +246,11 @@ private fun CodeBlock(content: String, modifier: Modifier = Modifier) {
     )
 }
 
-private fun AnnotatedString.Builder.processNode(node: Node, listLevel: Int = 0) {
+private fun AnnotatedString.Builder.processNode(
+    node: Node,
+    listLevel: Int = 0,
+    keywords: List<String> = emptyList()
+) {
     when (node) {
         is Heading -> {
             append("\n")
@@ -240,43 +265,75 @@ private fun AnnotatedString.Builder.processNode(node: Node, listLevel: Int = 0) 
                     }
                 )
             )
-            node.firstChild?.let { processNode(it) }
+            node.firstChild?.let { processNode(it, listLevel, keywords) }
             pop()
             append("\n")
         }
         is BulletList -> {
             node.firstChild?.let {
-                processNode(it, listLevel + 1)
+                processNode(it, listLevel + 1, keywords)
             }
         }
         is ListItem -> {
             append("\n")
             append("  ".repeat(listLevel))
             append("• ")
-            node.firstChild?.let { processNode(it, listLevel) }
-            node.next?.let { processNode(it, listLevel) }
+            node.firstChild?.let { processNode(it, listLevel, keywords) }
+            node.next?.let { processNode(it, listLevel, keywords) }
         }
         is Paragraph -> {
             if (node.parent !is ListItem) append("\n")
-            node.firstChild?.let { processNode(it) }
+            node.firstChild?.let { processNode(it, listLevel, keywords) }
             if (node.parent !is ListItem) append("\n")
         }
         is Text -> {
-            append(node.literal)
+            val text = node.literal
+            var lastIndex = 0
+
+            // 모든 키워드에 대해 검사
+            keywords.forEach { keyword ->
+                val pattern = keyword.toRegex(RegexOption.IGNORE_CASE)
+                pattern.findAll(text).forEach { result ->
+                    // 인덱스 유효성 검사 추가
+                    if (result.range.first >= lastIndex && result.range.first < result.range.last + 1) {
+                        // 키워드 이전 텍스트 추가
+                        append(text.substring(lastIndex, result.range.first))
+
+                        // 클릭 가능한 영역 시작
+                        pushStringAnnotation(
+                            tag = "CLICKABLE",
+                            annotation = keyword
+                        )
+
+                        // 키워드를 하이라이트와 함께 추가
+                        pushStyle(SpanStyle(background = Color.Yellow.copy(alpha = 0.5f)))
+                        append(text.substring(result.range.first, result.range.last + 1))
+
+                        pop()
+                        pop()
+
+                        lastIndex = result.range.last + 1
+                    }
+                }
+            }
+            // 남은 텍스트 추가
+            if (lastIndex < text.length) {
+                append(text.substring(lastIndex))
+            }
         }
         is StrongEmphasis -> {
             pushStyle(SpanStyle(fontWeight = FontWeight.Bold))
-            node.firstChild?.let { processNode(it) }
+            node.firstChild?.let { processNode(it, listLevel, keywords) }
             pop()
         }
         is Emphasis -> {
             pushStyle(SpanStyle(fontStyle = FontStyle.Italic))
-            node.firstChild?.let { processNode(it) }
+            node.firstChild?.let { processNode(it, listLevel, keywords) }
             pop()
         }
         is Link -> {
             pushStyle(SpanStyle(textDecoration = TextDecoration.Underline))
-            node.firstChild?.let { processNode(it) }
+            node.firstChild?.let { processNode(it, listLevel, keywords) }
             pop()
         }
         is Code -> {
@@ -298,10 +355,10 @@ private fun AnnotatedString.Builder.processNode(node: Node, listLevel: Int = 0) 
             append("\n")
         }
         else -> {
-            node.firstChild?.let { processNode(it) }
+            node.firstChild?.let { processNode(it, listLevel, keywords) }
         }
     }
     if (node !is ListItem) {
-        node.next?.let { processNode(it, listLevel) }
+        node.next?.let { processNode(it, listLevel, keywords) }
     }
 }

@@ -114,6 +114,10 @@ class SearchViewModel : ViewModel() {
         }
     }
 
-
+    fun onKeywordClick(keyword: String) {
+        viewModelScope.launch {
+            repository.getKeywordUrl(keyword)
+        }
+    }
 
 }

@@ -285,8 +285,10 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.modapjt.components.video.YouTubePlayerTime
 import com.example.modapjt.domain.model.CardDetail
+import com.example.modapjt.domain.viewmodel.SearchViewModel
 import com.example.modapjt.utils.extractYouTubeVideoId
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import java.time.LocalDateTime
@@ -296,6 +298,7 @@ import java.time.format.DateTimeFormatter
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun VideoDetailScreen(cardDetail: CardDetail) {
+    val searchViewModel: SearchViewModel = viewModel()
     // 상태 및 기본 설정
     var player by remember { mutableStateOf<YouTubePlayer?>(null) }
     val uriHandler = LocalUriHandler.current
@@ -363,9 +366,9 @@ fun VideoDetailScreen(cardDetail: CardDetail) {
                     
                     // 키워드
 
-                    val limitedKeywords = cardDetail.keywords.take(3).joinToString(", ")
+                    val limitedKeywords = cardDetail.keywords
                     Text(
-                        text = "키워드: $limitedKeywords",
+                        text = "키워드: ${limitedKeywords.take(3).joinToString(", ")}",
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(bottom = 4.dp)
                     )
@@ -373,7 +376,11 @@ fun VideoDetailScreen(cardDetail: CardDetail) {
                     // 비디오 설명
                     MarkdownText(
                         markdown = cardDetail.content,
-                        modifier = Modifier.padding(vertical = 4.dp)
+                        modifier = Modifier.padding(vertical = 4.dp),
+                        keywords = limitedKeywords,
+                        onKeywordClick = { keyword ->
+                            searchViewModel.onKeywordClick(keyword)
+                        }
                     )
 
                     // 원본 비디오 링크
