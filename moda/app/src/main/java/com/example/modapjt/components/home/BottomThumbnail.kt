@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -44,20 +45,20 @@ fun BottomThumbnail(
 
     Column(
         modifier = Modifier
-            .width(150.dp) // 썸네일 크기 조정
+            .width(224.dp) // 썸네일 크기 조정
             .clickable { onClick(cardId) }
     ) {
         // 썸네일 이미지 + 북마크 아이콘
         Box(
             modifier = Modifier
-                .height(100.dp)
+                .height(120.dp)
                 .fillMaxWidth()
-                .background(Color.LightGray, shape = RoundedCornerShape(12.dp))
+                .background(Color.LightGray, shape = RoundedCornerShape(8.dp))
         ) {
             coil.compose.AsyncImage(
                 model = thumbnailUrl,
                 contentDescription = "Thumbnail Image",
-                modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp)),
+                modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(8.dp)),
                 contentScale = ContentScale.Crop
             )
 
@@ -78,16 +79,23 @@ fun BottomThumbnail(
         // 제목 (두 줄 초과하면 '...' 처리)
         Text(
             text = title,
-            fontSize = 14.sp,
+            fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(top = 4.dp)
+            maxLines = 2,  // ✅ 최대 2줄 표시
+            overflow = TextOverflow.Ellipsis,  // ✅ 2줄 초과 시 ... 처리
+            lineHeight = 20.sp,  // ✅ 줄 간격 조정
+            softWrap = true,  // ✅ 자동 줄 바꿈 허용
+            modifier = Modifier
+                .padding(top = 10.dp)
+                .heightIn(min = 40.dp, max = 48.dp) // ✅ 최소 2줄 높이 보장
         )
 
-        // 뉴스 아이콘 + 키워드 (최대 3개)
+
+// 뉴스 아이콘 + 키워드 (항상 같은 위치)
         Row(
-            modifier = Modifier.padding(top = 4.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             val icon: Painter = painterResource(
@@ -108,12 +116,13 @@ fun BottomThumbnail(
             Text(
                 text = "${getTypeText(type)} | ${keywords.take(3).joinToString(" ")}",
                 fontSize = 12.sp,
-                color = Color.Gray,
+                color = Color(0xFFBAADA4),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.padding(start = 4.dp)
             )
         }
+
     }
 }
 
