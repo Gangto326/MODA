@@ -146,7 +146,7 @@ fun newCardDetailScreen(
                         onBackClick = { navController.popBackStack() },
                         onBookmarkClick = { viewModel.toggleBookmark(cardId) },
                         onEditClick = { /* 수정 로직 */ }, // 수정 대신 다른 기능될 듯
-                        onDeleteClick = { /* 삭제 로직 */ }
+                        onDeleteClick = { viewModel.deleteCard(listOf(cardId), navController) }
                     )
                 }
                 else -> HeaderBar(modifier = Modifier)

@@ -2,6 +2,7 @@ package com.example.modapjt.domain.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
 import com.example.modapjt.data.repository.CardDetailRepository
 import com.example.modapjt.data.repository.CardRepository
 import com.example.modapjt.domain.model.CardDetail
@@ -74,6 +75,23 @@ class CardDetailViewModel : ViewModel() {
             } catch (e: Exception) {
                 println("[CardDetailViewModel] 예외 발생: ${e.message}")
                 _uiState.value = CardDetailUiState.Error("북마크 토글 중 오류 발생: ${e.message}")
+            }
+        }
+    }
+
+    // deleteCard 함수 추가
+    fun deleteCard(cardIds: List<String>, navController: NavController) {
+        viewModelScope.launch {
+            try {
+                val result = cardRepository.deleteCard(cardIds)
+                if (result.isSuccess) {
+                    // 삭제 성공 시 이전 화면으로 이동
+                    navController.popBackStack()
+                } else {
+                    _uiState.value = CardDetailUiState.Error("카드 삭제 실패")
+                }
+            } catch (e: Exception) {
+                _uiState.value = CardDetailUiState.Error("카드 삭제 중 오류 발생: ${e.message}")
             }
         }
     }
