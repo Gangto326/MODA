@@ -68,6 +68,7 @@ fun newCardListScreen(
         }
     }
 
+
     Scaffold(
         topBar = { CategoryHeaderBar(categoryName = categoryName, navController = navController) },
         bottomBar = { BottomBarComponent(navController, currentRoute) }
@@ -84,6 +85,37 @@ fun newCardListScreen(
                 }
 
                 is CardUiState.Success -> {
+
+                    // 블로그 탭 페이징
+                    LaunchedEffect(state.blogs.size) {
+                        if (state.blogs.isNotEmpty() && !loadingMore && selectedCategory == "블로그") {
+                            val sortDirection = if (selectedSort == "최신순") "DESC" else "ASC"
+                            categoryId?.let {
+                                viewModel.loadCards(userId, it, selectedCategory, sortDirection, true)
+                            }
+                        }
+                    }
+
+                    // 동영상 탭 페이징
+                    LaunchedEffect(state.videos.size) {
+                        if (state.videos.isNotEmpty() && !loadingMore && selectedCategory == "동영상") {
+                            val sortDirection = if (selectedSort == "최신순") "DESC" else "ASC"
+                            categoryId?.let {
+                                viewModel.loadCards(userId, it, selectedCategory, sortDirection, true)
+                            }
+                        }
+                    }
+
+                    // 뉴스 탭 페이징
+                    LaunchedEffect(state.news.size) {
+                        if (state.news.isNotEmpty() && !loadingMore && selectedCategory == "뉴스") {
+                            val sortDirection = if (selectedSort == "최신순") "DESC" else "ASC"
+                            categoryId?.let {
+                                viewModel.loadCards(userId, it, selectedCategory, sortDirection, true)
+                            }
+                        }
+                    }
+
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -181,7 +213,10 @@ fun newCardListScreen(
                                         if (state.blogs.isEmpty() && !loadingMore) {
                                             item { EmptyMessage("저장된 블로그가 없습니다") }
                                         } else {
-                                            items(state.blogs) { card ->
+                                            items(
+                                                items = state.blogs,
+                                                key = { it.cardId }
+                                            ) { card ->
                                                 SwipableCardList(
                                                     cards = listOf(card),
                                                     onDelete = { viewModel.deleteCard(listOf(card.cardId)) }
@@ -193,15 +228,6 @@ fun newCardListScreen(
                                                         isMine = card.isMine,
                                                         onClick = { navController.navigate("cardDetail/${card.cardId}") }
                                                     )
-                                                }
-
-                                                if (card == state.blogs.lastOrNull() && !loadingMore) {
-                                                    LaunchedEffect(Unit) {
-                                                        val sortDirection = if (selectedSort == "최신순") "DESC" else "ASC"
-                                                        categoryId?.let {
-                                                            viewModel.loadCards(userId, it, selectedCategory, sortDirection, true)
-                                                        }
-                                                    }
                                                 }
                                             }
                                         }
@@ -222,15 +248,6 @@ fun newCardListScreen(
                                                         onClick = { navController.navigate("cardDetail/${card.cardId}") }
                                                     )
                                                 }
-
-                                                if (card == state.videos.lastOrNull() && !loadingMore) {
-                                                    LaunchedEffect(Unit) {
-                                                        val sortDirection = if (selectedSort == "최신순") "DESC" else "ASC"
-                                                        categoryId?.let {
-                                                            viewModel.loadCards(userId, it, selectedCategory, sortDirection, true)
-                                                        }
-                                                    }
-                                                }
                                             }
                                         }
                                     }
@@ -250,15 +267,6 @@ fun newCardListScreen(
                                                         isMine = card.isMine,
                                                         onClick = { navController.navigate("cardDetail/${card.cardId}") }
                                                     )
-                                                }
-
-                                                if (card == state.news.lastOrNull() && !loadingMore) {
-                                                    LaunchedEffect(Unit) {
-                                                        val sortDirection = if (selectedSort == "최신순") "DESC" else "ASC"
-                                                        categoryId?.let {
-                                                            viewModel.loadCards(userId, it, selectedCategory, sortDirection, true)
-                                                        }
-                                                    }
                                                 }
                                             }
                                         }
