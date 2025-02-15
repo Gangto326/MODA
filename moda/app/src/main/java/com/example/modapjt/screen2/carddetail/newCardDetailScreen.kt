@@ -21,6 +21,7 @@ import androidx.navigation.NavController
 import com.example.modapjt.components.bar.BottomBarComponent
 import com.example.modapjt.components.bar.CardDetailHeaderBar
 import com.example.modapjt.components.bar.HeaderBar
+import com.example.modapjt.components.bar.NotMineCardDetailHeaderBar
 import com.example.modapjt.domain.viewmodel.CardDetailUiState
 import com.example.modapjt.domain.viewmodel.CardDetailViewModel
 
@@ -140,14 +141,18 @@ fun newCardDetailScreen(
                         else -> ""
                     }
 
-                    CardDetailHeaderBar(
-                        title = title,
-                        isBookmarked = cardDetail.bookmark,
-                        onBackClick = { navController.popBackStack() },
-                        onBookmarkClick = { viewModel.toggleBookmark(cardId) },
-                        onEditClick = { /* 수정 로직 */ }, // 수정 대신 다른 기능될 듯
-                        onDeleteClick = { viewModel.deleteCard(listOf(cardId), navController) }
-                    )
+                    if (cardDetail.isMine) {
+                        CardDetailHeaderBar(
+                            title = title,
+                            isBookmarked = cardDetail.bookmark,
+                            onBackClick = { navController.popBackStack() },
+                            onBookmarkClick = { viewModel.toggleBookmark(cardId) },
+                            onEditClick = { /* 수정 로직 */ },
+                            onDeleteClick = { viewModel.deleteCard(listOf(cardId), navController) }
+                        )
+                    } else {
+                        NotMineCardDetailHeaderBar(title = title, onBackClick = { navController.popBackStack() },)
+                    }
                 }
                 else -> HeaderBar(modifier = Modifier)
             }
