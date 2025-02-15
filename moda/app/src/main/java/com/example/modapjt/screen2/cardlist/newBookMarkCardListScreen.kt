@@ -271,7 +271,7 @@ fun newBookMarkCardListScreen(
     currentRoute: String,
     viewModel: CardViewModel = viewModel()
 ) {
-    var selectedCategory by remember { mutableStateOf("전체") }
+    val selectedCategory by viewModel.selectedCategory.collectAsState()
     var selectedSort by remember { mutableStateOf("최신순") }
     val uiState by viewModel.uiState.collectAsState()
     val loadingMore by viewModel.loadingMore.collectAsState()
@@ -319,7 +319,9 @@ fun newBookMarkCardListScreen(
                             TypeSelectBar(
                                 selectedCategory = selectedCategory,
                                 selectedSort = selectedSort,
-                                onCategorySelected = { selectedCategory = it },
+                                onCategorySelected = { category ->
+                                    viewModel.updateSelectedCategory(category)
+                                },
                                 onSortSelected = { selectedSort = it }
                             )
                         }
@@ -333,10 +335,11 @@ fun newBookMarkCardListScreen(
                                         blogCards = state.blogs,
                                         videoCards = state.videos,
                                         newsCards = state.news,
-                                        onImageMoreClick = { selectedCategory = "이미지" },
-                                        onBlogMoreClick = { selectedCategory = "블로그" },
-                                        onVideoMoreClick = { selectedCategory = "동영상" },
-                                        onNewsMoreClick = { selectedCategory = "뉴스" }
+                                        onImageMoreClick = { viewModel.updateSelectedCategory("이미지") },
+                                        onBlogMoreClick = { viewModel.updateSelectedCategory("블로그") },
+                                        onVideoMoreClick = { viewModel.updateSelectedCategory("동영상") },
+                                        onNewsMoreClick = { viewModel.updateSelectedCategory("뉴스") }
+
                                     )
                                 }
                             }
