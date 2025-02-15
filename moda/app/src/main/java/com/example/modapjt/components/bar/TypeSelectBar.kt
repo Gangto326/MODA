@@ -1,3 +1,4 @@
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -5,7 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,13 +35,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.app.ui.theme.customTypography
-import com.example.modapjt.R  // 아이콘 리소스가 위치한 패키지
+import com.example.modapjt.R
 
 @Composable
 fun TypeSelectBar( // 상단 타입 선택 바
@@ -51,7 +48,7 @@ fun TypeSelectBar( // 상단 타입 선택 바
     onSortSelected: (String) -> Unit, // 정렬 선택 이벤트 추가
     modifier: Modifier = Modifier,
 ) {
-    val categories = listOf("전체", "이미지", "동영상", "블로그", "뉴스")
+    val categories = listOf("전체", "동영상", "블로그", "뉴스", "이미지")
 //    var selectedSort by remember { mutableStateOf("최신순") } // 기본 정렬 상태
 
     Row(
