@@ -1,7 +1,16 @@
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
@@ -12,15 +21,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.example.modapjt.R
 import com.example.modapjt.domain.model.Card
 import com.example.modapjt.screen2.EmptyMessage
-import com.example.modapjt.R
 
 @Composable
 fun AllTabCard(
+    navController: NavController, // NavController 추가
     imageCards: List<Card>,
     videoCards: List<Card>,
     blogCards: List<Card>,
@@ -36,21 +46,13 @@ fun AllTabCard(
 //            .padding(16.dp),
 //        verticalArrangement = Arrangement.spacedBy(24.dp) // 섹션 간 간격 설정
     ) {
-        // 이미지 섹션
-        SectionBlock(
-            title = "이미지",
-            items = imageCards,
-            isImage = true,
-            onMoreClick = onImageMoreClick
-        )
-        SectionDivider() // 이미지 섹션 후 구분선
-
         // 동영상 섹션
         SectionBlock(
             title = "동영상",
             items = videoCards,
             isImage = false,
-            onMoreClick = onVideoMoreClick
+            onMoreClick = onVideoMoreClick,
+            navController = navController // NavController 전달
         )
         SectionDivider() // 동영상 섹션 후 구분선
 
@@ -59,7 +61,8 @@ fun AllTabCard(
             title = "블로그",
             items = blogCards,
             isImage = false,
-            onMoreClick = onBlogMoreClick
+            onMoreClick = onBlogMoreClick,
+            navController = navController // NavController 전달
         )
         SectionDivider() // 블로그 섹션 후 구분선
 
@@ -68,14 +71,25 @@ fun AllTabCard(
             title = "뉴스",
             items = newsCards,
             isImage = false,
-            onMoreClick = onNewsMoreClick
+            onMoreClick = onNewsMoreClick,
+            navController = navController // NavController 전달
+        )
+        SectionDivider() // 이미지 섹션 후 구분선
+
+        // 이미지 섹션
+        SectionBlock(
+            title = "이미지",
+            items = imageCards,
+            isImage = true,
+            onMoreClick = onImageMoreClick,
+            navController = navController // NavController 전달
         )
     }
 }
 
 // 각 섹션을 공통적으로 처리하는 컴포넌트
 @Composable
-fun SectionBlock(title: String, items: List<Card>, isImage: Boolean, onMoreClick: () -> Unit) {
+fun SectionBlock(title: String, items: List<Card>, isImage: Boolean, onMoreClick: () -> Unit, navController: NavController ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -103,7 +117,7 @@ fun SectionBlock(title: String, items: List<Card>, isImage: Boolean, onMoreClick
                                     modifier = Modifier
                                         .weight(1f)
                                         .size(100.dp),
-                                    onClick = {},
+                                    onClick = { navController.navigate("cardDetail/${card.cardId}") }, // 클릭 시 이동
                                     isMine = card.isMine,
                                     bookMark = card.bookMark
                                 )
@@ -125,7 +139,7 @@ fun SectionBlock(title: String, items: List<Card>, isImage: Boolean, onMoreClick
                                 videoId = card.thumbnailUrl ?: "",
                                 title = card.title,
                                 modifier = Modifier.fillMaxWidth(),
-                                onClick = {},
+                                onClick = { navController.navigate("cardDetail/${card.cardId}") }, // 클릭 시 이동
                                 isMine = card.isMine,
                                 bookMark = card.bookMark,
                                 thumbnailContent = card.thumbnailContent ?: "",
@@ -136,7 +150,7 @@ fun SectionBlock(title: String, items: List<Card>, isImage: Boolean, onMoreClick
                                 title = card.title,
                                 description = card.thumbnailContent ?: "",
                                 imageUrl = card.thumbnailUrl ?: "",
-                                onClick = {},
+                                onClick = { navController.navigate("cardDetail/${card.cardId}") }, // 클릭 시 이동
                                 isMine = card.isMine,
                                 bookMark = card.bookMark,
                                 keywords = card.keywords
@@ -146,7 +160,7 @@ fun SectionBlock(title: String, items: List<Card>, isImage: Boolean, onMoreClick
                                 headline = card.title,
                                 keywords = card.keywords,
                                 imageUrl = card.thumbnailUrl ?: "",
-                                onClick = {},
+                                onClick = { navController.navigate("cardDetail/${card.cardId}") }, // 클릭 시 이동
                                 isMine = card.isMine,
                                 bookMark = card.bookMark
                             )
@@ -163,9 +177,10 @@ fun SectionBlock(title: String, items: List<Card>, isImage: Boolean, onMoreClick
                     }
                 }
             }
+            SectionAdd("$title 더보기", onMoreClick)
         }
 
-        SectionAdd("$title 더보기", onMoreClick)
+
     }
 }
 

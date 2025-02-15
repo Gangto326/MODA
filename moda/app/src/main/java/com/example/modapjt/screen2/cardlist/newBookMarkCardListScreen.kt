@@ -328,6 +328,7 @@ fun newBookMarkCardListScreen(
                             "전체" -> {
                                 item {
                                     AllTabCard(
+                                        navController = navController, // NavController 전달
                                         imageCards = state.images,
                                         blogCards = state.blogs,
                                         videoCards = state.videos,
