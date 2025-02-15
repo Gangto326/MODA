@@ -1,5 +1,6 @@
 package com.example.modapjt.data.api
 
+import com.example.modapjt.data.dto.request.BookmarkRequest
 import com.example.modapjt.data.dto.request.CardRequest
 import com.example.modapjt.data.dto.response.AllTabCardApiResponse
 import com.example.modapjt.data.dto.response.CardDetailDTO
@@ -82,4 +83,9 @@ interface CardApiService {
         @Query("sortBy") sortBy: String = "createdAt",
         @Query("sortDirection") sortDirection: String // 동적으로 반영
     ): Response<TabCardApiResponse>
+
+    @POST("api/card/bookmark")
+    suspend fun toggleBookmark(
+        @Body bookmarkRequest: BookmarkRequest
+    ): Response<Boolean>  // ApiResponse<Unit> 대신 Boolean으로 변경
 }
