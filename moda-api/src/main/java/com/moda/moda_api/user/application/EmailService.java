@@ -19,6 +19,7 @@ public class EmailService {
 	public boolean sendVerificationCode(String email) {
 		String code = generateCode(); // 6자리 랜덤 코드
 
+		System.out.println(code);
 		// Redis에 저장 (5분 유효)
 		emailRedisTemplate.opsForValue()
 			.set("EMAIL:" + email, code, 10, TimeUnit.MINUTES);

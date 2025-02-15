@@ -41,9 +41,6 @@ public class UserEntity {
     @Column(name = "user_name", length = 100, nullable = false)
     private String userName;
 
-    @Column(name = "profile_image", length = 255)
-    private String profileImage;
-
     @Column(name = "nickname", length = 100, nullable = false)
     private String nickname;
 

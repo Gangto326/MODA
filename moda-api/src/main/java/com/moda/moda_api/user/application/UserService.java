@@ -52,11 +52,8 @@ public class UserService {
      */
      public AuthResponse login(LoginRequest request) {
          // 이메일로 있는 User인지 체크
-         User user = userRepository.findByEmail(request.getEmail())
+         User user = userRepository.findByUserName(request.getUserName())
              .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 이메일입니다."));
-
-
-
 
          // 사용자 상태 체크
          if (user.isDeleted()) {

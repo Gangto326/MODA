@@ -35,7 +35,9 @@ public class JwtFilter extends OncePerRequestFilter {
                 "/api/user/login",
                 "/api/user/logout",
                 "/api/user/signup",
-                "/api/user/refresh"
+                "/api/user/refresh",
+                "/api/auth/email/send",
+                "/api/auth/email/verify"
         };
 
         String path = request.getRequestURI();

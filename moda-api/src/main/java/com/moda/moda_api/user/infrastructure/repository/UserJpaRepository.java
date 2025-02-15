@@ -20,7 +20,7 @@ public interface UserJpaRepository extends JpaRepository<UserEntity, String> {
      * @param email 찾고자 하는 사용자의 이메일
      * @return 해당 이메일을 가진 UserEntity, 없으면 null
      */
-    UserEntity findByEmail(String email);
+    UserEntity findByUserName(String email);
 
     /**
      * 주어진 닉네임으로 사용자 엔티티를 찾습니다.

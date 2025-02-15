@@ -27,8 +27,8 @@ public class UserRepositoryImpl implements UserRepository {
 
 
 	@Override
-	public Optional<User> findByEmail(String email) {
-		return Optional.ofNullable(userJpaRepository.findByEmail(email))
+	public Optional<User> findByUserName(String email) {
+		return Optional.ofNullable(userJpaRepository.findByUserName(email))
 			.map(userEntityMapper::toDomain);
 	}
 

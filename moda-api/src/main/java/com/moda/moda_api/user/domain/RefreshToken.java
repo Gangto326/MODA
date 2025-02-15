@@ -10,7 +10,7 @@ import lombok.Getter;
 public class RefreshToken {
 	private Long refreshTokenId;
 	private String token;
-	private UserId userId;
+	private String userName;
 	private LocalDateTime expiresAt;
 	private LocalDateTime createdAt;
 	private boolean isActive;

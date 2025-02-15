@@ -10,7 +10,7 @@ import java.util.Optional;
 public interface UserRepository {
     // email로 사용자 찾기
     // 해당 I
-    Optional<User> findByEmail(String email);
+    Optional<User> findByUserName(String email);
 
     // ID로 사용자 찾기
     // 반환값: 해당 ID의 사용자가 있으면 User 객체, 없으면 null
