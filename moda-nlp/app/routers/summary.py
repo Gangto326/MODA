@@ -19,7 +19,7 @@ router = APIRouter(
 @router.post("/post")
 async def summary_document(post_request: PostRequest):
     try:
-        print("포스트 요약 시작")
+        print("포스트 요약 시작: " + post_request)
         start_time = time.time()
 
         summarizer = PostSummary(post_request.content)
@@ -37,7 +37,7 @@ async def summary_document(post_request: PostRequest):
 @router.post("/youtube")
 async def process_youtube(youtube_request: YoutubeRequest):
     try:
-        print("유튜브 후처리 시작")
+        print("유튜브 후처리 시작: " + youtube_request)
         start_time = time.time()
 
         processer = YoutubeProcess(youtube_request.paragraph)
@@ -55,7 +55,7 @@ async def process_youtube(youtube_request: YoutubeRequest):
 @router.post("/image")
 async def analyze_image(image_request: ImageRequest):
     try:
-        print("이미지 분석 시작")
+        print("이미지 분석 시작: " + image_request)
         start_time = time.time()
 
         analyzer = ImageAnalyze(image_request.url)
