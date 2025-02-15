@@ -293,7 +293,7 @@ public class CardService {
 		cardViewCountRepository.incrementViewCount(cardIdObj);
 
 		// 카드 탐색
-		Card card = findCard(userIdObj, cardIdObj);
+		Card card = findCardDetail(cardIdObj);
 		return cardDtoMapper.toDetailResponse(userIdObj, card);
 	}
 
@@ -394,6 +394,11 @@ public class CardService {
 	private Card findCard(UserId userId, CardId cardId) {
 		return cardRepository.findByUserIdAndCardId(userId, cardId)
 			.orElseThrow(() -> new CardNotFoundException("카드를 찾을 수 없습니다."));
+	}
+
+	private Card findCardDetail(CardId cardId) {
+		return cardRepository.findByCardId(cardId)
+				.orElseThrow(() -> new CardNotFoundException("카드를 찾을 수 없습니다."));
 	}
 
 	/**

@@ -16,12 +16,15 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CardJpaRepository extends JpaRepository<CardEntity, String> {
-    Slice<CardEntity> findByUserId(String value, Pageable pageable);
+    Slice<CardEntity> findByUserIdAndDeletedAtIsNull(String value, Pageable pageable);
 
-    Slice<CardEntity> findByUserIdAndCategoryId(String userId, Long categoryId, Pageable pageable);
+    Slice<CardEntity> findByUserIdAndCategoryIdAndDeletedAtIsNull(String userId, Long categoryId, Pageable pageable);
 
-    @Query("SELECT c FROM CardEntity c LEFT JOIN FETCH c.urlCache WHERE c.userId = :userId AND c.cardId = :cardId")
+    @Query("SELECT c FROM CardEntity c LEFT JOIN FETCH c.urlCache WHERE c.userId = :userId AND c.cardId = :cardId AND c.deletedAt IS NULL")
     Optional<CardEntity> findByUserIdAndCardId(String userId, String cardId);
+
+    @Query("SELECT c FROM CardEntity c LEFT JOIN FETCH c.urlCache WHERE c.cardId = :cardId AND c.deletedAt IS NULL")
+    Optional<CardEntity> findByCardIdAndDeletedAtIsNull(String cardId);
 
 //    @Query("SELECT new com.moda.moda_api.card.dto.CardDTO(c, u.originalUrl) " +
 //            "FROM CardEntity c " +

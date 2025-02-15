@@ -38,4 +38,6 @@ public interface CardRepository {
     Slice<Card> findByUserIdAndBookmarkTrueAndTypeIdAndDeletedAtIsNull(UserId userId, Integer typeId, Pageable pageable);
 
     Boolean existsByUserIdAndUrlHashAndDeletedAtIsNull(UserId userId, String urlHash);
+
+    Optional<Card> findByCardId(CardId cardId);
 }
