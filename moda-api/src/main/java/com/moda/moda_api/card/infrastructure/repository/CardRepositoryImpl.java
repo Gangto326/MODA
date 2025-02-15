@@ -37,13 +37,13 @@ public class CardRepositoryImpl implements CardRepository {
 
     @Override
     public Slice<Card> findByUserId(UserId userId, Pageable pageable) {
-        Slice<CardEntity> cardEntities = cardJpaRepository.findByUserId(userId.getValue(), pageable);
+        Slice<CardEntity> cardEntities = cardJpaRepository.findByUserIdAndDeletedAtIsNull(userId.getValue(), pageable);
         return cardEntities.map(cardEntityMapper::toDomain);
     }
 
     @Override
     public Slice<Card> findByUserIdAndCategoryId(UserId userId, CategoryId categoryId, Pageable pageable) {
-        Slice<CardEntity> cardEntities = cardJpaRepository.findByUserIdAndCategoryId(userId.getValue(),
+        Slice<CardEntity> cardEntities = cardJpaRepository.findByUserIdAndCategoryIdAndDeletedAtIsNull(userId.getValue(),
             categoryId.getValue(), pageable);
         return cardEntities.map(cardEntityMapper::toDomain);
     }
@@ -127,5 +127,11 @@ public class CardRepositoryImpl implements CardRepository {
     @Override
     public Boolean existsByUserIdAndUrlHashAndDeletedAtIsNull(UserId userId, String urlHash) {
         return cardJpaRepository.existsByUserIdAndUrlHashAndDeletedAtIsNull(userId.getValue(), urlHash);
+    }
+
+    @Override
+    public Optional<Card> findByCardId(CardId cardId) {
+        Optional<CardEntity> entity = cardJpaRepository.findByCardIdAndDeletedAtIsNull(cardId.getValue());
+        return entity.map(card -> cardEntityMapper.toDomain(card));
     }
 }
