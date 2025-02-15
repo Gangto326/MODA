@@ -59,3 +59,49 @@ sealed class SignUpEvent {
     // 제출 이벤트
     object Submit : SignUpEvent()
 }
+
+
+// FindIdState.kt
+data class FindIdState(
+    val email: String = "",
+    val verificationCode: String = "",
+    val isLoading: Boolean = false,
+    val error: String? = null,
+    val isEmailVerificationSent: Boolean = false,
+    val foundUsername: String? = null,
+    val isEmailVerified: Boolean = false
+)
+
+// FindPasswordState.kt
+data class FindPasswordState(
+    val username: String = "",
+    val email: String = "",
+    val verificationCode: String = "",
+    val newPassword: String = "",
+    val confirmNewPassword: String = "",
+    val isLoading: Boolean = false,
+    val error: String? = null,
+    val isEmailVerificationSent: Boolean = false,
+    val isEmailVerified: Boolean = false,
+    val canChangePassword: Boolean = false
+)
+
+// FindIdEvent.kt
+sealed class FindIdEvent {
+    data class EmailChanged(val email: String) : FindIdEvent()
+    data class VerificationCodeChanged(val code: String) : FindIdEvent()
+    object SendVerification : FindIdEvent()
+    object VerifyCode : FindIdEvent()
+}
+
+// FindPasswordEvent.kt
+sealed class FindPasswordEvent {
+    data class UsernameChanged(val username: String) : FindPasswordEvent()
+    data class EmailChanged(val email: String) : FindPasswordEvent()
+    data class VerificationCodeChanged(val code: String) : FindPasswordEvent()
+    data class NewPasswordChanged(val password: String) : FindPasswordEvent()
+    data class ConfirmNewPasswordChanged(val password: String) : FindPasswordEvent()
+    object SendVerification : FindPasswordEvent()
+    object VerifyCode : FindPasswordEvent()
+    object SubmitNewPassword : FindPasswordEvent()
+}

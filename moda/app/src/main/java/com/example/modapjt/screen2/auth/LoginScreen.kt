@@ -43,7 +43,9 @@ import com.example.modapjt.domain.viewmodel.AuthViewModel
 fun LoginScreen(
     viewModel: AuthViewModel,
     onNavigateToSignUp: () -> Unit,
-    onNavigateToHome: () -> Unit = {}
+    onNavigateToHome: () -> Unit = {},
+    onNavigateToFindId: () -> Unit = {},
+    onNavigateToFindPassword: () -> Unit = {}
 ) {
     val state = viewModel.loginState.value
     var isKeyboardVisible by remember { mutableStateOf(false) }
@@ -153,7 +155,7 @@ fun LoginScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            TextButton(onClick = { /* TODO: 아이디 찾기 */ }) {
+            TextButton(onClick = onNavigateToFindId ) {
                 Text("아이디 찾기", color = Color.Gray)
             }
             Text(
@@ -161,7 +163,7 @@ fun LoginScreen(
                 color = Color.Gray,
                 modifier = Modifier.padding(vertical = 12.dp)
             )
-            TextButton(onClick = { /* TODO: 비밀번호 찾기 */ }) {
+            TextButton(onClick = onNavigateToFindPassword) {
                 Text("비밀번호 찾기", color = Color.Gray)
             }
             Text(

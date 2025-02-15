@@ -1,4 +1,4 @@
-package com.example.modapjt.screen2
+package com.example.modapjt.screen2.carddetail
 
 import BlogDetailScreen
 import ImageDetailScreen

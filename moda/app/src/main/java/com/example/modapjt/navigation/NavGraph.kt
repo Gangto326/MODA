@@ -4,6 +4,8 @@ package com.example.modapjt.navigation
 //import com.google.accompanist.navigation.animation.composable
 //import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 //import newCardListScreen
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -22,11 +24,13 @@ import com.example.modapjt.screen.SavedUrlsScreen
 import com.example.modapjt.screen.linkupload.LinkUploadScreen
 import com.example.modapjt.screen.recommend.RecommendScreen
 import com.example.modapjt.screen.settings.SettingsScreen
+import com.example.modapjt.screen2.auth.FindIdScreen
+import com.example.modapjt.screen2.auth.FindPasswordScreen
 import com.example.modapjt.screen2.auth.LoginScreen
 import com.example.modapjt.screen2.auth.SignUpScreen
+import com.example.modapjt.screen2.carddetail.newCardDetailScreen
 import com.example.modapjt.screen2.cardlist.newSearchCardListScreen
 import com.example.modapjt.screen2.newBookMarkCardListScreen
-import com.example.modapjt.screen2.newCardDetailScreen
 import com.example.modapjt.screen2.newCardListScreen
 import com.example.modapjt.screen2.search.NewSearchScreen
 import com.example.modapjt.screen2.user.MyPageScreen
@@ -149,6 +153,7 @@ import newLinkUploadScreen
 //}
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun NavGraph(
@@ -255,17 +260,34 @@ fun NavGraph(
         }
 
 
-
         composable("login") {
             LoginScreen(
                 viewModel = authViewModel,
                 onNavigateToSignUp = { navController.navigate("signup") },
-                onNavigateToHome = { navController.navigate("home") } // 로그인 성공 시 홈 이동
+                onNavigateToHome = { navController.navigate("home") },
+                onNavigateToFindId = { navController.navigate("find_id") },
+                onNavigateToFindPassword = { navController.navigate("find_password") }
             )
         }
 
         composable("signup") {
             SignUpScreen(
+                viewModel = authViewModel,
+                onNavigateBack = { navController.navigateUp() }
+            )
+        }
+
+        // 아이디 찾기 화면
+        composable("find_id") {
+            FindIdScreen(
+                viewModel = authViewModel,
+                onNavigateBack = { navController.navigateUp() }
+            )
+        }
+
+        // 비밀번호 찾기 화면
+        composable("find_password") {
+            FindPasswordScreen(
                 viewModel = authViewModel,
                 onNavigateBack = { navController.navigateUp() }
             )
