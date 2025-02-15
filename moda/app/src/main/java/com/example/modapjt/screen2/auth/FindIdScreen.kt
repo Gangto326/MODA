@@ -16,7 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -34,19 +33,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.modapjt.R
-import com.example.modapjt.domain.model.SignUpEvent
+import com.example.modapjt.domain.model.FindIdEvent
 import com.example.modapjt.domain.viewmodel.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SignUpScreen(
+fun FindIdScreen(
     viewModel: AuthViewModel,
     onNavigateBack: () -> Unit
 ) {
-    val state = viewModel.signUpState.value
+    val state = viewModel.findIdState.value
     val scrollState = rememberScrollState()
     var isKeyboardVisible by remember { mutableStateOf(false) }
     var keyboardHeight by remember { mutableStateOf(0) }
@@ -88,59 +86,7 @@ fun SignUpScreen(
             tint = Color.Unspecified
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
-
-        // 닉네임 입력
-        OutlinedTextField(
-            value = state.name,
-            onValueChange = { viewModel.onSignUpEvent(SignUpEvent.NameChanged(it)) },
-            label = { Text("닉네임") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp),
-            shape = RoundedCornerShape(8.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                unfocusedBorderColor = Color(0xFFBBAEA4),
-                focusedBorderColor = Color(0xFFBBAEA4),
-                unfocusedLabelColor = Color.Gray,
-                focusedLabelColor = Color(0xFFBBAEA4),
-            )
-        )
-
-        // 아이디 입력
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            OutlinedTextField(
-                value = state.username,
-                onValueChange = { viewModel.onSignUpEvent(SignUpEvent.UsernameChanged(it)) },
-                label = { Text("아이디") },
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(8.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedBorderColor = Color(0xFFBBAEA4),
-                    focusedBorderColor = Color(0xFFBBAEA4),
-                    unfocusedLabelColor = Color.Gray,
-                    focusedLabelColor = Color(0xFFBBAEA4),
-                )
-            )
-
-            Button(
-                onClick = { viewModel.onSignUpEvent(SignUpEvent.VerifyUsername) },
-                modifier = Modifier
-                    .height(56.dp)
-                    .width(100.dp),
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFBBAEA4)
-                )
-            ) {
-                Text("중복확인")
-            }
-        }
+        Spacer(modifier = Modifier.height(32.dp))
 
         // 이메일 입력
         Row(
@@ -151,7 +97,7 @@ fun SignUpScreen(
         ) {
             OutlinedTextField(
                 value = state.email,
-                onValueChange = { viewModel.onSignUpEvent(SignUpEvent.EmailChanged(it)) },
+                onValueChange = { viewModel.onFindIdEvent(FindIdEvent.EmailChanged(it)) },
                 label = { Text("이메일") },
                 modifier = Modifier.weight(1f),
                 shape = RoundedCornerShape(8.dp),
@@ -164,7 +110,7 @@ fun SignUpScreen(
             )
 
             Button(
-                onClick = { viewModel.onSignUpEvent(SignUpEvent.SendEmailVerification) },
+                onClick = { viewModel.onFindIdEvent(FindIdEvent.SendVerification) },
                 modifier = Modifier
                     .height(56.dp)
                     .width(100.dp),
@@ -177,7 +123,7 @@ fun SignUpScreen(
             }
         }
 
-        // 이메일 인증코드 입력
+        // 인증번호 입력 필드 (이메일 인증 요청 후 표시)
         if (state.isEmailVerificationSent) {
             Row(
                 modifier = Modifier
@@ -186,8 +132,8 @@ fun SignUpScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 OutlinedTextField(
-                    value = state.emailVerificationCode,
-                    onValueChange = { viewModel.onSignUpEvent(SignUpEvent.EmailVerificationCodeChanged(it)) },
+                    value = state.verificationCode,
+                    onValueChange = { viewModel.onFindIdEvent(FindIdEvent.VerificationCodeChanged(it)) },
                     label = { Text("인증번호") },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(8.dp),
@@ -200,7 +146,7 @@ fun SignUpScreen(
                 )
 
                 Button(
-                    onClick = { viewModel.onSignUpEvent(SignUpEvent.VerifyEmailCode) },
+                    onClick = { viewModel.onFindIdEvent(FindIdEvent.VerifyCode) },
                     modifier = Modifier
                         .height(56.dp)
                         .width(100.dp),
@@ -214,70 +160,24 @@ fun SignUpScreen(
             }
         }
 
-        // 비밀번호 입력
-        OutlinedTextField(
-            value = state.password,
-            onValueChange = { viewModel.onSignUpEvent(SignUpEvent.PasswordChanged(it)) },
-            label = { Text("비밀번호") },
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp),
-            shape = RoundedCornerShape(8.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                unfocusedBorderColor = Color(0xFFBBAEA4),
-                focusedBorderColor = Color(0xFFBBAEA4),
-                unfocusedLabelColor = Color.Gray,
-                focusedLabelColor = Color(0xFFBBAEA4),
+        // 찾은 아이디 표시
+        if (state.foundUsername != null) {
+            Text(
+                text = "아이디: ${state.foundUsername}",
+                modifier = Modifier.padding(vertical = 16.dp),
+                color = Color(0xFF4A4A4A)
             )
-        )
-
-        // 비밀번호 확인
-        OutlinedTextField(
-            value = state.confirmPassword,
-            onValueChange = { viewModel.onSignUpEvent(SignUpEvent.ConfirmPasswordChanged(it)) },
-            label = { Text("비밀번호 확인") },
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp),
-            shape = RoundedCornerShape(8.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                unfocusedBorderColor = Color(0xFFBBAEA4),
-                focusedBorderColor = Color(0xFFBBAEA4),
-                unfocusedLabelColor = Color.Gray,
-                focusedLabelColor = Color(0xFFBBAEA4),
-            )
-        )
+        }
 
         if (state.error != null) {
             Text(
                 text = state.error,
                 color = Color.Red,
-                modifier = Modifier.padding(vertical = 8.dp)
+                modifier = Modifier.padding(vertical = 16.dp)
             )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-
-        // 회원가입 버튼
-        Button(
-            onClick = { viewModel.onSignUpEvent(SignUpEvent.Submit) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            enabled = !state.isLoading && state.isValid(),
-            shape = RoundedCornerShape(8.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFFBBAEA4)
-            )
-        ) {
-            if (state.isLoading) {
-                CircularProgressIndicator(color = Color.White)
-            } else {
-                Text("회원가입")
-            }
-        }
 
         // 로그인으로 돌아가기
         TextButton(onClick = onNavigateBack) {

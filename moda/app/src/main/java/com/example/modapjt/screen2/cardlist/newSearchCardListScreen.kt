@@ -1,4 +1,4 @@
-package com.example.modapjt.screen2
+package com.example.modapjt.screen2.cardlist
 
 import AllTabCard
 import BlogBig
@@ -7,22 +7,36 @@ import NewsBig
 import TypeSelectBar
 import VideoBig
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -33,57 +47,85 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.modapjt.R
 import com.example.modapjt.components.bar.BottomBarComponent
 import com.example.modapjt.components.cardtab.SwipableCardList
+import com.example.modapjt.datastore.SearchKeywordDataStore
 import com.example.modapjt.domain.viewmodel.CardUiState
 import com.example.modapjt.domain.viewmodel.CardViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun newSearchCardListScreen(
     navController: NavController,
     currentRoute: String,
-    initialQuery: String, // ✅ 초기 검색어 추가
+    initialQuery: String,
     viewModel: CardViewModel = viewModel()
 ) {
-    var query by remember { mutableStateOf(initialQuery) } // ✅ 검색어 상태 관리
-    var selectedCategory by remember { mutableStateOf("전체") }
-    var selectedSort by remember { mutableStateOf("최신순") } // ✅ 정렬 상태 추가
+    var query by remember { mutableStateOf(initialQuery) }
+    val selectedCategory by viewModel.selectedCategory.collectAsState()
+    var selectedSort by remember { mutableStateOf("최신순") }
     val uiState by viewModel.uiState.collectAsState()
-    val userId = "user" // 실제 사용자 ID로 교체 필요
+    val loadingMore by viewModel.loadingMore.collectAsState()
+    val context = LocalContext.current
+    val userId = "user"
 
-    // 데이터 로드
     LaunchedEffect(query, selectedCategory, selectedSort) {
         if (query.isNotBlank()) {
+            viewModel.resetPagination()
             val sortDirection = if (selectedSort == "최신순") "DESC" else "ASC"
-            println("[newSearchCardListScreen] 검색어: $query, 선택된 탭: $selectedCategory, 정렬: $selectedSort ($sortDirection)")
-            viewModel.loadSearchCards(userId, query, selectedCategory, sortDirection) // ✅ 검색 API 호출
+            viewModel.loadSearchCards(userId, query, selectedCategory, sortDirection)
         }
     }
 
     Scaffold(
-//        topBar = { SearchBarComponent(query, onQueryChanged = { query = it }) }, // ✅ 검색창 추가
-        topBar = { SearchBarComponent(query = query, navController = navController) }, // ✅ 검색창 컴포넌트 수정
+        topBar = {
+            SearchListBar(
+                query = query,
+                onQueryChange = { newQuery ->
+                    query = newQuery
+                },
+                onSearch = { searchQuery ->
+                    if (searchQuery.isNotBlank()) {
+                        query = searchQuery
+                        viewModel.resetPagination()
+                        val sortDirection = if (selectedSort == "최신순") "DESC" else "ASC"
+                        viewModel.loadSearchCards(userId, searchQuery, selectedCategory, sortDirection)
+                    }
+                },
+                navController = navController
+            )
+        },
         bottomBar = { BottomBarComponent(navController, currentRoute) }
     ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .background(Color.White)
         ) {
-            when (uiState) {
+            when (val state = uiState) {
                 is CardUiState.Loading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
 
                 is CardUiState.Success -> {
-                    val data = uiState as CardUiState.Success
-
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -91,9 +133,11 @@ fun newSearchCardListScreen(
                         item {
                             TypeSelectBar(
                                 selectedCategory = selectedCategory,
-                                selectedSort = selectedSort, // ✅ 정렬 상태 추가
-                                onCategorySelected = { selectedCategory = it },
-                                onSortSelected = { selectedSort = it } // ✅ 정렬 변경
+                                selectedSort = selectedSort,
+                                onCategorySelected = { category ->
+                                    viewModel.updateSelectedCategory(category)
+                                },
+                                onSortSelected = { selectedSort = it }
                             )
                         }
 
@@ -101,114 +145,116 @@ fun newSearchCardListScreen(
                             "전체" -> {
                                 item {
                                     AllTabCard(
-                                        imageCards = data.images,
-                                        blogCards = data.blogs,
-                                        videoCards = data.videos,
-                                        newsCards = data.news,
-                                        onImageMoreClick = { selectedCategory = "이미지" },
-                                        onBlogMoreClick = { selectedCategory = "블로그" },
-                                        onVideoMoreClick = { selectedCategory = "동영상" },
-                                        onNewsMoreClick = { selectedCategory = "뉴스" }
+                                        navController = navController, // NavController 전달
+                                        imageCards = state.images,
+                                        blogCards = state.blogs,
+                                        videoCards = state.videos,
+                                        newsCards = state.news,
+                                        onImageMoreClick = { viewModel.updateSelectedCategory("이미지") },
+                                        onBlogMoreClick = { viewModel.updateSelectedCategory("블로그") },
+                                        onVideoMoreClick = { viewModel.updateSelectedCategory("동영상") },
+                                        onNewsMoreClick = { viewModel.updateSelectedCategory("뉴스") }
                                     )
                                 }
                             }
-
                             "이미지" -> {
-                                if (data.images.isEmpty()) {
-                                    item { EmptyMessage2("저장된 이미지가 없습니다") }
+                                if (state.images.isEmpty() && !loadingMore) {
+                                    item { EmptyMessage2("검색된 이미지가 없습니다") }
                                 } else {
-                                    val chunkedImages = data.images.chunked(2)
-
-                                    items(chunkedImages) { rowImages ->
-                                        Row(
+                                    item {
+                                        FlowRow(
                                             modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalArrangement = Arrangement.spacedBy(8.dp)
                                         ) {
-                                            rowImages.forEach { card ->
-                                                Box(modifier = Modifier.weight(1f)) {
-                                                    SwipableCardList(
-                                                        cards = listOf(card),
-//                                                        onDelete = { viewModel.deleteCard(it) }
-                                                        onDelete = { viewModel.deleteCard(listOf(it.cardId)) }
-                                                    ) {
-                                                        ImageBig(
-                                                            imageUrl = card.thumbnailUrl ?: "",
-                                                            onClick = {},
-                                                            modifier = Modifier.fillMaxWidth(),
-                                                            isMine = card.isMine,  // ✅ isMine 값 전달
-                                                        )
-                                                    }
-                                                }
+                                            state.images.forEachIndexed { index, card ->
+                                                ImageBig(
+                                                    imageUrl = card.thumbnailUrl ?: "",
+                                                    isMine = card.isMine,
+                                                    modifier = Modifier
+                                                        .fillMaxWidth(0.5f)
+                                                        .aspectRatio(1f),
+                                                    onClick = { navController.navigate("cardDetail/${card.cardId}") }
+                                                )
                                             }
-                                            if (rowImages.size == 1) {
-                                                Spacer(modifier = Modifier.weight(1f))
+
+                                            if (state.images.size % 2 != 0) {
+                                                Box(modifier = Modifier.fillMaxWidth(0.5f))
                                             }
                                         }
                                     }
                                 }
                             }
-
                             "블로그" -> {
-                                if (data.blogs.isEmpty()) {
-                                    item { EmptyMessage2("저장된 블로그가 없습니다") }
+                                if (state.blogs.isEmpty() && !loadingMore) {
+                                    item { EmptyMessage2("검색된 블로그가 없습니다") }
                                 } else {
-                                    items(data.blogs) { card ->
+                                    items(state.blogs) { card ->
                                         SwipableCardList(
                                             cards = listOf(card),
-//                                            onDelete = { viewModel.deleteCard(it) }
-                                            onDelete = { viewModel.deleteCard(listOf(it.cardId)) }
+                                            onDelete = { viewModel.deleteCard(listOf(card.cardId)) }
                                         ) {
                                             BlogBig(
                                                 title = card.title,
                                                 description = card.thumbnailContent ?: "",
                                                 imageUrl = card.thumbnailUrl ?: "",
-                                                onClick = {},
-                                                isMine = card.isMine,  // ✅ isMine 값 전달
+                                                isMine = card.isMine,
+                                                onClick = { navController.navigate("cardDetail/${card.cardId}") }
                                             )
                                         }
                                     }
                                 }
                             }
-
                             "동영상" -> {
-                                if (data.videos.isEmpty()) {
-                                    item { EmptyMessage2("저장된 영상이 없습니다") }
+                                if (state.videos.isEmpty() && !loadingMore) {
+                                    item { EmptyMessage2("검색된 동영상이 없습니다") }
                                 } else {
-                                    items(data.videos) { card ->
+                                    items(state.videos) { card ->
                                         SwipableCardList(
                                             cards = listOf(card),
-//                                            onDelete = { viewModel.deleteCard(it) }
-                                            onDelete = { viewModel.deleteCard(listOf(it.cardId)) }
+                                            onDelete = { viewModel.deleteCard(listOf(card.cardId)) }
                                         ) {
                                             VideoBig(
                                                 videoId = card.thumbnailUrl ?: "",
                                                 title = card.title,
-                                                isMine = card.isMine,  // ✅ isMine 값 전달
+                                                isMine = card.isMine,
+                                                onClick = { navController.navigate("cardDetail/${card.cardId}") }
                                             )
                                         }
                                     }
                                 }
                             }
-
                             "뉴스" -> {
-                                if (data.news.isEmpty()) {
-                                    item { EmptyMessage2("저장된 뉴스가 없습니다") }
+                                if (state.news.isEmpty() && !loadingMore) {
+                                    item { EmptyMessage2("검색된 뉴스가 없습니다") }
                                 } else {
-                                    items(data.news) { card ->
+                                    items(state.news) { card ->
                                         SwipableCardList(
                                             cards = listOf(card),
-//                                            onDelete = { viewModel.deleteCard(it) }
-                                            onDelete = { viewModel.deleteCard(listOf(it.cardId)) }
+                                            onDelete = { viewModel.deleteCard(listOf(card.cardId)) }
                                         ) {
                                             NewsBig(
                                                 title = card.title,
                                                 keywords = card.keywords,
                                                 imageUrl = card.thumbnailUrl ?: "",
-                                                isMine = card.isMine,  // ✅ isMine 값 전달
-                                                onClick = {}
+                                                isMine = card.isMine,
+                                                onClick = { navController.navigate("cardDetail/${card.cardId}") }
                                             )
                                         }
                                     }
+                                }
+                            }
+                        }
+
+                        if (loadingMore && selectedCategory != "전체") {
+                            item {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator()
                                 }
                             }
                         }
@@ -217,7 +263,7 @@ fun newSearchCardListScreen(
 
                 is CardUiState.Error -> {
                     Text(
-                        text = (uiState as CardUiState.Error).message,
+                        text = state.message,
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
@@ -226,106 +272,155 @@ fun newSearchCardListScreen(
     }
 }
 
-// ✅ 검색창 컴포넌트 추가
-//@Composable
-//fun SearchBarComponent(
-//    query: String,
-//    onQueryChanged: (String) -> Unit
-//) {
-//    Box(
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .padding(16.dp)
-//    ) {
-//        androidx.compose.material3.TextField(
-//            value = query,
-//            onValueChange = onQueryChanged,
-//            modifier = Modifier.fillMaxWidth(),
-//            placeholder = { Text("검색어를 입력하세요") },
-//            singleLine = true
-//        )
-//    }
-//}
-//@Composable
-//fun SearchBarComponent(
-//    query: String,
-//    navController: NavController
-//) {
-//    Box(
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .padding(16.dp)
-//            .clickable { navController.navigate("search") } // ✅ 검색창 클릭 시 검색 화면으로 이동
-//    ) {
-//        Row(
-//            modifier = Modifier.fillMaxWidth(),
-//            verticalAlignment = Alignment.CenterVertically
-//        ) {
-//            TextField(
-//                value = query,
-//                onValueChange = {},
-//                modifier = Modifier.weight(1f),
-//                readOnly = true, // ✅ 검색어 입력 방지
-//                placeholder = { Text("검색어를 입력하세요") },
-//                singleLine = true
-//            )
-//
-//            IconButton(
-//                onClick = { navController.navigate("search") }, // ✅ 돋보기 클릭 시 검색 화면 이동
-//                modifier = Modifier.size(48.dp)
-//            ) {
-//                Image(
-//                    painter = painterResource(id = R.drawable.ic_search),
-//                    contentDescription = "Search Icon",
-//                    modifier = Modifier.size(24.dp)
-//                )
-//            }
-//        }
-//    }
-//}
 @Composable
-fun SearchBarComponent(
+fun SearchListBar(
     query: String,
-    navController: NavController
+    onQueryChange: (String) -> Unit,
+    onSearch: (String) -> Unit,
+    navController: NavController,
+    modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = Modifier
+    var searchText by remember { mutableStateOf(query) }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val context = LocalContext.current
+
+    Surface(
+        modifier = modifier
             .fillMaxWidth()
-            .padding(16.dp)
-            .clickable { navController.navigate("search") } // ✅ 검색창 클릭 시 검색 화면으로 이동
+            .height(56.dp),
+        color = Color.White
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            TextField(
-                value = query,
-                onValueChange = {},
-                modifier = Modifier
-                    .weight(1f)
-                    .clickable { navController.navigate("search") }, // ✅ 입력창 클릭 시 이동
-                readOnly = true, // ✅ 검색어 입력 방지
-                placeholder = { Text("검색어를 입력하세요") },
-                singleLine = true
-            )
-
             IconButton(
-                onClick = { navController.navigate("search") }, // ✅ 돋보기 클릭 시 이동
+                onClick = { navController.navigateUp() },
                 modifier = Modifier.size(48.dp)
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_search),
-                    contentDescription = "Search Icon",
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Back",
+                    tint = Color.Black,
                     modifier = Modifier.size(24.dp)
                 )
+            }
+
+            // 테두리가 있는 검색창
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .border(
+                        width = 1.dp,
+                        color = Color(0xFFFFCC80),
+                        shape = RoundedCornerShape(8.dp)
+                    )
+                    .heightIn(min = 48.dp)
+                    .padding(horizontal = 8.dp),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 8.dp),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        if (searchText.isEmpty()) {
+                            Text(
+                                text = "찾고 싶은 내용을 입력하세요",
+                                color = Color.Gray,
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Normal,
+                                    letterSpacing = 0.sp
+                                )
+                            )
+                        }
+
+                        BasicTextField(
+                            value = searchText,
+                            onValueChange = {
+                                searchText = it
+                                onQueryChange(it)
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                            textStyle = TextStyle(
+                                color = Color.Black,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Normal,
+                                letterSpacing = 0.sp,
+                                lineHeight = 24.sp,
+                            ),
+                            singleLine = true,
+                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                            keyboardActions = KeyboardActions(
+                                onSearch = {
+                                    if (searchText.isNotBlank()) {
+                                        onSearch(searchText)
+                                        keyboardController?.hide()
+                                        CoroutineScope(Dispatchers.IO).launch {
+                                            val currentKeywords = SearchKeywordDataStore.getKeywords(context).first()
+                                            val updatedKeywords = (listOf(searchText) + currentKeywords).distinct().take(10)
+                                            SearchKeywordDataStore.saveKeywords(context, updatedKeywords)
+                                        }
+                                    }
+                                }
+                            )
+                        )
+                    }
+
+                    if (searchText.isNotEmpty()) {
+                        IconButton(
+                            onClick = {
+                                searchText = ""
+                                onQueryChange("")
+                            },
+                            modifier = Modifier.size(48.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Clear,
+                                contentDescription = "Clear text",
+                                tint = Color.Gray,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+
+                    IconButton(
+                        onClick = {
+                            if (searchText.isNotBlank()) {
+                                onSearch(searchText)
+                                keyboardController?.hide()
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    val currentKeywords = SearchKeywordDataStore.getKeywords(context).first()
+                                    val updatedKeywords = (listOf(searchText) + currentKeywords).distinct().take(10)
+                                    SearchKeywordDataStore.saveKeywords(context, updatedKeywords)
+                                }
+                            }
+                        },
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_search),
+                            contentDescription = "Search Icon",
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
             }
         }
     }
 }
 
-
-
-// 공통으로 사용되는 빈 목록 메시지
 @Composable
 fun EmptyMessage2(message: String) {
     Box(
@@ -341,24 +436,3 @@ fun EmptyMessage2(message: String) {
         )
     }
 }
-
-
-
-// -> 1/3 지점으로 조정 필요 시 사용
-//if (data.images.isEmpty()) {
-//    item {
-//        Box(
-//            modifier = Modifier
-//                .fillParentMaxSize()
-//                .fillMaxWidth()
-//                .padding(bottom = 200.dp),  // 위에서 1/3 지점으로 조정
-//            contentAlignment = Alignment.Center
-//        ) {
-//            Text(
-//                text = "저장된 이미지가 없습니다",
-//                color = Color.Gray,
-//                textAlign = TextAlign.Center
-//            )
-//        }
-//    }
-//}

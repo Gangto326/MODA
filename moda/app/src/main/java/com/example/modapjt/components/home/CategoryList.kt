@@ -2,16 +2,21 @@ package com.example.modapjt.components.home
 
 // `CategoryItem.kt`에서 이미 정의된 `CategoryItem` 가져오기
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -25,34 +30,60 @@ fun CategoryList(
     val categories by viewModel.categories.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.loadCategories("user") // 테스트용 userId
+        viewModel.loadCategories("user")
     }
 
-    Column(modifier = Modifier.fillMaxWidth()) {
-        // position 값이 1~5인 카테고리 (위쪽)
-        val topCategories = categories.filter { it.position in 1..5 }
-
-        // position 값이 6~10인 카테고리 (아래쪽)
-        val bottomCategories = categories.filter { it.position in 6..10 }
-
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+//                top = 10.dp
+            .padding(start = 30.dp, end = 30.dp, bottom = 30.dp),  // 전체 여백 증가
+        verticalArrangement = Arrangement.spacedBy(12.dp)  // 상하 Row 사이 간격
+    ) {
+        // 상단 카테고리 Row
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly  // 균등 간격
         ) {
-            topCategories.forEach { category ->
-                CategoryItem(category = category, navController = navController)
-            }
+            categories
+                .filter { it.position in 1..5 }
+                .forEach { category ->
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 4.dp),  // 좌우 간격
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CategoryItem(category = category, navController = navController)
+                    }
+                }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
-
+        // 하단 카테고리 Row
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            bottomCategories.forEach { category ->
-                CategoryItem(category = category, navController = navController)
-            }
+            categories
+                .filter { it.position in 6..10 }
+                .forEach { category ->
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 4.dp),  // 좌우 간격
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CategoryItem(category = category, navController = navController)
+                    }
+                }
         }
     }
+//    Spacer(modifier = Modifier.height(8.dp))
+
+
+    Divider(color = Color(0xFFF1F1F1), thickness = 6.dp, modifier = Modifier.padding(horizontal = 0.dp))
+    Spacer(modifier = Modifier.height(30.dp))
+
 }

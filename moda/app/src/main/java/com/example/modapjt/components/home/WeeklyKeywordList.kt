@@ -1,6 +1,7 @@
 package com.example.modapjt.components.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -41,20 +42,28 @@ fun WeeklyKeywordList(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = 20.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             topKeywords.forEach { keyword ->
                 val isSelected = keyword == selectedKeyword
                 Box(
                     modifier = Modifier
-                        .background(if (isSelected) Color(0xFFFF7043) else Color(0xFFFFCC80), shape = RoundedCornerShape(50))
-                        .padding(horizontal = 14.dp, vertical = 6.dp)
+                        .let {
+                            // 선택된 키워드에 배경색 추가
+                            if (isSelected) {
+                                it.background(Color(0xFFFFCD69), shape = RoundedCornerShape(50))
+                            } else {
+                                // 선택되지 않은 키워드는 테두리만 추가
+                                it.border(1.dp, Color(0xFFB8ACA5), shape = RoundedCornerShape(50))
+                            }
+                        }
+                        .padding(horizontal = 14.dp, vertical = 2.dp)
                         .clickable {
                             homeKeywordViewModel.updateKeywordAndFetchData(keyword, userId)
                         },
@@ -62,8 +71,8 @@ fun WeeklyKeywordList(
                 ) {
                     Text(
                         text = keyword,
-                        fontSize = 14.sp,
-                        color = Color.White
+                        fontSize = 12.sp,
+                        color = if (isSelected) Color.White else Color(0xFF665F5B) // 선택된 키워드 색상은 흰색, 나머지는 검은색
                     )
                 }
             }

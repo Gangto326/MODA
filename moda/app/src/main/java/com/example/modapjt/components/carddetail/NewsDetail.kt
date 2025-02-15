@@ -26,9 +26,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import com.example.modapjt.domain.model.CardDetail
+import com.example.modapjt.domain.viewmodel.SearchViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -41,6 +43,7 @@ import java.time.format.DateTimeFormatter
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NewsDetailScreen(cardDetail: CardDetail) {
+    val searchViewModel: SearchViewModel = viewModel()
     val uriHandler = LocalUriHandler.current
 
     // 날짜 포맷 변경 (년-월-일)
@@ -113,9 +116,9 @@ fun NewsDetailScreen(cardDetail: CardDetail) {
                 )
 
                 // 뉴스 관련 키워드
-                val limitedKeywords = cardDetail.keywords.take(3).joinToString(", ")
+                val limitedKeywords = cardDetail.keywords
                 Text(
-                    text = "키워드: $limitedKeywords",
+                    text = "키워드: ${limitedKeywords.take(3).joinToString(", ")}",
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.padding(vertical = 4.dp)
                 )
@@ -128,7 +131,11 @@ fun NewsDetailScreen(cardDetail: CardDetail) {
 //                )
                 MarkdownText(
                     markdown = cardDetail.content,
-                    modifier = Modifier.padding(vertical = 8.dp)
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    keywords = limitedKeywords,
+                    onKeywordClick = { keyword ->
+                        searchViewModel.onKeywordClick(keyword)
+                    }
                 )
 
 

@@ -1,9 +1,11 @@
-package com.example.modapjt.screen2
+package com.example.modapjt.screen2.carddetail
 
 import BlogDetailScreen
 import ImageDetailScreen
 import NewsDetailScreen
 import VideoDetailScreen
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -14,12 +16,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.modapjt.components.bar.BottomBarComponent
+import com.example.modapjt.components.bar.CardDetailHeaderBar
 import com.example.modapjt.components.bar.HeaderBar
+import com.example.modapjt.components.bar.NotMineCardDetailHeaderBar
 import com.example.modapjt.domain.viewmodel.CardDetailUiState
 import com.example.modapjt.domain.viewmodel.CardDetailViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 
 //@Composable
 //fun newCardDetailScreen(
@@ -110,6 +114,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 //    Text(text = "이미지 썸네일: $url")
 //}
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun newCardDetailScreen(
     navController: NavController,
@@ -124,7 +129,34 @@ fun newCardDetailScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
-        topBar = { HeaderBar(modifier = Modifier) },
+        topBar = {
+            when (uiState) {
+                is CardDetailUiState.Success -> {
+                    val cardDetail = (uiState as CardDetailUiState.Success).cardDetail
+                    val title = when (cardDetail.typeId) {
+                        1 -> "동영상"
+                        2 -> "블로그"
+                        3 -> "뉴스"
+                        4 -> "이미지"
+                        else -> ""
+                    }
+
+                    if (cardDetail.isMine) {
+                        CardDetailHeaderBar(
+                            title = title,
+                            isBookmarked = cardDetail.bookmark,
+                            onBackClick = { navController.popBackStack() },
+                            onBookmarkClick = { viewModel.toggleBookmark(cardId) },
+                            onEditClick = { /* 수정 로직 */ },
+                            onDeleteClick = { viewModel.deleteCard(listOf(cardId), navController) }
+                        )
+                    } else {
+                        NotMineCardDetailHeaderBar(title = title, onBackClick = { navController.popBackStack() },)
+                    }
+                }
+                else -> HeaderBar(modifier = Modifier)
+            }
+        },
         bottomBar = { BottomBarComponent(navController, currentRoute) }
     ) { paddingValues ->
         Box(

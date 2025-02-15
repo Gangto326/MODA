@@ -1,9 +1,14 @@
 // components/home/HomeTopBar.kt
 package com.example.modapjt.components.bar
 
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
@@ -13,88 +18,107 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import java.lang.reflect.Modifier
 
 
 @Composable
 fun BottomBarComponent(navController: NavController, currentRoute: String) {
-    NavigationBar(
-        containerColor = Color(0xFFFFFFFF), // 흰색 배경 (#FFFFFF)
-        contentColor = Color(0xFF000000), // 아이콘과 텍스트를 검정색 (#000000)
-//        modifier = Modifier.height(56.dp) // 바텀바 높이 줄이기
+    Row( // ✅ NavigationBar를 감싸는 Row 추가 (좌우 패딩 조절용)
+        modifier = androidx.compose.ui.Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp) // ✅ 양쪽 패딩 추가
     ) {
-        NavigationBarItem(
-            icon = {
-                Icon(Icons.Default.Home, contentDescription = "Home", tint = Color(0xFF000000))
-            },
-            label = { Text("홈", color = Color(0xFF000000)) },
-            selected = currentRoute == "home",
-            onClick = {
-                if (currentRoute != "home") {
-                    navController.navigate("home") {
-                        popUpTo("home") { inclusive = true }
+        NavigationBar(
+            containerColor = Color.White,
+            contentColor = Color(0xFF665F5B),
+            modifier = androidx.compose.ui.Modifier
+                .fillMaxWidth()
+                .height(56.dp) // ✅ 높이 줄이기 (기본 56.dp → 48.dp)
+        ) {
+            NavigationBarItem(
+                icon = { Icon(Icons.Default.Home, contentDescription = "Home", tint = Color(0xFF000000)) },
+                label = { Text("홈", fontSize = 10.sp, color = Color(0xFF665F5B)) },
+                selected = currentRoute == "home",
+                onClick = {
+                    if (currentRoute != "home") {
+                        navController.navigate("home") {
+                            popUpTo("home") { inclusive = true }
+                        }
                     }
-                }
-            },
-            colors = NavigationBarItemDefaults.colors(
-                indicatorColor = if (currentRoute == "home") Color(0xFFFFF9C4) else Color.Transparent // ✅ 선택 시 연한 노란색
+                },
+                colors = NavigationBarItemDefaults.colors(
+                    indicatorColor = if (currentRoute == "home") Color(0xFFFFF9C4) else Color.Transparent
+                )
             )
-        )
 
-        // 즐겨찾기 탭
-        NavigationBarItem(
-            icon = {
-                Icon(Icons.Filled.Star, contentDescription = "즐겨찾기", tint = Color(0xFF000000))
-            },
-            label = { Text("즐겨찾기", color = Color(0xFF000000)) },
-            selected = currentRoute == "bookmarkScreen",
-            onClick = {
-                navController.navigate("bookmarkScreen") {
-                    popUpTo("bookmarkScreen") { inclusive = true }
-                }
-            },
-            colors = NavigationBarItemDefaults.colors(
-                indicatorColor = if (currentRoute == "bookmarkScreen") Color(0xFFFFF9C4) else Color.Transparent
-            )
-        )
-
-        // 링크&파일 업로드 탭
-        NavigationBarItem(
-            icon = {
-                Icon(Icons.Default.Share, contentDescription = "링크 추가", tint = Color(0xFF000000))
-            },
-            label = { Text("링크 추가", color = Color(0xFF000000)) },
-            selected = currentRoute == "file_upload_test",
-            onClick = {
-                if (currentRoute != "file_upload_test") {
-                    navController.navigate("file_upload_test") {
-                        popUpTo("home")
+            NavigationBarItem(
+                icon = { Icon(Icons.Filled.Star, contentDescription = "즐겨찾기", tint = Color(0xFF000000)) },
+                label = { Text("즐겨찾기", fontSize = 10.sp, color = Color(0xFF665F5B)) },
+                selected = currentRoute == "bookmarkScreen",
+                onClick = {
+                    navController.navigate("bookmarkScreen") {
+                        popUpTo("bookmarkScreen") { inclusive = true }
                     }
-                }
-            },
-            colors = NavigationBarItemDefaults.colors(
-                indicatorColor = if (currentRoute == "file_upload_test") Color(0xFFFFF9C4) else Color.Transparent
+                },
+                colors = NavigationBarItemDefaults.colors(
+                    indicatorColor = if (currentRoute == "bookmarkScreen") Color(0xFFFFF9C4) else Color.Transparent
+                )
             )
-        )
 
-        // 마이페이지 탭
-        NavigationBarItem(
-            icon = {
-                Icon(Icons.Default.AccountCircle, contentDescription = "My Page", tint = Color(0xFF000000))
-            },
-            label = { Text("MY", color = Color(0xFF000000)) },
-            selected = currentRoute == "mypage",
-            onClick = {
-                if (currentRoute != "mypage") {
-                    navController.navigate("mypage/user") {
-                        popUpTo("home") { inclusive = false }
+            NavigationBarItem(
+                icon = { Icon(Icons.Default.Share, contentDescription = "링크 추가", tint = Color(0xFF000000)) },
+                label = { Text("링크 추가", fontSize = 10.sp, color = Color(0xFF665F5B)) },
+                selected = currentRoute == "file_upload_test",
+                onClick = {
+                    if (currentRoute != "file_upload_test") {
+                        navController.navigate("file_upload_test") {
+                            popUpTo("home")
+                        }
                     }
-                }
-            },
-            colors = NavigationBarItemDefaults.colors(
-                indicatorColor = if (currentRoute == "mypage") Color(0xFFFFF9C4) else Color.Transparent
+                },
+                colors = NavigationBarItemDefaults.colors(
+                    indicatorColor = if (currentRoute == "file_upload_test") Color(0xFFFFF9C4) else Color.Transparent
+                )
             )
-        )
+
+            NavigationBarItem(
+                icon = { Icon(Icons.Default.Search, contentDescription = "검색", tint = Color(0xFF000000)) },
+                label = { Text("검색", fontSize = 10.sp, color = Color(0xFF665F5B)) },
+                selected = currentRoute == "search",
+                onClick = {
+                    if (currentRoute != "search") {
+                        navController.navigate("search") {
+                            popUpTo("home")
+                        }
+                    }
+                },
+                colors = NavigationBarItemDefaults.colors(
+                    indicatorColor = if (currentRoute == "search") Color(0xFFFFF9C4) else Color.Transparent
+                )
+            )
+
+            NavigationBarItem(
+                icon = { Icon(Icons.Default.AccountCircle, contentDescription = "My Page", tint = Color(0xFF000000)) },
+                label = { Text("MY", fontSize = 10.sp, color = Color(0xFF665F5B)) },
+                selected = currentRoute == "mypage",
+                onClick = {
+                    if (currentRoute != "mypage") {
+                        navController.navigate("mypage/user") {
+                            popUpTo("home") { inclusive = false }
+                        }
+                    }
+                },
+                colors = NavigationBarItemDefaults.colors(
+                    indicatorColor = if (currentRoute == "mypage") Color(0xFFFFF9C4) else Color.Transparent
+                )
+            )
+        }
+    }
+}
+
 
 
 
@@ -151,7 +175,3 @@ fun BottomBarComponent(navController: NavController, currentRoute: String) {
 //                }
 //            }
 //        )
-
-
-    }
-}

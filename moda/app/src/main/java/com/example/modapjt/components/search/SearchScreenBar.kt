@@ -1,7 +1,11 @@
 package com.example.modapjt.components.search
 
+// 기존 imports에 추가
 import android.content.Context
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.Interaction
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -11,9 +15,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -32,10 +40,12 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -43,8 +53,17 @@ import com.example.modapjt.R
 import com.example.modapjt.datastore.SearchKeywordDataStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+
+// NoRippleInteractionSource 구현 (파일 상단에 추가)
+private object NoRippleInteractionSource : MutableInteractionSource {
+    override val interactions: Flow<Interaction> = emptyFlow()
+    override suspend fun emit(interaction: Interaction) {}
+    override fun tryEmit(interaction: Interaction) = true
+}
 
 @Composable
 fun SearchScreenBar(
@@ -55,14 +74,13 @@ fun SearchScreenBar(
     onSearchValueChange: (String) -> Unit,
     onFocusChanged: (Boolean) -> Unit,
     onBackPressed: () -> Unit,
-    onSearchSubmit: (String) -> Unit, // ✅✅ 검색 버튼 클릭 이벤트 추가
-    context: Context // 🔹 Context 추가
+    onSearchSubmit: (String) -> Unit,
+    context: Context
 ) {
     var searchText by remember { mutableStateOf(initialValue) }
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    // ✅ 화면이 열리자마자 키보드 활성화
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
         keyboardController?.show()
@@ -70,14 +88,171 @@ fun SearchScreenBar(
 
     Surface(
         modifier = modifier.fillMaxWidth().height(56.dp),
-        color = MaterialTheme.colorScheme.surface
+        color = Color.White
     ) {
         Row(
-            modifier = Modifier.fillMaxSize().padding(horizontal = 4.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(
+                onClick = onBackPressed,
+                modifier = Modifier.size(48.dp),
+                interactionSource = remember { NoRippleInteractionSource }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Back",
+                    tint = Color.Black,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            // 테두리가 있는 검색창
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .border(
+                        width = 1.dp,
+                        color = Color(0xFFFFCC80),
+                        shape = RoundedCornerShape(8.dp)
+                    )
+                    .heightIn(min = 48.dp)
+                    .padding(horizontal = 8.dp),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 8.dp),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        if (searchText.isEmpty()) {
+                            Text(
+                                text = "찾고 싶은 내용을 입력하세요",
+                                color = Color.Gray,
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Normal,
+                                    letterSpacing = 0.sp
+                                )
+                            )
+                        }
+
+                        BasicTextField(
+                            value = searchText,
+                            onValueChange = {
+                                searchText = it
+                                onSearchValueChange(it)
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .focusRequester(focusRequester)
+                                .onFocusChanged { focusState -> onFocusChanged(focusState.isFocused) }
+                                .padding(vertical = 8.dp),
+                            textStyle = TextStyle(
+                                color = Color.Black,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Normal,
+                                letterSpacing = 0.sp,
+                                lineHeight = 24.sp,
+                            ),
+                            singleLine = true,
+                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                            keyboardActions = KeyboardActions(
+                                onSearch = {
+                                    if (searchText.isNotBlank()) {
+                                        onSearchSubmit(searchText)
+                                        keyboardController?.hide()
+                                        CoroutineScope(Dispatchers.IO).launch {
+                                            val currentKeywords = SearchKeywordDataStore.getKeywords(context).first()
+                                            val updatedKeywords = (listOf(searchText) + currentKeywords).distinct().take(10)
+                                            SearchKeywordDataStore.saveKeywords(context, updatedKeywords)
+                                        }
+                                    }
+                                }
+                            )
+                        )
+                    }
+
+                    if (searchText.isNotEmpty()) {
+                        IconButton(
+                            onClick = {
+                                searchText = ""
+                                onSearchValueChange("")
+                            },
+                            modifier = Modifier.size(48.dp),interactionSource = remember { NoRippleInteractionSource }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Clear,
+                                contentDescription = "Clear text",
+                                tint = Color.Gray,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+
+                    IconButton(
+                        onClick = {
+                            if (searchText.isNotBlank()) {
+                                onSearchSubmit(searchText)
+                                keyboardController?.hide()
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    val currentKeywords = SearchKeywordDataStore.getKeywords(context).first()
+                                    val updatedKeywords = (listOf(searchText) + currentKeywords).distinct().take(10)
+                                    SearchKeywordDataStore.saveKeywords(context, updatedKeywords)
+                                }
+                            }
+                        },
+                        modifier = Modifier.size(48.dp),interactionSource = remember { NoRippleInteractionSource }
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_search),
+                            contentDescription = "Search Icon",
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+// SearchListBar.kt
+@Composable
+fun SearchListBar(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    onSearch: (String) -> Unit,
+    navController: NavController,
+    modifier: Modifier = Modifier
+) {
+    var searchText by remember { mutableStateOf(query) }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val context = LocalContext.current
+
+    Surface(
+        modifier = modifier.fillMaxWidth().height(56.dp),
+        color = Color.White // 배경색을 흰색으로 통일
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            IconButton(onClick = { onBackPressed() }, modifier = Modifier.size(48.dp)) {
+            IconButton(
+                onClick = { navController.navigateUp() },
+                modifier = Modifier.size(48.dp),
+                interactionSource = remember { NoRippleInteractionSource }
+            ) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = "Back",
@@ -90,7 +265,7 @@ fun SearchScreenBar(
                 modifier = Modifier
                     .weight(1f)
                     .heightIn(min = 48.dp),
-                contentAlignment = Alignment.CenterStart // ✅ 내용 가운데 정렬
+                contentAlignment = Alignment.CenterStart
             ) {
                 if (searchText.isEmpty()) {
                     Text(
@@ -109,44 +284,76 @@ fun SearchScreenBar(
                     value = searchText,
                     onValueChange = {
                         searchText = it
-                        onSearchValueChange(it)
+                        onQueryChange(it)
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .focusRequester(focusRequester)
-                        .onFocusChanged { focusState -> onFocusChanged(focusState.isFocused) }
-                        .padding(vertical = 8.dp), // ✅ 위아래 패딩 추가
+                        .padding(vertical = 8.dp),
                     textStyle = TextStyle(
                         color = Color.Black,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Normal,
                         letterSpacing = 0.sp,
-                        lineHeight = 24.sp, // ✅ 줄 높이 설정 (커서 중앙 정렬)
+                        lineHeight = 24.sp,
                     ),
                     singleLine = true,
-                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary)
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Search
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onSearch = {
+                            if (searchText.isNotBlank()) {
+                                onSearch(searchText)
+                                keyboardController?.hide()
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    val currentKeywords = SearchKeywordDataStore.getKeywords(context).first()
+                                    val updatedKeywords = (listOf(searchText) + currentKeywords).distinct().take(10)
+                                    SearchKeywordDataStore.saveKeywords(context, updatedKeywords)
+                                }
+                            }
+                        }
+                    )
                 )
             }
 
+            if (searchText.isNotEmpty()) {
+                IconButton(
+                    onClick = {
+                        searchText = ""
+                        onQueryChange("")
+                    },
+                    modifier = Modifier.size(48.dp),
+                    interactionSource = remember { NoRippleInteractionSource }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Clear,
+                        contentDescription = "Clear text",
+                        tint = Color.Gray,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
 
             IconButton(
                 onClick = {
                     if (searchText.isNotBlank()) {
-                        onSearchSubmit(searchText)
+                        onSearch(searchText)
+                        keyboardController?.hide()
                         CoroutineScope(Dispatchers.IO).launch {
                             val currentKeywords = SearchKeywordDataStore.getKeywords(context).first()
                             val updatedKeywords = (listOf(searchText) + currentKeywords).distinct().take(10)
                             SearchKeywordDataStore.saveKeywords(context, updatedKeywords)
                         }
-                        keyboardController?.hide()
                     }
                 },
-                modifier = Modifier.size(48.dp)
+                modifier = Modifier.size(48.dp),
+                interactionSource = remember { NoRippleInteractionSource }
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.ic_search),
                     contentDescription = "Search Icon",
-                    modifier = Modifier.size(24.dp).padding(start = 8.dp)
+                    modifier = Modifier.size(20.dp)
                 )
             }
         }

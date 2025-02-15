@@ -29,10 +29,12 @@ fun ImageSection(
             description = "| 해당 컨텐츠들에 대한 설명"
         )
 
-        ImageListComponent(navController, searchViewModel)
-        Spacer(modifier = Modifier.height(16.dp))
+//        Spacer(modifier = Modifier.height(30.dp)) 소제목이랑 컨텐츠 사이 간격
 
-        Divider(color = Color(0xFFDCDCDC), thickness = 4.dp, modifier = Modifier.padding(horizontal = 0.dp))
-        Spacer(modifier = Modifier.height(16.dp))
+        ImageListComponent(navController, searchViewModel)
+        Spacer(modifier = Modifier.height(30.dp))
+
+        Divider(color = Color(0xFFF1F1F1), thickness = 6.dp, modifier = Modifier.padding(horizontal = 0.dp))
+        Spacer(modifier = Modifier.height(20.dp))
     }
 }

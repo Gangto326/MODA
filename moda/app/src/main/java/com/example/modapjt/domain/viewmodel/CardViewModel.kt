@@ -4,163 +4,172 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.modapjt.data.repository.CardRepository
 import com.example.modapjt.domain.model.Card
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class CardViewModel : ViewModel() {
     private val repository = CardRepository()
-
     private val _uiState = MutableStateFlow<CardUiState>(CardUiState.Loading)
-    val uiState: StateFlow<CardUiState> = _uiState
+    val uiState: StateFlow<CardUiState> = _uiState.asStateFlow()
 
-    private var sortDirection = MutableStateFlow("DESC") // 기본 정렬 : 최신순
+    // ✅ 페이징 관련 상태
+    private var currentPage = 1
+    private var isLoading = false
+    private var hasNextPage = true
 
-//    fun loadCards(userId: String, categoryId: Int) {
-//        viewModelScope.launch {
-//            _uiState.value = CardUiState.Loading
-//            try {
-//                val result = repository.getCards(userId, categoryId, page = 1, size = 15)
-//                if (result.isSuccess) {
-//                    val cards = result.getOrNull() ?: emptyList()
-//                    _uiState.value = CardUiState.Success(
-//                        images = cards.filter { it.typeId == 1 },
-//                        videos = cards.filter { it.typeId == 2 },
-//                        blogs = cards.filter { it.typeId == 3 },
-//                        news = cards.filter { it.typeId == 4 }
-//                    )
-//                } else {
-//                    _uiState.value = CardUiState.Error("데이터를 불러오는데 실패했습니다.")
-//                }
-//            } catch (e: Exception) {
-//                _uiState.value = CardUiState.Error(e.message ?: "알 수 없는 오류가 발생했습니다.")
-//            }
-//        }
-//    }
-// ✅ 전체탭 및 특정탭 카드 리스트 불러오기
-//fun loadCards(userId: String, categoryId: Int, selectedTab: String) {
-//    viewModelScope.launch {
-//        _uiState.value = CardUiState.Loading
-//        try {
-//            val result = if (selectedTab == "전체") {
-//                repository.getAllTabCards(userId, "", categoryId) // ✅ api/search/main 호출
-//            } else {
-//                val typeId = when (selectedTab) {
-//                    "이미지" -> 1
-//                    "블로그" -> 2
-//                    "뉴스" -> 3
-//                    "영상" -> 4
-//                    else -> 0
-//                }
-//                repository.getTabCards(userId, "", categoryId, typeId) // ✅ api/search 호출
-//            }
-//
-//            if (result.isSuccess) {
-//                val cards = result.getOrNull() ?: emptyList()
-//                _uiState.value = CardUiState.Success(
-//                    images = cards.filter { it.typeId == 1 },
-//                    videos = cards.filter { it.typeId == 2 },
-//                    blogs = cards.filter { it.typeId == 3 },
-//                    news = cards.filter { it.typeId == 4 }
-//                )
-//            } else {
-//                _uiState.value = CardUiState.Error("데이터를 불러오는데 실패했습니다.")
-//            }
-//        } catch (e: Exception) {
-//            _uiState.value = CardUiState.Error(e.message ?: "알 수 없는 오류가 발생했습니다.")
-//        }
-//    }
-//}
+    //상태를 기억하기 위한 작업
+    private val _selectedCategory = MutableStateFlow("전체")
+    val selectedCategory = _selectedCategory.asStateFlow()
 
-    // 카드 리스트 불러오기 (정렬 포함)
-    fun loadCards(userId: String, categoryId: Int, selectedTab: String, sortDirection: String) {
+    fun updateSelectedCategory(category: String) {
+        _selectedCategory.value = category
+    }
+    private val _loadingMore = MutableStateFlow(false)
+    val loadingMore: StateFlow<Boolean> = _loadingMore.asStateFlow()
+
+    // ✅ 전체탭 카드 로드 (페이징 없음)
+    private fun loadAllTabCards(userId: String, query: String, categoryId: Int) {
         viewModelScope.launch {
-            _uiState.value = CardUiState.Loading
             try {
-                println("[CardViewModel] $selectedTab 탭 데이터 로드 시작 (정렬: $sortDirection)")
-
-                val result = if (selectedTab == "전체") {
-                    repository.getAllTabCards(userId, "", categoryId)
-                } else {
-                    val typeId = when (selectedTab) {
-                        "이미지" -> 4
-                        "블로그" -> 2
-                        "뉴스" -> 3
-                        "동영상" -> 1
-                        else -> 0
-                    }
-                    repository.getTabCards(userId, "", categoryId, typeId, sortDirection) // 정렬 추가
-                }
-
+                val result = repository.getAllTabCards(userId, query, categoryId)
                 if (result.isSuccess) {
                     val cards = result.getOrNull() ?: emptyList()
-                    println("[CardViewModel] 데이터 개수: ${cards.size}")
-
-                    if (selectedTab == "전체") {
-                        val images = cards.filter { it.typeId == 4 }  // 이미지 typeId = 4
-                        val blogs = cards.filter { it.typeId == 2 }
-                        val news = cards.filter { it.typeId == 3 }
-                        val videos = cards.filter { it.typeId == 1 }  // 동영상 typeId = 1
-
-
-                        println("[CardViewModel] 변환된 이미지 개수: ${images.size}")
-                        println("[CardViewModel] 변환된 블로그 개수: ${blogs.size}")
-                        println("[CardViewModel] 변환된 뉴스 개수: ${news.size}")
-                        println("[CardViewModel] 변환된 영상 개수: ${videos.size}")
-
-                        _uiState.value = CardUiState.Success(
-                            images = images,
-                            blogs = blogs,
-                            news = news,
-                            videos = videos
-                        )
-                    } else {
-                        _uiState.value = CardUiState.Success(
-                            images = if (selectedTab == "이미지") cards else emptyList(),
-                            blogs = if (selectedTab == "블로그") cards else emptyList(),
-                            news = if (selectedTab == "뉴스") cards else emptyList(),
-                            videos = if (selectedTab == "동영상") cards else emptyList()
-                        )
-                    }
+                    _uiState.value = CardUiState.Success(
+                        images = cards.filter { it.typeId == 4 },
+                        blogs = cards.filter { it.typeId == 2 },
+                        videos = cards.filter { it.typeId == 1 },
+                        news = cards.filter { it.typeId == 3 }
+                    )
                 } else {
-                    println("[CardViewModel] 데이터 로드 실패")
                     _uiState.value = CardUiState.Error("데이터를 불러오는데 실패했습니다.")
                 }
             } catch (e: Exception) {
-                println("[CardViewModel] 예외 발생: ${e.message}")
                 _uiState.value = CardUiState.Error(e.message ?: "알 수 없는 오류가 발생했습니다.")
             }
         }
     }
 
+    // ✅ 특정탭 카드 로드 (페이징 포함)
+    private fun loadTabCards(
+        userId: String,
+        query: String,
+        categoryId: Int,
+        typeId: Int,
+        sortDirection: String,
+        isLoadMore: Boolean = false
+    ) {
+        if (isLoading || (!isLoadMore && !hasNextPage)) return
 
+        viewModelScope.launch {
+            isLoading = true
+            _loadingMore.value = isLoadMore
 
-    // 새로운 방식: 키워드 검색을 기반으로 카드 리스트 로드
-    fun loadSearchCards(userId: String, query: String, selectedTab: String, sortDirection: String) {
+            try {
+                val page = if (isLoadMore) currentPage + 1 else 1
+                val result = repository.getTabCards(userId, query, categoryId, typeId, page, sortDirection)
+
+                if (result.isSuccess) {
+                    val (cards, hasNext) = result.getOrNull()!!
+                    hasNextPage = hasNext
+
+                    withContext(Dispatchers.Main) { // UI 업데이트를 메인 스레드에서 수행
+                        if (isLoadMore) {
+                            currentPage++
+                            appendCards(cards, typeId)
+                        } else {
+                            currentPage = 1
+                            setInitialCards(cards, typeId)
+                        }
+                    }
+                } else {
+                    _uiState.value = CardUiState.Error("데이터를 불러오는데 실패했습니다.")
+                }
+            } catch (e: Exception) {
+                _uiState.value = CardUiState.Error(e.message ?: "알 수 없는 오류가 발생했습니다.")
+            } finally {
+                isLoading = false
+                _loadingMore.value = false
+            }
+        }
+    }
+
+    // ✅ 공개 로드 함수
+    fun loadCards(userId: String, categoryId: Int, selectedTab: String, sortDirection: String, isLoadMore: Boolean = false) {
+        if (selectedTab == "전체") {
+            loadAllTabCards(userId, "", categoryId)
+        } else {
+            val typeId = getTypeIdForTab(selectedTab)
+            loadTabCards(userId, "", categoryId, typeId, sortDirection, isLoadMore)
+        }
+    }
+
+    // ✅ 검색용 로드 함수
+    fun loadSearchCards(userId: String, query: String, selectedTab: String, sortDirection: String, isLoadMore: Boolean = false) {
+        if (selectedTab == "전체") {
+            loadAllTabCards(userId, query, 0)
+        } else {
+            val typeId = getTypeIdForTab(selectedTab)
+            loadTabCards(userId, query, 0, typeId, sortDirection, isLoadMore)
+        }
+    }
+
+    // ✅ 즐겨찾기 카드 로드
+    fun loadBookmarkedCards(userId: String, typeId: Int, sortDirection: String, isLoadMore: Boolean = false) {
+        if (isLoading || (!isLoadMore && !hasNextPage)) return
+
+        viewModelScope.launch {
+            isLoading = true
+            _loadingMore.value = isLoadMore
+
+            try {
+                val page = if (isLoadMore) currentPage + 1 else 1
+                val result = repository.getTabBookMarkCards(userId, typeId, page, 15, sortDirection)
+
+                if (result.isSuccess) {
+                    val (cards, hasNext) = result.getOrNull()!!
+                    hasNextPage = hasNext
+
+                    if (isLoadMore) {
+                        currentPage++
+                        appendCards(cards, typeId)
+                    } else {
+                        currentPage = 1
+                        setInitialCards(cards, typeId)
+                    }
+                } else {
+                    _uiState.value = CardUiState.Error("즐겨찾기를 불러오는데 실패했습니다.")
+                }
+            } catch (e: Exception) {
+                _uiState.value = CardUiState.Error(e.message ?: "알 수 없는 오류가 발생했습니다.")
+            } finally {
+                isLoading = false
+                _loadingMore.value = false
+            }
+        }
+    }
+
+    // 즐겨찾기 전체탭
+    fun loadAllBookmarkedCards(userId: String) {
         viewModelScope.launch {
             _uiState.value = CardUiState.Loading
             try {
-                println("[CardViewModel] 검색어 '$query' 로 데이터 로드 시작 (정렬: $sortDirection)")
-
-                val result = if (selectedTab == "전체") {
-                    repository.getAllTabCards(userId, query, 0) // 검색어 기반 API 호출
-                } else {
-                    val typeId = when (selectedTab) {
-                        "이미지" -> 4
-                        "블로그" -> 2
-                        "뉴스" -> 3
-                        "동영상" -> 1
-                        else -> 0
-                    }
-                    repository.getTabCards(userId, query, 0, typeId, sortDirection)
-                }
+                // ✅ 전체 데이터 가져오기
+                val result = repository.getAllTabBookMarkCards(userId)
 
                 if (result.isSuccess) {
                     val cards = result.getOrNull() ?: emptyList()
-                    println("[CardViewModel] 검색 결과 개수: ${cards.size} (탭: $selectedTab) (타입: ${cards.map {it.typeId}})")
-                    _uiState.value = createCardUiState(cards, selectedTab)
+                    _uiState.value = CardUiState.Success(
+                        images = cards.filter { it.typeId == 4 },
+                        blogs = cards.filter { it.typeId == 2 },
+                        news = cards.filter { it.typeId == 3 },
+                        videos = cards.filter { it.typeId == 1 }
+                    )
                 } else {
-                    _uiState.value = CardUiState.Error("검색 데이터를 불러오는데 실패했습니다.")
+                    _uiState.value = CardUiState.Error("전체 데이터를 불러오는데 실패했습니다.")
                 }
             } catch (e: Exception) {
                 _uiState.value = CardUiState.Error(e.message ?: "알 수 없는 오류가 발생했습니다.")
@@ -168,23 +177,47 @@ class CardViewModel : ViewModel() {
         }
     }
 
-    // 공통 함수: UI 상태를 카드 데이터로 변환 (isMine 체크하여 배경색 변경)
-    private fun createCardUiState(cards: List<Card>, selectedTab: String): CardUiState.Success {
-        return CardUiState.Success(
-            images = if (selectedTab == "전체" || selectedTab == "이미지") cards.filter { it.typeId == 4 } else emptyList(),
-            blogs = if (selectedTab == "전체" || selectedTab == "블로그") cards.filter { it.typeId == 2 } else emptyList(),
-            news = if (selectedTab == "전체" || selectedTab == "뉴스") cards.filter { it.typeId == 3 } else emptyList(),
-            videos = if (selectedTab == "전체" || selectedTab == "동영상") cards.filter { it.typeId == 1 } else emptyList()
+
+    // ✅ 페이지네이션 리셋
+    fun resetPagination() {
+        currentPage = 1
+        hasNextPage = true
+        isLoading = false
+        _loadingMore.value = false
+    }
+
+    // ✅ 카드 추가/삭제 함수
+    private fun appendCards(newCards: List<Card>, typeId: Int) {
+        val currentState = _uiState.value as? CardUiState.Success ?: return
+        _uiState.value = CardUiState.Success(
+            images = if (typeId == 4) currentState.images + newCards else currentState.images,
+            blogs = if (typeId == 2) currentState.blogs + newCards else currentState.blogs,
+            videos = if (typeId == 1) currentState.videos + newCards else currentState.videos,
+            news = if (typeId == 3) currentState.news + newCards else currentState.news
         )
     }
 
+    private fun setInitialCards(cards: List<Card>, typeId: Int) {
+        _uiState.value = CardUiState.Success(
+            images = if (typeId == 4) cards else emptyList(),
+            blogs = if (typeId == 2) cards else emptyList(),
+            videos = if (typeId == 1) cards else emptyList(),
+            news = if (typeId == 3) cards else emptyList()
+        )
+    }
 
+    private fun getTypeIdForTab(selectedTab: String): Int = when (selectedTab) {
+        "이미지" -> 4
+        "블로그" -> 2
+        "뉴스" -> 3
+        "동영상" -> 1
+        else -> 0
+    }
 
-    // 카드 삭제 기능 추가
+    // 기존 deleteCard 함수는 유지
     fun deleteCard(cardIds: List<String>) {
         viewModelScope.launch {
             val result = repository.deleteCard(cardIds)
-
             if (result.isSuccess) {
                 val currentState = _uiState.value
                 if (currentState is CardUiState.Success) {
@@ -195,46 +228,9 @@ class CardViewModel : ViewModel() {
                         news = currentState.news.filterNot { it.cardId in cardIds }
                     )
                 }
-            } else {
-                println("카드 삭제 실패: ${result.exceptionOrNull()?.message}")
             }
         }
     }
-
-
-    // ✅ 즐겨찾기 카드 리스트 불러오기
-    fun loadBookmarkedCards(userId: String, selectedTab: String, sortDirection: String) {
-        viewModelScope.launch {
-            _uiState.value = CardUiState.Loading
-            try {
-                println("[CardViewModel] 즐겨찾기 $selectedTab 탭 데이터 로드 시작 (정렬: $sortDirection)")
-
-                val result = if (selectedTab == "전체") {
-                    repository.getAllTabBookMarkCards(userId)
-                } else {
-                    val typeId = when (selectedTab) {
-                        "이미지" -> 4
-                        "블로그" -> 2
-                        "뉴스" -> 3
-                        "동영상" -> 1
-                        else -> 0
-                    }
-                    repository.getTabBookMarkCards(userId, typeId, 1, 15, sortDirection)
-                }
-
-                if (result.isSuccess) {
-                    val cards = result.getOrNull() ?: emptyList()
-                    println("[CardViewModel] 즐겨찾기 데이터 개수: ${cards.size}")
-                    _uiState.value = createCardUiState(cards, selectedTab)
-                } else {
-                    _uiState.value = CardUiState.Error("즐겨찾기 데이터를 불러오는데 실패했습니다.")
-                }
-            } catch (e: Exception) {
-                _uiState.value = CardUiState.Error(e.message ?: "알 수 없는 오류가 발생했습니다.")
-            }
-        }
-    }
-
 }
 
 sealed class CardUiState {

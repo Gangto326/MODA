@@ -1,5 +1,6 @@
 package com.example.modapjt.screen2.auth
 
+import android.view.ViewTreeObserver
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,10 +21,16 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -36,35 +43,57 @@ import com.example.modapjt.domain.viewmodel.AuthViewModel
 fun LoginScreen(
     viewModel: AuthViewModel,
     onNavigateToSignUp: () -> Unit,
-    onNavigateToHome: () -> Unit = {}
+    onNavigateToHome: () -> Unit = {},
+    onNavigateToFindId: () -> Unit = {},
+    onNavigateToFindPassword: () -> Unit = {}
 ) {
     val state = viewModel.loginState.value
+    var isKeyboardVisible by remember { mutableStateOf(false) }
+
+    // 키보드 가시성 감지
+    val view = LocalView.current
+    DisposableEffect(view) {
+        val listener = ViewTreeObserver.OnGlobalLayoutListener {
+            val screenHeight = view.context.resources.displayMetrics.heightPixels
+            val visibleFrameSize = android.graphics.Rect().apply {
+                view.getWindowVisibleDisplayFrame(this)
+            }
+            val keyboardHeight = screenHeight - visibleFrameSize.bottom
+            isKeyboardVisible = keyboardHeight > screenHeight * 0.15
+        }
+
+        view.viewTreeObserver.addOnGlobalLayoutListener(listener)
+        onDispose {
+            view.viewTreeObserver.removeOnGlobalLayoutListener(listener)
+        }
+    }
 
     LaunchedEffect(key1 = true) {
         viewModel.setOnLoginSuccess(onNavigateToHome)
     }
-
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
+        verticalArrangement = if (isKeyboardVisible) Arrangement.Top else Arrangement.Center
     ) {
-        Spacer(modifier = Modifier.height(60.dp))  // 상단 여백 추가
+        if (isKeyboardVisible) {
+            Spacer(modifier = Modifier.height(60.dp))
+        }
 
         Icon(
             painter = painterResource(id = R.drawable.ic_logo),
             contentDescription = "Logo",
-            modifier = Modifier.size(80.dp), // 아이콘 크기
+            modifier = Modifier.size(80.dp),
             tint = Color.Unspecified
         )
 
         OutlinedTextField(
-            value = state.email,
-            onValueChange = { viewModel.onLoginEvent(LoginEvent.EmailChanged(it)) },
-            label = { Text("이메일") },
+            value = state.username,
+            onValueChange = { viewModel.onLoginEvent(LoginEvent.UsernameChanged(it)) },
+            label = { Text("아이디") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 4.dp),
@@ -126,21 +155,21 @@ fun LoginScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            TextButton(onClick = { /* TODO: 아이디 찾기 */ }) {
+            TextButton(onClick = onNavigateToFindId ) {
                 Text("아이디 찾기", color = Color.Gray)
             }
             Text(
                 text = "|",
                 color = Color.Gray,
-                modifier = Modifier.padding(vertical = 12.dp)  // | 의 세로 크기 증가
+                modifier = Modifier.padding(vertical = 12.dp)
             )
-            TextButton(onClick = { /* TODO: 비밀번호 찾기 */ }) {
+            TextButton(onClick = onNavigateToFindPassword) {
                 Text("비밀번호 찾기", color = Color.Gray)
             }
             Text(
                 text = "|",
                 color = Color.Gray,
-                modifier = Modifier.padding(vertical = 12.dp)  // | 의 세로 크기 증가
+                modifier = Modifier.padding(vertical = 12.dp)
             )
             TextButton(onClick = onNavigateToSignUp) {
                 Text("회원가입", color = Color.Gray)

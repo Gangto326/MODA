@@ -9,11 +9,13 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.core.view.WindowCompat
 import com.example.modapjt.navigation.NavGraph
 import com.example.modapjt.overlay.BrowserAccessibilityService
 import com.example.modapjt.overlay.OverlayService
 import com.example.modapjt.ui.theme.ModapjtTheme
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+
 
 @OptIn(ExperimentalAnimationApi::class)
 class MainActivity : ComponentActivity() {
@@ -26,6 +28,8 @@ class MainActivity : ComponentActivity() {
         checkOverlayPermission()
 
         setContent {
+
+
             ModapjtTheme {
                 val navController = rememberAnimatedNavController()
                 NavGraph(
