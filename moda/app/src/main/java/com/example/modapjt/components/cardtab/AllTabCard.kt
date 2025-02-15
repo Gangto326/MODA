@@ -99,13 +99,18 @@ fun SectionBlock(title: String, items: List<Card>, isImage: Boolean, onMoreClick
         SectionHeader(title)
 
         if (items.isEmpty()) {
-            EmptyMessage("저장된 $title 가 없습니다")
-        } else {
+            val message = when (title) {
+                "동영상" -> "저장된 ${title}이 없습니다"
+                else -> "저장된 ${title}가 없습니다"
+            }
+            EmptyMessage(message) // ✅ 동영상만 "이 없습니다", 나머지는 "가 없습니다"
+        }
+        else {
             if (isImage) {
                 // 이미지 섹션 (3x2 레이아웃, 간격 8dp 적용)
                 val rows = items.take(6).chunked(3) // 3개씩 나누어 2줄 생성
 
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) { // 이미지 행(row) 간 간격 8dp 유지
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) { // 이미지 행(row) 간 간격 8dp 유지
                     rows.forEach { rowItems ->
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -132,6 +137,7 @@ fun SectionBlock(title: String, items: List<Card>, isImage: Boolean, onMoreClick
                 }
             } else {
                 // 동영상, 블로그, 뉴스 섹션
+                // 동영상, 블로그, 뉴스 섹션을 처리하는 부분
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     items.take(3).forEachIndexed { index, card ->
                         when (title) {
@@ -139,7 +145,7 @@ fun SectionBlock(title: String, items: List<Card>, isImage: Boolean, onMoreClick
                                 videoId = card.thumbnailUrl ?: "",
                                 title = card.title,
                                 modifier = Modifier.fillMaxWidth(),
-                                onClick = { navController.navigate("cardDetail/${card.cardId}") }, // 클릭 시 이동
+                                onClick = { navController.navigate("cardDetail/${card.cardId}") },
                                 isMine = card.isMine,
                                 bookMark = card.bookMark,
                                 thumbnailContent = card.thumbnailContent ?: "",
@@ -150,7 +156,7 @@ fun SectionBlock(title: String, items: List<Card>, isImage: Boolean, onMoreClick
                                 title = card.title,
                                 description = card.thumbnailContent ?: "",
                                 imageUrl = card.thumbnailUrl ?: "",
-                                onClick = { navController.navigate("cardDetail/${card.cardId}") }, // 클릭 시 이동
+                                onClick = { navController.navigate("cardDetail/${card.cardId}") },
                                 isMine = card.isMine,
                                 bookMark = card.bookMark,
                                 keywords = card.keywords
@@ -160,14 +166,14 @@ fun SectionBlock(title: String, items: List<Card>, isImage: Boolean, onMoreClick
                                 headline = card.title,
                                 keywords = card.keywords,
                                 imageUrl = card.thumbnailUrl ?: "",
-                                onClick = { navController.navigate("cardDetail/${card.cardId}") }, // 클릭 시 이동
+                                onClick = { navController.navigate("cardDetail/${card.cardId}") },
                                 isMine = card.isMine,
                                 bookMark = card.bookMark
                             )
                         }
 
-                        // 뉴스, 블로그, 동영상 아이템 간 Divider 적용
-                        if (index < 2) {
+                        // 🔥 마지막 아이템이 아닐 때만 Divider 추가
+                        if (index < items.size - 1) {
                             Divider(
                                 modifier = Modifier.fillMaxWidth(),
                                 color = Color(0xFFF1F1F1),
@@ -176,6 +182,7 @@ fun SectionBlock(title: String, items: List<Card>, isImage: Boolean, onMoreClick
                         }
                     }
                 }
+
             }
             SectionAdd("$title 더보기", onMoreClick)
         }
@@ -202,7 +209,7 @@ private fun SectionHeader(title: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White) // 배경 색
+            .background(Color.Yellow) // 배경 색
             .height(IntrinsicSize.Min), // 높이를 내부 요소에 맞춤 (불필요한 공간 제거)
         verticalAlignment = Alignment.CenterVertically, // 아이콘과 텍스트를 세로 중앙 정렬
         horizontalArrangement = Arrangement.Start // 텍스트는 왼쪽 정렬
@@ -223,7 +230,7 @@ private fun SectionHeader(title: String) {
                 contentDescription = "$title 아이콘",
                 modifier = Modifier
                     .size(24.dp) // 아이콘 크기 조정
-                    .padding(end = 8.dp) // 아이콘과 텍스트 간의 간격
+                    .padding(end = 6.dp) // 아이콘과 텍스트 간의 간격
             )
         }
 
@@ -231,7 +238,7 @@ private fun SectionHeader(title: String) {
         Text(
             text = title,
             color = Color(0xFF2B2826),
-            fontSize = 14.sp,
+            fontSize = 16.sp,
             fontWeight = FontWeight.Bold // 텍스트는 굵게 설정
         )
     }
@@ -246,8 +253,8 @@ private fun SectionAdd(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(48.dp)
-            .border(1.dp, Color(0xFFFFC107), shape = RoundedCornerShape(12.dp)), // 테두리 추가
+            .height(44.dp)
+            .border(1.dp, Color(0xFFFFC107), shape = RoundedCornerShape(16.dp)), // 테두리 추가
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {

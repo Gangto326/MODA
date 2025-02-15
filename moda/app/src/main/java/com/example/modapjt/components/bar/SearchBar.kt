@@ -50,7 +50,7 @@ fun SearchBar(
             ) {
                 navController?.navigate("search")
             },
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(16.dp),
         shadowElevation = 0.dp
     ) {
         Row(
