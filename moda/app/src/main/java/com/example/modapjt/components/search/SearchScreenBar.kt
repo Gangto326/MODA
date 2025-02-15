@@ -1,8 +1,11 @@
 package com.example.modapjt.components.search
 
+// 기존 imports에 추가
 import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.Interaction
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -50,8 +53,17 @@ import com.example.modapjt.R
 import com.example.modapjt.datastore.SearchKeywordDataStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+
+// NoRippleInteractionSource 구현 (파일 상단에 추가)
+private object NoRippleInteractionSource : MutableInteractionSource {
+    override val interactions: Flow<Interaction> = emptyFlow()
+    override suspend fun emit(interaction: Interaction) {}
+    override fun tryEmit(interaction: Interaction) = true
+}
 
 @Composable
 fun SearchScreenBar(
@@ -86,7 +98,8 @@ fun SearchScreenBar(
         ) {
             IconButton(
                 onClick = onBackPressed,
-                modifier = Modifier.size(48.dp)
+                modifier = Modifier.size(48.dp),
+                interactionSource = remember { NoRippleInteractionSource }
             ) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
@@ -174,7 +187,7 @@ fun SearchScreenBar(
                                 searchText = ""
                                 onSearchValueChange("")
                             },
-                            modifier = Modifier.size(48.dp)
+                            modifier = Modifier.size(48.dp),interactionSource = remember { NoRippleInteractionSource }
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Clear,
@@ -197,7 +210,7 @@ fun SearchScreenBar(
                                 }
                             }
                         },
-                        modifier = Modifier.size(48.dp)
+                        modifier = Modifier.size(48.dp),interactionSource = remember { NoRippleInteractionSource }
                     ) {
                         Image(
                             painter = painterResource(id = R.drawable.ic_search),
@@ -237,7 +250,8 @@ fun SearchListBar(
         ) {
             IconButton(
                 onClick = { navController.navigateUp() },
-                modifier = Modifier.size(48.dp)
+                modifier = Modifier.size(48.dp),
+                interactionSource = remember { NoRippleInteractionSource }
             ) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
@@ -309,7 +323,8 @@ fun SearchListBar(
                         searchText = ""
                         onQueryChange("")
                     },
-                    modifier = Modifier.size(48.dp)
+                    modifier = Modifier.size(48.dp),
+                    interactionSource = remember { NoRippleInteractionSource }
                 ) {
                     Icon(
                         imageVector = Icons.Default.Clear,
@@ -332,7 +347,8 @@ fun SearchListBar(
                         }
                     }
                 },
-                modifier = Modifier.size(48.dp)
+                modifier = Modifier.size(48.dp),
+                interactionSource = remember { NoRippleInteractionSource }
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.ic_search),

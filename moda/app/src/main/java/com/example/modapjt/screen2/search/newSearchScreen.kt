@@ -3,6 +3,7 @@ package com.example.modapjt.screen2.search
 import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -153,7 +154,10 @@ fun SearchSuggestions(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(8.dp)
-                        .clickable {
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) {
                             Log.d("SearchSuggestions", "검색어 클릭됨: $suggestion")
                             onSearchSubmit(suggestion) // ✅ 클릭된 검색어 전달
 
