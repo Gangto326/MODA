@@ -1,22 +1,20 @@
 package com.moda.moda_api.summary.application.service;
 
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.moda.moda_api.card.domain.EmbeddingVector;
 import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.summary.application.dto.SummaryResultDto;
 import com.moda.moda_api.summary.exception.SummaryProcessingException;
 import com.moda.moda_api.summary.infrastructure.api.LilysAiClient;
 import com.moda.moda_api.summary.infrastructure.api.YoutubeApiClient;
 import com.moda.moda_api.summary.infrastructure.dto.AIAnalysisResponseDTO;
-import com.moda.moda_api.summary.infrastructure.dto.LilysRequestIdResponse;
 import com.moda.moda_api.summary.infrastructure.dto.LilysSummary;
 import com.moda.moda_api.summary.infrastructure.dto.YoutubeAPIResponseDTO;
 
@@ -60,9 +58,11 @@ public class LilysSummaryService {
 				CompletableFuture<AIAnalysisResponseDTO> aiAnalysisFuture = CompletableFuture.completedFuture(
 					AIAnalysisResponseDTO.builder()
 						.categoryId(new CategoryId(2L))  // null 허용
-						.keywords(new String[]{"키오드","쌈플"})
-						.thumbnailContent("썸네일 컨튼츠")
-						.content("내영 셈플 ")
+						.keywords(new String[] {"박종원_02_16~02_17_Test"})
+						.thumbnailContent("박종원_02_16~02_17_Test")
+						.content(lilysSummary.getContents().stream()
+							.map(content -> content.getTitle() + ": " + content.getContent())
+							.collect(Collectors.joining("\n")))
 						.embeddingVector(null)
 						.build()
 				);
@@ -77,7 +77,7 @@ public class LilysSummaryService {
 					.thenApply(v -> {
 						AIAnalysisResponseDTO aiAnalysis = aiAnalysisFuture.join();
 						YoutubeAPIResponseDTO youtubeAPI = youtubeApiFuture.join();
-						String[] keywords = getKeyWords(aiAnalysis,youtubeAPI);
+						String[] keywords = getKeyWords(aiAnalysis, youtubeAPI);
 						String[] subContents = getSubContents(lilysSummary, youtubeAPI);
 
 						return SummaryResultDto.builder()
@@ -94,9 +94,10 @@ public class LilysSummaryService {
 					});
 			});
 	}
-	private String[] getKeyWords(AIAnalysisResponseDTO aiAnalysis, YoutubeAPIResponseDTO youtubeAPI ){
+
+	private String[] getKeyWords(AIAnalysisResponseDTO aiAnalysis, YoutubeAPIResponseDTO youtubeAPI) {
 		return Stream.of(
-				new String[]{youtubeAPI.getChannelTitle()},
+				new String[] {youtubeAPI.getChannelTitle()},
 				aiAnalysis.getKeywords(),
 				youtubeAPI.getTags()
 			)

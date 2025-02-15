@@ -19,7 +19,7 @@ public class PlatformExtractorFactory {
 
 		CONFIGS.add(ExtractorConfig.builder()
 			.pattern("m.blog.naver.com")
-			.contentSelector(".se_component_wrap")
+			.contentSelector(".se-main-container")
 			.imageSelector(".se_mediaImage")
 			.requiresFrame(false)
 			.urlDomainType(UrlDomainType.NAVER_BLOG)

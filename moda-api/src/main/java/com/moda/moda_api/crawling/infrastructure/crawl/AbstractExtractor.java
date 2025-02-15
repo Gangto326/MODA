@@ -82,6 +82,8 @@ public class AbstractExtractor {
 
 		try {
 			ExtractorConfig config = extractorFactory.getConfig(url);
+			System.out.println(config.getPattern());
+
 			driver.get(url);
 
 			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));

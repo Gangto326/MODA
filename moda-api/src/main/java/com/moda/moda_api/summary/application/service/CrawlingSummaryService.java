@@ -51,9 +51,9 @@ public class CrawlingSummaryService {
 				CompletableFuture<AIAnalysisResponseDTO> pythonAnalysisFuture = CompletableFuture.completedFuture(
 					AIAnalysisResponseDTO.builder()
 						.categoryId(new CategoryId(2L))  // null 허용
-						.keywords(new String[]{"한윤지_바보"})
-						.thumbnailContent("sample")
-						.content("sample")
+						.keywords(new String[]{"박종원 test박종원 test박종원 test박종원 test박종원 test"})
+						.thumbnailContent("박종원 test박종원 test박종원 test박종원 test")
+						.content(crawledContent.getExtractedContent().getText())
 						.embeddingVector(new EmbeddingVector(null))
 						.build()
 				);
