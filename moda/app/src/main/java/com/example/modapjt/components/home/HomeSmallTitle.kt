@@ -19,20 +19,20 @@ fun HomeSmallTitle(
     Row(
         modifier = Modifier
             .fillMaxWidth() // fillMaxWidth 적용
-            .padding(horizontal = 20.dp, vertical = 8.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
             .then(modifier), // 기존 modifier 추가
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = title,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Black,
             color = Color(0xFF2B2826)
         )
         Spacer(modifier = Modifier.width(6.dp)) // width 오류 해결됨
         Text(
             text = description,
-            fontSize = 12.sp,
+            fontSize = 10.sp,
             color = Color(0xFFBAADA4)
         )
     }

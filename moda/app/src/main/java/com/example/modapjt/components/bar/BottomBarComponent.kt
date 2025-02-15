@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import java.lang.reflect.Modifier
 
@@ -30,7 +31,7 @@ fun BottomBarComponent(navController: NavController, currentRoute: String) {
             icon = {
                 Icon(Icons.Default.Home, contentDescription = "Home", tint = Color(0xFF000000))
             },
-            label = { Text("홈", color = Color(0xFF000000)) },
+            label = { Text("홈",fontSize = 10.sp, color = Color(0xFF665F5B)) },
             selected = currentRoute == "home",
             onClick = {
                 if (currentRoute != "home") {
@@ -49,7 +50,7 @@ fun BottomBarComponent(navController: NavController, currentRoute: String) {
             icon = {
                 Icon(Icons.Filled.Star, contentDescription = "즐겨찾기", tint = Color(0xFF000000))
             },
-            label = { Text("즐겨찾기", color = Color(0xFF000000)) },
+            label = { Text("즐겨찾기",fontSize = 10.sp, color = Color(0xFF665F5B)) },
             selected = currentRoute == "bookmarkScreen",
             onClick = {
                 navController.navigate("bookmarkScreen") {
@@ -66,7 +67,7 @@ fun BottomBarComponent(navController: NavController, currentRoute: String) {
             icon = {
                 Icon(Icons.Default.Share, contentDescription = "링크 추가", tint = Color(0xFF000000))
             },
-            label = { Text("링크 추가", color = Color(0xFF000000)) },
+            label = { Text("링크 추가",fontSize = 10.sp, color = Color(0xFF665F5B)) },
             selected = currentRoute == "file_upload_test",
             onClick = {
                 if (currentRoute != "file_upload_test") {
@@ -85,7 +86,7 @@ fun BottomBarComponent(navController: NavController, currentRoute: String) {
             icon = {
                 Icon(Icons.Default.Search, contentDescription = "검색", tint = Color(0xFF000000))
             },
-            label = { Text("검색", color = Color(0xFF000000)) },
+            label = { Text("검색",fontSize = 10.sp, color = Color(0xFF665F5B)) },
             selected = currentRoute == "search",
             onClick = {
                 if (currentRoute != "search") {
@@ -104,7 +105,7 @@ fun BottomBarComponent(navController: NavController, currentRoute: String) {
             icon = {
                 Icon(Icons.Default.AccountCircle, contentDescription = "My Page", tint = Color(0xFF000000))
             },
-            label = { Text("MY", color = Color(0xFF000000)) },
+            label = { Text("MY", fontSize = 10.sp, color = Color(0xFF665F5B)) },
             selected = currentRoute == "mypage",
             onClick = {
                 if (currentRoute != "mypage") {

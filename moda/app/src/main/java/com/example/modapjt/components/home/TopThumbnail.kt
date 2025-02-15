@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,7 +24,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -74,19 +77,29 @@ fun TopThumbnail(
         Column(
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp) // 좌우 가로 패딩 추가
+                .padding(start = 16.dp, end = 16.dp, bottom = 12.dp) // 좌우 가로 패딩 추가
         ) {
             // 제목
             title?.let {
                 Text(
                     text = it,
                     color = Color.White,
-                    fontSize = 20.sp, // 제목 폰트 사이즈
+                    fontSize = 18.sp, // 제목 폰트 사이즈
+                    lineHeight = 20.sp, // 행간을 줄여서 간격을 조정
                     fontWeight = FontWeight.Bold,
                     maxLines = 2, // 두 줄로 제한
-                    overflow = TextOverflow.Ellipsis // ... 처리
+                    overflow = TextOverflow.Ellipsis, // ... 처리
+                            style = TextStyle(
+                            shadow = Shadow( // 🔥 그림자 효과 적용
+                                color = Color.Black.copy(alpha = 0.8f),
+                                blurRadius = 4f
+                            )
+                            )
                 )
             }
+
+            // 🔹 Spacer를 사용한 간격 추가 (대체 가능)
+            Spacer(modifier = Modifier.height(4.dp)) // ✅ 제목과 내용 사이 4dp 간격
 
             // 내용과 투명 박스를 가로로 정렬 (Row 사용)
             Row(
@@ -99,11 +112,17 @@ fun TopThumbnail(
                     Text(
                         text = it,
                         color = Color(0xFFECECEC),
-                        fontSize = 14.sp,
-                        lineHeight = 18.sp, // 행간을 줄여서 간격을 조정
+                        fontSize = 12.sp,
+                        lineHeight = 16.sp, // 행간을 줄여서 간격을 조정
                         maxLines = 2, // 두 줄로 제한
                         overflow = TextOverflow.Ellipsis, // ... 처리
-                        modifier = Modifier.weight(1f) // 내용이 왼쪽에 차지하도록 설정
+                        modifier = Modifier.weight(1f), // 내용이 왼쪽에 차지하도록 설정
+                        style = TextStyle(
+                            shadow = Shadow( // 🔥 그림자 효과 적용
+                                color = Color.Black.copy(alpha = 0.8f),
+                                blurRadius = 4f
+                            )
+                        )
                     )
                 }
 
@@ -111,7 +130,7 @@ fun TopThumbnail(
                 Box(
                     modifier = Modifier
                         .height(30.dp) // 페이지 인디케이터 크기와 동일하게 설정
-                        .width(60.dp) // 가로 크기 넓히기
+                        .width(50.dp) // 가로 크기 넓히기
                         .background(
                             Color.White.copy(alpha = 0.0f),
                             RoundedCornerShape(6.dp)
@@ -126,9 +145,9 @@ fun TopThumbnail(
         Box(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(12.dp)
+                .padding(10.dp)
                 .background(color = Color(0xFF665F5B).copy(alpha = 0.5f), RoundedCornerShape(12.dp))
-                .padding(horizontal = 12.dp, vertical = 2.dp) // 내부 패딩
+                .padding(horizontal = 10.dp, vertical = 0.dp) // 내부 패딩
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically
@@ -137,7 +156,7 @@ fun TopThumbnail(
                 Text(
                     text = "${currentIndex + 1}",
                     color = Color(0xFFECECEC),
-                    fontSize = 12.sp,
+                    fontSize = 10.sp,
                     fontWeight = FontWeight.Bold, // 현재 페이지 숫자만 굵게 설정
                     textAlign = TextAlign.Center
                 )
@@ -146,7 +165,7 @@ fun TopThumbnail(
                 Text(
                     text = " / ",
                     color = Color(0xFFECECEC),
-                    fontSize = 12.sp,
+                    fontSize = 10.sp,
                     fontWeight = FontWeight.Medium, // 나머지 부분은 기본 폰트 굵기
                     textAlign = TextAlign.Center
                 )
@@ -155,7 +174,7 @@ fun TopThumbnail(
                 Text(
                     text = "$totalItems",
                     color = Color(0xFFECECEC),
-                    fontSize = 12.sp,
+                    fontSize = 10.sp,
                     fontWeight = FontWeight.Medium, // 전체 페이지 숫자는 굵기 그대로
                     textAlign = TextAlign.Center
                 )
