@@ -25,11 +25,11 @@ fun HomeSmallTitle(
     ) {
         Text(
             text = title,
-            fontSize = 14.sp,
+            fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             color = Color(0xFF2B2826)
         )
-        Spacer(modifier = Modifier.width(8.dp)) // width 오류 해결됨
+        Spacer(modifier = Modifier.width(6.dp)) // width 오류 해결됨
         Text(
             text = description,
             fontSize = 12.sp,
