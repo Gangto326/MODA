@@ -251,14 +251,18 @@ fun NavGraph(
             )
         }
 
+        // NavGraph.kt에서
         composable(
             route = "cardDetail/{cardId}",
             arguments = listOf(navArgument("cardId") { type = NavType.StringType })
         ) { backStackEntry ->
             val cardId = backStackEntry.arguments?.getString("cardId") ?: "Unknown"
-            newCardDetailScreen(navController, currentRoute = "cardDetail", cardId)
+            newCardDetailScreen(
+                navController = navController,
+                currentRoute = "cardDetail",
+                cardId = cardId
+            )
         }
-
 
         composable("login") {
             LoginScreen(

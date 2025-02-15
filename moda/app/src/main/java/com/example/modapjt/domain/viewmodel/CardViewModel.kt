@@ -21,6 +21,13 @@ class CardViewModel : ViewModel() {
     private var isLoading = false
     private var hasNextPage = true
 
+    //상태를 기억하기 위한 작업
+    private val _selectedCategory = MutableStateFlow("전체")
+    val selectedCategory = _selectedCategory.asStateFlow()
+
+    fun updateSelectedCategory(category: String) {
+        _selectedCategory.value = category
+    }
     private val _loadingMore = MutableStateFlow(false)
     val loadingMore: StateFlow<Boolean> = _loadingMore.asStateFlow()
 

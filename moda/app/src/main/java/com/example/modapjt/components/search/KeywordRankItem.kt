@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -39,7 +40,7 @@ fun KeywordRankItem(rank: Int, keyword: String, change: Int, navController: NavC
         Text(
             text = "$rank.",
             style = MaterialTheme.typography.bodyMedium.copy(
-                fontSize = 14.sp,
+                fontSize = 13.sp,  // ✨ 글씨 크기 축소
                 fontWeight = FontWeight.Bold
             ),
             modifier = Modifier.width(28.dp)
@@ -49,7 +50,7 @@ fun KeywordRankItem(rank: Int, keyword: String, change: Int, navController: NavC
         Text(
             text = keyword,
             style = MaterialTheme.typography.bodyMedium.copy(
-                fontSize = 14.sp,
+                fontSize = 13.sp,  // ✨ 글씨 크기 축소
                 fontWeight = FontWeight.Normal
             ),
             modifier = Modifier
@@ -58,33 +59,36 @@ fun KeywordRankItem(rank: Int, keyword: String, change: Int, navController: NavC
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() }
                 ) {
-                    // 최근 검색어에 저장
                     coroutineScope.launch(Dispatchers.IO) {
                         val currentKeywords = SearchKeywordDataStore.getKeywords(context).first()
                         val updatedKeywords = (listOf(keyword) + currentKeywords).distinct().take(10)
                         SearchKeywordDataStore.saveKeywords(context, updatedKeywords)
                     }
-                    // 검색 결과 화면으로 이동
                     navController.navigate("newSearchCardListScreen/$keyword")
                 }
         )
 
-        // 변화 아이콘
-        val changeSymbol = when {
+        // ✨ 변화 아이콘 크기 조정 및 스타일 개선
+        val changeText = when {
             change == 100 -> "NEW"
-            change > 0 -> "▲ $change"
-            change < 0 -> "▼ ${-change}"
-            else -> "━"
+            change > 0 -> "▲${change}"  // 화살표와 숫자 붙임
+            change < 0 -> "▼${-change}" // 화살표와 숫자 붙임
+            else -> "-"
         }
 
         Text(
-            text = changeSymbol,
+            text = changeText,
             style = MaterialTheme.typography.bodyMedium.copy(
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold
+                fontSize = when {  // ✨ NEW와 화살표 크기 차별화
+                    change == 100 -> 11.sp  // NEW는 더 작게
+                    else -> 12.sp  // 화살표는 조금 더 크게
+                },
+                fontWeight = FontWeight.Medium
             ),
+            modifier = Modifier.width(40.dp),  // ✨ 고정 너비 설정
+            textAlign = TextAlign.End,  // ✨ 오른쪽 정렬
             color = when {
-                change == 100 -> Color.Green
+                change == 100 ->Color(0xFFFFCC80)
                 change > 0 -> Color.Red
                 change < 0 -> Color.Blue
                 else -> Color.Gray
