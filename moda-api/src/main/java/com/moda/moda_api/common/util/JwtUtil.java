@@ -68,7 +68,7 @@ public class JwtUtil {
 		long expiresAt = getExpiration(issuedAt, type);
 
 		String token = Jwts.builder()
-				.claim("userId", user.getUserId())
+				.claim("userId", user.getUserId().getValue())
 				.issuedAt(new Date(issuedAt))
 				.expiration(new Date(expiresAt))
 				.signWith(getSecretKey(type))

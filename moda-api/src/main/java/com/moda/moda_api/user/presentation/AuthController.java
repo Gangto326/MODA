@@ -91,7 +91,7 @@ public class AuthController {
 		// 새로운 AccessToken을 전송.
 		return ResponseEntity.ok()
 			.headers(httpHeaders)
-			.body(true);
+			.body(Boolean.TRUE);
 	}
 
 }
