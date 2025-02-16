@@ -87,7 +87,9 @@ public class UserController {
         // HTTP Header의 Authorization (AccessToken) 추출.
         String accessToken = HeaderUtil.getAccessToken(request);
 
+        System.out.println(accessToken);
         userService.logout(accessToken);
+
 
         // maxAge(0)으로 RefreshToken 삭제.
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -129,6 +131,9 @@ public class UserController {
         boolean isAvailable = userService.isUserNameAvailable(userName);
         return ResponseEntity.ok(isAvailable);
     }
+
+    // @PostMapping("/find-user-id")
+    // public ResponseEntity<Boolean> findUserName()
 
     /**
      * 사용자 프로필 정보를 조회합니다.

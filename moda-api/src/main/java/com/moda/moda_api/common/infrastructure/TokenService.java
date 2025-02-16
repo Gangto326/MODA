@@ -59,6 +59,7 @@ public class TokenService {
     public void invalidateRefreshToken(UserId userId, String token) {
         RefreshToken refreshToken = refreshTokenRepository.findByTokenAndUserNameAndIsActiveTrue(token, userId)
                 .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 리프레시 토큰입니다."));
+        System.out.println("refreshTokne 삭제 하기전 :" + refreshToken);
         refreshToken.deactivate();
         refreshTokenRepository.save(refreshToken);
     }

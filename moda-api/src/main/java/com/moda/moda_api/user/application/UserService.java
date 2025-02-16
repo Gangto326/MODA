@@ -118,7 +118,7 @@ public class UserService {
     }
 
     public boolean isUserNameAvailable(String userName) {
-        return !userRepository.existsByUserName(userName);
+        return userRepository.existsByUserName(userName);
     }
 
 
