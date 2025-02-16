@@ -3,9 +3,7 @@ package com.example.modapjt.data.api
 import android.util.Log
 import com.example.modapjt.data.storage.TokenManager
 import okhttp3.Interceptor
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
 
@@ -71,10 +69,9 @@ class TokenInterceptor(private val tokenManager: TokenManager) : Interceptor {
 //                .url("http://10.0.2.2:8080/api/auth/refresh")
 //                .method("POST", RequestBody.create(null, ByteArray(0))) // 빈 body 추가
 //                .build()
-            val emptyBody = "{}".toRequestBody("application/json".toMediaType())
             val refreshRequest = Request.Builder()
                 .url("http://10.0.2.2:8080/api/auth/refresh")
-                .post(emptyBody)
+                .get()
                 .build()
 
             Log.d(TAG, "Sending refresh request")

@@ -182,6 +182,7 @@ object RetrofitInstance {
     private const val BASE_URL = "http://10.0.2.2:8080"
     private lateinit var tokenManager: TokenManager
 
+
     // TokenManager 초기화 함수
     fun initialize(tokenManager: TokenManager) {
         this.tokenManager = tokenManager
@@ -190,6 +191,8 @@ object RetrofitInstance {
     // 토큰을 포함한 HTTP 클라이언트 생성을 위한 함수
     private fun createOkHttpClient(): OkHttpClient {
         return OkHttpClient.Builder()
+            .followRedirects(true)  // 쿠키 처리를 위해 필요
+            .followSslRedirects(true)  // HTTPS 리다이렉트 허용
             .addInterceptor(TokenInterceptor(tokenManager))
             .build()
     }

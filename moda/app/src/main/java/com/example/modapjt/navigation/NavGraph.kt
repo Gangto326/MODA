@@ -141,7 +141,7 @@ fun NavGraph(
         }
 
 
-        // ✅✅추가
+        // ✅추가
         composable(route = "newSearchCardListScreen/{searchQuery}") { navBackStackEntry ->
             val searchQuery = navBackStackEntry.arguments?.getString("searchQuery") ?: ""
             newSearchCardListScreen(
