@@ -20,8 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @NoArgsConstructor
 public class JwtUtil {
-	private final long ACCESS_TOKEN_EXPIRE_TIME = 1000L * 30; // 30초
-	// private final long ACCESS_TOKEN_EXPIRE_TIME = 1000L * 60 * 15; // 15분
+	// private final long ACCESS_TOKEN_EXPIRE_TIME = 1000L * 30; // 30초
+	private final long ACCESS_TOKEN_EXPIRE_TIME = 1000L * 60 * 15; // 15분
 
 	private final long REFRESH_TOKEN_EXPIRE_TIME = 1000L * 60 * 60 * 6; // 6시간
 

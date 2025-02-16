@@ -25,6 +25,7 @@ public class RefreshTokenRepositoryImpl implements RefreshTokenRepository {
 	@Override
 	public RefreshToken save(RefreshToken refreshToken) {
 		RefreshTokenEntity entity = refreshTokenMapper.fromDomain(refreshToken);
+		System.out.println(entity.toString());
 		return refreshTokenMapper.toDomain(refreshTokenJpaRepository.save(entity));
 	}
 

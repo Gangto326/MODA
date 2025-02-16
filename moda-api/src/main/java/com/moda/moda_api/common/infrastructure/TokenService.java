@@ -6,6 +6,8 @@ import com.moda.moda_api.user.domain.RefreshToken;
 import com.moda.moda_api.user.domain.RefreshTokenRepository;
 import com.moda.moda_api.user.domain.UserId;
 import lombok.RequiredArgsConstructor;
+
+import org.aspectj.weaver.tools.Trace;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -28,8 +30,6 @@ public class TokenService {
 
 	//AccessToken저장하기
     public void saveAccessToken(UserId userId, String accessToken) {
-        System.out.println(userId + "sdadassdadassdadassdadas");
-        System.out.println(accessToken + " sdadassdadassdadassdadas");
         String key = ACCESS_TOKEN_PREFIX + userId.getValue();
 		jwtRedisTemplate.opsForValue().set(
                 key,
@@ -48,6 +48,7 @@ public class TokenService {
                         ZoneId.systemDefault()
                 ))
                 .userId(userId.getValue())
+                .isActive(true)
                 .build();
 
         refreshTokenRepository.save(refreshToken);
