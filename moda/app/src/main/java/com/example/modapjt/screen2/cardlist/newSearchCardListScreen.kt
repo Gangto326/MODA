@@ -54,7 +54,6 @@ fun newSearchCardListScreen(
     var selectedSort by remember { mutableStateOf("최신순") }
     val uiState by viewModel.uiState.collectAsState()
     val loadingMore by viewModel.loadingMore.collectAsState()
-    val userId = "user"
 
     // LazyListState to keep track of the scroll position
     val lazyListState = rememberLazyListState()
@@ -63,7 +62,7 @@ fun newSearchCardListScreen(
         if (query.isNotBlank()) {
             viewModel.resetPagination()
             val sortDirection = if (selectedSort == "최신순") "DESC" else "ASC"
-            viewModel.loadSearchCards(userId, query, selectedCategory, sortDirection)
+            viewModel.loadSearchCards(query, selectedCategory, sortDirection)
         }
     }
 
@@ -77,7 +76,7 @@ fun newSearchCardListScreen(
                         query = searchQuery
                         viewModel.resetPagination()
                         val sortDirection = if (selectedSort == "최신순") "DESC" else "ASC"
-                        viewModel.loadSearchCards(userId, searchQuery, selectedCategory, sortDirection)
+                        viewModel.loadSearchCards(searchQuery, selectedCategory, sortDirection)
                     }
                 },
                 navController = navController

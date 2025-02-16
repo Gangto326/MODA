@@ -27,13 +27,13 @@ import com.example.modapjt.domain.viewmodel.SearchViewModel
 fun CategoryList(
     navController: NavController,
     viewModel: CategoryViewModel = viewModel(),
-    homeKeywordViewModel: SearchViewModel = viewModel()
+//    homeKeywordViewModel: SearchViewModel = viewModel() // 필요 X
 ) {
     val categories by viewModel.categories.collectAsState()
-    val visibleCategories by homeKeywordViewModel.visibleCategories.collectAsState(initial = emptyMap())
+//    val visibleCategories by homeKeywordViewModel.visibleCategories.collectAsState(initial = emptyMap()) // 필요 X
 
     LaunchedEffect(Unit) {
-        viewModel.loadCategories("user")
+        viewModel.loadCategories()
     }
 
     Column(
@@ -58,7 +58,8 @@ fun CategoryList(
                             .padding(horizontal = 4.dp),  // 좌우 간격
                         contentAlignment = Alignment.Center
                     ) {
-                        CategoryItem(category = category, navController = navController, isVisible = visibleCategories[category.categoryId.toLong()] ?: false)
+//                        CategoryItem(category = category, navController = navController, isVisible = visibleCategories[category.categoryId.toLong()] ?: false)
+                        CategoryItem(category = category, navController = navController) // 수정
                     }
                 }
         }
@@ -78,7 +79,8 @@ fun CategoryList(
                             .padding(horizontal = 4.dp),  // 좌우 간격
                         contentAlignment = Alignment.Center
                     ) {
-                        CategoryItem(category = category, navController = navController, isVisible = visibleCategories[category.categoryId.toLong()] ?: false)
+//                        CategoryItem(category = category, navController = navController, isVisible = visibleCategories[category.categoryId.toLong()] ?: false)
+                        CategoryItem(category = category, navController = navController) // 수정
                     }
                 }
         }

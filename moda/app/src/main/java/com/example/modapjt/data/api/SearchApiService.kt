@@ -18,23 +18,20 @@ interface SearchApiService {
 
     /**
      * 사용자 ID를 기반으로 검색 결과를 가져오는 API
-     * @param userId 사용자 ID
      * @return 검색 결과를 포함하는 Response 객체
      */
     @GET("api/search/main")
     suspend fun searchMain(
-        @Query("userId") userId: String
+
     ): SearchResponse
 
     @GET("api/card/main")
     suspend fun homeKeyword(
-        @Query("userId") userId : String
     ): HomeKeywordResponse
 
     @GET("/api/search/keyword/{keyword}")
     suspend fun getSearchDataByKeyword(
         @Path("keyword") keyword: String,
-        @Query("userId") userId: String
     ): List<KeywordSearchResponse>
 
     @GET("api/card/hot-topic")

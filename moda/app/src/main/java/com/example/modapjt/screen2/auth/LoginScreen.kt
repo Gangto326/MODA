@@ -68,8 +68,17 @@ fun LoginScreen(
         }
     }
 
+//    LaunchedEffect(key1 = true) {
+//        viewModel.setOnLoginSuccess(onNavigateToHome)
+//    }
+    // -> 변경
+    // 로그인 성공 시 홈 화면으로 이동
     LaunchedEffect(key1 = true) {
-        viewModel.setOnLoginSuccess(onNavigateToHome)
+        println("setOnLoginSuccess 실행됨")
+        viewModel.setOnLoginSuccess {
+            println("로그인 성공! 홈 화면으로 이동")
+            onNavigateToHome()
+        }
     }
 
     Column(

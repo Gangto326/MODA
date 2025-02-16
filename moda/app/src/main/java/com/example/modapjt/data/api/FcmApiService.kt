@@ -9,6 +9,5 @@ interface FcmApiService {
 
     @POST("/api/notifications/token")
     suspend fun postToken(
-        @Query("UserId") userId: String,
         @Body request: FCMTokenRequest
     )}

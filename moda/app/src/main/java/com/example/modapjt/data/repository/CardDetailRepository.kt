@@ -10,11 +10,11 @@ class CardDetailRepository {
     private val api = RetrofitInstance.cardApi
 
     // 카드 상세페이지 정보 가져오기 (api/card/{cardId})
-    suspend fun getCardDetail(userId: String, cardId: String): Result<CardDetail> {  // ✅ 반환 타입 변경 (List<Card> → CardDetail)
+    suspend fun getCardDetail(cardId: String): Result<CardDetail> {  // ✅ 반환 타입 변경 (List<Card> → CardDetail)
         return try {
-            println("[CardDetailRepository] 카드 상세정보 API 요청: userId=$userId, cardId=$cardId")
+            println("[CardDetailRepository] 카드 상세정보 API 요청: cardId=$cardId")
 
-            val response = api.getCardDetail(cardId, userId)  // ✅ API 호출 시 cardId를 String으로 변경
+            val response = api.getCardDetail(cardId)  // ✅ API 호출 시 cardId를 String으로 변경
             println("[CardDetailRepository] 카드 상세정보 응답 코드: ${response.code()}, 메시지: ${response.message()}")
 
             if (response.isSuccessful) {

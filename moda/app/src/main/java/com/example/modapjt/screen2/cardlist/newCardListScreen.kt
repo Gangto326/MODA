@@ -53,7 +53,6 @@ fun newCardListScreen(
     var selectedSort by remember { mutableStateOf("최신순") }
     val uiState by viewModel.uiState.collectAsState()
     val loadingMore by viewModel.loadingMore.collectAsState()
-    val userId = "user"
     val categoryName by categoryViewModel.categoryName.collectAsState()
 
     // LazyListState to keep track of the scroll position
@@ -63,9 +62,9 @@ fun newCardListScreen(
     LaunchedEffect(categoryId, selectedCategory, selectedSort) {
         viewModel.resetPagination()
         val sortDirection = if (selectedSort == "최신순") "DESC" else "ASC"
-        categoryViewModel.loadCategories(userId)
+        categoryViewModel.loadCategories()
         categoryId?.let {
-            viewModel.loadCards(userId, it, selectedCategory, sortDirection)
+            viewModel.loadCards(it, selectedCategory, sortDirection)
             categoryViewModel.updateCategoryName(it)
         }
     }

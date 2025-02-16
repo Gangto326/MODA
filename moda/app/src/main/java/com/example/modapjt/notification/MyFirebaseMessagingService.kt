@@ -12,7 +12,6 @@ import kotlinx.coroutines.launch
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
     private val api = RetrofitInstance.fcmTokenApi
-    private val userId = "user"  // 실제 사용자 ID 가져오는 로직으로 수정 필요
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     override fun onCreate() {
         super.onCreate()
@@ -28,7 +27,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             try {
                 Log.d("FCM", "Sending token to server: $token") // 요청 시작 로그
                 api.postToken(
-                    userId = userId,
                     request = FCMTokenRequest(token)
                 )
                 Log.d("FCM", "Token sent successfully") // 성공 로그

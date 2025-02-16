@@ -8,9 +8,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class UserRepository(private val api: UserApiService) {
-    suspend fun getUser(userId: String): User {
+    suspend fun getUser(): User {
         return withContext(Dispatchers.IO) {
-            val response: UserProfileResponse = api.getUserProfile(userId)
+            val response: UserProfileResponse = api.getUserProfile()
             response.toDomainModel()
         }
     }

@@ -274,7 +274,6 @@ fun newBookMarkCardListScreen(
     var selectedSort by remember { mutableStateOf("최신순") }
     val uiState by viewModel.uiState.collectAsState()
     val loadingMore by viewModel.loadingMore.collectAsState()
-    val userId = "user"
 
     // LazyListState to keep track of the scroll position
     val lazyListState = rememberLazyListState()
@@ -284,7 +283,7 @@ fun newBookMarkCardListScreen(
         val sortDirection = if (selectedSort == "최신순") "DESC" else "ASC"
 
         if (selectedCategory == "전체") {
-            viewModel.loadAllBookmarkedCards(userId)
+            viewModel.loadAllBookmarkedCards()
         } else {
             val typeId = when (selectedCategory) {
                 "이미지" -> 4
@@ -293,7 +292,7 @@ fun newBookMarkCardListScreen(
                 "동영상" -> 1
                 else -> 0
             }
-            viewModel.loadBookmarkedCards(userId, typeId, sortDirection)
+            viewModel.loadBookmarkedCards(typeId, sortDirection)
         }
     }
 

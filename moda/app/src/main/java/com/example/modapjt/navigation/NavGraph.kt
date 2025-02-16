@@ -8,6 +8,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,6 +37,7 @@ import com.example.modapjt.screen2.search.NewSearchScreen
 import com.example.modapjt.screen2.search.oldSearchScreen
 import com.example.modapjt.screen2.user.MyPageScreen
 import com.google.accompanist.navigation.animation.AnimatedNavHost
+import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import newHomeScreen
 import newLinkUploadScreen
@@ -158,26 +160,76 @@ import newLinkUploadScreen
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun NavGraph(
-    navController: NavHostController = rememberAnimatedNavController(), // AnimatedNavController 사용
+    navController: NavHostController, // AnimatedNavController 사용
+    authViewModel: AuthViewModel,  // ViewModel 추가
     onStartOverlay: () -> Unit
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: "home"
     var isOverlayActive by remember { mutableStateOf(false) } // 오버레이 상태 추가
 
-    // AuthViewModel 인스턴스 생성
-    val authViewModel: AuthViewModel = viewModel()
+//    // AuthViewModel 인스턴스 생성
+//    val authViewModel: AuthViewModel = viewModel()
 
     val repository = CardRepository() // CardRepository 인스턴스 생성
 
+    val isLoggedIn by authViewModel.isLoggedIn // 추가
+
+
+    // 추가
+    // 로그인 상태에 따라 시작 화면 설정
+    LaunchedEffect(isLoggedIn) {
+        if (!isLoggedIn) {
+            navController.navigate("login") {
+                popUpTo(navController.graph.startDestinationId) {
+                    inclusive = true
+                }
+            }
+        }
+    }
 
     AnimatedNavHost(
         navController = navController,
-        startDestination = "home"
+//        startDestination = "home"
+        startDestination = if (isLoggedIn) "home" else "login" // 위의 주석 부분 대신 추가
     ) {
+        // 추가
+//        composable("login") {
+//            LoginScreen(
+//                viewModel = authViewModel,
+//                onNavigateToHome = {
+//                    navController.navigate("home") {
+//                        popUpTo("login") { inclusive = true }
+//                    }
+//                }
+//            )
+//        }
+        // -> 한번 더 수정
+        composable("login") {
+            LoginScreen(
+                viewModel = authViewModel,
+                onNavigateToHome = {
+                    navController.navigate("home") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                },
+                onNavigateToSignUp = {
+                    navController.navigate("signup")
+                },
+                onNavigateToFindId = {
+                    navController.navigate("find_id")
+                },
+                onNavigateToFindPassword = {
+                    navController.navigate("find_password")
+                }
+            )
+        }
+
+
         composable("home") {
             newHomeScreen(
                 navController = navController,
+                authViewModel = authViewModel, // 추가
                 currentRoute = currentRoute
             )
         }
@@ -273,9 +325,8 @@ fun NavGraph(
 //            newCardDetailScreen(navController, currentRoute = "card_detail_test")
 //        }
 
-        composable("mypage/{userId}") { backStackEntry ->
-            val userId = backStackEntry.arguments?.getString("userId") ?: "user"
-            MyPageScreen(userId = userId, navController = navController, currentRoute = "mypage")
+        composable("mypage/user") { backStackEntry ->
+            MyPageScreen(navController = navController, currentRoute = "mypage", authViewModel = authViewModel)
         }
 
 
@@ -302,15 +353,17 @@ fun NavGraph(
             )
         }
 
-        composable("login") {
-            LoginScreen(
-                viewModel = authViewModel,
-                onNavigateToSignUp = { navController.navigate("signup") },
-                onNavigateToHome = { navController.navigate("home") },
-                onNavigateToFindId = { navController.navigate("find_id") },
-                onNavigateToFindPassword = { navController.navigate("find_password") }
-            )
-        }
+//        composable("login") {
+//            LoginScreen(
+//                viewModel = authViewModel,
+//                onNavigateToSignUp = { navController.navigate("signup") },
+//                onNavigateToHome = { navController.navigate("home") },
+//                onNavigateToFindId = { navController.navigate("find_id") },
+//                onNavigateToFindPassword = { navController.navigate("find_password") }
+//            )
+//        }
+        // -> 변경
+
 
         composable("signup") {
             SignUpScreen(

@@ -40,6 +40,7 @@ import com.example.modapjt.components.home.section.ImageSection
 import com.example.modapjt.components.home.section.TodayContentSection
 import com.example.modapjt.components.home.section.VideoSection
 import com.example.modapjt.components.home.section.WeeklyKeywordSection
+import com.example.modapjt.domain.viewmodel.AuthViewModel
 import com.example.modapjt.domain.viewmodel.CategoryViewModel
 import com.example.modapjt.domain.viewmodel.SearchViewModel
 
@@ -48,8 +49,23 @@ import com.example.modapjt.domain.viewmodel.SearchViewModel
 fun newHomeScreen(
     navController: NavController,
     currentRoute: String,
-    homeKeywordViewModel: SearchViewModel = viewModel()
+    homeKeywordViewModel: SearchViewModel = viewModel(),
+    authViewModel: AuthViewModel // 추가
 ) {
+    // 추가 : 로그인 상태 확인
+    val isLoggedIn by authViewModel.isLoggedIn
+
+    // 로그인 되지 않은 경우 로그인 화면으로 이동
+    LaunchedEffect(isLoggedIn) {
+        if (!isLoggedIn) {
+            navController.navigate("login") {
+                popUpTo(navController.graph.startDestinationId) {
+                    inclusive = true
+                }
+            }
+        }
+    }
+
     val listState = rememberLazyListState()
     var isHeaderVisible by remember { mutableStateOf(true) }
     var lastScrollOffset by remember { mutableStateOf(0) }
@@ -59,11 +75,8 @@ fun newHomeScreen(
     // 🔹 API에서 받아올 creator 값 저장
     val creator by homeKeywordViewModel.creator.collectAsState()
 
-    // ✅ 로그인된 유저 ID를 가져온다고 가정 (예: SharedPreferences에서 가져오기)
-    val userId = remember { "user" } // 실제 앱에서는 여기를 로그인된 유저 ID로 변경해야 함
-
     LaunchedEffect(Unit) {
-        homeKeywordViewModel.fetchHomeKeywords("user") // userId 전달
+        homeKeywordViewModel.fetchHomeKeywords() // userId 전달
     }
 
 
@@ -125,20 +138,22 @@ fun newHomeScreen(
             }
 
             item {
-                ThumbnailSlider(viewModel = searchViewModel, navController = navController, userId = "user123")
+                ThumbnailSlider(viewModel = searchViewModel, navController = navController)
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
 
+//            item {
+//                CategoryList(navController = navController, viewModel = categoryViewModel, homeKeywordViewModel = homeKeywordViewModel)
+//            }
             item {
-                CategoryList(navController = navController, viewModel = categoryViewModel, homeKeywordViewModel = homeKeywordViewModel)
+                CategoryList(navController = navController, viewModel = categoryViewModel)
             }
 
 
             item {
                 WeeklyKeywordSection(
                     homeKeywordViewModel = homeKeywordViewModel,
-                    userId = userId,
                     navController = navController,
                     searchViewModel = searchViewModel
                 )

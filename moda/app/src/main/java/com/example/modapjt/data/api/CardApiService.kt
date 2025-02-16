@@ -29,7 +29,6 @@ interface CardApiService {
     // 전체탭 카드 리스트 API 재설정
     @GET("api/search/tab") // main -> tab으로 변경
     suspend fun getAllTabCardList(
-        @Query("userId") userId: String,
         @Query("query") query: String,
         @Query("categoryId") categoryId: Int
     ): Response<AllTabCardApiResponse>
@@ -37,7 +36,6 @@ interface CardApiService {
     // 그 외 탭(이미지탭, 블로그탭, .. ) 카드 리스트 API 재설정
     @GET("api/search")
     suspend fun getTabCardList(
-        @Query("userId") userId: String,
         @Query("query") query: String,
         @Query("categoryId") categoryId: Int,
         @Query("typeId") typeId: Int,
@@ -51,7 +49,6 @@ interface CardApiService {
     @GET("api/card/{cardId}")
     suspend fun getCardDetail(
         @Path("cardId") cardId: String,
-        @Query("userId") userId: String
     ): Response<CardDetailDTO>
 
     // 카드 저장 API
@@ -70,13 +67,11 @@ interface CardApiService {
     // 즐겨찾기 전체탭 카드 리스트 API
     @GET("api/search/bookmark")
     suspend fun getAllTabBookMarkCardList(
-        @Query("userId") userId: String,
     ): Response<AllTabCardApiResponse>
 
     // 즐겨찾기 그 외 탭(이미지탭, 블로그탭, .. ) 카드 리스트 API 재설정
     @GET("api/search/bookmark/type")
     suspend fun getTabBookMarkCardList(
-        @Query("userId") userId: String,
         @Query("typeId") typeId: Int,
         @Query("page") page: Int,
         @Query("size") size: Int = 15, // 15개씩 불러오기

@@ -9,7 +9,6 @@ import retrofit2.http.Query
 interface CategoryApiService {
     @GET("api/category")
     suspend fun getCategoryList(
-        @Query("userId") userId: String
     ): Response<List<CategoryDTO>>
 }
 

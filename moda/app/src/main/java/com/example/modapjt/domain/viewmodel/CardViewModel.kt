@@ -32,10 +32,10 @@ class CardViewModel : ViewModel() {
     val loadingMore: StateFlow<Boolean> = _loadingMore.asStateFlow()
 
     // ✅ 전체탭 카드 로드 (페이징 없음)
-    private fun loadAllTabCards(userId: String, query: String, categoryId: Int) {
+    private fun loadAllTabCards(query: String, categoryId: Int) {
         viewModelScope.launch {
             try {
-                val result = repository.getAllTabCards(userId, query, categoryId)
+                val result = repository.getAllTabCards(query, categoryId)
                 if (result.isSuccess) {
                     val cards = result.getOrNull() ?: emptyList()
                     _uiState.value = CardUiState.Success(
@@ -55,7 +55,6 @@ class CardViewModel : ViewModel() {
 
     // ✅ 특정탭 카드 로드 (페이징 포함)
     private fun loadTabCards(
-        userId: String,
         query: String,
         categoryId: Int,
         typeId: Int,
@@ -70,7 +69,7 @@ class CardViewModel : ViewModel() {
 
             try {
                 val page = if (isLoadMore) currentPage + 1 else 1
-                val result = repository.getTabCards(userId, query, categoryId, typeId, page, sortDirection)
+                val result = repository.getTabCards(query, categoryId, typeId, page, sortDirection)
 
                 if (result.isSuccess) {
                     val (cards, hasNext) = result.getOrNull()!!
@@ -98,27 +97,27 @@ class CardViewModel : ViewModel() {
     }
 
     // ✅ 공개 로드 함수
-    fun loadCards(userId: String, categoryId: Int, selectedTab: String, sortDirection: String, isLoadMore: Boolean = false) {
+    fun loadCards(categoryId: Int, selectedTab: String, sortDirection: String, isLoadMore: Boolean = false) {
         if (selectedTab == "전체") {
-            loadAllTabCards(userId, "", categoryId)
+            loadAllTabCards("", categoryId)
         } else {
             val typeId = getTypeIdForTab(selectedTab)
-            loadTabCards(userId, "", categoryId, typeId, sortDirection, isLoadMore)
+            loadTabCards("", categoryId, typeId, sortDirection, isLoadMore)
         }
     }
 
     // ✅ 검색용 로드 함수
-    fun loadSearchCards(userId: String, query: String, selectedTab: String, sortDirection: String, isLoadMore: Boolean = false) {
+    fun loadSearchCards(query: String, selectedTab: String, sortDirection: String, isLoadMore: Boolean = false) {
         if (selectedTab == "전체") {
-            loadAllTabCards(userId, query, 0)
+            loadAllTabCards(query, 0)
         } else {
             val typeId = getTypeIdForTab(selectedTab)
-            loadTabCards(userId, query, 0, typeId, sortDirection, isLoadMore)
+            loadTabCards(query, 0, typeId, sortDirection, isLoadMore)
         }
     }
 
     // ✅ 즐겨찾기 카드 로드
-    fun loadBookmarkedCards(userId: String, typeId: Int, sortDirection: String, isLoadMore: Boolean = false) {
+    fun loadBookmarkedCards(typeId: Int, sortDirection: String, isLoadMore: Boolean = false) {
         if (isLoading || (!isLoadMore && !hasNextPage)) return
 
         viewModelScope.launch {
@@ -127,7 +126,7 @@ class CardViewModel : ViewModel() {
 
             try {
                 val page = if (isLoadMore) currentPage + 1 else 1
-                val result = repository.getTabBookMarkCards(userId, typeId, page, 15, sortDirection)
+                val result = repository.getTabBookMarkCards(typeId, page, 15, sortDirection)
 
                 if (result.isSuccess) {
                     val (cards, hasNext) = result.getOrNull()!!
@@ -153,12 +152,12 @@ class CardViewModel : ViewModel() {
     }
 
     // 즐겨찾기 전체탭
-    fun loadAllBookmarkedCards(userId: String) {
+    fun loadAllBookmarkedCards() {
         viewModelScope.launch {
             _uiState.value = CardUiState.Loading
             try {
                 // ✅ 전체 데이터 가져오기
-                val result = repository.getAllTabBookMarkCards(userId)
+                val result = repository.getAllTabBookMarkCards()
 
                 if (result.isSuccess) {
                     val cards = result.getOrNull() ?: emptyList()

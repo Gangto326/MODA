@@ -21,10 +21,10 @@ class UserViewModel : ViewModel() {
     val interestKeywords: StateFlow<List<String>> = _interestKeywords
 
     // ✅ 사용자 정보 가져오기
-    fun fetchUser(userId: String) {
+    fun fetchUser() {
         viewModelScope.launch {
             try {
-                val response = RetrofitInstance.userApi.getUserProfile(userId)
+                val response = RetrofitInstance.userApi.getUserProfile()
                 _user.value = response.toDomainModel()
             } catch (e: Exception) {
                 _user.value = null
