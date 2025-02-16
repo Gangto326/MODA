@@ -32,11 +32,16 @@ public class YoutubeApiClient {
 		JsonNode channelData = getChannelData(extractChannelId(videoData));
 
 		return YoutubeAPIResponseDTO.builder()
+			.title(extractVideoTitle(videoData)) // 추가된 부분
 			.tags(extractTags(videoData))
 			.description(extractDescription(videoData))
 			.channelTitle(extractChannelTitle(channelData))
 			.channelThumbnailUrl(extractChannelThumbnailUrl(channelData))
 			.build();
+	}
+
+	private String extractVideoTitle(JsonNode videoData) {
+		return videoData.path("items").get(0).path("snippet").path("title").asText();
 	}
 
 	private JsonNode getVideoInfo(String videoId) {

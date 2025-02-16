@@ -64,9 +64,6 @@ public class LilysAiClient {
 		// 두 번째 Future: shortSummary 가져오기
 		CompletableFuture<JsonNode> thumbnailFuture = getResult(requestId, "shortSummary");
 
-		// 세 번째 Future: title 가져오기
-		CompletableFuture<String> titleFuture = titleExtractor.extractTitle(url);
-
 		// 확인용 출력
 		contentFuture.thenAccept(json -> {
 			log.info("Received blogPost data: {}", json);
@@ -75,12 +72,11 @@ public class LilysAiClient {
 			log.info("Received thumbnail data: {}", json);
 		});
 
-		CompletableFuture.allOf(contentFuture, thumbnailFuture, titleFuture).join();
+		CompletableFuture.allOf(contentFuture, thumbnailFuture).join();
 
 		try {
 			JsonNode content = contentFuture.get();
 			JsonNode thumbnail = thumbnailFuture.get();
-			String title = titleFuture.get();
 
 			List<TitleAndContent> mainContent = jsonMapper.processSummaryNote(content);
 			String[] timeStamps = jsonMapper.extractTimestamps(content);
@@ -93,7 +89,6 @@ public class LilysAiClient {
 				.contents(mainContent)
 				.thumbnailContent(thumbnailContent)
 				.thumbnailUrl(thumbnailUrl)
-				.title(title)
 				.typeId(1)
 				.timeStamp(timeStamps)
 				.build();
