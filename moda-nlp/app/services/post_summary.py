@@ -78,6 +78,8 @@ class PostSummary:
         while attempt_count < self.MAX_CATEGORY_TRIES:
             response = self.chat(model = model, messages = messages, format = format)
 
+            print(f" 카테고리 선택 시도 ${attempt_count} - ${response}")
+
             for idx, category in enumerate(categories_name()):
                 if category.lower() in response.lower():
                     find_category = True
@@ -92,7 +94,7 @@ class PostSummary:
 
         if attempt_count == self.MAX_CATEGORY_TRIES:
             self.category_id = 0
-            self.category = 'ALL'
+            self.category = 'All'
 
     #origin_content를 요약하는 함수
     def summary_content(self):
