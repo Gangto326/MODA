@@ -40,6 +40,8 @@ public class EmailService {
 		return code.equals(savedCode);
 	}
 
+
+
 	private String generateCode() {
 		return String.format("%06d", new Random().nextInt(1000000));
 	}

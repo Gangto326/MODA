@@ -121,6 +121,10 @@ public class UserService {
         return userRepository.existsByUserName(userName);
     }
 
+    public User findByUserName(String email)
+    {
+        return userRepository.findByEmail(email).get();
+    }
 
     /**
      * 사용자 프로필을 수정합니다.

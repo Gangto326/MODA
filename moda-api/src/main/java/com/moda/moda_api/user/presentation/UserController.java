@@ -132,9 +132,6 @@ public class UserController {
         return ResponseEntity.ok(isAvailable);
     }
 
-    // @PostMapping("/find-user-id")
-    // public ResponseEntity<Boolean> findUserName()
-
     /**
      * 사용자 프로필 정보를 조회합니다.
      *

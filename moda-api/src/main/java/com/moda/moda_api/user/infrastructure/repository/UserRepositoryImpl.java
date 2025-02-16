@@ -27,11 +27,17 @@ public class UserRepositoryImpl implements UserRepository {
 
 
 	@Override
-	public Optional<User> findByUserName(String email) {
-		return Optional.ofNullable(userJpaRepository.findByUserName(email))
+	public Optional<User> findByUserName(String userName) {
+		return Optional.ofNullable(userJpaRepository.findByUserName(userName))
 			.map(userEntityMapper::toDomain);
 	}
 
+
+	@Override
+	public Optional<User> findByEmail(String email) {
+		return Optional.ofNullable(userJpaRepository.findByEmail(email))
+			.map(userEntityMapper::toDomain);
+	}
 
 	/**
 	 * ID로 사용자를 조회합니다.

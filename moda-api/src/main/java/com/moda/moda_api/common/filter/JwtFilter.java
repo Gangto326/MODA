@@ -40,6 +40,7 @@ public class JwtFilter extends OncePerRequestFilter {
 			"/api/user/refresh",
 			"/api/auth/email/send",
 			"/api/auth/email/verify",
+			"/api/auth/find-user-id",
 			"/api/user/check-user-name",
 			"/api/user/refresh",
 			"/swagger-ui",  // 수정
