@@ -49,23 +49,23 @@ public class LilysSummaryService {
 
 				// 서버 전용
 				// getSummaryResults 완료 후 병렬로 실행 가능한 작업들
-				// CompletableFuture<AIAnalysisResponseDTO> aiAnalysisFuture =
-				// 	CompletableFuture.supplyAsync(() ->
-				// 		pythonAnalysisService.youtubeAnalyze(lilysSummary.getContents())
-				// 	);
+				CompletableFuture<AIAnalysisResponseDTO> aiAnalysisFuture =
+					CompletableFuture.supplyAsync(() ->
+						pythonAnalysisService.youtubeAnalyze(lilysSummary.getContents())
+					);
 
 				// 로컬 전용
-				CompletableFuture<AIAnalysisResponseDTO> aiAnalysisFuture = CompletableFuture.completedFuture(
-					AIAnalysisResponseDTO.builder()
-						.categoryId(new CategoryId(2L))  // null 허용
-						.keywords(new String[] {"박종원_02_16~02_17_Test"})
-						.thumbnailContent("박종원_02_16~02_17_Test")
-						.content(lilysSummary.getContents().stream()
-							.map(content -> content.getTitle() + ": " + content.getContent())
-							.collect(Collectors.joining("\n")))
-						.embeddingVector(null)
-						.build()
-				);
+				// CompletableFuture<AIAnalysisResponseDTO> aiAnalysisFuture = CompletableFuture.completedFuture(
+				// 	AIAnalysisResponseDTO.builder()
+				// 		.categoryId(new CategoryId(2L))  // null 허용
+				// 		.keywords(new String[] {"박종원_02_16~02_17_Test"})
+				// 		.thumbnailContent("박종원_02_16~02_17_Test")
+				// 		.content(lilysSummary.getContents().stream()
+				// 			.map(content -> content.getTitle() + ": " + content.getContent())
+				// 			.collect(Collectors.joining("\n")))
+				// 		.embeddingVector(null)
+				// 		.build()
+				// );
 
 				CompletableFuture<YoutubeAPIResponseDTO> youtubeApiFuture =
 					CompletableFuture.supplyAsync(() ->
@@ -80,9 +80,10 @@ public class LilysSummaryService {
 						String[] keywords = getKeyWords(aiAnalysis, youtubeAPI);
 						String[] subContents = getSubContents(lilysSummary, youtubeAPI);
 
+
 						return SummaryResultDto.builder()
 							.typeId(lilysSummary.getTypeId())
-							.title(lilysSummary.getTitle())
+							.title(youtubeAPI.getTitle())
 							.content(aiAnalysis.getContent())
 							.thumbnailContent(youtubeAPI.getChannelTitle())
 							.embeddingVector(aiAnalysis.getEmbeddingVector())

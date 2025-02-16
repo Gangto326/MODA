@@ -12,17 +12,16 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Component;
 
-
 import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
 public class TitleExtractor {
 	private final WebDriver webDriver;
+
 	public CompletableFuture<String> extractTitle(String url) {
 
 		return CompletableFuture.supplyAsync(() -> {
-
 
 			try {
 				System.out.println("Extracting title for: " + url);
@@ -32,7 +31,7 @@ public class TitleExtractor {
 
 				// Wait for the page to load completely
 				WebDriverWait wait = new WebDriverWait(webDriver, Duration.ofSeconds(50));
-				wait.until(webDriver -> ((JavascriptExecutor) webDriver)
+				wait.until(webDriver -> ((JavascriptExecutor)webDriver)
 					.executeScript("return document.readyState").equals("complete"));
 
 				// Try getting the title
