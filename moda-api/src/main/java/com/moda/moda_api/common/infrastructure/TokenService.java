@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 @Service
 @RequiredArgsConstructor
 public class TokenService {
+
     private final RedisTemplate<String, String> jwtRedisTemplate;
     private final RefreshTokenRepository refreshTokenRepository;
 
@@ -25,6 +26,8 @@ public class TokenService {
 
 	//AccessToken저장하기
     public void saveAccessToken(UserId userId, String accessToken) {
+        System.out.println(userId + "sdadassdadassdadassdadas");
+        System.out.println(accessToken + " sdadassdadassdadassdadas");
         String key = ACCESS_TOKEN_PREFIX + userId.getValue();
 		jwtRedisTemplate.opsForValue().set(
                 key,

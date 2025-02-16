@@ -1,26 +1,33 @@
 package com.moda.moda_api.user.presentation;
 
-import com.moda.moda_api.common.jwt.TokenDto;
-import com.moda.moda_api.common.util.HeaderUtil;
-import com.moda.moda_api.user.application.EmailService;
-import com.moda.moda_api.user.application.UserService;
-import com.moda.moda_api.user.application.response.*;
-import com.moda.moda_api.user.presentation.request.DeleteUserRequest;
-import com.moda.moda_api.user.presentation.request.EmailRequest;
-import com.moda.moda_api.user.presentation.request.EmailVerifyRequest;
-import com.moda.moda_api.user.presentation.request.LoginRequest;
-import com.moda.moda_api.user.presentation.request.SignupRequest;
-import com.moda.moda_api.user.presentation.request.UpdateProfileRequest;
-
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.moda.moda_api.common.jwt.TokenDto;
+import com.moda.moda_api.common.util.HeaderUtil;
+import com.moda.moda_api.user.application.UserService;
+import com.moda.moda_api.user.application.response.AuthResponse;
+import com.moda.moda_api.user.application.response.ErrorResponse;
+import com.moda.moda_api.user.application.response.SuccessResponse;
+import com.moda.moda_api.user.exception.InvalidRequestException;
+import com.moda.moda_api.user.exception.UserNotFoundException;
+import com.moda.moda_api.user.presentation.request.LoginRequest;
+import com.moda.moda_api.user.presentation.request.PasswordResetRequest;
+import com.moda.moda_api.user.presentation.request.SignupRequest;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 사용자 관련 HTTP 요청을 처리하는 컨트롤러입니다.
@@ -28,6 +35,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
+@Slf4j
 public class UserController {
 
     private final UserService userService;
@@ -126,65 +134,19 @@ public class UserController {
                 .body(true);
     }
 
-    @GetMapping("/check-user-name/{userName}")
-    public ResponseEntity<Boolean> checkUserName(@PathVariable String userName) {
-        boolean isAvailable = userService.isUserNameAvailable(userName);
-        return ResponseEntity.ok(isAvailable);
+
+    @PatchMapping("/reset-password")
+    public ResponseEntity<Boolean> resetPassword(@RequestBody PasswordResetRequest passwordResetRequest) {
+        if (!passwordResetRequest.getNewPasswordConfirm().equals(passwordResetRequest.getNewPassword())) {
+            return ResponseEntity.badRequest().body(Boolean.FALSE);
+        }
+
+        try {
+            boolean result = userService.resetPassword(passwordResetRequest);
+            return ResponseEntity.ok(result);
+        } catch (UserNotFoundException | InvalidRequestException e) {
+            log.error("비밀번호 재설정 실패: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(Boolean.FALSE);
+        }
     }
-
-    /**
-     * 사용자 프로필 정보를 조회합니다.
-     *
-     * @param userId 조회할 사용자의 ID
-     * @return 사용자의 프로필 정보
-     */
-    // @GetMapping("/{userId}")
-    // public ResponseEntity<UserProfileResponse> getUserProfile(@PathVariable String userId) {
-    //     UserProfileResponse response = userService.getUserProfile(userId);
-    //     return ResponseEntity.ok(response);
-    // }
-
-    /**
-     * 사용자 프로필 정보를 수정합니다.
-     *
-     * @param userId 수정할 사용자의 ID
-     * @param request 수정할 프로필 정보를 담은 요청 객체
-     * @return 수정된 사용자의 프로필 정보
-     */
-    // @PutMapping("/{userId}")
-    // public ResponseEntity<UserResponse> updateProfile(
-    //         @PathVariable String userId,
-    //         @RequestBody UpdateProfileRequest request) {
-    //     UserResponse response = userService.updateProfile(userId, request);
-    //     return ResponseEntity.ok(response);
-    // }
-
-    /**
-     * 이메일 중복 여부를 확인합니다.
-     *
-     * @param email 중복 검사할 이메일
-     * @return 중복 여부
-     */
-    // @GetMapping("/check-email")
-    // public ResponseEntity<Boolean> checkEmailDuplicate(@RequestParam String email) {
-    //     boolean isDuplicate = userService.checkEmailDuplicate(email);
-    //     return ResponseEntity.ok(isDuplicate);
-    // }
-
-    /**
-     * 닉네임 중복 여부를 확인합니다.
-     *
-     * @param nickname 중복 검사할 닉네임
-     * @return 중복 여부
-     */
-    // @GetMapping("/check-nickname")
-    // public ResponseEntity<Boolean> checkNicknameDuplicate(@RequestParam String nickname) {
-    //     boolean isDuplicate = userService.checkNicknameDuplicate(nickname);
-    //     return ResponseEntity.ok(isDuplicate);
-    // }
-
-    // @DeleteMapping
-    // public ResponseEntity<Boolean> deleteUser(@RequestBody DeleteUserRequest request) {
-    //     return ResponseEntity.ok(userService.deleteUser(request));
-    // }
 }
