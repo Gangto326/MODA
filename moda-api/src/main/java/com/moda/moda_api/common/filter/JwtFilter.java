@@ -42,7 +42,7 @@ public class JwtFilter extends OncePerRequestFilter {
 			"/api/auth/email/verify",
 			"/api/auth/find-user-id",
 			"/api/auth/check-user-name",
-			"/api/user/refresh",
+			"/api/auth/refresh",
 			"/swagger-ui",  // 수정
 			"/v3/api-docs",  // 수정
 			"/swagger-resources",
@@ -79,6 +79,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
 		// 2. JWT 토큰 유효성 검증 (만료, 서명 등)
 		if (!jwtUtil.isValidToken(accessToken, "AccessToken")) {
+			System.out.println("AccessToken만료 JwtFilter" + accessToken);
 			response.setStatus(HttpStatus.UNAUTHORIZED.value());
 			response.setContentType("application/json");
 			response.getWriter().write(objectMapper.writeValueAsString(

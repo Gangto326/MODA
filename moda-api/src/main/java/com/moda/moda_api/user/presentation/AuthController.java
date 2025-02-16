@@ -78,8 +78,11 @@ public class AuthController {
 	@GetMapping("/refresh")
 	public ResponseEntity<Boolean> refresh(HttpServletRequest httpServletRequest) {
 
+		System.out.println("refresh들어왔습니다. ");
 		// Client에서 withCredentials 옵션으로 설정하여 전송된 경우, RefreshToken을 받을 수 있다.
 		String refreshToken = HeaderUtil.getRefreshToken(httpServletRequest);
+
+		System.out.println("refreshToken = " + refreshToken);
 
 		// RefreshToken을 바탕으로 새로운 AccessToken을 발급.
 		TokenDto newAccessToken = userService.reGenerateToken(refreshToken);
