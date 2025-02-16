@@ -2,47 +2,67 @@ package com.example.modapjt
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import android.util.Log
 import android.widget.Toast
-import com.example.modapjt.data.AppDatabase
-import com.example.modapjt.data.CaptureRepository
-import kotlinx.coroutines.*
+import androidx.activity.ComponentActivity
+import androidx.lifecycle.lifecycleScope
+import com.example.modapjt.data.repository.CardRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
-class ShareReceiverActivity : AppCompatActivity() {
-    private lateinit var repository: CaptureRepository
+class ShareReceiverActivity : ComponentActivity() {
+    private val repository = CardRepository()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // RoomDB 초기화
-        val db = AppDatabase.getDatabase(this)
-        repository = CaptureRepository(db.captureDao())
+        Log.d("ShareReceiver", "onCreate 시작")
 
         if (intent?.action == Intent.ACTION_SEND && intent.type == "text/plain") {
-            val sharedText = intent.getStringExtra(Intent.EXTRA_TEXT)
-            sharedText?.let {
-                saveToDatabase(it) // DB에 저장
+            intent.getStringExtra(Intent.EXTRA_TEXT)?.let { url ->
+                Log.d("ShareReceiver", "공유된 URL: $url")
+                handleUrl(url)
+            } ?: run {
+                Log.d("ShareReceiver", "공유된 URL이 null")
+                finish()
             }
+        } else {
+            Log.d("ShareReceiver", "Intent 조건 불일치")
+            finish()
         }
-
-        finish() // 액티비티 종료 (UI 없이 백그라운드에서 처리)
     }
 
-    private fun saveToDatabase(url: String) {
-        CoroutineScope(Dispatchers.IO).launch {
+    private fun handleUrl(url: String) {
+        lifecycleScope.launch {
             try {
-                repository.insert(url) // RoomDB에 URL 저장
-                runOnUiThread {
-                    Toast.makeText(applicationContext, "공유된 링크 저장 완료", Toast.LENGTH_SHORT).show()
+                val finalUrl = if (!url.startsWith("http")) "https://$url" else url
+                Log.d("ShareReceiver", "처리할 URL: $finalUrl")
+
+                withContext(Dispatchers.IO) {
+                    repository.createCard(finalUrl)
                 }
+
+                Toast.makeText(
+                    applicationContext,
+                    "공유하기 버튼으로 정보 저장 성공!",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                delay(1000)
+
             } catch (e: Exception) {
-                e.printStackTrace()
-                runOnUiThread {
-                    Toast.makeText(applicationContext, "URL 저장 실패", Toast.LENGTH_SHORT).show()
-                }
+                Log.e("ShareReceiver", "URL 저장 실패", e)
+                Toast.makeText(
+                    applicationContext,
+                    "URL 저장 실패: ${e.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } finally {
+                finish()
             }
         }
     }
 }
-
