@@ -1,12 +1,10 @@
 package com.moda.moda_api.card.application.service;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 
 import com.moda.moda_api.card.application.response.CardMainResponse;
 import com.moda.moda_api.card.application.response.HotTopicResponse;
@@ -454,10 +452,37 @@ public class CardService {
 	 */
 	public CardMainResponse getMainKeywords(String userId) {
 		UserId userIdObj = new UserId(userId);
+		List<Object[]> results = cardRepository.findCategoryExistenceByUserId(userIdObj);
+
+		// 기본적으로 모든 categoryId(2~10) 값에 대해 false로 초기화
+		Map<Long, Boolean> categories = LongStream.rangeClosed(2, 10)
+				.boxed()
+				.collect(Collectors.toMap(category -> category, category -> false));
+
+
+		// 전체 콘텐츠(1번) 값 초기화
+		boolean hasAnyContent = false;
+
+		// 쿼리 결과를 기반으로 존재하는 categoryId를 true로 설정
+		for (Object[] result : results) {
+			Long categoryId = (Long) result[0];
+			Long count = (Long) result[1];
+
+			boolean exists = count > 0;
+			categories.put(categoryId, count > 0);
+
+			// 하나라도 count > 0 이면 전체 콘텐츠(1번)를 true로 설정
+			if (exists) {
+				hasAnyContent = true;
+			}
+		}
+
+		categories.put(1L, hasAnyContent);
 
 		return CardMainResponse.builder()
 			.topKeywords(userKeywordRepository.getTopKeywords(userIdObj, 5))
 			.creator(videoCreatorRepository.getCreatorByUserId(userIdObj))
+				.categories(categories)
 			.build();
 	}
 

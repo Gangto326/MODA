@@ -134,4 +134,9 @@ public class CardRepositoryImpl implements CardRepository {
         Optional<CardEntity> entity = cardJpaRepository.findByCardIdAndDeletedAtIsNull(cardId.getValue());
         return entity.map(card -> cardEntityMapper.toDomain(card));
     }
+
+    @Override
+    public List<Object[]> findCategoryExistenceByUserId(UserId userId) {
+        return cardJpaRepository.findCategoryExistenceByUserId(userId.getValue());
+    }
 }
