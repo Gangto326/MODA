@@ -79,6 +79,6 @@ public class TokenService {
     public RefreshToken validateRefreshToken(String token) {
         return refreshTokenRepository.findByTokenAndIsActiveTrue(token)
             .filter(rt -> rt.getExpiresAt().isAfter(LocalDateTime.now()))
-            .orElseThrow(() -> new UnauthorizedException("Refresh Token이 만료되었거나 유효하지 않습니다.", "REFRESH_TOKEN_INVALID"));
+            .orElseThrow(() -> new UnauthorizedException("Refresh Token이 만료되었거나 유효하지 않습니다.", "REFRESH_TOKEN_EXPIRED"));
     }
 }
