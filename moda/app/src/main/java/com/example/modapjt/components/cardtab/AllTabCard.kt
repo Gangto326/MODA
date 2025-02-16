@@ -212,7 +212,7 @@ private fun SectionHeader(title: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.Yellow) // 배경 색
+//            .background(Color.Yellow) // 배경 색
             .height(IntrinsicSize.Min), // 높이를 내부 요소에 맞춤 (불필요한 공간 제거)
         verticalAlignment = Alignment.CenterVertically, // 아이콘과 텍스트를 세로 중앙 정렬
         horizontalArrangement = Arrangement.Start // 텍스트는 왼쪽 정렬

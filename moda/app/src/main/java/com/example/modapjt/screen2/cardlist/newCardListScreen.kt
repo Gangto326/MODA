@@ -182,31 +182,53 @@ fun newCardListScreen(
                                             item { EmptyMessage("저장된 이미지가 없습니다") }
                                         } else {
                                             item {
-                                                FlowRow(
-                                                    modifier = Modifier.fillMaxWidth(),
-                                                    horizontalArrangement = Arrangement.SpaceBetween, // ✅ 아이템 간격 균등 배치
-                                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                                ) {
-                                                    state.images.forEachIndexed { index, card ->
-                                                        ImageBig(
-                                                            imageUrl = card.thumbnailUrl ?: "",
-                                                            isMine = card.isMine,
-                                                            modifier = Modifier
-                                                                .fillMaxWidth(0.5f) // ✅ 한 줄에 2개씩 배치
-                                                                .aspectRatio(1f), // ✅ 정사각형 유지
-                                                            onClick = { navController.navigate("cardDetail/${card.cardId}") }
-                                                        )
-                                                    }
-
-                                                    // ✅ 마지막 아이템이 홀수라면 빈 Spacer 추가
-                                                    if (state.images.size % 2 != 0) {
-                                                        Box(modifier = Modifier.fillMaxWidth(0.5f)) // ✅ 빈 공간 확보
-                                                    }
-                                                }
+                                                MasonryImageGrid(
+                                                    imageUrls = state.images.map { it.thumbnailUrl ?: "" },  // ✅ 이미지 리스트 전달
+                                                    isMineList = state.images.map { it.isMine },  // ✅ 내 콘텐츠 여부 전달
+                                                    cardIdList = state.images.map { it.cardId },  // ✅ 카드 ID 전달
+                                                    onImageClick = { cardId -> navController.navigate("cardDetail/$cardId") }  // ✅ 클릭 시 이동
+                                                )
                                             }
                                         }
                                     }
 
+
+
+
+////////////////////////////////////////////////////////////////////( 기존 코드_추후에 삭제 예정 )
+//                                    "이미지" -> {
+//                                        if (state.images.isEmpty() && !loadingMore) {
+//                                            item { EmptyMessage("저장된 이미지가 없습니다") }
+//                                        } else {
+//                                            item {
+//                                                FlowRow(
+//                                                    modifier = Modifier
+//                                                        .fillMaxWidth()
+//                                                        .padding(horizontal = 12.dp), // ✅ 양쪽 패딩 추가
+//                                                    horizontalArrangement = Arrangement.SpaceBetween, // ✅ 아이템 간격 균등 배치
+////                                                    horizontalArrangement = Arrangement.spacedBy(8.dp), // ✅ 이미지 간격 추가
+//                                                    verticalArrangement = Arrangement.spacedBy(4.dp)
+//                                                ) {
+//                                                    state.images.forEachIndexed { index, card ->
+//                                                        ImageBig(
+//                                                            imageUrl = card.thumbnailUrl ?: "",
+//                                                            isMine = card.isMine,
+//                                                            modifier = Modifier
+//                                                                .fillMaxWidth(0.5f) // ✅ 한 줄에 2개씩 배치
+//                                                                .aspectRatio(1f), // ✅ 정사각형 유지
+//                                                            onClick = { navController.navigate("cardDetail/${card.cardId}") }
+//                                                        )
+//                                                    }
+//
+//                                                    // ✅ 마지막 아이템이 홀수라면 빈 Spacer 추가
+//                                                    if (state.images.size % 2 != 0) {
+//                                                        Box(modifier = Modifier.fillMaxWidth(0.5f)) // ✅ 빈 공간 확보
+//                                                    }
+//                                                }
+//                                            }
+//                                        }
+//                                    }
+////////////////////////////////////////////////////////////////////( 기존 코드_추후에 삭제 예정 )
 
 
 

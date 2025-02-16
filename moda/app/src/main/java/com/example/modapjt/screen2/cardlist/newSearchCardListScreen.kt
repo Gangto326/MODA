@@ -65,6 +65,7 @@ import com.example.modapjt.components.cardtab.SwipableCardList
 import com.example.modapjt.datastore.SearchKeywordDataStore
 import com.example.modapjt.domain.viewmodel.CardUiState
 import com.example.modapjt.domain.viewmodel.CardViewModel
+import com.example.modapjt.screen2.MasonryImageGrid
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -162,29 +163,48 @@ fun newSearchCardListScreen(
                                     item { EmptyMessage2("검색된 이미지가 없습니다") }
                                 } else {
                                     item {
-                                        FlowRow(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                                        ) {
-                                            state.images.forEachIndexed { index, card ->
-                                                ImageBig(
-                                                    imageUrl = card.thumbnailUrl ?: "",
-                                                    isMine = card.isMine,
-                                                    modifier = Modifier
-                                                        .fillMaxWidth(0.5f)
-                                                        .aspectRatio(1f),
-                                                    onClick = { navController.navigate("cardDetail/${card.cardId}") }
-                                                )
-                                            }
-
-                                            if (state.images.size % 2 != 0) {
-                                                Box(modifier = Modifier.fillMaxWidth(0.5f))
-                                            }
-                                        }
+                                        MasonryImageGrid(
+                                            imageUrls = state.images.map { it.thumbnailUrl ?: "" },  // ✅ 이미지 리스트 전달
+                                            isMineList = state.images.map { it.isMine },  // ✅ 내 콘텐츠 여부 전달
+                                            cardIdList = state.images.map { it.cardId },  // ✅ 카드 ID 전달
+                                            onImageClick = { cardId -> navController.navigate("cardDetail/$cardId") }  // ✅ 클릭 시 이동
+                                        )
                                     }
                                 }
                             }
+
+
+///////                         ////////////////////////////////////////////////////////////////////( 기존 코드_추후에 삭제 예정 )
+//                            "이미지" -> {
+//                                if (state.images.isEmpty() && !loadingMore) {
+//                                    item { EmptyMessage2("검색된 이미지가 없습니다") }
+//                                } else {
+//                                    item {
+//                                        FlowRow(
+//                                            modifier = Modifier.fillMaxWidth(),
+//                                            horizontalArrangement = Arrangement.SpaceBetween,
+//                                            verticalArrangement = Arrangement.spacedBy(8.dp)
+//                                        ) {
+//                                            state.images.forEachIndexed { index, card ->
+//                                                ImageBig(
+//                                                    imageUrl = card.thumbnailUrl ?: "",
+//                                                    isMine = card.isMine,
+//                                                    modifier = Modifier
+//                                                        .fillMaxWidth(0.5f)
+//                                                        .aspectRatio(1f),
+//                                                    onClick = { navController.navigate("cardDetail/${card.cardId}") }
+//                                                )
+//                                            }
+//
+//                                            if (state.images.size % 2 != 0) {
+//                                                Box(modifier = Modifier.fillMaxWidth(0.5f))
+//                                            }
+//                                        }
+//                                    }
+//                                }
+//                            }
+
+                            ///////////////////////////////////////////////////////////////////////////
                             "블로그" -> {
                                 if (state.blogs.isEmpty() && !loadingMore) {
                                     item { EmptyMessage2("검색된 블로그가 없습니다") }
