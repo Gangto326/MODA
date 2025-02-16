@@ -40,4 +40,6 @@ public interface CardRepository {
     Boolean existsByUserIdAndUrlHashAndDeletedAtIsNull(UserId userId, String urlHash);
 
     Optional<Card> findByCardId(CardId cardId);
+
+    List<Object[]> findCategoryExistenceByUserId(UserId userId);
 }

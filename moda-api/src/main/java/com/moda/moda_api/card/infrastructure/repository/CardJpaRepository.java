@@ -114,4 +114,11 @@ public interface CardJpaRepository extends JpaRepository<CardEntity, String> {
     void updateViewCount(@Param("cardId") String cardId, @Param("increment") int increment);
 
     Boolean existsByUserIdAndUrlHashAndDeletedAtIsNull(String value, String urlHash);
+
+    @Query("SELECT c.categoryId, COUNT(c) " +
+            "FROM CardEntity c " +
+            "WHERE c.userId = :userId " +
+            "AND c.categoryId BETWEEN 2 AND 10 " +
+            "GROUP BY c.categoryId")
+    List<Object[]> findCategoryExistenceByUserId(@Param("userId") String userId);
 }
