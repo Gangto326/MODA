@@ -21,7 +21,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import java.lang.reflect.Modifier
 
 
 @Composable
@@ -87,16 +86,16 @@ fun BottomBarComponent(navController: NavController, currentRoute: String) {
             NavigationBarItem(
                 icon = { Icon(Icons.Default.Search, contentDescription = "검색", tint = Color(0xFF000000)) },
                 label = { Text("검색", fontSize = 10.sp, color = Color(0xFF665F5B)) },
-                selected = currentRoute == "search",
+                selected = currentRoute == "afterSearch",
                 onClick = {
-                    if (currentRoute != "search") {
-                        navController.navigate("search") {
+                    if (currentRoute != "afterSearch") {
+                        navController.navigate("afterSearch") {
                             popUpTo("home")
                         }
                     }
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    indicatorColor = if (currentRoute == "search") Color(0xFFFFF9C4) else Color.Transparent
+                    indicatorColor = if (currentRoute == "afterSearch") Color(0xFFFFF9C4) else Color.Transparent
                 )
             )
 

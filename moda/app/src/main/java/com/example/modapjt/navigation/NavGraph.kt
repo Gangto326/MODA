@@ -33,6 +33,7 @@ import com.example.modapjt.screen2.cardlist.newSearchCardListScreen
 import com.example.modapjt.screen2.newBookMarkCardListScreen
 import com.example.modapjt.screen2.newCardListScreen
 import com.example.modapjt.screen2.search.NewSearchScreen
+import com.example.modapjt.screen2.search.oldSearchScreen
 import com.example.modapjt.screen2.user.MyPageScreen
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
@@ -181,8 +182,45 @@ fun NavGraph(
             )
         }
 
-        composable("search") {
-            NewSearchScreen(navController = navController)
+
+
+        composable("afterSearch") {
+            oldSearchScreen(navController = navController, currentRoute = currentRoute)
+        }
+
+
+        // Remove the simple "search" route and only keep the parameterized version
+        composable(
+            route = "search?query={query}",
+            arguments = listOf(
+                navArgument("query") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) { backStackEntry ->
+            val searchQuery = backStackEntry.arguments?.getString("query")
+            NewSearchScreen(
+                navController = navController,
+                // Pass searchQuery directly without the initialQuery parameter
+                searchQuery = searchQuery ?: ""
+            )
+        }
+
+        // Keep only one version of the search results screen
+        composable(
+            route = "newSearchCardListScreen/{searchQuery}",
+            arguments = listOf(
+                navArgument("searchQuery") { type = NavType.StringType }
+            )
+        ) { navBackStackEntry ->
+            val searchQuery = navBackStackEntry.arguments?.getString("searchQuery") ?: ""
+            newSearchCardListScreen(
+                navController = navController,
+                currentRoute = "newSearchCardListScreen",
+                initialQuery = searchQuery
+            )
         }
 
         // 설정 화면 (오버레이 활성화 여부 전달)

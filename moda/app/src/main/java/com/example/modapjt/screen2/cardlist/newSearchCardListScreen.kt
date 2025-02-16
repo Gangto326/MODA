@@ -2,19 +2,20 @@ package com.example.modapjt.screen2.cardlist
 
 import AllTabCard
 import BlogBig
-import ImageBig
 import NewsBig
 import TypeSelectBar
 import VideoBig
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.Interaction
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -57,19 +58,19 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.modapjt.R
 import com.example.modapjt.components.bar.BottomBarComponent
 import com.example.modapjt.components.cardtab.SwipableCardList
-import com.example.modapjt.datastore.SearchKeywordDataStore
 import com.example.modapjt.domain.viewmodel.CardUiState
 import com.example.modapjt.domain.viewmodel.CardViewModel
+import com.example.modapjt.domain.viewmodel.SearchViewModel
 import com.example.modapjt.screen2.MasonryImageGrid
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
+import com.example.modapjt.screen2.search.SearchSuggestions
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -77,7 +78,8 @@ fun newSearchCardListScreen(
     navController: NavController,
     currentRoute: String,
     initialQuery: String,
-    viewModel: CardViewModel = viewModel()
+    viewModel: CardViewModel = viewModel(),
+    searchViewModel: SearchViewModel = viewModel() // SearchViewModel 추가
 ) {
     var query by remember { mutableStateOf(initialQuery) }
     val selectedCategory by viewModel.selectedCategory.collectAsState()
@@ -110,7 +112,8 @@ fun newSearchCardListScreen(
                         viewModel.loadSearchCards(userId, searchQuery, selectedCategory, sortDirection)
                     }
                 },
-                navController = navController
+                navController = navController,
+                viewModel = searchViewModel // SearchViewModel 전달
             )
         },
         bottomBar = { BottomBarComponent(navController, currentRoute) }
@@ -292,147 +295,196 @@ fun newSearchCardListScreen(
     }
 }
 
+// NoRippleInteractionSource 객체 추가
+private object NoRippleInteractionSource : MutableInteractionSource {
+    override val interactions: Flow<Interaction> = emptyFlow()
+    override suspend fun emit(interaction: Interaction) {}
+    override fun tryEmit(interaction: Interaction) = true
+}
+
 @Composable
 fun SearchListBar(
     query: String,
     onQueryChange: (String) -> Unit,
     onSearch: (String) -> Unit,
     navController: NavController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: SearchViewModel = viewModel()
 ) {
     var searchText by remember { mutableStateOf(query) }
     val keyboardController = LocalSoftwareKeyboardController.current
-    val context = LocalContext.current
+    val searchResults by viewModel.searchResults.collectAsState()
+    var showSuggestions by remember { mutableStateOf(false) }
+    var lastQuery by remember { mutableStateOf("") }
 
-    Surface(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(56.dp),
-        color = Color.White
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 4.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(
-                onClick = { navController.navigateUp() },
-                modifier = Modifier.size(48.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Back",
-                    tint = Color.Black,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
+    LaunchedEffect(showSuggestions) {
+        if (showSuggestions) {
+            viewModel.fetchAutoCompleteKeywords(searchText)
+        }
+    }
 
-            // 테두리가 있는 검색창
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .border(
-                        width = 1.dp,
-                        color = Color(0xFFFFCC80),
-                        shape = RoundedCornerShape(8.dp)
-                    )
-                    .heightIn(min = 48.dp)
-                    .padding(horizontal = 8.dp),
-                contentAlignment = Alignment.CenterStart
+    Box(modifier = Modifier.fillMaxWidth()) {
+        Column {
+            Surface(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .zIndex(1f),
+                color = Color.White
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(start = 8.dp),
-                        contentAlignment = Alignment.CenterStart
+                    IconButton(
+                        onClick = { navController.navigateUp() },
+                        modifier = Modifier.size(48.dp),
+                        interactionSource = remember { NoRippleInteractionSource }
                     ) {
-                        if (searchText.isEmpty()) {
-                            Text(
-                                text = "찾고 싶은 내용을 입력하세요",
-                                color = Color.Gray,
-                                style = MaterialTheme.typography.bodyLarge.copy(
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Normal,
-                                    letterSpacing = 0.sp
-                                )
-                            )
-                        }
-
-                        BasicTextField(
-                            value = searchText,
-                            onValueChange = {
-                                searchText = it
-                                onQueryChange(it)
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp),
-                            textStyle = TextStyle(
-                                color = Color.Black,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Normal,
-                                letterSpacing = 0.sp,
-                                lineHeight = 24.sp,
-                            ),
-                            singleLine = true,
-                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                            keyboardActions = KeyboardActions(
-                                onSearch = {
-                                    if (searchText.isNotBlank()) {
-                                        onSearch(searchText)
-                                        keyboardController?.hide()
-                                        CoroutineScope(Dispatchers.IO).launch {
-                                            val currentKeywords = SearchKeywordDataStore.getKeywords(context).first()
-                                            val updatedKeywords = (listOf(searchText) + currentKeywords).distinct().take(10)
-                                            SearchKeywordDataStore.saveKeywords(context, updatedKeywords)
-                                        }
-                                    }
-                                }
-                            )
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back",
+                            tint = Color.Black,
+                            modifier = Modifier.size(24.dp)
                         )
                     }
 
-                    if (searchText.isNotEmpty()) {
-                        IconButton(
-                            onClick = {
-                                searchText = ""
-                                onQueryChange("")
-                            },
-                            modifier = Modifier.size(48.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Clear,
-                                contentDescription = "Clear text",
-                                tint = Color.Gray,
-                                modifier = Modifier.size(20.dp)
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .border(
+                                width = 1.dp,
+                                color = Color(0xFFFFCC80),
+                                shape = RoundedCornerShape(8.dp)
                             )
-                        }
-                    }
+                            .heightIn(min = 48.dp)
+                            .padding(horizontal = 8.dp)
+                            .clickable(
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() }
+                            ) {
+                                showSuggestions = true
+                                keyboardController?.show()
+                            }
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(start = 8.dp),
+                                contentAlignment = Alignment.CenterStart
+                            ) {
+                                if (searchText.isEmpty()) {
+                                    Text(
+                                        text = "찾고 싶은 내용을 입력하세요",
+                                        color = Color.Gray,
+                                        style = MaterialTheme.typography.bodyLarge.copy(
+                                            fontSize = 16.sp,
+                                            fontWeight = FontWeight.Normal,
+                                            letterSpacing = 0.sp
+                                        )
+                                    )
+                                }
 
-                    IconButton(
-                        onClick = {
-                            if (searchText.isNotBlank()) {
-                                onSearch(searchText)
-                                keyboardController?.hide()
-                                CoroutineScope(Dispatchers.IO).launch {
-                                    val currentKeywords = SearchKeywordDataStore.getKeywords(context).first()
-                                    val updatedKeywords = (listOf(searchText) + currentKeywords).distinct().take(10)
-                                    SearchKeywordDataStore.saveKeywords(context, updatedKeywords)
+                                BasicTextField(
+                                    value = searchText,
+                                    onValueChange = { newText ->
+                                        searchText = newText
+                                        onQueryChange(newText)
+                                        showSuggestions = true
+                                        viewModel.fetchAutoCompleteKeywords(newText)
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp),
+                                    textStyle = TextStyle(
+                                        color = Color.Black,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Normal,
+                                        letterSpacing = 0.sp,
+                                        lineHeight = 24.sp
+                                    ),
+                                    singleLine = true,
+                                    cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                                    keyboardActions = KeyboardActions(
+                                        onSearch = {
+                                            if (searchText.isNotBlank()) {
+                                                onSearch(searchText)
+                                                showSuggestions = false
+                                                keyboardController?.hide()
+                                            }
+                                        }
+                                    )
+                                )
+                            }
+
+                            if (searchText.isNotEmpty()) {
+                                IconButton(
+                                    onClick = {
+                                        searchText = ""
+                                        onQueryChange("")
+                                        lastQuery = ""
+                                    },
+                                    modifier = Modifier.size(48.dp),
+                                    interactionSource = remember { NoRippleInteractionSource }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Clear,
+                                        contentDescription = "Clear text",
+                                        tint = Color.Gray,
+                                        modifier = Modifier.size(20.dp)
+                                    )
                                 }
                             }
-                        },
-                        modifier = Modifier.size(48.dp)
+
+                            IconButton(
+                                onClick = {
+                                    if (searchText.isNotBlank()) {
+                                        onSearch(searchText)
+                                        showSuggestions = false
+                                        keyboardController?.hide()
+                                    }
+                                },
+                                modifier = Modifier.size(48.dp),
+                                interactionSource = remember { NoRippleInteractionSource }
+                            ) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.ic_search),
+                                    contentDescription = "Search Icon",
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (showSuggestions) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.White)
+                ) {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = Color.White,
+                        shadowElevation = 4.dp
                     ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.ic_search),
-                            contentDescription = "Search Icon",
-                            modifier = Modifier.size(20.dp)
+                        SearchSuggestions(
+                            suggestions = searchResults,
+                            onSearchSubmit = { suggestion ->
+                                searchText = suggestion
+                                lastQuery = suggestion
+                                onSearch(suggestion)
+                                showSuggestions = false
+                                keyboardController?.hide()
+                            }
                         )
                     }
                 }
@@ -440,7 +492,6 @@ fun SearchListBar(
         }
     }
 }
-
 @Composable
 fun EmptyMessage2(message: String) {
     Box(
