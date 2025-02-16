@@ -1,10 +1,8 @@
 package com.example.modapjt.components.home.section
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -21,7 +19,6 @@ import com.example.modapjt.domain.viewmodel.SearchViewModel
 @Composable
 fun WeeklyKeywordSection(
     homeKeywordViewModel: SearchViewModel,
-    userId: String,
     navController: NavController,
     searchViewModel: SearchViewModel
 ) {
@@ -38,7 +35,7 @@ fun WeeklyKeywordSection(
     }
 
     if (topKeywords.isNotEmpty()) {
-        WeeklyKeywordList(homeKeywordViewModel, userId)
+        WeeklyKeywordList(homeKeywordViewModel)
         Spacer(
             modifier = Modifier
                 .height(20.dp)

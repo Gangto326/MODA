@@ -11,35 +11,10 @@ import java.io.IOException
 class CardRepository {
     private val api = RetrofitInstance.cardApi
 
-//    // ✅ 전체탭 카드 리스트 가져오기 (api/search/main)
-//    suspend fun getAllTabCards(userId: String, query: String, categoryId: Int): Result<List<Card>> {
-//        return try {
-//            println("[CardRepository] 전체탭 API 요청: userId=$userId, categoryId=$categoryId, query=$query")
-//
-//            val response = api.getAllTabCardList(userId, query, categoryId)
-//            println("[CardRepository] 전체탭 응답 코드: ${response.code()}, 메시지: ${response.message()}")
-//
-//            if (response.isSuccessful) {
-//                val body = response.body()
-//                println("[CardRepository] 전체탭 응답 데이터: $body")
-//
-//                Result.success(body?.toDomain() ?: emptyList()) // ✅ 전체탭 응답 변환 적용
-//            } else {
-//                println("[CardRepository] 전체탭 응답 실패: ${response.errorBody()?.string()}")
-//                Result.failure(Exception("전체탭 카드 리스트 불러오기 실패 - ${response.message()}"))
-//            }
-//        } catch (e: IOException) {
-//            println("[CardRepository] 네트워크 오류 발생: ${e.message}")
-//            Result.failure(Exception("네트워크 오류 발생: ${e.message}"))
-//        } catch (e: Exception) {
-//            println("[CardRepository] 전체탭 API 요청 예외 발생: ${e.message}")
-//            Result.failure(e)
-//        }
-//    }
     // ✅ 전체탭 카드 리스트 가져오기 - 페이징 없음
-    suspend fun getAllTabCards(userId: String, query: String, categoryId: Int): Result<List<Card>> {
+    suspend fun getAllTabCards(query: String, categoryId: Int): Result<List<Card>> {
         return try {
-            val response = api.getAllTabCardList(userId, query, categoryId)
+            val response = api.getAllTabCardList(query, categoryId)
             println("[CardRepository] 전체탭 응답 코드: ${response.code()}, 메시지: ${response.message()}")
 
             if (response.isSuccessful) {
@@ -55,36 +30,8 @@ class CardRepository {
     }
 
 
-//    // ✅ 특정탭(이미지, 블로그, 뉴스, 영상) 카드 리스트 가져오기 (api/search)
-//    suspend fun getTabCards(userId: String, query: String, categoryId: Int, typeId: Int, sortDirection: String): Result<List<Card>> {
-//        return try {
-//            println("[CardRepository] 특정탭 API 요청: userId=$userId, categoryId=$categoryId, typeId=$typeId, sortDirection=$sortDirection")
-//
-////            val response = api.getTabCardList(userId, query, categoryId, typeId)
-//            val response = api.getTabCardList(userId, query, categoryId, typeId, sortDirection = sortDirection) // sortDirection 추가됨
-//
-//            println("[CardRepository] 특정탭 응답 코드: ${response.code()}, 메시지: ${response.message()}")
-//
-//            if (response.isSuccessful) {
-//                val body = response.body()
-//                println("[CardRepository] 특정탭 응답 데이터: $body")
-//
-//                Result.success(body?.toDomain() ?: emptyList()) // ✅ 특정탭 응답 변환 적용
-//            } else {
-//                println("[CardRepository] 특정탭 응답 실패: ${response.errorBody()?.string()}")
-//                Result.failure(Exception("특정탭 카드 리스트 불러오기 실패 - ${response.message()}"))
-//            }
-//        } catch (e: IOException) {
-//            println("[CardRepository] 네트워크 오류 발생: ${e.message}")
-//            Result.failure(Exception("네트워크 오류 발생: ${e.message}"))
-//        } catch (e: Exception) {
-//            println("[CardRepository] 특정탭 API 요청 예외 발생: ${e.message}")
-//            Result.failure(e)
-//        }
-//    }
     // ✅ 특정탭 카드 리스트 가져오기 - 페이징 포함
     suspend fun getTabCards(
-        userId: String,
         query: String,
         categoryId: Int,
         typeId: Int,
@@ -92,10 +39,9 @@ class CardRepository {
         sortDirection: String
     ): Result<Pair<List<Card>, Boolean>> {
         return try {
-            println("[CardRepository] 특정탭 API 요청: userId=$userId, categoryId=$categoryId, typeId=$typeId, sortDirection=$sortDirection")
+            println("[CardRepository] 특정탭 API 요청: categoryId=$categoryId, typeId=$typeId, sortDirection=$sortDirection")
 
             val response = api.getTabCardList(
-                userId = userId,
                 query = query,
                 categoryId = categoryId,
                 typeId = typeId,
@@ -181,35 +127,10 @@ class CardRepository {
         }
     }
 
-//    // 즐겨찾기 전체탭 카드 리스트 가져오기 (api/search/bookmark)
-//    suspend fun getAllTabBookMarkCards(userId: String): Result<List<Card>> {
-//        return try {
-//            println("[CardRepository] 전체탭 API 요청: userId=$userId")
-//
-//            val response = api.getAllTabBookMarkCardList(userId)
-//            println("[CardRepository] 전체탭 응답 코드: ${response.code()}, 메시지: ${response.message()}")
-//
-//            if (response.isSuccessful) {
-//                val body = response.body()
-//                println("[CardRepository] 전체탭 응답 데이터: $body")
-//
-//                Result.success(body?.toDomain() ?: emptyList()) // ✅ 전체탭 응답 변환 적용
-//            } else {
-//                println("[CardRepository] 전체탭 응답 실패: ${response.errorBody()?.string()}")
-//                Result.failure(Exception("전체탭 카드 리스트 불러오기 실패 - ${response.message()}"))
-//            }
-//        } catch (e: IOException) {
-//            println("[CardRepository] 네트워크 오류 발생: ${e.message}")
-//            Result.failure(Exception("네트워크 오류 발생: ${e.message}"))
-//        } catch (e: Exception) {
-//            println("[CardRepository] 전체탭 API 요청 예외 발생: ${e.message}")
-//            Result.failure(e)
-//        }
-//    }
     // ✅ 즐겨찾기 전체탭 카드 리스트 가져오기 - 페이징 없음
-    suspend fun getAllTabBookMarkCards(userId: String): Result<List<Card>> {
+    suspend fun getAllTabBookMarkCards(): Result<List<Card>> {
         return try {
-            val response = api.getAllTabBookMarkCardList(userId)
+            val response = api.getAllTabBookMarkCardList()
 
             if (response.isSuccessful) {
                 val body = response.body()
@@ -224,35 +145,8 @@ class CardRepository {
 
 
 
-//    // 즐겨찾기 특정탭(이미지, 블로그, 뉴스, 영상) 카드 리스트 가져오기 (api/search)
-//    suspend fun getTabBookMarkCards(userId: String, typeId: Int, page: Int, size: Int, sortDirection: String): Result<List<Card>> {
-//        return try {
-//            println("[CardRepository] 특정탭 API 요청: userId=$userId, typeId=$typeId, page=$page, size=$size, sortDirection=$sortDirection")
-//
-//            val response = api.getTabBookMarkCardList(userId, typeId, page, size, sortDirection = sortDirection) // sortDirection 추가됨
-//
-//            println("[CardRepository] 특정탭 응답 코드: ${response.code()}, 메시지: ${response.message()}")
-//
-//            if (response.isSuccessful) {
-//                val body = response.body()
-//                println("[CardRepository] 특정탭 응답 데이터: $body")
-//
-//                Result.success(body?.toDomain() ?: emptyList()) // ✅ 특정탭 응답 변환 적용
-//            } else {
-//                println("[CardRepository] 특정탭 응답 실패: ${response.errorBody()?.string()}")
-//                Result.failure(Exception("특정탭 카드 리스트 불러오기 실패 - ${response.message()}"))
-//            }
-//        } catch (e: IOException) {
-//            println("[CardRepository] 네트워크 오류 발생: ${e.message}")
-//            Result.failure(Exception("네트워크 오류 발생: ${e.message}"))
-//        } catch (e: Exception) {
-//            println("[CardRepository] 특정탭 API 요청 예외 발생: ${e.message}")
-//            Result.failure(e)
-//        }
-//    }
     // ✅ 즐겨찾기 특정탭 카드 리스트 가져오기 - 페이징 포함
     suspend fun getTabBookMarkCards(
-        userId: String,
         typeId: Int,
         page: Int,
         size: Int = 15,
@@ -260,7 +154,6 @@ class CardRepository {
     ): Result<Pair<List<Card>, Boolean>> {
         return try {
             val response = api.getTabBookMarkCardList(
-                userId = userId,
                 typeId = typeId,
                 page = page,
                 size = size,

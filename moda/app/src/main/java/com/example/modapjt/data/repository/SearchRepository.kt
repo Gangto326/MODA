@@ -44,31 +44,30 @@ class SearchRepository(private val api: SearchApiService) {
 
     /**
      * 검색 API를 호출하여 데이터를 가져옴
-     * @param userId 사용자 ID
      * @param onSuccess 성공 시 데이터를 반환하는 콜백 함수
      * @param onFailure 실패 시 호출될 콜백 함수
      */
-    suspend fun getSearchData(userId: String): SearchResponse? {
+    suspend fun getSearchData(): SearchResponse? {
         return try {
-            api.searchMain(userId)
+            api.searchMain()
         } catch (e: Exception) {
             e.printStackTrace()
             null
         }
     }
 
-    suspend fun getHomeKeyword(userId: String): HomeKeywordResponse {
+    suspend fun getHomeKeyword(): HomeKeywordResponse {
         return try {
-            api.homeKeyword(userId) // 전체 HomeKeywordResponse 반환
+            api.homeKeyword() // 전체 HomeKeywordResponse 반환
         } catch (e: Exception) {
             Log.e("HomeKeywordRepository", "Error fetching home keyword", e)
             HomeKeywordResponse(emptyList(), "") // 에러 발생 시 빈 데이터 반환
         }
     }
 
-    suspend fun getSearchDataByKeyword(keyword: String, userId: String): List<KeywordSearchResponse>? {
+    suspend fun getSearchDataByKeyword(keyword: String): List<KeywordSearchResponse>? {
         return try {
-            api.getSearchDataByKeyword(keyword, userId) // ✅ API 응답을 리스트로 받음
+            api.getSearchDataByKeyword(keyword) // ✅ API 응답을 리스트로 받음
         } catch (e: Exception) {
             e.printStackTrace()
             emptyList()

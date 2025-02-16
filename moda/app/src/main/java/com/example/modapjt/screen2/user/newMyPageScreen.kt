@@ -55,7 +55,6 @@ import com.example.modapjt.overlay.OverlayStateManager
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MyPageScreen(
-    userId: String,
     navController: NavController,
     currentRoute: String = ""
 ) {
@@ -105,9 +104,8 @@ fun MyPageScreen(
         }
     }
 
-    LaunchedEffect(userId) {
-        viewModel.fetchUser(userId)
-        viewModel.fetchInterestKeywords(userId)
+    LaunchedEffect(Unit) {
+        viewModel.fetchUser()
     }
 
     val user by viewModel.user.collectAsState()

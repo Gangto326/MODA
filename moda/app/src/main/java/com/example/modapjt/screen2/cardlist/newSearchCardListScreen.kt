@@ -2,7 +2,6 @@ package com.example.modapjt.screen2.cardlist
 
 import AllTabCard
 import BlogBig
-import ImageBig
 import NewsBig
 import TypeSelectBar
 import VideoBig
@@ -12,9 +11,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -85,13 +82,12 @@ fun newSearchCardListScreen(
     val uiState by viewModel.uiState.collectAsState()
     val loadingMore by viewModel.loadingMore.collectAsState()
     val context = LocalContext.current
-    val userId = "user"
 
     LaunchedEffect(query, selectedCategory, selectedSort) {
         if (query.isNotBlank()) {
             viewModel.resetPagination()
             val sortDirection = if (selectedSort == "최신순") "DESC" else "ASC"
-            viewModel.loadSearchCards(userId, query, selectedCategory, sortDirection)
+            viewModel.loadSearchCards(query, selectedCategory, sortDirection)
         }
     }
 
@@ -107,7 +103,7 @@ fun newSearchCardListScreen(
                         query = searchQuery
                         viewModel.resetPagination()
                         val sortDirection = if (selectedSort == "최신순") "DESC" else "ASC"
-                        viewModel.loadSearchCards(userId, searchQuery, selectedCategory, sortDirection)
+                        viewModel.loadSearchCards(searchQuery, selectedCategory, sortDirection)
                     }
                 },
                 navController = navController

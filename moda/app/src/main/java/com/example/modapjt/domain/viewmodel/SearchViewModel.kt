@@ -53,11 +53,10 @@ class SearchViewModel : ViewModel() {
     }
 
     // ✅ 새로고침 또는 첫 화면 진입 시 API 호출
-    fun loadSearchData(userId: String) {
+    fun loadSearchData() {
         viewModelScope.launch {
             try {
-                println("[SearchViewModel] API 호출: 사용자 ID = $userId")
-                val response = repository.getSearchData(userId)
+                val response = repository.getSearchData()
                 _searchData.value = response
                 println("[SearchViewModel] 데이터 로드 완료")
             } catch (e: Exception) {
@@ -69,10 +68,10 @@ class SearchViewModel : ViewModel() {
 
 
     // ✅ 이번주 키워드 5개 가지고 오는 API 호출
-    fun fetchHomeKeywords(userId: String) {
+    fun fetchHomeKeywords() {
         viewModelScope.launch {
             try {
-                val response = repository.getHomeKeyword(userId)
+                val response = repository.getHomeKeyword()
                 _topKeywords.value = response.topKeywords // ✅ 키워드 리스트 업데이트
                 _creator.value = response.creator // ✅ creator 업데이트
             } catch (e: Exception) {
@@ -85,14 +84,14 @@ class SearchViewModel : ViewModel() {
 
 
     // ✅ 키워드 검색 시 API 호출 (KeywordSearchResponse 저장)
-    fun updateKeywordAndFetchData(keyword: String, userId: String) {
+    fun updateKeywordAndFetchData(keyword: String) {
         if (_selectedKeyword.value == keyword) return // 이미 선택된 키워드면 무시
         _selectedKeyword.value = keyword
 
         viewModelScope.launch {
             try {
                 println("[SearchViewModel] 키워드 검색 API 호출: $keyword")
-                val response = repository.getSearchDataByKeyword(keyword, userId)
+                val response = repository.getSearchDataByKeyword(keyword)
                 _keywordSearchData.value = response ?: emptyList() // ✅ 키워드 검색 결과만 업데이트
                 println("[SearchViewModel] 키워드 검색 데이터 로드 완료")
             } catch (e: Exception) {

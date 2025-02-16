@@ -13,10 +13,10 @@
 //    private val _user = MutableStateFlow<User?>(null)
 //    val user: StateFlow<User?> get() = _user
 //
-//    fun fetchUser(userId: String) {
+//    fun fetchUser() {
 //        viewModelScope.launch {
 //            try {
-//                val response = RetrofitInstance.userApi.getUserProfile(userId) // ✅ API 호출
+//                val response = RetrofitInstance.userApi.getUserProfile() // ✅ API 호출
 //                _user.value = response.toDomainModel() // ✅ 데이터 변환 후 저장
 //            } catch (e: Exception) {
 //                _user.value = null

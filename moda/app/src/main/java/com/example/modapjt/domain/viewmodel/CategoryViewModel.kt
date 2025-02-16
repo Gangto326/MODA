@@ -17,9 +17,9 @@ class CategoryViewModel : ViewModel() {
     private val _categoryName = MutableStateFlow("전체") // 기본값 설정
     val categoryName: StateFlow<String> = _categoryName
 
-    fun loadCategories(userId: String) {
+    fun loadCategories() {
         viewModelScope.launch {
-            val result = repository.getCategories(userId)
+            val result = repository.getCategories()
             if (result.isSuccess) {
                 _categories.value = result.getOrNull() ?: emptyList()
             }

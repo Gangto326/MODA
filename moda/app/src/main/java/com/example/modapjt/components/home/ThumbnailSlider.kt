@@ -22,7 +22,6 @@ import kotlinx.coroutines.delay
 fun ThumbnailSlider(
     viewModel: SearchViewModel = viewModel(),
     navController: NavController,
-    userId: String
 ) {
     val searchData by viewModel.searchData.collectAsState()
 
@@ -30,15 +29,15 @@ fun ThumbnailSlider(
     var dragOffset by remember { mutableStateOf(0f) }
     val dragThreshold = 100f
 
-    // ✅ 홈 화면에서 API 자동 호출
-    LaunchedEffect(userId) {
-        viewModel.loadSearchData(userId)
+    // 홈 화면에서 API 자동 호출
+    LaunchedEffect(searchData) { // ✅ LaunchedEffect()의 key에 searchData를 추가하여 검색 데이터가 변경될 때만 실행하도록 수정
+        viewModel.loadSearchData()
     }
 
-    // ✅ 4초마다 자동 슬라이드 추가
+    // 4초마다 자동 슬라이드 추가
     LaunchedEffect(currentIndex) {
         while (true) {
-            delay(4000) // ✅ 4초마다 자동 슬라이드
+            delay(4000) // 4초마다 자동 슬라이드
             searchData?.thumbnails?.let { thumbnails ->
                 if (thumbnails.isNotEmpty()) {
                     currentIndex = (currentIndex + 1) % thumbnails.size

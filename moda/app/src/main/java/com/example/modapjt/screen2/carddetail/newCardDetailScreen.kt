@@ -123,7 +123,7 @@ fun newCardDetailScreen(
     viewModel: CardDetailViewModel = viewModel()
 ) {
     LaunchedEffect(cardId) {
-        viewModel.loadCardDetail(userId = "user", cardId = cardId)  // ✅ userId 수정 필요
+        viewModel.loadCardDetail(cardId)
     }
 
     val uiState by viewModel.uiState.collectAsState()

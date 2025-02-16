@@ -226,7 +226,6 @@ package com.example.modapjt.screen2
 
 import AllTabCard
 import BlogBig
-import ImageBig
 import NewsBig
 import TypeSelectBar
 import VideoBig
@@ -234,10 +233,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -275,14 +271,13 @@ fun newBookMarkCardListScreen(
     var selectedSort by remember { mutableStateOf("최신순") }
     val uiState by viewModel.uiState.collectAsState()
     val loadingMore by viewModel.loadingMore.collectAsState()
-    val userId = "user"
 
     LaunchedEffect(selectedCategory, selectedSort) {
         viewModel.resetPagination()
         val sortDirection = if (selectedSort == "최신순") "DESC" else "ASC"
 
         if (selectedCategory == "전체") {
-            viewModel.loadAllBookmarkedCards(userId)
+            viewModel.loadAllBookmarkedCards()
         } else {
             val typeId = when (selectedCategory) {
                 "이미지" -> 4
@@ -291,7 +286,7 @@ fun newBookMarkCardListScreen(
                 "동영상" -> 1
                 else -> 0
             }
-            viewModel.loadBookmarkedCards(userId, typeId, sortDirection)
+            viewModel.loadBookmarkedCards(typeId, sortDirection)
         }
     }
 
@@ -449,7 +444,7 @@ fun newBookMarkCardListScreen(
                                                     "동영상" -> 1
                                                     else -> 0
                                                 }
-                                                viewModel.loadBookmarkedCards(userId, typeId, sortDirection, true)
+                                                viewModel.loadBookmarkedCards(typeId, sortDirection, true)
                                             }
                                         }
                                     }

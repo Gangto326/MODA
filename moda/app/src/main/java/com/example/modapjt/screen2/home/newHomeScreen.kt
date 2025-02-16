@@ -60,10 +60,9 @@ fun newHomeScreen(
     val creator by homeKeywordViewModel.creator.collectAsState()
 
     // ✅ 로그인된 유저 ID를 가져온다고 가정 (예: SharedPreferences에서 가져오기)
-    val userId = remember { "user" } // 실제 앱에서는 여기를 로그인된 유저 ID로 변경해야 함
 
     LaunchedEffect(Unit) {
-        homeKeywordViewModel.fetchHomeKeywords("user") // userId 전달
+        homeKeywordViewModel.fetchHomeKeywords()
     }
 
 
@@ -125,7 +124,7 @@ fun newHomeScreen(
             }
 
             item {
-                ThumbnailSlider(viewModel = searchViewModel, navController = navController, userId = "user123")
+                ThumbnailSlider(viewModel = searchViewModel, navController = navController)
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
@@ -138,7 +137,6 @@ fun newHomeScreen(
             item {
                 WeeklyKeywordSection(
                     homeKeywordViewModel = homeKeywordViewModel,
-                    userId = userId,
                     navController = navController,
                     searchViewModel = searchViewModel
                 )

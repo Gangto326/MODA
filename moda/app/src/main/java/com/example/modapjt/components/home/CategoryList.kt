@@ -30,7 +30,7 @@ fun CategoryList(
     val categories by viewModel.categories.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.loadCategories("user")
+        viewModel.loadCategories()
     }
 
     Column(

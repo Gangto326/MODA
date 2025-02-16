@@ -2,7 +2,6 @@ package com.example.modapjt.screen2
 
 import AllTabCard
 import BlogBig
-import ImageBig
 import NewsBig
 import TypeSelectBar
 import VideoBig
@@ -10,8 +9,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -54,16 +51,15 @@ fun newCardListScreen(
     var selectedSort by remember { mutableStateOf("최신순") }
     val uiState by viewModel.uiState.collectAsState()
     val loadingMore by viewModel.loadingMore.collectAsState()
-    val userId = "user"
     val categoryName by categoryViewModel.categoryName.collectAsState()
 
     // 카테고리나 정렬 변경시 페이지네이션 리셋
     LaunchedEffect(categoryId, selectedCategory, selectedSort) {
         viewModel.resetPagination()
         val sortDirection = if (selectedSort == "최신순") "DESC" else "ASC"
-        categoryViewModel.loadCategories(userId)
+        categoryViewModel.loadCategories()
         categoryId?.let {
-            viewModel.loadCards(userId, it, selectedCategory, sortDirection)
+            viewModel.loadCards(it, selectedCategory, sortDirection)
             categoryViewModel.updateCategoryName(it)
         }
     }
@@ -91,7 +87,7 @@ fun newCardListScreen(
                         if (state.blogs.isNotEmpty() && !loadingMore && selectedCategory == "블로그") {
                             val sortDirection = if (selectedSort == "최신순") "DESC" else "ASC"
                             categoryId?.let {
-                                viewModel.loadCards(userId, it, selectedCategory, sortDirection, true)
+                                viewModel.loadCards(it, selectedCategory, sortDirection, true)
                             }
                         }
                     }
@@ -101,7 +97,7 @@ fun newCardListScreen(
                         if (state.videos.isNotEmpty() && !loadingMore && selectedCategory == "동영상") {
                             val sortDirection = if (selectedSort == "최신순") "DESC" else "ASC"
                             categoryId?.let {
-                                viewModel.loadCards(userId, it, selectedCategory, sortDirection, true)
+                                viewModel.loadCards(it, selectedCategory, sortDirection, true)
                             }
                         }
                     }
@@ -111,7 +107,7 @@ fun newCardListScreen(
                         if (state.news.isNotEmpty() && !loadingMore && selectedCategory == "뉴스") {
                             val sortDirection = if (selectedSort == "최신순") "DESC" else "ASC"
                             categoryId?.let {
-                                viewModel.loadCards(userId, it, selectedCategory, sortDirection, true)
+                                viewModel.loadCards(it, selectedCategory, sortDirection, true)
                             }
                         }
                     }
