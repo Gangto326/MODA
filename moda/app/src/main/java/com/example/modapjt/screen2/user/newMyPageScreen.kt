@@ -48,6 +48,7 @@ import com.example.modapjt.components.setting.SettingItem
 import com.example.modapjt.components.user.InterestKeywords
 import com.example.modapjt.components.user.MyPageHeader
 import com.example.modapjt.components.user.UserProfileCard
+import com.example.modapjt.domain.viewmodel.AuthViewModel
 import com.example.modapjt.domain.viewmodel.UserViewModel
 import com.example.modapjt.overlay.OverlayService
 import com.example.modapjt.overlay.OverlayStateManager
@@ -56,6 +57,7 @@ import com.example.modapjt.overlay.OverlayStateManager
 @Composable
 fun MyPageScreen(
     navController: NavController,
+    authViewModel: AuthViewModel, // ✅ AuthViewModel 추가
     currentRoute: String = ""
 ) {
     val viewModel: UserViewModel = viewModel()
@@ -222,13 +224,18 @@ fun MyPageScreen(
 
                     // ✅ LazyColumn 내부에서 다이얼로그 호출
                     if (showLogoutDialog) {
+//                        LogoutDialog(
+//                            onConfirm = {
+//                                showLogoutDialog = false
+//                                navController.navigate("login") {
+//                                    popUpTo("home") { inclusive = true }
+//                                }
+//                            },
+//                            onDismiss = { showLogoutDialog = false }
+//                        )
                         LogoutDialog(
-                            onConfirm = {
-                                showLogoutDialog = false
-                                navController.navigate("login") {
-                                    popUpTo("home") { inclusive = true }
-                                }
-                            },
+                            viewModel = authViewModel, // ✅ AuthViewModel 전달
+                            navController = navController,
                             onDismiss = { showLogoutDialog = false }
                         )
                     }
@@ -239,14 +246,39 @@ fun MyPageScreen(
 }
 
 // ✅ 별도 @Composable 함수로 로그아웃 다이얼로그 분리
+//@Composable
+//fun LogoutDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+//    AlertDialog(
+//        onDismissRequest = onDismiss,
+//        title = { Text("로그아웃") },
+//        text = { Text("로그아웃 하시겠습니까?") },
+//        confirmButton = {
+//            Button(onClick = onConfirm) {
+//                Text("확인")
+//            }
+//        },
+//        dismissButton = {
+//            Button(onClick = onDismiss) {
+//                Text("취소")
+//            }
+//        }
+//    )
+//}
 @Composable
-fun LogoutDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+fun LogoutDialog(viewModel: AuthViewModel, navController: NavController, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("로그아웃") },
         text = { Text("로그아웃 하시겠습니까?") },
         confirmButton = {
-            Button(onClick = onConfirm) {
+            Button(onClick = {
+                viewModel.logout {
+                    navController.navigate("home") {
+                        popUpTo("home") { inclusive = true }
+                    }
+                }
+                onDismiss()
+            }) {
                 Text("확인")
             }
         },
@@ -257,3 +289,4 @@ fun LogoutDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
         }
     )
 }
+

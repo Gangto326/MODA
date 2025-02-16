@@ -36,12 +36,31 @@ class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
         _isLoggedIn.value = !tokenManager.getAccessToken().isNullOrEmpty()
     }
 
-    fun logout() {
+//    fun logout() {
+//        viewModelScope.launch {
+//            tokenManager.clearTokens() // 토큰 삭제
+//            _isLoggedIn.value = false
+//        }
+//    }
+    // -> 토큰 삭제만 하고 API요청안하고 있어서 아래 코드로 변경
+    fun logout(onLogoutSuccess: () -> Unit) {
         viewModelScope.launch {
-            tokenManager.clearTokens() // ✅ 토큰 삭제
-            _isLoggedIn.value = false
+            try {
+                val response = RetrofitInstance.userApi.logout()
+
+                if (response.isSuccessful) {
+                    tokenManager.clearTokens() // 토큰 삭제
+                    _isLoggedIn.value = false
+                    onLogoutSuccess() // 로그아웃 성공 시 실행할 콜백
+                } else {
+                    Log.e("AuthViewModel", "로그아웃 실패: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                Log.e("AuthViewModel", "로그아웃 중 오류 발생", e)
+            }
         }
     }
+
 
     fun onLoginEvent(event: LoginEvent) {
         when (event) {

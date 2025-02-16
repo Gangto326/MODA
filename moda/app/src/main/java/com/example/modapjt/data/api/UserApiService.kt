@@ -4,6 +4,7 @@ import com.example.modapjt.data.dto.request.LoginRequest
 import com.example.modapjt.data.dto.response.UserProfileResponse
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 
@@ -21,8 +22,14 @@ interface UserApiService {
 //    suspend fun getUserSignup(
 //        @Body userSignupRequest: UserSignupRequest
 //    ): Response<Boolean>
+
+    // 로그인
     @POST("/api/user/login")
     suspend fun login(@Body request: LoginRequest): Response<Boolean>
+
+    // 로그아웃 : 응답 처리 X
+    @DELETE("/api/user/logout")
+    suspend fun logout(): Response<Unit>
 
 
 }

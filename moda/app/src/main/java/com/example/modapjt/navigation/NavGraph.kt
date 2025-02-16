@@ -135,9 +135,9 @@ fun NavGraph(
 //            newCardDetailScreen(navController, currentRoute = "card_detail_test")
 //        }
 
-        composable("mypage") { backStackEntry ->
+        composable("mypage/user") { backStackEntry ->
 //            val userId = backStackEntry.arguments?.getString("userId") ?: "user"
-            MyPageScreen(navController = navController, currentRoute = "mypage")
+            MyPageScreen(navController = navController, currentRoute = "mypage", authViewModel = authViewModel)
         }
 
 

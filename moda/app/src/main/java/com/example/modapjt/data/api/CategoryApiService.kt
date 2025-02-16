@@ -12,6 +12,6 @@ import retrofit2.http.GET
 //}
 
 interface CategoryApiService {
-    @GET("/api/categories")
+    @GET("/api/category")
     suspend fun getCategories(): Response<List<CategoryDTO>>
 }

@@ -20,6 +20,15 @@ class TokenInterceptor(private val tokenManager: TokenManager) : Interceptor {
         val originalRequest = chain.request()
         val accessToken = tokenManager.getAccessToken()
 
+        // 원본 요청 정보 로깅
+        Log.d(TAG, """
+        Original Request:
+        URL: ${originalRequest.url}
+        Method: ${originalRequest.method}
+        Headers: ${originalRequest.headers}
+    """.trimIndent())
+
+
         Log.d(TAG, "Original AccessToken: $accessToken")
 
         // 토큰이 있으면 헤더에 추가
