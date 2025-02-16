@@ -16,6 +16,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.stereotype.Service;
 
 import com.moda.moda_api.common.infrastructure.ImageStorageService;
+import com.moda.moda_api.crawling.application.service.WebDriverService;
 import com.moda.moda_api.crawling.domain.model.CrawledContent;
 import com.moda.moda_api.crawling.domain.model.ExtractedContent;
 import com.moda.moda_api.crawling.domain.model.Url;
@@ -32,12 +33,15 @@ import lombok.extern.slf4j.Slf4j;
 public class AbstractExtractor {
 	private final PlatformExtractorFactory extractorFactory;
 	private final ImageStorageService imageStorageService;
-	private final WebDriver driver;
+	private final WebDriverService webDriverService;
 
 	// URL을 추출하는 Method
 	public List<Url> extractUrl(String url) {
+		WebDriver driver = null;
 
 		try {
+			driver = webDriverService.getDriver();
+
 			ExtractorConfig config = extractorFactory.getConfig(url);
 			driver.get(url);
 
@@ -79,8 +83,11 @@ public class AbstractExtractor {
 
 	// 추출하는 매서드
 	public CrawledContent extract(String url) throws Exception {
+		WebDriver driver = null;
 
 		try {
+			driver = webDriverService.getDriver();
+
 			ExtractorConfig config = extractorFactory.getConfig(url);
 			System.out.println(config.getPattern());
 
@@ -104,7 +111,7 @@ public class AbstractExtractor {
 		} catch (Exception e) {
 			throw new Exception("Failed to crawl content: " + e.getMessage());
 		} finally {
-			if (driver.switchTo() != null) {
+			if (driver != null && driver.switchTo() != null) {  // driver null 체크 추가
 				driver.switchTo().defaultContent();
 			}
 		}

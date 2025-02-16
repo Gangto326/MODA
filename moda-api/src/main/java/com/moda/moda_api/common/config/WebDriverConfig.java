@@ -13,11 +13,8 @@ import org.springframework.context.annotation.Scope;
 public class WebDriverConfig {
 
 	@Bean
-	@Scope("prototype")
-	public WebDriver webDriver() {
+	public ChromeOptions chromeOptions() {
 		ChromeOptions options = new ChromeOptions();
-
-		// 기존 옵션 유지
 		options.addArguments("--disable-blink-features=AutomationControlled");
 		options.setExperimentalOption("excludeSwitches", Arrays.asList("enable-automation"));
 		options.setExperimentalOption("useAutomationExtension", false);
@@ -28,7 +25,12 @@ public class WebDriverConfig {
 		options.addArguments("--remote-allow-origins=*");
 		options.addArguments("--disable-extensions");
 		options.addArguments("--headless");
+		return options;
+	}
 
-		return new ChromeDriver(options);
+	@Bean
+	@Scope("prototype")
+	public WebDriver webDriver(ChromeOptions chromeOptions) {
+		return new ChromeDriver(chromeOptions);
 	}
 }
