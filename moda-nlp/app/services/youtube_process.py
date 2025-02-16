@@ -1,3 +1,4 @@
+import asyncio
 import json
 from typing import List
 
@@ -11,7 +12,6 @@ from app.services.embedding import Embedding
 
 class YoutubeProcess:
     MAX_CATEGORY_TRIES = 10
-    MODEL = 'kwangsuklee/Qwen2.5-14B-Gutenberg-1e-Delta.Q5_K_M'
 
     def __init__(self, origin_paragraph: List[TitleAndContent]):
         self.origin_content = json.dumps([p.model_dump() for p in origin_paragraph], ensure_ascii=False)
@@ -25,10 +25,12 @@ class YoutubeProcess:
 
     #YoutubeProcess 객체가 실행되면 가장 먼저 실행되는 함수
     async def execute(self):
-        self.process_paragraph()
-        self.choose_category()
-        self.make_keywords()
-        self.make_embedding_vector()
+        self.process_paragraph('kwangsuklee/Qwen2.5-14B-Gutenberg-1e-Delta.Q5_K_M')
+        await asyncio.gather(
+            self.choose_category('anpigon/qwen2.5-7b-instruct-kowiki'),
+            self.make_keywords('anpigon/qwen2.5-7b-instruct-kowiki'),
+            self.make_embedding_vector()
+        )
 
     #Response 형태로 만들어주는 함수
     def get_response(self) -> YoutubeResponse:
@@ -42,7 +44,7 @@ class YoutubeProcess:
     #ollama 채팅을 진행하는 함수
     def chat(self,
              messages,
-             model: str = MODEL,
+             model: str,
              format = None):
         response = ollama.chat(
             model = model,
@@ -52,8 +54,7 @@ class YoutubeProcess:
         return response['message']['content']
 
     #origin_paragraph의 데이터를 처리하는 함수
-    def process_paragraph(self):
-        model = self.MODEL
+    def process_paragraph(self, model: str):
         messages = make_process_prompt(self.origin_content)
         format = None
 
@@ -61,8 +62,7 @@ class YoutubeProcess:
         self.content = str(response).removeprefix("```markdown\n").removesuffix("```")
 
     #category를 선택하는 함수
-    def choose_category(self):
-        model = self.MODEL
+    async def choose_category(self, model: str):
         messages = make_category_prompt(self.content)
         format = {
             'type': 'object',
@@ -96,8 +96,7 @@ class YoutubeProcess:
             self.category = 'ALL'
 
     #keywords를 생성하는 함수
-    def make_keywords(self):
-        model = self.MODEL
+    async def make_keywords(self, model: str):
         messages = make_keywords_content_prompt(self.content)
         format = {
             'type': 'object',
@@ -117,5 +116,5 @@ class YoutubeProcess:
         self.keywords = [keyword for keyword in self.keywords if keyword in self.content]
 
     #embeeding_vector를 생성하는 함수
-    def make_embedding_vector(self):
+    async def make_embedding_vector(self):
         self.embedding_vector = self.embedder.embed_document(self.content)

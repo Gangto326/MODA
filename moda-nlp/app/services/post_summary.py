@@ -1,3 +1,4 @@
+import asyncio
 import json
 
 import ollama
@@ -11,7 +12,6 @@ from app.services.embedding import Embedding
 
 class PostSummary:
     MAX_CATEGORY_TRIES = 10
-    MODEL = 'kwangsuklee/Qwen2.5-14B-Gutenberg-1e-Delta.Q5_K_M'
 
     def __init__(self, origin_content: str):
         self.origin_content = origin_content
@@ -26,16 +26,13 @@ class PostSummary:
 
     #PostSummary 객체가 실행되면 가장 먼저 실행되는 함수
     async def execute(self):
-        self.choose_category()
-        print(f"1. 카테고리 선택 완료 - {self.category}")
-        self.summary_content()
-        print("2. 컨텐츠 요약 완료")
-        self.make_keywords()
-        print(f"3. 핵심 키워드 선택 완료 - {self.keywords}")
-        self.make_thumbnail_content()
-        print(f"4. 썸네일 작성 완료 - {self.thumbnail_content}")
-        self.make_embedding_vector()
-        print(f"5. 임베딩 벡터 생성 완료")
+        self.choose_category('anpigon/qwen2.5-7b-instruct-kowiki')
+        self.summary_content('kwangsuklee/Qwen2.5-14B-Gutenberg-1e-Delta.Q5_K_M')
+        await asyncio.gather(
+            self.make_keywords('anpigon/qwen2.5-7b-instruct-kowiki'),
+            self.make_thumbnail_content('anpigon/qwen2.5-7b-instruct-kowiki'),
+            self.make_embedding_vector()
+        )
 
     #Response 형태로 만들어주는 함수
     def get_response(self) -> PostResponse:
@@ -50,7 +47,7 @@ class PostSummary:
     #ollama 채팅을 진행하는 함수
     def chat(self,
              messages,
-             model: str = MODEL,
+             model: str,
              format = None):
         response = ollama.chat(
             model = model,
@@ -60,8 +57,7 @@ class PostSummary:
         return response['message']['content']
 
     #category를 선택하는 함수
-    def choose_category(self):
-        model = self.MODEL
+    def choose_category(self, model: str):
         messages = make_category_prompt(self.origin_content)
         format = {
             'type': 'object',
@@ -97,10 +93,9 @@ class PostSummary:
             self.category = 'All'
 
     #origin_content를 요약하는 함수
-    def summary_content(self):
+    def summary_content(self, model: str):
         has_html_tag = any(tag in self.origin_content for tag in ['<h1>', '<h2>', '<h3>'])
 
-        model = self.MODEL
         messages = make_summary_prompt(self.category, self.origin_content, has_html_tag)
         format = None
 
@@ -108,8 +103,7 @@ class PostSummary:
         self.content = str(response).removeprefix("```markdown\n").removesuffix("```")
 
     #keywords를 생성하는 함수
-    def make_keywords(self):
-        model = self.MODEL
+    async def make_keywords(self, model: str):
         messages = make_keywords_content_prompt(self.content)
         format = {
             'type': 'object',
@@ -129,8 +123,7 @@ class PostSummary:
         self.keywords = [keyword for keyword in self.keywords if keyword in self.content]
 
     # thumbnail_content를 생성하는 함수
-    def make_thumbnail_content(self):
-        model = self.MODEL
+    async def make_thumbnail_content(self, model: str):
         messages = make_thumbnail_content_prompt(self.content)
         format = None
 
@@ -138,5 +131,5 @@ class PostSummary:
         self.thumbnail_content = response
 
     #embeeding_vector를 생성하는 함수
-    def make_embedding_vector(self):
+    async def make_embedding_vector(self):
         self.embedding_vector = self.embedder.embed_document(self.content)

@@ -2,13 +2,11 @@ def make_category_prompt(content:str):
     return [
         {
             'role': 'system',
-            'content': 'Only print out the categories requested by the user, and do not say anything else.'
+            'content': '사용자에게서 주어진 카테고리 중 하나를 선택해줘\n절대 다른 선택지는 고르지 마'
         },
         {
             'role': 'user',
-            'content': f'''Please choose one of the categories from the image and content given and tell me just the categories.
-Don't say anything else and just tell me the categories.
-['Trends', 'Entertainment', 'Finance', 'Travel', 'Food', 'IT', 'Design', 'Society', 'Health']
+            'content': f'''Treands, Entertainment, Fiance, Travel, Food, IT, Design, Society, Health 중에서 주어진 내용과 가장 적합한 카테고리를 선택해줘\절대 다른 카테고리는 선택하지 말아줘
 
 {content}
 '''
@@ -33,7 +31,7 @@ def make_keywords_content_prompt(content: str):
     return [
         {
             'role': 'system',
-            'content': '''다음 규칙을 반드시 따라주세요:
+            'content': '''# 다음 규칙을 반드시 따라주세요
 - 주요 개념이나 주제를 대표하는 단어나 구만 선택
 - 각 키워드는 1-3단어로 제한
 - 불필요한 조사나 부사는 제외
@@ -42,7 +40,7 @@ def make_keywords_content_prompt(content: str):
         },
         {
             'role': 'user',
-            'content': f'당신은 텍스트에서 가장 중요한 핵심 키워드를 추출하는 전문가입니다.\n다음 텍스트에서 가장 중요한 핵심 키워드 3-5개를 추출해주세요:\n\n{content}'
+            'content': f'# 다음 텍스트에서 가장 중요한 핵심 키워드 3-5개를 추출해주세요\n\n{content}'
         }
     ]
 
