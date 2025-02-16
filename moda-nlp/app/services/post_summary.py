@@ -27,10 +27,15 @@ class PostSummary:
     #PostSummary 객체가 실행되면 가장 먼저 실행되는 함수
     async def execute(self):
         self.choose_category()
+        print(f"1. 카테고리 선택 완료 - {self.category}")
         self.summary_content()
+        print("2. 컨텐츠 요약 완료")
         self.make_keywords()
+        print(f"3. 핵심 키워드 선택 완료 - {self.keywords}")
         self.make_thumbnail_content()
+        print(f"4. 썸네일 작성 완료 - {self.thumbnail_content}")
         self.make_embedding_vector()
+        print(f"5. 임베딩 벡터 생성 완료")
 
     #Response 형태로 만들어주는 함수
     def get_response(self) -> PostResponse:
