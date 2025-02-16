@@ -343,47 +343,62 @@ fun newBookMarkCardListScreen(
                                     )
                                 }
                             }
-
                             "이미지" -> {
                                 if (state.images.isEmpty() && !loadingMore) {
                                     item { EmptyMessage3("저장된 즐겨찾기가 없습니다") }
                                 } else {
                                     item {
-                                        FlowRow(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(horizontal = 8.dp), // 좌우 패딩 추가 (UI 정렬)
-                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                                        ) {
-                                            state.images.forEach { card ->
-                                                Box(
-                                                    modifier = Modifier
-                                                        .weight(1f) // ✅ 같은 비율로 배분 (자동 정렬)
-                                                        .aspectRatio(1f) // ✅ 정사각형 형태 유지
-                                                ) {
-                                                    ImageBig(
-                                                        imageUrl = card.thumbnailUrl ?: "",
-                                                        isMine = card.isMine,
-                                                        onClick = { navController.navigate("cardDetail/${card.cardId}") }
-                                                    )
-                                                }
-                                            }
-
-                                            // ✅ 홀수 개일 경우 균형 맞추기 (한 줄에 1개만 남았을 때 공간 확보)
-                                            if (state.images.size % 2 != 0) {
-                                                Box(
-                                                    modifier = Modifier
-                                                        .weight(1f)
-                                                        .aspectRatio(1f)
-                                                )
-                                            }
-                                        }
+                                        MasonryImageGrid(
+                                            imageUrls = state.images.map { it.thumbnailUrl ?: "" },  // ✅ 이미지 리스트 전달
+                                            isMineList = state.images.map { it.isMine },  // ✅ 내 콘텐츠 여부 전달
+                                            cardIdList = state.images.map { it.cardId },  // ✅ 카드 ID 전달
+                                            onImageClick = { cardId -> navController.navigate("cardDetail/$cardId") }  // ✅ 클릭 시 이동
+                                        )
                                     }
-
-
                                 }
                             }
+
+////////////////////////////////////////////////////////////////////////////////////( 이전코드_추후삭제예정 )
+//                            "이미지" -> {
+//                                if (state.images.isEmpty() && !loadingMore) {
+//                                    item { EmptyMessage3("저장된 즐겨찾기가 없습니다") }
+//                                } else {
+//                                    item {
+//                                        FlowRow(
+//                                            modifier = Modifier
+//                                                .fillMaxWidth()
+//                                                .padding(horizontal = 8.dp), // 좌우 패딩 추가 (UI 정렬)
+//                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+//                                            verticalArrangement = Arrangement.spacedBy(8.dp)
+//                                        ) {
+//                                            state.images.forEach { card ->
+//                                                Box(
+//                                                    modifier = Modifier
+//                                                        .weight(1f) // ✅ 같은 비율로 배분 (자동 정렬)
+//                                                        .aspectRatio(1f) // ✅ 정사각형 형태 유지
+//                                                ) {
+//                                                    ImageBig(
+//                                                        imageUrl = card.thumbnailUrl ?: "",
+//                                                        isMine = card.isMine,
+//                                                        onClick = { navController.navigate("cardDetail/${card.cardId}") }
+//                                                    )
+//                                                }
+//                                            }
+//
+//                                            // ✅ 홀수 개일 경우 균형 맞추기 (한 줄에 1개만 남았을 때 공간 확보)
+//                                            if (state.images.size % 2 != 0) {
+//                                                Box(
+//                                                    modifier = Modifier
+//                                                        .weight(1f)
+//                                                        .aspectRatio(1f)
+//                                                )
+//                                            }
+//                                        }
+//                                    }
+//                                }
+//                            }
+////////////////////////////////////////////////////////////////////////////////////( 이전코드_추후삭제예정 )
+
 
                             else -> {
                                 val cards = when (selectedCategory) {
