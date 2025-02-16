@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.ToString;
 
 @Getter
-@Builder
 @ToString
 public class YoutubeAPIResponseDTO {
 	private String title; // 추가된 부분

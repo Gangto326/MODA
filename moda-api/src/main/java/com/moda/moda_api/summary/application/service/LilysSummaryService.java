@@ -80,9 +80,10 @@ public class LilysSummaryService {
 						String[] keywords = getKeyWords(aiAnalysis, youtubeAPI);
 						String[] subContents = getSubContents(lilysSummary, youtubeAPI);
 
+
 						return SummaryResultDto.builder()
 							.typeId(lilysSummary.getTypeId())
-							.title(lilysSummary.getTitle())
+							.title(youtubeAPI.getTitle())
 							.content(aiAnalysis.getContent())
 							.thumbnailContent(youtubeAPI.getChannelTitle())
 							.embeddingVector(aiAnalysis.getEmbeddingVector())
