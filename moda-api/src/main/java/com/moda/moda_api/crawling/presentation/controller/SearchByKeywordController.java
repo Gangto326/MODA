@@ -24,4 +24,5 @@ public class SearchByKeywordController {
 		System.out.println(searchRequest.getKeyword());
 		return keywordSearchService.crawlByKeyWord(searchRequest.getKeyword());
 	}
+
 }

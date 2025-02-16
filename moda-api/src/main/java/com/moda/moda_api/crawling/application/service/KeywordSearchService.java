@@ -41,7 +41,7 @@ public class KeywordSearchService {
 
 			// Google 검색 기본 URL
 			searchUrlBuilder.append("https://www.google.com/search");
-			searchUrlBuilder.append("?q=").append(URLEncoder.encode(keyword, "UTF-8"));
+			searchUrlBuilder.append("?q=").append(URLEncoder.encode(keyword + " -site:youtube.com", "UTF-8"));
 
 			// 추가 매개변수
 			searchUrlBuilder.append("&num=20");  // 검색 결과 수 (최대 100)
