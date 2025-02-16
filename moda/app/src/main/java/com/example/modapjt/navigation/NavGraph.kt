@@ -20,6 +20,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.example.modapjt.data.repository.CardRepository
 import com.example.modapjt.domain.viewmodel.AuthViewModel
+import com.example.modapjt.presentation.auth.signup.SignUpScreen
+import com.example.modapjt.presentation.auth.signup.SignUpViewModel
 import com.example.modapjt.screen.SavedUrlsScreen
 import com.example.modapjt.screen.linkupload.LinkUploadScreen
 import com.example.modapjt.screen.recommend.RecommendScreen
@@ -27,7 +29,6 @@ import com.example.modapjt.screen.settings.SettingsScreen
 import com.example.modapjt.screen2.auth.FindIdScreen
 import com.example.modapjt.screen2.auth.FindPasswordScreen
 import com.example.modapjt.screen2.auth.LoginScreen
-import com.example.modapjt.screen2.auth.SignUpScreen
 import com.example.modapjt.screen2.carddetail.newCardDetailScreen
 import com.example.modapjt.screen2.cardlist.newSearchCardListScreen
 import com.example.modapjt.screen2.newBookMarkCardListScreen
@@ -166,6 +167,7 @@ fun NavGraph(
     var isOverlayActive by remember { mutableStateOf(false) } // 오버레이 상태 추가
 
     // AuthViewModel 인스턴스 생성
+    val signUpViewModel: SignUpViewModel = viewModel()
     val authViewModel: AuthViewModel = viewModel()
 
     val repository = CardRepository() // CardRepository 인스턴스 생성
@@ -314,7 +316,7 @@ fun NavGraph(
 
         composable("signup") {
             SignUpScreen(
-                viewModel = authViewModel,
+                viewModel = signUpViewModel,
                 onNavigateBack = { navController.navigateUp() }
             )
         }
