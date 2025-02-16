@@ -10,6 +10,7 @@ public class RefreshTokenMapper {
 	public RefreshToken toDomain(RefreshTokenEntity entity) {
 		return RefreshToken.builder()
 			.refreshTokenId(entity.getRefreshTokenId())
+			.userId(entity.getUserId())
 			.token(entity.getToken())
 			.expiresAt(entity.getExpiresAt())
 			.createdAt(entity.getCreatedAt())
@@ -21,6 +22,7 @@ public class RefreshTokenMapper {
 		return RefreshTokenEntity.builder()
 			.refreshTokenId(refreshToken.getRefreshTokenId())
 			.token(refreshToken.getToken())
+			.userId(refreshToken.getUserId())
 			.expiresAt(refreshToken.getExpiresAt())
 			.createdAt(refreshToken.getCreatedAt())
 			.isActive(refreshToken.isActive())
