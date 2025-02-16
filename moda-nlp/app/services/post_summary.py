@@ -27,7 +27,7 @@ class PostSummary:
     #PostSummary 객체가 실행되면 가장 먼저 실행되는 함수
     async def execute(self):
         self.choose_category('anpigon/qwen2.5-7b-instruct-kowiki')
-        self.summary_content('kwangsuklee/Qwen2.5-14B-Gutenberg-1e-Delta.Q5_K_M')
+        self.summary_content('anpigon/qwen2.5-7b-instruct-kowiki')
         await asyncio.gather(
             self.make_keywords('anpigon/qwen2.5-7b-instruct-kowiki'),
             self.make_thumbnail_content('anpigon/qwen2.5-7b-instruct-kowiki'),

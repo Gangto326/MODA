@@ -25,7 +25,7 @@ class YoutubeProcess:
 
     #YoutubeProcess 객체가 실행되면 가장 먼저 실행되는 함수
     async def execute(self):
-        self.process_paragraph('kwangsuklee/Qwen2.5-14B-Gutenberg-1e-Delta.Q5_K_M')
+        self.process_paragraph('anpigon/qwen2.5-7b-instruct-kowiki')
         await asyncio.gather(
             self.choose_category('anpigon/qwen2.5-7b-instruct-kowiki'),
             self.make_keywords('anpigon/qwen2.5-7b-instruct-kowiki'),
