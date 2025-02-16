@@ -2,11 +2,12 @@ def make_category_prompt(content:str):
     return [
         {
             'role': 'system',
-            'content': '사용자가 요청한 카테고리만 출력하고, 다른 말은 하지 않도록 한다.'
+            'content': 'Only print out the categories requested by the user, and do not say anything else.'
         },
         {
             'role': 'user',
-            'content': f'''아래 내용을 읽고 카테고리 중에 하나 골라서 카테고리만 알려줘. 다른 말은 하지말고 카테고리만 말해줘.
+            'content': f'''Please choose one of the categories from the image and content given and tell me just the categories.
+Don't say anything else and just tell me the categories.
 ['Trends', 'Entertainment', 'Finance', 'Travel', 'Food', 'IT', 'Design', 'Society', 'Health']
 
 {content}
