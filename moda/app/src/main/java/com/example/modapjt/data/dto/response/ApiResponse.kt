@@ -2,6 +2,7 @@ package com.example.modapjt.data.dto.response
 
 data class ApiResponse<T>(
     val status: Int,
+    val success: Boolean,
     val message: String,
     val data: T?,
     val meta: Meta?

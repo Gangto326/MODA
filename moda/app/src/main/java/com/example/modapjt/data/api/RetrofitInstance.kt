@@ -6,8 +6,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 object RetrofitInstance {
 //    private const val BASE_URL = "http://localhost:8080/" // API 서버 주소 입력
 
-//    private const val BASE_URL = "http://10.0.2.2:8080" // localhost → 10.0.2.2 변경 (에뮬레이터 전용)
-    private const val BASE_URL = "https://i12a805.p.ssafy.io" // 우리 서버!
+    private const val BASE_URL = "http://10.0.2.2:8080" // localhost → 10.0.2.2 변경 (에뮬레이터 전용)
+//    private const val BASE_URL = "https://i12a805.p.ssafy.io" // 우리 서버!
 
 //    private const val BASE_URL = "http://0.0.0.0:8080"  // 내 PC의 IP 주소로 변경
 
@@ -56,6 +56,12 @@ object RetrofitInstance {
     val fcmTokenApi: FcmApiService by lazy{
         retrofit.create(FcmApiService::class.java)
     }
+
+    //회원가입 API 추가
+    val signupApi: SignUpApiService by lazy{
+        retrofit.create(SignUpApiService::class.java)
+    }
+
 }
 
 

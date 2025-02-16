@@ -1,6 +1,8 @@
-package com.example.modapjt.screen2.auth
+package com.example.modapjt.presentation.auth.signup
 
+import android.util.Log
 import android.view.ViewTreeObserver
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,9 +24,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,24 +34,28 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.modapjt.R
 import com.example.modapjt.domain.model.SignUpEvent
-import com.example.modapjt.domain.viewmodel.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpScreen(
-    viewModel: AuthViewModel,
-    onNavigateBack: () -> Unit
+    viewModel: SignUpViewModel,
+    onNavigateBack: () -> Unit,
+    navController: NavController
 ) {
     val state = viewModel.signUpState.value
     val scrollState = rememberScrollState()
     var isKeyboardVisible by remember { mutableStateOf(false) }
     var keyboardHeight by remember { mutableStateOf(0) }
+
+    val context = LocalContext.current
 
     // 키보드 가시성 감지
     val view = LocalView.current
@@ -93,7 +99,7 @@ fun SignUpScreen(
         // 닉네임 입력
         OutlinedTextField(
             value = state.name,
-            onValueChange = { viewModel.onSignUpEvent(SignUpEvent.NameChanged(it)) },
+            onValueChange = { viewModel.onEvent(SignUpEvent.NameChanged(it)) },
             label = { Text("닉네임") },
             modifier = Modifier
                 .fillMaxWidth()
@@ -107,29 +113,38 @@ fun SignUpScreen(
             )
         )
 
-        // 아이디 입력
+        // 아이디 입력 및 중복 확인
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 4.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            OutlinedTextField(
-                value = state.username,
-                onValueChange = { viewModel.onSignUpEvent(SignUpEvent.UsernameChanged(it)) },
-                label = { Text("아이디") },
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(8.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedBorderColor = Color(0xFFBBAEA4),
-                    focusedBorderColor = Color(0xFFBBAEA4),
-                    unfocusedLabelColor = Color.Gray,
-                    focusedLabelColor = Color(0xFFBBAEA4),
+            Column(modifier = Modifier.weight(1f)) {
+                OutlinedTextField(
+                    value = state.username,
+                    onValueChange = { viewModel.onEvent(SignUpEvent.UsernameChanged(it)) },
+                    label = { Text("아이디") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        unfocusedBorderColor = Color(0xFFBBAEA4),
+                        focusedBorderColor = Color(0xFFBBAEA4),
+                        unfocusedLabelColor = Color.Gray,
+                        focusedLabelColor = Color(0xFFBBAEA4),
+                    )
                 )
-            )
+                state.usernameVerificationMessage?.let { message ->
+                    Text(
+                        text = message,
+                        color = if (state.isUsernameVerified) Color.Green else Color.Red,
+                        modifier = Modifier.padding(start = 8.dp, top = 4.dp)
+                    )
+                }
+            }
 
             Button(
-                onClick = { viewModel.onSignUpEvent(SignUpEvent.VerifyUsername) },
+                onClick = { viewModel.onEvent(SignUpEvent.VerifyUsername) },
                 modifier = Modifier
                     .height(56.dp)
                     .width(100.dp),
@@ -142,29 +157,51 @@ fun SignUpScreen(
             }
         }
 
-        // 이메일 입력
+        // 이메일 입력 및 인증
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 4.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            OutlinedTextField(
-                value = state.email,
-                onValueChange = { viewModel.onSignUpEvent(SignUpEvent.EmailChanged(it)) },
-                label = { Text("이메일") },
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(8.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedBorderColor = Color(0xFFBBAEA4),
-                    focusedBorderColor = Color(0xFFBBAEA4),
-                    unfocusedLabelColor = Color.Gray,
-                    focusedLabelColor = Color(0xFFBBAEA4),
+            Column(modifier = Modifier.weight(1f)) {
+                OutlinedTextField(
+                    value = state.email,
+                    onValueChange = { viewModel.onEvent(SignUpEvent.EmailChanged(it)) },
+                    label = { Text("이메일") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        unfocusedBorderColor = Color(0xFFBBAEA4),
+                        focusedBorderColor = Color(0xFFBBAEA4),
+                        unfocusedLabelColor = Color.Gray,
+                        focusedLabelColor = Color(0xFFBBAEA4),
+                    )
                 )
-            )
+                if (state.isTimerRunning) {
+                    Text(
+                        text = "남은 시간: ${state.remainingTime / 60}:${
+                            String.format(
+                                "%02d",
+                                state.remainingTime % 60
+                            )
+                        }",
+                        color = Color.Gray,
+                        modifier = Modifier.padding(start = 8.dp, top = 4.dp)
+                    )
+                }
+                state.emailVerificationMessage?.let { message ->
+                    Text(
+                        text = message,
+                        color = if (message == "인증되었습니다.") Color.Green else Color.Red,
+                        modifier = Modifier.padding(start = 8.dp, top = 4.dp)
+                    )
+                }
+            }
 
             Button(
-                onClick = { viewModel.onSignUpEvent(SignUpEvent.SendEmailVerification) },
+                onClick = { viewModel.onEvent(SignUpEvent.SendEmailVerification) },
+                enabled = state.isEmailFieldValid() && !state.isEmailVerified,
                 modifier = Modifier
                     .height(56.dp)
                     .width(100.dp),
@@ -177,8 +214,8 @@ fun SignUpScreen(
             }
         }
 
-        // 이메일 인증코드 입력
-        if (state.isEmailVerificationSent) {
+        // 이메일 인증 코드 입력
+        if (state.isEmailVerificationSent && !state.isEmailVerified) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -187,7 +224,7 @@ fun SignUpScreen(
             ) {
                 OutlinedTextField(
                     value = state.emailVerificationCode,
-                    onValueChange = { viewModel.onSignUpEvent(SignUpEvent.EmailVerificationCodeChanged(it)) },
+                    onValueChange = { viewModel.onEvent(SignUpEvent.EmailVerificationCodeChanged(it)) },
                     label = { Text("인증번호") },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(8.dp),
@@ -200,7 +237,7 @@ fun SignUpScreen(
                 )
 
                 Button(
-                    onClick = { viewModel.onSignUpEvent(SignUpEvent.VerifyEmailCode) },
+                    onClick = { viewModel.onEvent(SignUpEvent.VerifyEmailCode) },
                     modifier = Modifier
                         .height(56.dp)
                         .width(100.dp),
@@ -217,7 +254,7 @@ fun SignUpScreen(
         // 비밀번호 입력
         OutlinedTextField(
             value = state.password,
-            onValueChange = { viewModel.onSignUpEvent(SignUpEvent.PasswordChanged(it)) },
+            onValueChange = { viewModel.onEvent(SignUpEvent.PasswordChanged(it)) },
             label = { Text("비밀번호") },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier
@@ -233,22 +270,33 @@ fun SignUpScreen(
         )
 
         // 비밀번호 확인
-        OutlinedTextField(
-            value = state.confirmPassword,
-            onValueChange = { viewModel.onSignUpEvent(SignUpEvent.ConfirmPasswordChanged(it)) },
-            label = { Text("비밀번호 확인") },
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp),
-            shape = RoundedCornerShape(8.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                unfocusedBorderColor = Color(0xFFBBAEA4),
-                focusedBorderColor = Color(0xFFBBAEA4),
-                unfocusedLabelColor = Color.Gray,
-                focusedLabelColor = Color(0xFFBBAEA4),
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            OutlinedTextField(
+                value = state.confirmPassword,
+                onValueChange = { viewModel.onEvent(SignUpEvent.ConfirmPasswordChanged(it)) },
+                label = { Text("비밀번호 확인") },
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                shape = RoundedCornerShape(8.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    unfocusedBorderColor = Color(0xFFBBAEA4),
+                    focusedBorderColor = Color(0xFFBBAEA4),
+                    unfocusedLabelColor = Color.Gray,
+                    focusedLabelColor = Color(0xFFBBAEA4),
+                )
             )
-        )
+            state.passwordMatchMessage?.let { message ->
+                Text(
+                    text = message,
+                    color = Color.Red,
+                    modifier = Modifier.padding(start = 8.dp, top = 4.dp)
+                )
+            }
+        }
 
         if (state.error != null) {
             Text(
@@ -261,8 +309,12 @@ fun SignUpScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         // 회원가입 버튼
+        // 회원가입 버튼
         Button(
-            onClick = { viewModel.onSignUpEvent(SignUpEvent.Submit) },
+            onClick = {
+                viewModel.onEvent(SignUpEvent.Submit)
+                // 여기서 직접 navigate하지 않음
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp),
@@ -273,20 +325,41 @@ fun SignUpScreen(
             )
         ) {
             if (state.isLoading) {
-                CircularProgressIndicator(color = Color.White)
+                CircularProgressIndicator(
+                    color = Color.White,
+                    modifier = Modifier.size(24.dp)
+                )
             } else {
                 Text("회원가입")
             }
         }
+// UI 이벤트 수집 부분 수정
+        LaunchedEffect(key1 = true) {
+            viewModel.uiEvent.collect { event ->
+                Log.d("SignUpScreen", "UI Event 발생: $event") // ✅ 확인용 로그 추가
+                when (event) {
+                    is SignUpViewModel.UiEvent.SignUpSuccess -> {
+                        Log.d("SignUpScreen", "로그인 페이지로 이동합니다.") // ✅ 확인용 로그 추가
+                        Toast.makeText(
+                            context,
+                            "회원가입에 성공하셨습니다! 🎉",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        // onNavigateBack() 대신 로그인 페이지로 직접 네비게이션
+                        navController.navigate("login") {
+                            popUpTo("home") { inclusive = false } // ✅ "home"까지 유지하면서 "signup"만 제거
+                        }
+                    }
 
-        // 로그인으로 돌아가기
-        TextButton(onClick = onNavigateBack) {
-            Text("로그인으로 돌아가기", color = Color.Gray)
-        }
-
-        // 키보드가 보일 때 추가 공간 확보
-        if (isKeyboardVisible) {
-            Spacer(modifier = Modifier.height(keyboardHeight.dp))
+                    is SignUpViewModel.UiEvent.ShowError -> {
+                        Toast.makeText(
+                            context,
+                            event.message,
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            }
         }
     }
 }
