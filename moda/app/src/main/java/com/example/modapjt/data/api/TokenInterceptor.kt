@@ -74,7 +74,7 @@ class TokenInterceptor(private val tokenManager: TokenManager) : Interceptor {
             val emptyBody = "{}".toRequestBody("application/json".toMediaType())
             val refreshRequest = Request.Builder()
                 .url("http://10.0.2.2:8080/api/auth/refresh")
-                .post(emptyBody)
+                .get()
                 .build()
 
             Log.d(TAG, "Sending refresh request")

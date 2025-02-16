@@ -1,4 +1,5 @@
 package com.example.modapjt.data.api
+import com.example.modapjt.data.cookie.ApplicationCookieJar
 import com.example.modapjt.data.storage.TokenManager
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -190,10 +191,12 @@ object RetrofitInstance {
     // 토큰을 포함한 HTTP 클라이언트 생성을 위한 함수
     private fun createOkHttpClient(): OkHttpClient {
         return OkHttpClient.Builder()
+            .followRedirects(true)  // 쿠키 처리를 위해 필요
+            .followSslRedirects(true)  // HTTPS 리다이렉트 허용
+            .cookieJar(ApplicationCookieJar)  // 쿠키 자동 관리 추가
             .addInterceptor(TokenInterceptor(tokenManager))
             .build()
     }
-
     // Retrofit 인스턴스 생성을 위한 함수
     private fun createRetrofit(): Retrofit {
         return Retrofit.Builder()
