@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -156,9 +157,16 @@ fun newSearchCardListScreen(
                                                 description = card.thumbnailContent ?: "",
                                                 imageUrl = card.thumbnailUrl ?: "",
                                                 isMine = card.isMine,
+                                                keywords = card.keywords,
                                                 onClick = { navController.navigate("cardDetail/${card.cardId}") }
                                             )
                                         }
+                                        // 각 블로그 사이에 구분선 추가
+                                        Divider(
+                                            color = Color(0xFFF1F1F1),
+                                            thickness = 1.dp,
+                                            modifier = Modifier.padding(start = 16.dp, end = 16.dp) // 양쪽에 패딩 추가
+                                        )
                                     }
                                 }
                             }
@@ -184,10 +192,18 @@ fun newSearchCardListScreen(
                                                 videoId = card.thumbnailUrl ?: "",
                                                 title = card.title,
                                                 isMine = card.isMine,
+                                                thumbnailContent = card.thumbnailContent ?: "",
+                                                keywords = card.keywords.take(3),
                                                 onClick = { navController.navigate("cardDetail/${card.cardId}") },
                                                 isTopVideo = isTopVideo // 화면 상단에 있는 동영상만 자동 재생
                                             )
                                         }
+                                        // 각 비디오 사이에 구분선 추가
+                                        Divider(
+                                            color = Color(0xFFF1F1F1),
+                                            thickness = 1.dp,
+                                            modifier = Modifier.padding(start = 16.dp, end = 16.dp) // 양쪽에 패딩 추가
+                                        )
                                     }
                                 }
                             }
@@ -209,6 +225,12 @@ fun newSearchCardListScreen(
                                                 onClick = { navController.navigate("cardDetail/${card.cardId}") }
                                             )
                                         }
+                                        // 각 뉴스 사이에 구분선 추가
+                                        Divider(
+                                            color = Color(0xFFF1F1F1),
+                                            thickness = 1.dp,
+                                            modifier = Modifier.padding(start = 16.dp, end = 16.dp) // 양쪽에 패딩 추가
+                                        )
                                     }
                                 }
                             }

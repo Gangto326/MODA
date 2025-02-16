@@ -226,22 +226,20 @@ package com.example.modapjt.screen2
 
 import AllTabCard
 import BlogBig
-import ImageBig
 import NewsBig
 import TypeSelectBar
 import VideoBig
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -263,9 +261,6 @@ import com.example.modapjt.components.bar.CategoryHeaderBar
 import com.example.modapjt.components.cardtab.SwipableCardList
 import com.example.modapjt.domain.viewmodel.CardUiState
 import com.example.modapjt.domain.viewmodel.CardViewModel
-
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import kotlinx.coroutines.delay
 
 
@@ -389,10 +384,18 @@ fun newBookMarkCardListScreen(
                                                 videoId = card.thumbnailUrl ?: "",
                                                 title = card.title,
                                                 isMine = card.isMine,
+                                                thumbnailContent = card.thumbnailContent ?: "",
+                                                keywords = card.keywords.take(3),
                                                 onClick = { navController.navigate("cardDetail/${card.cardId}") },
                                                 isTopVideo = isTopVideo // Only autoplay the video that is on top of the screen
                                             )
                                         }
+                                        // 각 비디오 사이에 구분선 추가
+                                        Divider(
+                                            color = Color(0xFFF1F1F1),
+                                            thickness = 1.dp,
+                                            modifier = Modifier.padding(start = 16.dp, end = 16.dp) // 양쪽에 패딩 추가
+                                        )
                                     }
                                 }
                             }
@@ -411,9 +414,16 @@ fun newBookMarkCardListScreen(
                                                 description = card.thumbnailContent ?: "",
                                                 imageUrl = card.thumbnailUrl ?: "",
                                                 isMine = card.isMine,
+                                                keywords = card.keywords,
                                                 onClick = { navController.navigate("cardDetail/${card.cardId}") }
                                             )
                                         }
+                                        // 각 블로그 사이에 구분선 추가
+                                        Divider(
+                                            color = Color(0xFFF1F1F1),
+                                            thickness = 1.dp,
+                                            modifier = Modifier.padding(start = 16.dp, end = 16.dp) // 양쪽에 패딩 추가
+                                        )
                                     }
                                 }
                             }
@@ -435,6 +445,12 @@ fun newBookMarkCardListScreen(
                                                 onClick = { navController.navigate("cardDetail/${card.cardId}") }
                                             )
                                         }
+                                        // 각 뉴스 사이에 구분선 추가
+                                        Divider(
+                                            color = Color(0xFFF1F1F1),
+                                            thickness = 1.dp,
+                                            modifier = Modifier.padding(start = 16.dp, end = 16.dp) // 양쪽에 패딩 추가
+                                        )
                                     }
                                 }
                             }
