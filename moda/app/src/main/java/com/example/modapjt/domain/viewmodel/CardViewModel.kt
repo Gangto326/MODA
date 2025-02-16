@@ -109,7 +109,7 @@ class CardViewModel : ViewModel() {
     // ✅ 검색용 로드 함수
     fun loadSearchCards(query: String, selectedTab: String, sortDirection: String, isLoadMore: Boolean = false) {
         if (selectedTab == "전체") {
-            loadAllTabCards( query, 0)
+            loadAllTabCards(query, 0)
         } else {
             val typeId = getTypeIdForTab(selectedTab)
             loadTabCards(query, 0, typeId, sortDirection, isLoadMore)
