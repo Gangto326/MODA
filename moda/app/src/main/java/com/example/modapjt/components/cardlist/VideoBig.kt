@@ -23,16 +23,17 @@ fun VideoBig(
     title: String,
     isMine: Boolean,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
+    isTopVideo: Boolean // 파라미터 이름을 수정
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
-            .clickable(onClick = onClick), // ✅ 클릭 가능하도록 설정
-    shape = RoundedCornerShape(12.dp),
+            .clickable(onClick = onClick), // 클릭 가능하도록 설정
+        shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (!isMine) Color.Gray else Color.White // ✅ 배경색 적용
+            containerColor = if (!isMine) Color.Gray else Color.White
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
@@ -43,6 +44,7 @@ fun VideoBig(
         ) {
             YouTubePlayer(
                 videoId = videoId,
+                isTopVideo = isTopVideo, // 파라미터 전달
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(16f / 9f)
