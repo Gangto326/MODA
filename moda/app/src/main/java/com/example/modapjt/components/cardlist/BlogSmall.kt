@@ -1,12 +1,6 @@
-
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
@@ -18,107 +12,89 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.app.ui.theme.customTypography
+import androidx.compose.foundation.layout.FlowRow
 
-// BlogSmall: 블로그 포스트를 카드 형태로 표시하는 컴포저블 함수
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun BlogSmall(
-    title: String,         // 블로그 제목
-    description: String,   // 블로그 내용 요약
-    imageUrl: String,      // 썸네일 이미지 URL
-    isMine: Boolean,       // 내가 저장한 포스트 여부 (true면 흰색, false면 회색 배경)
-    keywords: List<String>,// 블로그 관련 키워드 목록
-    bookMark: Boolean,     // 즐겨찾기 여부
+    title: String,
+    description: String,
+    imageUrl: String,
+    isMine: Boolean,
+    keywords: List<String>,
+    bookMark: Boolean,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit = {}// 카드 클릭 시 실행될 동작
+    onClick: () -> Unit = {}
 ) {
-    // 전체 컨테이너: 세로 방향으로 컨텐츠 배치
     Column(
         modifier = modifier
-            .fillMaxWidth() // 가로 전체 너비 사용
-            .clip(RoundedCornerShape(12.dp)) // 모서리 둥글게 처리
-//            .background(if (!isMine) Color.Gray else Color.White) // 저장 여부에 따른 배경색
-            .background(if (!isMine) Color.Gray.copy(alpha = 0.2f)	 else Color.White) // 저장 여부에 따른 배경색
-            .clickable(onClick = onClick)          // 클릭 가능하도록 설정
-//            .padding(12.dp)                        // 내부 여백 설정
+            .fillMaxWidth()
+            .background(if (!isMine) Color.Gray.copy(alpha = 0.2f) else Color.White)
+            .clickable(onClick = onClick)
     ) {
-        // 상단 영역: 텍스트와 이미지를 가로로 배치
         Row(
-            verticalAlignment = Alignment.CenterVertically // 세로 방향 중앙 정렬
+            verticalAlignment = Alignment.Top // 이미지 상단에 맞춤
         ) {
-            // 제목과 설명 텍스트 영역
             Column(
-                modifier = Modifier.weight(1f)     // 남은 공간 모두 차지
+                modifier = Modifier.weight(1f)
             ) {
-                // 블로그 제목
                 Text(
                     text = title,
-//                    fontSize = 16.sp,
-//                    fontWeight = FontWeight.Bold,
-                    style = customTypography.headlineMedium ,
+                    style = customTypography.headlineMedium,
                     color = Color(0xFF2B2826),
-                    maxLines = 1,                  // 한 줄로 제한
-                    overflow = TextOverflow.Ellipsis // 넘치는 텍스트는 ...으로 표시
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
-                // 블로그 설명
                 Text(
                     text = description,
-//                    fontSize = 14.sp,
-                    style = customTypography.bodyMedium  ,
-                    color = Color(0xFF797069),// 회색으로 표시
-                    maxLines = 2,                  // 최대 2줄까지 표시
+                    style = customTypography.bodyMedium,
+                    color = Color(0xFF797069),
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.padding(top = 6.dp)
                 )
             }
-            // 썸네일 이미지
+
+            Spacer(modifier = Modifier.width(10.dp)) // 🔥 제목과 이미지 사이 간격 추가
+
             AsyncImage(
                 model = imageUrl,
                 contentDescription = null,
-                contentScale = ContentScale.Crop,  // 이미지 비율 유지하며 채우기
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .size(84.dp)                  // 70dp x 70dp 크기
-                    .clip(RoundedCornerShape(8.dp))// 이미지 모서리 둥글게
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(8.dp))
             )
         }
 
-        // 하단 영역: 키워드와 즐겨찾기 아이콘을 가로로 배치
-        Row(
+        // 🔥 키워드 간격 적용
+        FlowRow(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp),             // 상단 여백 추가
-            horizontalArrangement = Arrangement.SpaceBetween, // 요소들을 양끝으로 정렬
-            verticalAlignment = Alignment.CenterVertically    // 세로 방향 중앙 정렬
+                .padding(top = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp), // ✅ 키워드 사이 간격 설정
+            verticalArrangement = Arrangement.spacedBy(4.dp) // ✅ 여러 줄일 경우 간격 조정
         ) {
-            // 키워드 목록 (최대 3개)
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp) // 키워드 간 간격
-            ) {
-                keywords.take(3).forEach { keyword ->
-                    Text(
-                        text = "# $keyword",        // "# $keyword" : 해시태그 형식으로 표시
-//                        fontSize = 12.sp,
-                        style = customTypography.bodySmall ,
-                        color = Color(0xFFBAADA4),
-                    )
-                }
-            }
-
-            // 즐겨찾기 아이콘 (내 포스트이고 즐겨찾기된 경우에만 표시)
-            if (bookMark && isMine) {
-                print("블로그 즐겨찾기 !!")        // 디버깅용 로그
-                Icon(
-                    imageVector = Icons.Filled.Star, // 별 모양 아이콘
-                    contentDescription = "즐겨찾기됨",
-                    tint = Color(0xFFFFCD69),     // 노란색 별표
-                    modifier = Modifier.size(20.dp) // 20dp x 20dp 크기
+            keywords.take(3).forEach { keyword ->
+                Text(
+                    text = "# $keyword",
+                    style = customTypography.bodySmall,
+                    color = Color(0xFFBAADA4),
                 )
             }
         }
+
+//        if (bookMark && isMine) {
+//            Icon(
+//                imageVector = Icons.Filled.Star,
+//                contentDescription = "즐겨찾기됨",
+//                tint = Color(0xFFFFCD69),
+//                modifier = Modifier.size(20.dp)
+//            )
+//        }
     }
 }

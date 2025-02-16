@@ -19,45 +19,81 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 
-// ImageSmall: 정사각형 형태의 이미지 카드를 표시하는 컴포저블 함수
+import androidx.compose.foundation.layout.*
+
+@Composable
+fun ImageGrid(
+    imageUrls: List<String>,  // 이미지 리스트
+    isMine: Boolean,  // 내가 저장한 이미지 여부
+    bookMarks: List<Boolean>, // 즐겨찾기 여부 리스트
+    onClick: (Int) -> Unit = {} // 클릭 이벤트 (index 전달)
+) {
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val imageSize = screenWidth / 3  // 한 줄에 3개씩 배치 (화면 1/3 크기)
+
+    // ✅ 3개씩 그룹으로 묶어서 줄 단위로 배치
+    Column(
+        verticalArrangement = Arrangement.spacedBy(10.dp) // 🔥 행 간 간격 10dp
+    ) {
+        imageUrls.chunked(3).forEachIndexed { rowIndex, rowImages ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp) // 🔥 이미지 간 가로 간격 8dp
+            ) {
+                rowImages.forEachIndexed { index, imageUrl ->
+                    ImageSmall(
+                        imageUrl = imageUrl,
+                        isMine = isMine,
+                        bookMark = bookMarks[rowIndex * 3 + index],
+                        onClick = { onClick(rowIndex * 3 + index) },
+                        modifier = Modifier.weight(1f) // 🔥 동일한 크기 유지
+                    )
+                }
+
+                // 3개 미만일 경우 빈 `Spacer` 추가하여 정렬 유지
+                repeat(3 - rowImages.size) {
+                    Spacer(modifier = Modifier.weight(1f))
+                }
+            }
+        }
+    }
+}
+
+// ✅ 단일 이미지 카드 (즐겨찾기 아이콘 + 그림자 추가)
 @Composable
 fun ImageSmall(
-    imageUrl: String, // 표시할 이미지 URL
+    imageUrl: String,
     modifier: Modifier = Modifier,
-    isMine: Boolean,  // 내가 저장한 이미지 여부 (true면 흰색, false면 회색 배경)
-    bookMark: Boolean, // 즐겨찾기 여부
-    onClick: () -> Unit = {}// 이미지 클릭 시 실행될 동작
+    isMine: Boolean,
+    bookMark: Boolean,
+    onClick: () -> Unit = {}
 ) {
-    // 화면 너비를 가져와서 이미지 크기 계산
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-    val imageSize = screenWidth / 3  // 화면 너비의 1/3 크기로 설정
+    val imageSize = screenWidth / 3  // 한 줄에 3개씩 배치
 
-    // Box 컨테이너: 이미지와 즐겨찾기 아이콘을 겹쳐서 표시
     Box(
         modifier = modifier
-            .size(imageSize) // 계산된 크기로 설정
-            .clip(RoundedCornerShape(8.dp)) // 모서리 둥글게 처리
-            .background(if (!isMine) Color.Gray else Color.White) // 저장 여부에 따른 배경색
-            .clickable(onClick = onClick) // 클릭 가능하도록 설정
+            .size(imageSize)
+            .clip(RoundedCornerShape(8.dp)) // 🔥 모서리 둥글게 처리
+            .background(if (!isMine) Color.Gray else Color.White)
+            .clickable(onClick = onClick)
     ) {
-        // 메인 이미지
         AsyncImage(
             model = imageUrl,
             contentDescription = null,
-            contentScale = ContentScale.Crop, // 이미지 비율 유지하며 채우기
-            modifier = Modifier.fillMaxSize() // Box 전체 크기 채우기
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
         )
 
-        // 즐겨찾기 아이콘 (내 이미지이고 즐겨찾기된 경우에만 표시)
+        // ✅ 즐겨찾기 아이콘 (내 이미지이고 즐겨찾기된 경우에만 표시)
         if (bookMark && isMine) {
-            println("이미지즐겨찾기") // 디버깅용 로그
             Icon(
                 imageVector = Icons.Filled.Star, // 별 모양 아이콘
                 contentDescription = "즐겨찾기됨",
-                tint = Color(0xFFFFCD69), // 노란색 별표
+                tint = Color(0xFFFFCD69),
                 modifier = Modifier
-                    .size(20.dp) // 아이콘 크기
-                    .align(Alignment.BottomEnd) // 우측 하단에 배치
+                    .size(30.dp) // 아이콘 크기
+                    .align(Alignment.TopEnd) // 우측 하단에 배치
                     .padding(6.dp) // 여백 추가
             )
         }

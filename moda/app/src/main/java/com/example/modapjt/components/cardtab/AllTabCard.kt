@@ -136,55 +136,58 @@ fun SectionBlock(title: String, items: List<Card>, isImage: Boolean, onMoreClick
                     }
                 }
             } else {
-                // 동영상, 블로그, 뉴스 섹션
                 // 동영상, 블로그, 뉴스 섹션을 처리하는 부분
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     items.take(3).forEachIndexed { index, card ->
-                        when (title) {
-                            "동영상" -> VideoSmall(
-                                videoId = card.thumbnailUrl ?: "",
-                                title = card.title,
-                                modifier = Modifier.fillMaxWidth(),
-                                onClick = { navController.navigate("cardDetail/${card.cardId}") },
-                                isMine = card.isMine,
-                                bookMark = card.bookMark,
-                                thumbnailContent = card.thumbnailContent ?: "",
-                                keywords = card.keywords.take(3)
-                            )
+                        Column {
+                            when (title) {
+                                "동영상" -> VideoSmall(
+                                    videoId = card.thumbnailUrl ?: "",
+                                    title = card.title,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    onClick = { navController.navigate("cardDetail/${card.cardId}") },
+                                    isMine = card.isMine,
+                                    bookMark = card.bookMark,
+                                    thumbnailContent = card.thumbnailContent ?: "",
+                                    keywords = card.keywords.take(3)
+                                )
 
-                            "블로그" -> BlogSmall(
-                                title = card.title,
-                                description = card.thumbnailContent ?: "",
-                                imageUrl = card.thumbnailUrl ?: "",
-                                onClick = { navController.navigate("cardDetail/${card.cardId}") },
-                                isMine = card.isMine,
-                                bookMark = card.bookMark,
-                                keywords = card.keywords
-                            )
+                                "블로그" -> BlogSmall(
+                                    title = card.title,
+                                    description = card.thumbnailContent ?: "",
+                                    imageUrl = card.thumbnailUrl ?: "",
+                                    onClick = { navController.navigate("cardDetail/${card.cardId}") },
+                                    isMine = card.isMine,
+                                    bookMark = card.bookMark,
+                                    keywords = card.keywords
+                                )
 
-                            "뉴스" -> NewsSmall(
-                                headline = card.title,
-                                keywords = card.keywords,
-                                imageUrl = card.thumbnailUrl ?: "",
-                                onClick = { navController.navigate("cardDetail/${card.cardId}") },
-                                isMine = card.isMine,
-                                bookMark = card.bookMark
-                            )
-                        }
+                                "뉴스" -> NewsSmall(
+                                    headline = card.title,
+                                    keywords = card.keywords,
+                                    description = card.thumbnailContent ?: "",
+                                    imageUrl = card.thumbnailUrl ?: "",
+                                    onClick = { navController.navigate("cardDetail/${card.cardId}") },
+                                    isMine = card.isMine,
+                                    bookMark = card.bookMark
+                                )
+                            }
 
-                        // 🔥 마지막 아이템이 아닐 때만 Divider 추가
-                        if (index < items.size - 1) {
-                            Divider(
-                                modifier = Modifier.fillMaxWidth(),
-                                color = Color(0xFFF1F1F1),
-                                thickness = 1.dp
-                            )
+                            // 🔥 마지막 아이템이 아닐 때만 Divider 추가
+                            if (index < items.take(3).size - 1) {
+                                Divider(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 20.dp), // ✅ 구분선 위에 8dp 패딩 추가
+                                    color = Color(0xFFF1F1F1),
+                                    thickness = 1.dp
+                                )
+                            }
                         }
                     }
                 }
-
             }
-            SectionAdd("$title 더보기", onMoreClick)
+                SectionAdd("$title 더보기", onMoreClick)
         }
 
 
