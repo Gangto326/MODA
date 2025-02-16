@@ -93,7 +93,7 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
 
     private val screenWidth by lazy { resources.displayMetrics.widthPixels.toFloat() }
     private val screenHeight by lazy { resources.displayMetrics.heightPixels.toFloat() }
-    private val duration = 1000
+    private val duration = if (_isCapturedState.value) 1 else 1000
     private val easing = EaseInOutCirc
     private val iconSize by lazy { screenWidth.roundToInt() / 6 }
 
@@ -146,7 +146,7 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
             .build()
     }
 
-    fun startProjection(resultCode: Int, data: Intent) {
+    private fun startProjection(resultCode: Int, data: Intent) {
         val mediaProjectionManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
         mediaProjection = mediaProjectionManager.getMediaProjection(resultCode, data)
 
@@ -386,6 +386,25 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
     }
 
     private fun showBackground() {
+        backgroundView = ComposeView(this).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setViewTreeLifecycleOwner(this@OverlayService)
+            setViewTreeSavedStateRegistryOwner(this@OverlayService)
+
+            setContent {
+                val isCollapsed by isCollapsedState.collectAsState()
+
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Termination Zone Icon",
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .alpha(0.5f),
+                    tint = if (isCollapsed) Color.Red else Color.Gray
+                )
+            }
+        }
+
         if (backgroundView?.isAttachedToWindow == false)
             windowManager?.addView(backgroundView, backgroundParams)
     }
@@ -537,7 +556,3 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
         const val EXTRA_DATA = "extra_data"
     }
 }
-
-
-
-
