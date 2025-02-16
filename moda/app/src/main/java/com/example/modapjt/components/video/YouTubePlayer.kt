@@ -21,7 +21,7 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTube
  */
 
 @Composable
-fun YouTubePlayer(videoId: String, modifier: Modifier = Modifier) {
+fun YouTubePlayer(videoId: String, modifier: Modifier = Modifier, isTopVideo: Boolean = false) {
     val context = LocalContext.current
     val youTubePlayerView = remember {
         YouTubePlayerView(context).apply {
@@ -34,10 +34,11 @@ fun YouTubePlayer(videoId: String, modifier: Modifier = Modifier) {
 
     // 생명주기 관리 추가
     DisposableEffect(Unit) {
+        // 리소스가 필요할 때만 추가하기
         (context as? androidx.lifecycle.LifecycleOwner)?.lifecycle?.addObserver(youTubePlayerView)
 
         onDispose {
-            youTubePlayerView.release()
+            youTubePlayerView.release()  // 재생 종료 후 리소스를 해제
         }
     }
 
@@ -47,11 +48,19 @@ fun YouTubePlayer(videoId: String, modifier: Modifier = Modifier) {
     ) { view ->
         view.addYouTubePlayerListener(object : AbstractYouTubePlayerListener() {
             override fun onReady(youTubePlayer: YouTubePlayer) {
-                youTubePlayer.loadVideo(videoId, 0f)
+                // 상단 비디오일 때만 자동 재생하고 음소거
+                if (isTopVideo) {
+                    youTubePlayer.loadVideo(videoId, 0f)  // 상단 비디오만 자동 재생
+                    youTubePlayer.mute()  // 음소거
+                } else {
+                    // 다른 비디오는 자동으로 재생되지 않도록 하고 멈춤
+                    youTubePlayer.cueVideo(videoId, 0f)  // 자동재생은 하지 않고 대기 상태로 유지
+                }
             }
         })
     }
 }
+
 
 
 // 추가 기능

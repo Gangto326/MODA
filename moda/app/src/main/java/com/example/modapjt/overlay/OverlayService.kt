@@ -66,40 +66,58 @@ import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
 
 class OverlayService : LifecycleService(), SavedStateRegistryOwner {
+    private val savedStateRegistryController = SavedStateRegistryController.create(this)
+    override val savedStateRegistry: SavedStateRegistry
+        get() = savedStateRegistryController.savedStateRegistry
+
     private var windowManager: WindowManager? = null
+
+    // 메인 오버레이 뷰 (사용자가 드래그할 수 있는 아이콘)
     private var overlayView: ComposeView? = null
     private lateinit var params: WindowManager.LayoutParams
 
+    // 휴지통 뷰 (드래그 시 나타나는 삭제 영역)
     private var backgroundView: ComposeView? = null
     private var backgroundParams: WindowManager.LayoutParams? = null
 
+    // 화면 캡처 애니메이션을 표시할 뷰
     private var captureView: ComposeView? = null
     private lateinit var captureParams: WindowManager.LayoutParams
 
     private val repository = CardRepository()
-    private val savedStateRegistryController = SavedStateRegistryController.create(this)
 
-    override val savedStateRegistry: SavedStateRegistry
-        get() = savedStateRegistryController.savedStateRegistry
-
+    // 상태 관리를 위한 StateFlow들
+    // 현재 오버레이가 휴지통과 겹쳐있는지 여부
     private val _isCollapsedState = MutableStateFlow(false)
     private val isCollapsedState = _isCollapsedState.asStateFlow()
+
+    // 현재 화면 캡처 중인지 여부
     private val _isCapturedState = MutableStateFlow(false)
     private val isCapturedState = _isCapturedState.asStateFlow()
+
+    // 캡처된 이미지가 이동할 목표 위치 좌표
     private val _targetXState = MutableStateFlow(0)
     private val targetXState = _targetXState.asStateFlow()
     private val _targetYState = MutableStateFlow(0)
     private val targetYState = _targetYState.asStateFlow()
 
+    // 애니메이션 관련 설정
+    private val duration = if (_isCapturedState.value) 1 else 1000
+    private val easing = EaseInOutCirc
+
+    // 화면 크기 관련 변수들
     private val screenWidth by lazy { resources.displayMetrics.widthPixels.toFloat() }
     private val screenHeight by lazy { resources.displayMetrics.heightPixels.toFloat() }
-    private val duration = 1000
-    private val easing = EaseInOutCirc
     private val iconSize by lazy { screenWidth.roundToInt() / 6 }
 
+    // 화면 캡처를 위한 MediaProjection 관련 변수들
     private var mediaProjection: MediaProjection? = null
     private var virtualDisplay: VirtualDisplay? = null
 
+    /**
+     * 서비스가 생성될 때 호출되는 함수
+     * 오버레이 뷰를 설정하고 포그라운드 서비스를 시작
+     */
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate() {
         super.onCreate()
@@ -110,9 +128,13 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
             NOTIFICATION_ID,
             createNotification()
         )
-        Log.d("OverlayService", "오버레이 서비스 시작됨") // 로그 추가
+        Log.d("OverlayService", "오버레이 서비스 시작됨")
     }
 
+    /**
+     * 서비스가 시작될 때 호출되는 함수
+     * MediaProjection 관련 데이터를 받아 화면 캡처 기능을 초기화
+     */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
         intent?.let {
@@ -126,6 +148,9 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
         return START_NOT_STICKY
     }
 
+    /**
+     * 포그라운드 서비스를 위한 알림 생성
+     */
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createNotification(): Notification {
         val channelId = "screen_capture_service"
@@ -134,19 +159,22 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
         // Create notification channel
         val channel = NotificationChannel(
             channelId,
-            "Screen Capture Service",
+            "모다",
             NotificationManager.IMPORTANCE_DEFAULT
         )
         notificationManager.createNotificationChannel(channel)
 
         return NotificationCompat.Builder(this, channelId)
-            .setContentTitle("Screen Capture Service")
-            .setContentText("Recording your screen")
+            .setContentTitle("모다")
+            .setContentText("화면 캡처 기능을 활성화하였습니다.")
             .setSmallIcon(android.R.drawable.ic_menu_camera)
             .build()
     }
 
-    fun startProjection(resultCode: Int, data: Intent) {
+    /**
+     * MediaProjection을 시작하여 화면 캡처 기능 초기화
+     */
+    private fun startProjection(resultCode: Int, data: Intent) {
         val mediaProjectionManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
         mediaProjection = mediaProjectionManager.getMediaProjection(resultCode, data)
 
@@ -161,6 +189,9 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
         setupVirtualDisplay()
     }
 
+    /**
+     * 가상 디스플레이 설정 및 이미지 캡처 리스너 등록
+     */
     private fun setupVirtualDisplay() {
         val metrics = Resources.getSystem().displayMetrics
         val screenWidth = metrics.widthPixels
@@ -189,6 +220,9 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
         }, null)
     }
 
+    /**
+     * 오버레이 뷰들(메인 아이콘, 휴지통, 캡처 뷰)의 초기 설정
+     */
     private fun setupOverlayView() {
         backgroundParams = WindowManager.LayoutParams(
             iconSize,
@@ -247,7 +281,6 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
                 val targetX by targetXState.collectAsState()
                 val targetY by targetYState.collectAsState()
 
-                // 크기 변동
                 val sizeX by animateFloatAsState(
                     targetValue = if (isCaptured) 1f else screenWidth,
                     animationSpec = tween(
@@ -263,7 +296,6 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
                     )
                 )
 
-                //위치 이동
                 val offsetX by animateFloatAsState(
                     targetValue = if (isCaptured) targetX.toFloat() + iconSize / 2 else 0f,
                     animationSpec = tween(
@@ -372,6 +404,10 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
         }
     }
 
+    /**
+     * 오버레이 아이콘의 위치 이동 처리
+     * 휴지통과의 충돌 검사도 수행
+     */
     private fun movePosition(offset: IntOffset) {
         params.x += offset.x
         params.y += offset.y
@@ -386,6 +422,25 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
     }
 
     private fun showBackground() {
+        backgroundView = ComposeView(this).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setViewTreeLifecycleOwner(this@OverlayService)
+            setViewTreeSavedStateRegistryOwner(this@OverlayService)
+
+            setContent {
+                val isCollapsed by isCollapsedState.collectAsState()
+
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Termination Zone Icon",
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .alpha(0.5f),
+                    tint = if (isCollapsed) Color.Red else Color.Gray
+                )
+            }
+        }
+
         if (backgroundView?.isAttachedToWindow == false)
             windowManager?.addView(backgroundView, backgroundParams)
     }
@@ -437,7 +492,11 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
             )
         }
     }
-
+    
+    /**
+     * 현재 URL 캡처 및 저장
+     * 화면 캡처 후 애니메이션을 통해 시각적 피드백 제공
+     */
     private fun captureUrl() {
         CoroutineScope(Dispatchers.IO).launch {
             withContext(Dispatchers.Main) {
@@ -537,7 +596,3 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
         const val EXTRA_DATA = "extra_data"
     }
 }
-
-
-
-

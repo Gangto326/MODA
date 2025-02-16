@@ -5,27 +5,18 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.Call
-import androidx.compose.material.icons.filled.Create
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Face
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.modapjt.R
 import com.example.modapjt.domain.model.Category
 
 @Composable
@@ -45,17 +36,17 @@ fun CategoryItem(category: Category, navController: NavController) {
 
 
     val iconVector = when (category.category) {
-        "All" -> Icons.Default.AccountBox
-        "Trends" -> Icons.Default.Call
-        "Entertainment" -> Icons.Default.Info
-        "Finance" -> Icons.Default.Star
-        "Travel" -> Icons.Default.ThumbUp
-        "Food" -> Icons.Default.Menu
-        "IT" -> Icons.Default.Lock
-        "Design" -> Icons.Default.Face
-        "Society" -> Icons.Default.Email
-        "Health" -> Icons.Default.Create
-        else -> Icons.Default.Done
+        "All" -> R.drawable.category_all
+        "Trends" -> R.drawable.category_trends
+        "Entertainment" -> R.drawable.category_entertainment
+        "Finance" -> R.drawable.category_finance
+        "Travel" -> R.drawable.category_travel
+        "Food" -> R.drawable.category_food
+        "IT" -> R.drawable.category_it
+        "Design" -> R.drawable.category_design
+        "Society" -> R.drawable.category_society
+        "Health" -> R.drawable.category_health
+        else -> R.drawable.category_default
     }
 
     val categoryName = categoryNameMap[category.category] ?: category.category
@@ -67,8 +58,9 @@ fun CategoryItem(category: Category, navController: NavController) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
-            imageVector = iconVector,
+            painter = painterResource(id = iconVector),
             contentDescription = categoryName,
+            colorFilter = ColorFilter.tint(Color.Black),
             modifier = Modifier
                 .size(36.dp)  // 아이콘 크기 약간 축소
                 .padding(bottom = 2.dp)
