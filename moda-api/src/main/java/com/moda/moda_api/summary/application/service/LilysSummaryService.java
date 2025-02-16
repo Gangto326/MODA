@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
@@ -49,20 +50,22 @@ public class LilysSummaryService {
 			})
 			.thenCompose(lilysSummary -> {
 				// getSummaryResults 완료 후 병렬로 실행 가능한 작업들
-				CompletableFuture<AIAnalysisResponseDTO> aiAnalysisFuture =
-					CompletableFuture.supplyAsync(() ->
-						pythonAnalysisService.youtubeAnalyze(lilysSummary.getContents())
-					);
+				// CompletableFuture<AIAnalysisResponseDTO> aiAnalysisFuture =
+				// 	CompletableFuture.supplyAsync(() ->
+				// 		pythonAnalysisService.youtubeAnalyze(lilysSummary.getContents())
+				// 	);
 
-				// CompletableFuture<AIAnalysisResponseDTO> aiAnalysisFuture = CompletableFuture.completedFuture(
-				// 	AIAnalysisResponseDTO.builder()
-				// 		.categoryId(new CategoryId(1L))  // null 허용
-				// 		.keywords(new String[0])
-				// 		.thumbnailContent("")
-				// 		.content("")
-				// 		.embeddingVector(new EmbeddingVector(new float[768]))
-				// 		.build()
-				// );
+				CompletableFuture<AIAnalysisResponseDTO> aiAnalysisFuture = CompletableFuture.completedFuture(
+					AIAnalysisResponseDTO.builder()
+						.categoryId(new CategoryId(2L))  // null 허용
+						.keywords(new String[] {"박종원_02_16~02_17_Test"})
+						.thumbnailContent("박종원_02_16~02_17_Test")
+						.content(lilysSummary.getContents().stream()
+							.map(content -> content.getTitle() + ": " + content.getContent())
+							.collect(Collectors.joining("\n")))
+						.embeddingVector(null)
+						.build()
+				);
 
 				CompletableFuture<YoutubeAPIResponseDTO> youtubeApiFuture =
 					CompletableFuture.supplyAsync(() ->

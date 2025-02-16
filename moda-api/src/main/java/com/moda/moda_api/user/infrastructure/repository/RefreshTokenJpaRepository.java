@@ -1,6 +1,7 @@
 package com.moda.moda_api.user.infrastructure.repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import aj.org.objectweb.asm.commons.Remapper;
@@ -17,4 +18,7 @@ public interface RefreshTokenJpaRepository extends JpaRepository<RefreshTokenEnt
 	void deleteByExpiresAtBefore(LocalDateTime dateTime);
 
 	Optional<RefreshTokenEntity> findByTokenAndUserIdAndIsActiveTrue(String token, String userId);
+
+	Optional<List<RefreshTokenEntity>> findAllByUserIdAndIsActiveTrue(String userId);
+
 }

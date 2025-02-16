@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -60,13 +61,17 @@ public class TokenService {
     }
 
     // refreshToken 제거하기
-    public void invalidateRefreshToken(UserId userId, String token) {
-        RefreshToken refreshToken = refreshTokenRepository.findByTokenAndUserNameAndIsActiveTrue(token, userId)
-                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 리프레시 토큰입니다."));
-        System.out.println("refreshToken 삭제 하기전 :" + refreshToken);
-        refreshToken.deactivate();
-        refreshTokenRepository.save(refreshToken);
+    public void invalidateRefreshToken(UserId userId) {
+        // 해당 유저의 모든 active한 refresh token을 찾아서 비활성화
+        List<RefreshToken> refreshTokens = refreshTokenRepository.findAllByUserNameAndIsActiveTrue(userId);
+
+        for (RefreshToken refreshToken : refreshTokens) {
+            System.out.println("refreshToken 삭제 하기전 :" + refreshToken);
+            refreshToken.deactivate();
+            refreshTokenRepository.save(refreshToken);
+        }
     }
+
 
 	// AccessToken 살아 있는지 체크하기
     public boolean validateAccessToken(UserId userId, String accessToken) {

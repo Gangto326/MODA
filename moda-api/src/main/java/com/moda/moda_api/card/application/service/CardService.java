@@ -66,7 +66,7 @@ public class CardService {
 	 */
 	@Transactional
 	public CompletableFuture<Boolean> createCard(String userId, String url) {
-		UserId userIdObj = new UserId("user");
+		UserId userIdObj = new UserId(userId);
 		String urlHash = UrlCache.generateHash(url);
 
 		if (cardRepository.existsByUserIdAndUrlHashAndDeletedAtIsNull(userIdObj, urlHash)) {
@@ -181,7 +181,7 @@ public class CardService {
 
 	@Transactional
 	public Boolean createImages(String userId, List<MultipartFile> multipartFiles) {
-		UserId userIdObj = new UserId("user");
+		UserId userIdObj = new UserId(userId);
 
 		List<Card> cards = multipartFiles.stream()
 			.map(file -> {
@@ -190,16 +190,16 @@ public class CardService {
 					String urlHash = UrlCache.generateHash(s3Url);
 
 					// 실제 AI 분석
-					AIAnalysisResponseDTO aiAnalysisResponseDTO = pythonAiClient.imageAnalysis(new AiImageRequestDTO(s3Url));
+					// AIAnalysisResponseDTO aiAnalysisResponseDTO = pythonAiClient.imageAnalysis(new AiImageRequestDTO(s3Url));
 
 					// AI Test생성
-					// AIAnalysisResponseDTO aiAnalysisResponseDTO = AIAnalysisResponseDTO.builder()
-					// 	.keywords(new String[] {"3차"})
-					// 	.embeddingVector(new EmbeddingVector(null))
-					// 	.categoryId(new CategoryId(1L))
-					// 	.content("AIContnet")
-					// 	.thumbnailContent("abcd")
-					// 	.build();
+					AIAnalysisResponseDTO aiAnalysisResponseDTO = AIAnalysisResponseDTO.builder()
+						.keywords(new String[] {"3차"})
+						.embeddingVector(new EmbeddingVector(null))
+						.categoryId(new CategoryId(3L))
+						.content("AIContnet")
+						.thumbnailContent("abcd")
+						.build();
 
 					return Card.builder()
 						.cardId(new CardId(UUID.randomUUID().toString()))

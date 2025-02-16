@@ -97,10 +97,7 @@ public class UserService {
         UserId userId = new UserId(jwtUtil.getUserId(accessToken, "AccessToken"));
 
         tokenService.invalidateAccessToken(userId);
-        tokenService.invalidateRefreshToken(
-                userId,
-                accessToken
-        );
+        tokenService.invalidateRefreshToken(userId);
     }
 
     /**

@@ -27,7 +27,9 @@ public class CategoryController {
     public ResponseEntity<List<CategoryListResponse>> getCategoryList(
             @UserId String userId
     ) {
+        System.out.println(userId + " 여기야!여기야!여기야!여기야!여기야!여기야!여기야!여기야!여기야!여기야!여기야!여기야!여기야!여기야!여기야!여기야!여기야!여기야!여기야!여기야!여기야!");
         List<CategoryListResponse> responseList = categoryService.getCategoryList(userId);
+
         return ResponseEntity.ok(responseList);
     }
 
