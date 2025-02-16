@@ -21,13 +21,16 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.modapjt.domain.viewmodel.CategoryViewModel
+import com.example.modapjt.domain.viewmodel.SearchViewModel
 
 @Composable
 fun CategoryList(
     navController: NavController,
-    viewModel: CategoryViewModel = viewModel()
+    viewModel: CategoryViewModel = viewModel(),
+    homeKeywordViewModel: SearchViewModel = viewModel()
 ) {
     val categories by viewModel.categories.collectAsState()
+    val visibleCategories by homeKeywordViewModel.visibleCategories.collectAsState(initial = emptyMap())
 
     LaunchedEffect(Unit) {
         viewModel.loadCategories("user")
@@ -55,7 +58,7 @@ fun CategoryList(
                             .padding(horizontal = 4.dp),  // 좌우 간격
                         contentAlignment = Alignment.Center
                     ) {
-                        CategoryItem(category = category, navController = navController)
+                        CategoryItem(category = category, navController = navController, isVisible = visibleCategories[category.categoryId.toLong()] ?: false)
                     }
                 }
         }
@@ -75,7 +78,7 @@ fun CategoryList(
                             .padding(horizontal = 4.dp),  // 좌우 간격
                         contentAlignment = Alignment.Center
                     ) {
-                        CategoryItem(category = category, navController = navController)
+                        CategoryItem(category = category, navController = navController, isVisible = visibleCategories[category.categoryId.toLong()] ?: false)
                     }
                 }
         }

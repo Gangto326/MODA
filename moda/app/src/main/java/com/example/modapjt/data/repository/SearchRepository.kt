@@ -62,7 +62,7 @@ class SearchRepository(private val api: SearchApiService) {
             api.homeKeyword(userId) // 전체 HomeKeywordResponse 반환
         } catch (e: Exception) {
             Log.e("HomeKeywordRepository", "Error fetching home keyword", e)
-            HomeKeywordResponse(emptyList(), "") // 에러 발생 시 빈 데이터 반환
+            HomeKeywordResponse(emptyList(), "", emptyMap()) // 에러 발생 시 빈 데이터 반환
         }
     }
 
