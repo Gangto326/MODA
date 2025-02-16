@@ -131,7 +131,7 @@ fun newHomeScreen(
 
 
             item {
-                CategoryList(navController = navController, viewModel = categoryViewModel)
+                CategoryList(navController = navController, viewModel = categoryViewModel, homeKeywordViewModel = homeKeywordViewModel)
             }
 
 

@@ -35,6 +35,10 @@ class SearchViewModel : ViewModel() {
     private val _topKeywords = MutableStateFlow<List<String>>(emptyList())
     val topKeywords: StateFlow<List<String>> get() = _topKeywords
 
+    // ✅ 카테고리에 데이터가 존재하는지 알려주는 Map
+    private val _visibleCategories = MutableStateFlow<Map<Long, Boolean>>(emptyMap())
+    val visibleCategories: StateFlow<Map<Long, Boolean>> get() = _visibleCategories
+
     // ✅ 위의 두개를 한꺼번에 가지고 오는 것.
     private val _selectedKeyword = MutableStateFlow<String?>(null)
     val selectedKeyword: StateFlow<String?> = _selectedKeyword.asStateFlow()
@@ -75,6 +79,7 @@ class SearchViewModel : ViewModel() {
                 val response = repository.getHomeKeyword(userId)
                 _topKeywords.value = response.topKeywords // ✅ 키워드 리스트 업데이트
                 _creator.value = response.creator // ✅ creator 업데이트
+                _visibleCategories.value = response.categories // ✅ categories 업데이트
             } catch (e: Exception) {
                 _topKeywords.value = emptyList()
                 _creator.value = ""

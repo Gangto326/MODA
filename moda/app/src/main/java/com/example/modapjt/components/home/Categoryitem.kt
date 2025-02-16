@@ -1,5 +1,6 @@
 package com.example.modapjt.components.home
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -11,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -20,7 +22,11 @@ import com.example.modapjt.R
 import com.example.modapjt.domain.model.Category
 
 @Composable
-fun CategoryItem(category: Category, navController: NavController) {
+fun CategoryItem(
+    category: Category,
+    navController: NavController,
+    isVisible: Boolean
+) {
     val categoryNameMap = mapOf(
         "All" to "전체",
         "Trends" to "트렌드",
@@ -50,17 +56,31 @@ fun CategoryItem(category: Category, navController: NavController) {
     }
 
     val categoryName = categoryNameMap[category.category] ?: category.category
+    val color = if (isVisible) Color(0xFF665F5B) else Color(0xFFC1C1C1)
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
             .padding(4.dp)  // 패딩 값 축소
-            .clickable { navController.navigate("categoryDetail/${category.categoryId}") },
+            .then (
+                if (isVisible) {
+                    Modifier.clickable { navController.navigate("categoryDetail/${category.categoryId}") }
+                } else {
+                    Modifier.clickable {
+                        Toast.makeText(
+                            context,
+                            "$categoryName 컨텐츠를 채워 활성화해주세요.",
+                            Toast.LENGTH_SHORT)
+                        .show()
+                    }
+                }
+            ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
             painter = painterResource(id = iconVector),
             contentDescription = categoryName,
-            colorFilter = ColorFilter.tint(Color.Black),
+            colorFilter = ColorFilter.tint(color),
             modifier = Modifier
                 .size(36.dp)  // 아이콘 크기 약간 축소
                 .padding(bottom = 2.dp)
@@ -68,7 +88,7 @@ fun CategoryItem(category: Category, navController: NavController) {
         Text(
             text = categoryName,
             fontSize = 12.sp,  // 폰트 크기 약간 축소
-            color = Color(0xFF665F5B),
+            color = color,
             maxLines = 1,  // 한 줄로 제한
             overflow = TextOverflow.Ellipsis  // 길이가 길면 ...으로 표시
         )
