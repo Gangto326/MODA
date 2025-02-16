@@ -2,17 +2,16 @@ package com.example.modapjt.data.api
 
 import com.example.modapjt.data.dto.request.EmailVerificationRequest
 import com.example.modapjt.data.dto.request.SignUpRequest
+import com.example.modapjt.data.dto.request.UserNameRequest
 import com.example.modapjt.data.dto.response.ApiResponse
 import retrofit2.http.Body
-import retrofit2.http.GET
 import retrofit2.http.POST
-import retrofit2.http.Path
 
 interface SignUpApiService {
-    @GET("/api/user/check-user-name/{userName}")
+    @POST("/api/auth/check-user-name")
     suspend fun checkUsername(
-        @Path("userName") username: String
-    ): Boolean  // ApiResponse<Boolean>에서 Boolean으로 변경
+        @Body request: UserNameRequest
+    ): Boolean
 
     @POST("/api/auth/email/send")
     suspend fun sendEmailVerification(

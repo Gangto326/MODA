@@ -314,12 +314,15 @@ fun NavGraph(
             )
         }
 
+
         composable("signup") {
             SignUpScreen(
                 viewModel = signUpViewModel,
-                onNavigateBack = { navController.navigateUp() }
+                onNavigateBack = { navController.navigateUp() },
+                navController = navController // ✅ navController 올바르게 전달됨
             )
         }
+
 
         // 아이디 찾기 화면
         composable("find_id") {

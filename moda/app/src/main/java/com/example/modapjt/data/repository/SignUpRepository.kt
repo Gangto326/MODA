@@ -4,6 +4,7 @@ import android.util.Log
 import com.example.modapjt.data.api.SignUpApiService
 import com.example.modapjt.data.dto.request.EmailVerificationRequest
 import com.example.modapjt.data.dto.request.SignUpRequest
+import com.example.modapjt.data.dto.request.UserNameRequest
 import com.example.modapjt.utils.Resource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -13,8 +14,10 @@ class SignUpRepository(private val api: SignUpApiService) {
     suspend fun checkUsername(username: String): Resource<Boolean> {
         return withContext(Dispatchers.IO) {
             try {
-                val isAvailable = api.checkUsername(username)
-                Resource.Success(isAvailable)
+                val request = UserNameRequest(username)
+                val response = api.checkUsername(request)
+                // true = 중복된 아이디, false = 사용 가능한 아이디
+                Resource.Success(response)  // 응답 그대로 반환
             } catch (e: Exception) {
                 Resource.Error(e.message ?: "아이디 중복 확인 중 오류가 발생했습니다.")
             }

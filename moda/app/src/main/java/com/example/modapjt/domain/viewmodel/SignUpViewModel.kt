@@ -110,14 +110,16 @@ class SignUpViewModel : ViewModel() {
             when (val result = repository.checkUsername(username)) {
                 is Resource.Success -> {
                     _signUpState.value = _signUpState.value.copy(
-                        isUsernameVerified = result.data ?: false,
-                        usernameVerificationMessage = if (result.data == true)
-                            "사용 가능한 아이디입니다."
+                        isUsernameVerified = !result.data,  // 여기서 NOT 연산 추가
+                        usernameVerificationMessage = if (result.data)
+                            "이미 사용중인 아이디입니다."
                         else
-                            "이미 사용중인 아이디입니다.",
+                            "사용 가능한 아이디입니다.",
                         isLoading = false
                     )
                 }
+
+
                 is Resource.Error -> {
                     _signUpState.value = _signUpState.value.copy(
                         usernameVerificationMessage = result.message,
@@ -317,21 +319,36 @@ class SignUpViewModel : ViewModel() {
                         isLoading = false,
                         error = null
                     )
-                    _uiEvent.send(UiEvent.SignUpSuccess)
+                    _uiEvent.send(UiEvent.SignUpSuccess) // 🚀 로그인 페이지로 이동
                 }
                 is Resource.Error -> {
                     Log.e("SignUpViewModel", "Sign up error: ${result.message}")
-                    _signUpState.value = state.copy(
-                        error = result.message,
-                        isLoading = false
-                    )
-                    _uiEvent.send(UiEvent.ShowError(result.message))
+
+                    // ✅ "회원가입이 완료되었습니다." 메시지가 포함되어 있으면 성공 처리
+                    if (result.message.contains("회원가입이 완료되었습니다.")) {
+                        Log.d("SignUpViewModel", "회원가입 성공 메시지 감지 → 성공으로 처리")
+                        _signUpState.value = state.copy(
+                            isLoading = false,
+                            error = null
+                        )
+                        _uiEvent.send(UiEvent.SignUpSuccess) // 🚀 로그인 페이지로 이동
+                    } else {
+                        _signUpState.value = state.copy(
+                            error = result.message,
+                            isLoading = false
+                        )
+                        _uiEvent.send(UiEvent.ShowError(result.message)) // ❌ 실제 에러만 ShowError 처리
+                    }
                 }
-                is Resource.Loading -> {
+
+
+
+            is Resource.Loading -> {
                     _signUpState.value = state.copy(
                         isLoading = true
                     )
                 }
+
             }
         }
     }
@@ -341,3 +358,4 @@ class SignUpViewModel : ViewModel() {
         timerJob?.cancel()
     }
 }
+

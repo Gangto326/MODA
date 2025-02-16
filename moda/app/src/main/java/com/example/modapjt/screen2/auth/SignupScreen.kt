@@ -1,5 +1,6 @@
 package com.example.modapjt.presentation.auth.signup
 
+import android.util.Log
 import android.view.ViewTreeObserver
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
@@ -23,7 +24,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -39,6 +39,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.modapjt.R
 import com.example.modapjt.domain.model.SignUpEvent
 
@@ -46,7 +47,8 @@ import com.example.modapjt.domain.model.SignUpEvent
 @Composable
 fun SignUpScreen(
     viewModel: SignUpViewModel,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    navController: NavController
 ) {
     val state = viewModel.signUpState.value
     val scrollState = rememberScrollState()
@@ -178,7 +180,12 @@ fun SignUpScreen(
                 )
                 if (state.isTimerRunning) {
                     Text(
-                        text = "남은 시간: ${state.remainingTime / 60}:${String.format("%02d", state.remainingTime % 60)}",
+                        text = "남은 시간: ${state.remainingTime / 60}:${
+                            String.format(
+                                "%02d",
+                                state.remainingTime % 60
+                            )
+                        }",
                         color = Color.Gray,
                         modifier = Modifier.padding(start = 8.dp, top = 4.dp)
                     )
@@ -302,8 +309,12 @@ fun SignUpScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         // 회원가입 버튼
+        // 회원가입 버튼
         Button(
-            onClick = { viewModel.onEvent(SignUpEvent.Submit) },
+            onClick = {
+                viewModel.onEvent(SignUpEvent.Submit)
+                // 여기서 직접 navigate하지 않음
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp),
@@ -322,43 +333,33 @@ fun SignUpScreen(
                 Text("회원가입")
             }
         }
+// UI 이벤트 수집 부분 수정
+        LaunchedEffect(key1 = true) {
+            viewModel.uiEvent.collect { event ->
+                Log.d("SignUpScreen", "UI Event 발생: $event") // ✅ 확인용 로그 추가
+                when (event) {
+                    is SignUpViewModel.UiEvent.SignUpSuccess -> {
+                        Log.d("SignUpScreen", "로그인 페이지로 이동합니다.") // ✅ 확인용 로그 추가
+                        Toast.makeText(
+                            context,
+                            "회원가입에 성공하셨습니다! 🎉",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        // onNavigateBack() 대신 로그인 페이지로 직접 네비게이션
+                        navController.navigate("login") {
+                            popUpTo("home") { inclusive = false } // ✅ "home"까지 유지하면서 "signup"만 제거
+                        }
+                    }
 
-        // 로그인으로 돌아가기
-        TextButton(
-            onClick = onNavigateBack,
-            modifier = Modifier.padding(vertical = 8.dp)
-        ) {
-            Text("로그인으로 돌아가기", color = Color.Gray)
-        }
-
-        // 키보드가 보일 때 추가 공간 확보
-        if (isKeyboardVisible) {
-            Spacer(modifier = Modifier.height(keyboardHeight.dp))
-        }
-
-    }
-
-    // UI 이벤트 수집
-    LaunchedEffect(key1 = true) {
-        viewModel.uiEvent.collect { event ->
-            when (event) {
-                is SignUpViewModel.UiEvent.SignUpSuccess -> {
-                    Toast.makeText(
-                        context,
-                        "회원가입에 성공하셨습니다! 🎉",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    onNavigateBack()
-                }
-                is SignUpViewModel.UiEvent.ShowError -> {
-                    Toast.makeText(
-                        context,
-                        event.message,
-                        Toast.LENGTH_LONG
-                    ).show()
+                    is SignUpViewModel.UiEvent.ShowError -> {
+                        Toast.makeText(
+                            context,
+                            event.message,
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
                 }
             }
         }
     }
-
 }
