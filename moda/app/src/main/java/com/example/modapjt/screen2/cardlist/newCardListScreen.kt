@@ -2,6 +2,7 @@ package com.example.modapjt.screen2
 
 import AllTabCard
 import BlogBig
+import CategoryViewModel
 import NewsBig
 import TypeSelectBar
 import VideoBig
@@ -34,9 +35,9 @@ import androidx.navigation.NavController
 import com.example.modapjt.components.bar.BottomBarComponent
 import com.example.modapjt.components.bar.CategoryHeaderBar
 import com.example.modapjt.components.cardtab.SwipableCardList
+import com.example.modapjt.data.storage.TokenManager
 import com.example.modapjt.domain.viewmodel.CardUiState
 import com.example.modapjt.domain.viewmodel.CardViewModel
-import com.example.modapjt.domain.viewmodel.CategoryViewModel
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -44,6 +45,7 @@ fun newCardListScreen(
     navController: NavController,
     currentRoute: String,
     categoryId: Int?,
+    tokenManager: TokenManager,  // TokenManager 추가
     viewModel: CardViewModel = viewModel(),
     categoryViewModel: CategoryViewModel = viewModel()
 ) {
