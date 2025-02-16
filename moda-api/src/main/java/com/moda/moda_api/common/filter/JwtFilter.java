@@ -49,7 +49,6 @@ public class JwtFilter extends OncePerRequestFilter {
 			"/webjars",
 			"/api/user/check-user-name",
 			"/api/auth/password-change-check"
-
 		};
 
 		String path = request.getRequestURI();
@@ -65,29 +64,43 @@ public class JwtFilter extends OncePerRequestFilter {
 
 		String accessToken = HeaderUtil.getAccessToken(request);
 
-		// 만약 해당 값이 없으면 Access Token이 존재하지 않은 것
+		// 1. Access Token 존재 여부 확인
 		if (accessToken == null) {
-			sendErrorResponse(response, "Access token이 존재하지 않습니다");
+			response.setStatus(HttpStatus.UNAUTHORIZED.value());
+			response.setContentType("application/json");
+			response.getWriter().write(objectMapper.writeValueAsString(
+				Map.of(
+					"message", "Access Token이 존재하지 않습니다.",
+					"code", "ACCESS_TOKEN_MISSING"
+				)
+			));
 			return;
 		}
 
-		//JWT 유효성 검증
+		// 2. JWT 토큰 유효성 검증 (만료, 서명 등)
 		if (!jwtUtil.isValidToken(accessToken, "AccessToken")) {
 			response.setStatus(HttpStatus.UNAUTHORIZED.value());
 			response.setContentType("application/json");
 			response.getWriter().write(objectMapper.writeValueAsString(
 				Map.of(
 					"message", "Access Token이 만료되었습니다.",
-					"code", "ACCESS_TOKEN_EXPIRED"
+					"code", "ACCESS_TOKEN_EXPIRED"  // 프론트에서 이 코드를 보고 refresh 요청
 				)
 			));
 			return;
 		}
 
-		// 2. Redis 토큰 유효성 검증 (로그아웃 여부 등 체크)
+		// 3. Redis 토큰 유효성 검증 (로그아웃 여부 등)
 		UserId userId = new UserId(jwtUtil.getUserId(accessToken, "AccessToken"));
 		if (!tokenService.validateAccessToken(userId, accessToken)) {
-			sendErrorResponse(response, "Access token이 유효하지 않습니다. ");
+			response.setStatus(HttpStatus.UNAUTHORIZED.value());
+			response.setContentType("application/json");
+			response.getWriter().write(objectMapper.writeValueAsString(
+				Map.of(
+					"message", "로그아웃 되었거나 유효하지 않은 토큰입니다.",
+					"code", "ACCESS_TOKEN_INVALID"  // 프론트에서 이 코드를 보고 로그인 페이지로 이동
+				)
+			));
 			return;
 		}
 

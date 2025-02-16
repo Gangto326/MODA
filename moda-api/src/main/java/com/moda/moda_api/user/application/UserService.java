@@ -2,14 +2,15 @@ package com.moda.moda_api.user.application;
 
 import org.springframework.stereotype.Service;
 
+import com.moda.moda_api.card.exception.UnauthorizedException;
 import com.moda.moda_api.common.infrastructure.TokenService;
 import com.moda.moda_api.common.jwt.TokenDto;
 import com.moda.moda_api.common.util.JwtUtil;
 import com.moda.moda_api.user.application.response.AuthResponse;
+import com.moda.moda_api.user.domain.RefreshToken;
 import com.moda.moda_api.user.domain.User;
 import com.moda.moda_api.user.domain.UserId;
 import com.moda.moda_api.user.domain.UserRepository;
-import com.moda.moda_api.user.exception.InvalidPasswordException;
 import com.moda.moda_api.user.exception.InvalidRequestException;
 import com.moda.moda_api.user.exception.UserNotFoundException;
 import com.moda.moda_api.user.infrastructure.PasswordEncrypt;
@@ -108,12 +109,24 @@ public class UserService {
      * @return
      */
     public TokenDto reGenerateToken(String refreshToken) {
+        // 1. refreshToken JWT 유효성 검증
+        if (!jwtUtil.isValidToken(refreshToken, "RefreshToken")) {
+            throw new UnauthorizedException("Refresh Token이 만료되었습니다.", "REFRESH_TOKEN_EXPIRED");
+        }
+
+        // 2. DB에서 refreshToken을 확인하고 isDead인지 확인해 ~
+        RefreshToken validatedToken = tokenService.validateRefreshToken(refreshToken);
+
+        // 3. 다 통과하면 통과해
         UserId userId = new UserId(jwtUtil.getUserId(refreshToken, "RefreshToken"));
 
-        tokenService.validateRefreshToken(refreshToken);
-
+        // 4. 해당 유저가 있는지도 검사해
         User user = userRepository.findById(userId.getValue())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+            .orElseThrow(() -> new UnauthorizedException("존재하지 않는 사용자입니다.", "USER_NOT_FOUND"));
+
+        if (user.getDeletedAt() != null) {
+            throw new UnauthorizedException("탈퇴한 사용자입니다.", "USER_DELETED");
+        }
 
         // 새로운 Access Token 생성
         TokenDto newAccessToken = jwtUtil.generateToken(user, "AccessToken");

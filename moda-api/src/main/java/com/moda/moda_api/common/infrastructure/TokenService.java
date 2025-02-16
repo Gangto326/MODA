@@ -1,5 +1,6 @@
 package com.moda.moda_api.common.infrastructure;
 
+import com.moda.moda_api.card.exception.UnauthorizedException;
 import com.moda.moda_api.common.jwt.TokenDto;
 import com.moda.moda_api.user.domain.RefreshToken;
 import com.moda.moda_api.user.domain.RefreshTokenRepository;
@@ -62,7 +63,7 @@ public class TokenService {
     public void invalidateRefreshToken(UserId userId, String token) {
         RefreshToken refreshToken = refreshTokenRepository.findByTokenAndUserNameAndIsActiveTrue(token, userId)
                 .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 리프레시 토큰입니다."));
-        System.out.println("refreshTokne 삭제 하기전 :" + refreshToken);
+        System.out.println("refreshToken 삭제 하기전 :" + refreshToken);
         refreshToken.deactivate();
         refreshTokenRepository.save(refreshToken);
     }
@@ -77,7 +78,7 @@ public class TokenService {
 	// RefreshToken 살아 있는지 체크하기
     public RefreshToken validateRefreshToken(String token) {
         return refreshTokenRepository.findByTokenAndIsActiveTrue(token)
-                .filter(rt -> rt.getExpiresAt().isAfter(LocalDateTime.now()))
-                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 리프레시 토큰입니다."));
+            .filter(rt -> rt.getExpiresAt().isAfter(LocalDateTime.now()))
+            .orElseThrow(() -> new UnauthorizedException("Refresh Token이 만료되었거나 유효하지 않습니다.", "REFRESH_TOKEN_INVALID"));
     }
 }

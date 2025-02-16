@@ -115,25 +115,6 @@ public class UserController {
     }
 
 
-    @GetMapping("/refresh")
-    public ResponseEntity<Boolean> refresh(HttpServletRequest httpServletRequest) {
-
-        // Client에서 withCredentials 옵션으로 설정하여 전송된 경우, RefreshToken을 받을 수 있다.
-        String refreshToken = HeaderUtil.getRefreshToken(httpServletRequest);
-
-        // RefreshToken을 바탕으로 새로운 AccessToken을 발급.
-        TokenDto newAccessToken = userService.reGenerateToken(refreshToken);
-
-        // 새로운 Accesstoken을 Header에 추가.
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add(HeaderUtil.getAuthorizationHeaderName(), HeaderUtil.getTokenPrefix() + newAccessToken.getTokenValue());
-
-        // 새로운 AccessToken을 전송.
-        return ResponseEntity.ok()
-                .headers(httpHeaders)
-                .body(true);
-    }
-
 
     @PatchMapping("/reset-password")
     public ResponseEntity<Boolean> resetPassword(@RequestBody PasswordResetRequest passwordResetRequest) {

@@ -1,5 +1,6 @@
 package com.moda.moda_api.user.presentation;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -8,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.moda.moda_api.common.jwt.TokenDto;
+import com.moda.moda_api.common.util.HeaderUtil;
 import com.moda.moda_api.user.application.EmailService;
 import com.moda.moda_api.user.application.UserService;
 import com.moda.moda_api.user.domain.User;
@@ -16,6 +19,7 @@ import com.moda.moda_api.user.presentation.request.EmailVerifyRequest;
 import com.moda.moda_api.user.presentation.request.PasswordVerifyRequest;
 import com.moda.moda_api.user.presentation.request.UserNameRequest;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -71,6 +75,24 @@ public class AuthController {
 		return ResponseEntity.ok(isAvailable);
 	}
 
+	@GetMapping("/refresh")
+	public ResponseEntity<Boolean> refresh(HttpServletRequest httpServletRequest) {
+
+		// Client에서 withCredentials 옵션으로 설정하여 전송된 경우, RefreshToken을 받을 수 있다.
+		String refreshToken = HeaderUtil.getRefreshToken(httpServletRequest);
+
+		// RefreshToken을 바탕으로 새로운 AccessToken을 발급.
+		TokenDto newAccessToken = userService.reGenerateToken(refreshToken);
+
+		// 새로운 Accesstoken을 Header에 추가.
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.add(HeaderUtil.getAuthorizationHeaderName(), HeaderUtil.getTokenPrefix() + newAccessToken.getTokenValue());
+
+		// 새로운 AccessToken을 전송.
+		return ResponseEntity.ok()
+			.headers(httpHeaders)
+			.body(true);
+	}
 
 }
 
