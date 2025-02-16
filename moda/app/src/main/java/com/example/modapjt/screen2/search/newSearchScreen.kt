@@ -31,10 +31,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -43,16 +45,13 @@ import com.example.modapjt.R
 import com.example.modapjt.components.search.KeywordRankList
 import com.example.modapjt.components.search.SearchKeywordList
 import com.example.modapjt.components.search.SearchScreenBar
-import com.example.modapjt.datastore.SearchKeywordDataStore
 import com.example.modapjt.domain.viewmodel.SearchViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 
 @Composable
 fun NewSearchScreen(
     navController: NavController,
-    searchViewModel: SearchViewModel = viewModel()
+    searchViewModel: SearchViewModel = viewModel(),
+    searchQuery: String = "" // Changed from initialQuery to searchQuery
 ) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -62,11 +61,21 @@ fun NewSearchScreen(
     var isSearchActive by remember { mutableStateOf(false) }
     val searchResults by searchViewModel.searchResults.collectAsState()
 
+    // searchQuery 파라미터를 초기값으로 사용
+    var currentSearchQuery by remember { mutableStateOf(searchQuery) }
+
     // ✨ 이전 검색 결과를 저장하는 변수 추가
     var lastValidSearchResults by remember { mutableStateOf<List<String>>(emptyList()) }
 
-    // ✅ 화면이 열리자마자 키보드 활성화
+    var searchText by remember { mutableStateOf(searchQuery) }
+
+
+    // ✅ 화면이 열리자마자 키보드 활성화 // 초기 검색어가 있을 경우 자동완성 실행
     LaunchedEffect(Unit) {
+        if (searchQuery.isNotEmpty()) {
+            searchViewModel.fetchAutoCompleteKeywords(searchQuery)
+            isSearchActive = true
+        }
         keyboardController?.show()
     }
 
@@ -81,23 +90,24 @@ fun NewSearchScreen(
         }
     }
 
+
     Scaffold(
         topBar = {
             SearchScreenBar(
                 navController = navController,
+                initialValue = currentSearchQuery, // 현재 검색어 전달
                 isSearchActive = isSearchActive,
                 onSearchValueChange = {
-                    searchQuery = it
+                    currentSearchQuery = it
                     searchViewModel.fetchAutoCompleteKeywords(it)
                 },
                 onFocusChanged = { isSearchActive = it },
-                onSearchSubmit = { query -> // ✅ 검색 버튼 클릭 시 동작
+                onSearchSubmit = { query ->
                     if (query.isNotBlank()) {
-                        navController.navigate("newSearchCardListScreen/$query") // ✅ 검색어와 함께 이동
+                        navController.navigate("newSearchCardListScreen/$query")
                     }
                 },
                 onBackPressed = {
-                    // 단순히 이전 화면으로 돌아가기
                     navController.navigateUp()
                 },
                 context = context
@@ -110,25 +120,21 @@ fun NewSearchScreen(
                 .padding(paddingValues)
                 .pointerInput(Unit) {
                     detectTapGestures {
-                        keyboardController?.hide() // ✅ 헤더 외 다른 부분 터치 시 키보드 숨김
+                        keyboardController?.hide()
                     }
                 }
         ) {
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                if (searchQuery.isEmpty()) {
-                    // 🔹 검색어가 없을 때 최근 검색어 & 인기 검색어 표시
+                if (currentSearchQuery.isEmpty()) {
                     item { SearchKeywordList(context, navController = navController) }
-                    // ✨ 검색어 리스트 사이 간격 20dp 추가
                     item { Spacer(modifier = Modifier.height(20.dp)) }
                     item { KeywordRankList(viewModel = viewModel(), navController = navController) }
                 }
 
-                if (searchQuery.isNotEmpty()) {
-                    // 🔹 검색어 입력 시 자동완성 검색어 표시
+                if (currentSearchQuery.isNotEmpty()) {
                     item {
-                        // ✨ 빈 검색 결과일 경우 마지막 유효한 결과 사용
                         val displayResults = if (searchResults.isEmpty()) lastValidSearchResults else searchResults
                         SearchSuggestions(displayResults, onSearchSubmit = { query ->
                             if (query.isNotBlank()) {
@@ -147,21 +153,15 @@ fun SearchSuggestions(
     suggestions: List<String>,
     onSearchSubmit: (String) -> Unit
 ) {
-    val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
-
-    Log.d("SearchSuggestions", "검색어 리스트 갱신됨: $suggestions")
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        // ✨ "자동완성 검색어" 텍스트 제거
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(min = 100.dp, max = 400.dp),
+                .heightIn(max = 300.dp), // 높이 제한 수정
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             items(suggestions.take(10), key = { it }) { suggestion ->
@@ -172,19 +172,11 @@ fun SearchSuggestions(
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() }
                         ) {
-                            Log.d("SearchSuggestions", "검색어 클릭됨: $suggestion")
                             onSearchSubmit(suggestion)
-
-                            coroutineScope.launch(Dispatchers.IO) {
-                                val currentKeywords = SearchKeywordDataStore.getKeywords(context).first()
-                                val updatedKeywords = (listOf(suggestion) + currentKeywords).distinct().take(10)
-                                SearchKeywordDataStore.saveKeywords(context, updatedKeywords)
-                            }
                         }
                         .padding(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // ✨ 검색 아이콘 추가
                     Image(
                         painter = painterResource(id = R.drawable.ic_search),
                         contentDescription = "Search Icon",
@@ -196,10 +188,23 @@ fun SearchSuggestions(
                     Text(
                         text = suggestion,
                         style = MaterialTheme.typography.bodyMedium.copy(
-                            fontSize = 14.sp  // ✨ 글씨 크기 조정
+                            fontSize = 14.sp
                         )
                     )
                 }
+            }
+
+            item {
+                Text(
+                    text = "자동완성 적용중...",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                    textAlign = TextAlign.Center,
+                    fontSize = 11.sp
+                )
             }
         }
     }
