@@ -18,6 +18,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.example.modapjt.data.repository.CardRepository
 import com.example.modapjt.domain.viewmodel.AuthViewModel
+import com.example.modapjt.domain.viewmodel.FindIdViewModel
+import com.example.modapjt.domain.viewmodel.FindPasswordViewModel
 import com.example.modapjt.screen.SavedUrlsScreen
 import com.example.modapjt.screen.linkupload.LinkUploadScreen
 import com.example.modapjt.screen.recommend.RecommendScreen
@@ -53,6 +55,8 @@ fun NavGraph(
 //    // AuthViewModel 인스턴스 생성
 //    val authViewModel: AuthViewModel = viewModel()
     val signUpViewModel: SignUpViewModel = viewModel()
+    val findIdViewModel: FindIdViewModel = viewModel()
+    val findPasswordViewModel: FindPasswordViewModel = viewModel()
     val repository = CardRepository() // CardRepository 인스턴스 생성
 
     val isLoggedIn by authViewModel.isLoggedIn // 추가
@@ -259,7 +263,7 @@ fun NavGraph(
         // 아이디 찾기 화면
         composable("find_id") {
             FindIdScreen(
-                viewModel = authViewModel,
+                viewModel = findIdViewModel,
                 onNavigateBack = { navController.navigateUp() }
             )
         }
@@ -267,7 +271,7 @@ fun NavGraph(
         // 비밀번호 찾기 화면
         composable("find_password") {
             FindPasswordScreen(
-                viewModel = authViewModel,
+                viewModel = findPasswordViewModel,
                 onNavigateBack = { navController.navigateUp() }
             )
         }
