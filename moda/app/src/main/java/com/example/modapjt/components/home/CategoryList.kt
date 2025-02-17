@@ -1,6 +1,7 @@
 package com.example.modapjt.components.home
 
 // `CategoryItem.kt`에서 이미 정의된 `CategoryItem` 가져오기
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,10 +28,10 @@ import com.example.modapjt.domain.viewmodel.SearchViewModel
 fun CategoryList(
     navController: NavController,
     viewModel: CategoryViewModel = viewModel(),
-//    homeKeywordViewModel: SearchViewModel = viewModel() // 필요 X
+    homeKeywordViewModel: SearchViewModel = viewModel()
 ) {
     val categories by viewModel.categories.collectAsState()
-//    val visibleCategories by homeKeywordViewModel.visibleCategories.collectAsState(initial = emptyMap()) // 필요 X
+    val visibleCategories by homeKeywordViewModel.visibleCategories.collectAsState(initial = emptyMap())
 
     LaunchedEffect(Unit) {
         viewModel.loadCategories()
@@ -58,8 +59,7 @@ fun CategoryList(
                             .padding(horizontal = 4.dp),  // 좌우 간격
                         contentAlignment = Alignment.Center
                     ) {
-//                        CategoryItem(category = category, navController = navController, isVisible = visibleCategories[category.categoryId.toLong()] ?: false)
-                        CategoryItem(category = category, navController = navController) // 수정
+                        CategoryItem(category = category, navController = navController, isVisible = visibleCategories[category.categoryId.toLong()] ?: false)
                     }
                 }
         }
@@ -79,8 +79,7 @@ fun CategoryList(
                             .padding(horizontal = 4.dp),  // 좌우 간격
                         contentAlignment = Alignment.Center
                     ) {
-//                        CategoryItem(category = category, navController = navController, isVisible = visibleCategories[category.categoryId.toLong()] ?: false)
-                        CategoryItem(category = category, navController = navController) // 수정
+                        CategoryItem(category = category, navController = navController, isVisible = visibleCategories[category.categoryId.toLong()] ?: false)
                     }
                 }
         }

@@ -93,14 +93,14 @@ fun newHomeScreen(
     )
 
     LaunchedEffect(listState.firstVisibleItemIndex, listState.firstVisibleItemScrollOffset, ) {
-            val currentOffset = listState.firstVisibleItemScrollOffset
-            val isScrollingDown = currentOffset > lastScrollOffset
+        val currentOffset = listState.firstVisibleItemScrollOffset
+        val isScrollingDown = currentOffset > lastScrollOffset
 
-            isHeaderVisible = if (listState.firstVisibleItemIndex == 0) {
-                true
-            } else {
-                !isScrollingDown
-            }
+        isHeaderVisible = if (listState.firstVisibleItemIndex == 0) {
+            true
+        } else {
+            !isScrollingDown
+        }
 
         lastScrollOffset = currentOffset
     }
@@ -143,11 +143,8 @@ fun newHomeScreen(
             }
 
 
-//            item {
-//                CategoryList(navController = navController, viewModel = categoryViewModel, homeKeywordViewModel = homeKeywordViewModel)
-//            }
             item {
-                CategoryList(navController = navController, viewModel = categoryViewModel)
+                CategoryList(navController = navController, viewModel = categoryViewModel, homeKeywordViewModel = homeKeywordViewModel)
             }
 
 

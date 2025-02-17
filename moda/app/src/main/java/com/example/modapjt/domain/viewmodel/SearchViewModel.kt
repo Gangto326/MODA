@@ -78,7 +78,11 @@ class SearchViewModel : ViewModel() {
                 val response = repository.getHomeKeyword()
                 _topKeywords.value = response.topKeywords // ✅ 키워드 리스트 업데이트
                 _creator.value = response.creator // ✅ creator 업데이트
-                _visibleCategories.value = response.categories // ✅ categories 업데이트
+//                _visibleCategories.value = response.categories // ✅ categories 업데이트
+                // -> 이렇게 하면 가입 시 키워드 5개 존재 X 유저는 카테고리 안나타남
+                if (response.categories.isNotEmpty()) {
+                    _visibleCategories.value = response.categories
+                }
             } catch (e: Exception) {
                 _topKeywords.value = emptyList()
                 _creator.value = ""

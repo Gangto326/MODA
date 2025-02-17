@@ -26,7 +26,7 @@ import com.example.modapjt.domain.model.Category
 fun CategoryItem(
     category: Category,
     navController: NavController,
-//    isVisible: Boolean
+    isVisible: Boolean
 ) {
     val categoryNameMap = mapOf(
         "All" to "전체",
@@ -57,54 +57,31 @@ fun CategoryItem(
     }
 
     val categoryName = categoryNameMap[category.category] ?: category.category
-//    val color = if (isVisible) Color(0xFF665F5B) else Color(0xFFC1C1C1)
-//    val context = LocalContext.current
+    val color = if (isVisible) Color(0xFF665F5B) else Color(0xFFC1C1C1)
+    val context = LocalContext.current
 
-//    Column(
-//        modifier = Modifier
-//            .padding(4.dp)  // 패딩 값 축소
-//            .then (
-//                if (isVisible) {
-//                    Modifier.clickable { navController.navigate("categoryDetail/${category.categoryId}") }
-//                } else {
-//                    Modifier.clickable {
-//                        Toast.makeText(
-//                            context,
-//                            "$categoryName 컨텐츠를 채워 활성화해주세요.",
-//                            Toast.LENGTH_SHORT)
-//                        .show()
-//                    }
-//                }
-//            ),
-//        horizontalAlignment = Alignment.CenterHorizontally
-//    ) {
-//        Image(
-//            painter = painterResource(id = iconVector),
-//            contentDescription = categoryName,
-//            colorFilter = ColorFilter.tint(color),
-//            modifier = Modifier
-//                .size(36.dp)  // 아이콘 크기 약간 축소
-//                .padding(bottom = 2.dp)
-//        )
-//        Text(
-//            text = categoryName,
-//            fontSize = 12.sp,  // 폰트 크기 약간 축소
-//            color = color,
-//            maxLines = 1,  // 한 줄로 제한
-//            overflow = TextOverflow.Ellipsis  // 길이가 길면 ...으로 표시
-//        )
-//    }
-    // -> 이건 기존 코드로 해야하는데 잠시 주석처리
     Column(
         modifier = Modifier
             .padding(4.dp)  // 패딩 값 축소
-            .clickable { navController.navigate("categoryDetail/${category.categoryId}") },
+            .then (
+                if (isVisible) {
+                    Modifier.clickable { navController.navigate("categoryDetail/${category.categoryId}") }
+                } else {
+                    Modifier.clickable {
+                        Toast.makeText(
+                            context,
+                            "$categoryName 컨텐츠를 채워 활성화해주세요.",
+                            Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                }
+            ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
             painter = painterResource(id = iconVector),
             contentDescription = categoryName,
-//            colorFilter = ColorFilter.tint(color),  // 잠시 주석처리
+            colorFilter = ColorFilter.tint(color),
             modifier = Modifier
                 .size(36.dp)  // 아이콘 크기 약간 축소
                 .padding(bottom = 2.dp)
@@ -112,9 +89,11 @@ fun CategoryItem(
         Text(
             text = categoryName,
             fontSize = 12.sp,  // 폰트 크기 약간 축소
-            color = Color(0xFF665F5B),
+            color = color,
             maxLines = 1,  // 한 줄로 제한
             overflow = TextOverflow.Ellipsis  // 길이가 길면 ...으로 표시
         )
     }
 }
+
+
