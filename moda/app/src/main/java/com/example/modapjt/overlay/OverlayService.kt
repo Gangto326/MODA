@@ -115,6 +115,7 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
     // 화면 캡처를 위한 MediaProjection 관련 변수들
     private var mediaProjection: MediaProjection? = null
     private var virtualDisplay: VirtualDisplay? = null
+    private var imageReader: ImageReader? = null
 
     /**
      * 서비스가 생성될 때 호출되는 함수
@@ -195,24 +196,24 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
      * 가상 디스플레이 설정 및 이미지 캡처 리스너 등록
      */
     private fun setupVirtualDisplay() {
-        val imageReader = ImageReader.newInstance(
+        imageReader?.close()  // 기존 ImageReader 정리
+        imageReader = ImageReader.newInstance(
             screenWidth, screenHeight,
-            PixelFormat.RGBA_8888, 1
+            PixelFormat.RGBA_8888, 2  // 버퍼 크기를 2로 증가
         )
 
         virtualDisplay = mediaProjection?.createVirtualDisplay(
             "ScreenCapture",
             screenWidth, screenHeight, screenDensity,
             DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
-            imageReader.surface, null, null
+            imageReader?.surface, null, null
         )
 
-        imageReader.setOnImageAvailableListener({ reader ->
+        imageReader?.setOnImageAvailableListener({ reader ->
             val image = reader.acquireLatestImage()
 
-            image?.let {
+            image?.use {
                 ScreenCaptureManager.saveImage(image)
-                it.close()
             }
         }, null)
     }
@@ -545,6 +546,8 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
     }
 
     override fun onDestroy() {
+        imageReader?.close()
+        imageReader = null
         virtualDisplay?.release()
         mediaProjection?.stop()
         ScreenCaptureManager.clearCapturedBitmap()
