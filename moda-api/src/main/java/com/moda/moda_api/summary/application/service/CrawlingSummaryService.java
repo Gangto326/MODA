@@ -50,8 +50,8 @@ public class CrawlingSummaryService {
 				// CompletableFuture<AIAnalysisResponseDTO> pythonAnalysisFuture = CompletableFuture.completedFuture(
 				// 	AIAnalysisResponseDTO.builder()
 				// 		.categoryId(new CategoryId(2L))  // null 허용
-				// 		.keywords(new String[]{"박종원 test박종원 test박종원 test박종원 test박종원 test"})
-				// 		.thumbnailContent("박종원 test박종원 test박종원 test박종원 test")
+				// 		.keywords(new String[]{"새로운 test"})
+				// 		.thumbnailContent("새로운 test")
 				// 		.content(crawledContent.getExtractedContent().getText())
 				// 		.embeddingVector(new EmbeddingVector(null))
 				// 		.build()

@@ -48,7 +48,7 @@ public class NotificationService {
 				.setToken(token)
 				.setNotification(com.google.firebase.messaging.Notification.builder()
 					.setTitle( "카드가 생성이 되었습니다. 모다모다~")
-					.setBody(CardContentType.getContentTypeString(card.getTypeId()))
+					.setBody(card.getTitle() + "")
 					.build())
 				.putData("cardId", card.getCardId().getValue())  // data 필드로 전달
 				.setAndroidConfig(AndroidConfig.builder()
@@ -56,6 +56,7 @@ public class NotificationService {
 					.setNotification(AndroidNotification.builder()
 						.setColor("#FFFFFF")
 						.setIcon("icon_round.webp")
+						.setImage(imageUrl)
 						.setClickAction("OPEN_ACTIVITY")
 						.setDefaultVibrateTimings(true)
 						.setDefaultSound(true)

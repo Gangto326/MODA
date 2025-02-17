@@ -29,7 +29,7 @@ public class TokenService {
     private final JwtUtil jwtUtil;
 
     private static final String ACCESS_TOKEN_PREFIX = "access_token:";
-    private static final long ACCESS_TOKEN_EXPIRE_TIME = 30 * 60; // 30분
+    private static final long ACCESS_TOKEN_EXPIRE_TIME = 30 * 60 * 60; // 30분 * 60
 
 	//AccessToken저장하기
     public void saveAccessToken(UserId userId, String accessToken) {
