@@ -1,33 +1,12 @@
 package com.example.modapjt.screen2.auth
 
 import android.view.ViewTreeObserver
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,16 +14,15 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.modapjt.R
-import com.example.modapjt.domain.model.FindIdEvent
-import com.example.modapjt.domain.viewmodel.AuthViewModel
+import com.example.modapjt.domain.viewmodel.FindIdViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FindIdScreen(
-    viewModel: AuthViewModel,
+    viewModel: FindIdViewModel,
     onNavigateBack: () -> Unit
 ) {
-    val state = viewModel.findIdState.value
+    val state = viewModel.state.value
     val scrollState = rememberScrollState()
     var isKeyboardVisible by remember { mutableStateOf(false) }
     var keyboardHeight by remember { mutableStateOf(0) }
@@ -97,7 +75,7 @@ fun FindIdScreen(
         ) {
             OutlinedTextField(
                 value = state.email,
-                onValueChange = { viewModel.onFindIdEvent(FindIdEvent.EmailChanged(it)) },
+                onValueChange = { viewModel.onEmailChanged(it) },
                 label = { Text("이메일") },
                 modifier = Modifier.weight(1f),
                 shape = RoundedCornerShape(8.dp),
@@ -110,20 +88,21 @@ fun FindIdScreen(
             )
 
             Button(
-                onClick = { viewModel.onFindIdEvent(FindIdEvent.SendVerification) },
+                onClick = { viewModel.sendVerification() },
                 modifier = Modifier
                     .height(56.dp)
                     .width(100.dp),
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFFBBAEA4)
-                )
+                ),
+                enabled = !state.isLoading
             ) {
                 Text("인증요청")
             }
         }
 
-        // 인증번호 입력 필드 (이메일 인증 요청 후 표시)
+        // 인증번호 입력 필드
         if (state.isEmailVerificationSent) {
             Row(
                 modifier = Modifier
@@ -133,7 +112,7 @@ fun FindIdScreen(
             ) {
                 OutlinedTextField(
                     value = state.verificationCode,
-                    onValueChange = { viewModel.onFindIdEvent(FindIdEvent.VerificationCodeChanged(it)) },
+                    onValueChange = { viewModel.onVerificationCodeChanged(it) },
                     label = { Text("인증번호") },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(8.dp),
@@ -146,14 +125,15 @@ fun FindIdScreen(
                 )
 
                 Button(
-                    onClick = { viewModel.onFindIdEvent(FindIdEvent.VerifyCode) },
+                    onClick = { viewModel.verifyAndFindId() },
                     modifier = Modifier
                         .height(56.dp)
                         .width(100.dp),
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFFBBAEA4)
-                    )
+                    ),
+                    enabled = !state.isLoading
                 ) {
                     Text("확인")
                 }
@@ -161,14 +141,15 @@ fun FindIdScreen(
         }
 
         // 찾은 아이디 표시
-        if (state.foundUsername != null) {
+        if (state.foundId != null) {
             Text(
-                text = "아이디: ${state.foundUsername}",
+                text = "아이디 : " +state.foundId,
                 modifier = Modifier.padding(vertical = 16.dp),
                 color = Color(0xFF4A4A4A)
             )
         }
 
+        // 에러 메시지 표시
         if (state.error != null) {
             Text(
                 text = state.error,
@@ -188,5 +169,14 @@ fun FindIdScreen(
         if (isKeyboardVisible) {
             Spacer(modifier = Modifier.height(keyboardHeight.dp))
         }
+    }
+
+    // 로딩 표시
+    if (state.isLoading) {
+        CircularProgressIndicator(
+            modifier = Modifier
+                .fillMaxSize()
+                .wrapContentSize(Alignment.Center)
+        )
     }
 }

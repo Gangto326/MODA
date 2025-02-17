@@ -159,40 +159,52 @@ class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
                     isEmailVerified = false
                 )
             }
+
             is SignUpEvent.PasswordChanged -> {
                 _signUpState.value = _signUpState.value.copy(password = event.password)
             }
+
             is SignUpEvent.ConfirmPasswordChanged -> {
-                _signUpState.value = _signUpState.value.copy(confirmPassword = event.confirmPassword)
+                _signUpState.value =
+                    _signUpState.value.copy(confirmPassword = event.confirmPassword)
             }
+
             is SignUpEvent.NameChanged -> {
                 _signUpState.value = _signUpState.value.copy(name = event.name)
             }
+
             is SignUpEvent.UsernameChanged -> {
                 _signUpState.value = _signUpState.value.copy(
                     username = event.username,
                     isUsernameVerified = false
                 )
             }
+
             is SignUpEvent.EmailVerificationCodeChanged -> {
                 _signUpState.value = _signUpState.value.copy(
                     emailVerificationCode = event.code
                 )
             }
+
             is SignUpEvent.VerifyUsername -> {
                 verifyUsername()
             }
+
             is SignUpEvent.SendEmailVerification -> {
                 sendEmailVerification()
             }
+
             is SignUpEvent.VerifyEmailCode -> {
                 verifyEmailCode()
             }
+
             is SignUpEvent.Submit -> {
                 submitSignUp()
             }
         }
     }
+
+
 
     private fun verifyUsername() {
         val username = _signUpState.value.username
@@ -214,6 +226,7 @@ class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
         }
     }
 
+
     private fun sendEmailVerification() {
         val email = _signUpState.value.email
         if (email.isEmpty()) {
@@ -232,6 +245,7 @@ class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
             )
         }
     }
+
 
     private fun verifyEmailCode() {
         val code = _signUpState.value.emailVerificationCode
@@ -252,6 +266,7 @@ class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
         }
     }
 
+
     private fun submitSignUp() {
         val state = _signUpState.value
 
@@ -260,26 +275,32 @@ class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
                 _signUpState.value = state.copy(error = "닉네임을 입력해주세요.")
                 return
             }
+
             state.username.isEmpty() -> {
                 _signUpState.value = state.copy(error = "아이디를 입력해주세요.")
                 return
             }
+
             !state.isUsernameVerified -> {
                 _signUpState.value = state.copy(error = "아이디 중복확인을 해주세요.")
                 return
             }
+
             state.email.isEmpty() -> {
                 _signUpState.value = state.copy(error = "이메일을 입력해주세요.")
                 return
             }
+
             !state.isEmailVerified -> {
                 _signUpState.value = state.copy(error = "이메일 인증을 완료해주세요.")
                 return
             }
+
             state.password.isEmpty() -> {
                 _signUpState.value = state.copy(error = "비밀번호를 입력해주세요.")
                 return
             }
+
             state.password != state.confirmPassword -> {
                 _signUpState.value = state.copy(error = "비밀번호가 일치하지 않습니다.")
                 return
@@ -295,6 +316,8 @@ class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
         }
     }
 
+
+
     private val _findIdState = mutableStateOf(FindIdState())
     val findIdState: State<FindIdState> = _findIdState
 
@@ -309,19 +332,23 @@ class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
                     isEmailVerified = false
                 )
             }
+
             is FindIdEvent.VerificationCodeChanged -> {
                 _findIdState.value = _findIdState.value.copy(
                     verificationCode = event.code
                 )
             }
+
             is FindIdEvent.SendVerification -> {
                 sendFindIdVerification()
             }
+
             is FindIdEvent.VerifyCode -> {
                 verifyFindIdCode()
             }
         }
     }
+
 
     private fun sendFindIdVerification() {
         val email = _findIdState.value.email
@@ -342,6 +369,7 @@ class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
         }
     }
 
+
     private fun verifyFindIdCode() {
         val code = _findIdState.value.verificationCode
         if (code.isEmpty()) {
@@ -361,121 +389,6 @@ class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
                 error = null
             )
         }
-    }
-
-    fun onFindPasswordEvent(event: FindPasswordEvent) {
-        when (event) {
-            is FindPasswordEvent.UsernameChanged -> {
-                _findPasswordState.value = _findPasswordState.value.copy(
-                    username = event.username
-                )
-            }
-            is FindPasswordEvent.EmailChanged -> {
-                _findPasswordState.value = _findPasswordState.value.copy(
-                    email = event.email,
-                    isEmailVerified = false
-                )
-            }
-            is FindPasswordEvent.VerificationCodeChanged -> {
-                _findPasswordState.value = _findPasswordState.value.copy(
-                    verificationCode = event.code
-                )
-            }
-            is FindPasswordEvent.NewPasswordChanged -> {
-                _findPasswordState.value = _findPasswordState.value.copy(
-                    newPassword = event.password
-                )
-            }
-            is FindPasswordEvent.ConfirmNewPasswordChanged -> {
-                _findPasswordState.value = _findPasswordState.value.copy(
-                    confirmNewPassword = event.password
-                )
-            }
-            is FindPasswordEvent.SendVerification -> {
-                sendFindPasswordVerification()
-            }
-            is FindPasswordEvent.VerifyCode -> {
-                verifyFindPasswordCode()
-            }
-            is FindPasswordEvent.SubmitNewPassword -> {
-                submitNewPassword()
-            }
-        }
-    }
-
-    private fun sendFindPasswordVerification() {
-        val state = _findPasswordState.value
-        if (state.email.isEmpty()) {
-            _findPasswordState.value = state.copy(error = "이메일을 입력해주세요.")
-            return
-        }
-        if (state.username.isEmpty()) {
-            _findPasswordState.value = state.copy(error = "아이디를 입력해주세요.")
-            return
-        }
-
-        viewModelScope.launch {
-            _findPasswordState.value = state.copy(isLoading = true)
-            delay(1000) // 실제로는 API 호출로 대체될 부분
-
-            _findPasswordState.value = state.copy(
-                isEmailVerificationSent = true,
-                isLoading = false,
-                error = null
-            )
-        }
-    }
-
-    private fun verifyFindPasswordCode() {
-        val state = _findPasswordState.value
-        if (state.verificationCode.isEmpty()) {
-            _findPasswordState.value = state.copy(error = "인증번호를 입력해주세요.")
-            return
-        }
-
-        viewModelScope.launch {
-            _findPasswordState.value = state.copy(isLoading = true)
-            delay(1000) // 실제로는 API 호출로 대체될 부분
-
-            _findPasswordState.value = state.copy(
-                isEmailVerified = true,
-                canChangePassword = true,
-                isLoading = false,
-                error = null
-            )
-        }
-    }
-
-    private fun submitNewPassword() {
-        val state = _findPasswordState.value
-        when {
-            state.newPassword.isEmpty() -> {
-                _findPasswordState.value = state.copy(error = "새 비밀번호를 입력해주세요.")
-                return
-            }
-            state.newPassword != state.confirmNewPassword -> {
-                _findPasswordState.value = state.copy(error = "비밀번호가 일치하지 않습니다.")
-                return
-            }
-        }
-
-        viewModelScope.launch {
-            _findPasswordState.value = state.copy(isLoading = true)
-            delay(1000) // 실제로는 API 호출로 대체될 부분
-
-            // 비밀번호 변경 성공 후 상태 초기화
-            _findPasswordState.value = FindPasswordState()
-            // TODO: 성공 메시지 표시 또는 로그인 화면으로 이동
-        }
-    }
-
-    // 상태 초기화 함수들
-    fun resetFindIdState() {
-        _findIdState.value = FindIdState()
-    }
-
-    fun resetFindPasswordState() {
-        _findPasswordState.value = FindPasswordState()
     }
 }
 
