@@ -6,7 +6,7 @@ def make_category_prompt(content:str):
         },
         {
             'role': 'user',
-            'content': f'''Treands, Entertainment, Fiance, Travel, Food, IT, Design, Society, Health 중에서 주어진 내용과 가장 적합한 카테고리를 선택해줘\절대 다른 카테고리는 선택하지 말아줘
+            'content': f'''Trends, Entertainment, Finance, Travel, Food, IT, Design, Society, Health 중에서 주어진 내용과 가장 적합한 카테고리를 선택해줘\절대 다른 카테고리는 선택하지 말아줘
 
 {content}
 '''
