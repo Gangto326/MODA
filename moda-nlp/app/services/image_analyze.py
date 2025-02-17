@@ -87,7 +87,7 @@ class ImageAnalyze:
         while attempt_count < self.MAX_CATEGORY_TRIES:
             response = self.chat(model = model, messages = messages, format = format)
 
-            print(f" 카테고리 선택 시도 ${attempt_count} - ${response}")
+            print(f" 카테고리 선택 시도 {attempt_count} - {response}")
 
             for idx, category in enumerate(categories_name()):
                 if category.lower() in response.lower():
