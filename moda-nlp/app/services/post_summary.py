@@ -125,6 +125,8 @@ class PostSummary:
         response = self.chat(model = model, messages = messages, format = format)
         data = json.loads(response)
 
+        print(data)
+
         contents = []
         for paragraph in data:
             # 제목 저장
