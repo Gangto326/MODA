@@ -15,3 +15,8 @@ data class EmailVerificationRequest(
 data class UserNameRequest(
     val userId: String
 )
+
+data class FindUserIdRequest(
+    val email: String,
+    val code: String
+)

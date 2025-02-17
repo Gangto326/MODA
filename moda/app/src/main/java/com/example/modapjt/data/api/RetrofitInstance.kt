@@ -62,6 +62,11 @@ object RetrofitInstance {
         retrofit.create(SignUpApiService::class.java)
     }
 
+    //아이디 찾기 API
+    val findIdApi: FindIdApiService by lazy{
+        retrofit.create(FindIdApiService::class.java)
+    }
+
 }
 
 
