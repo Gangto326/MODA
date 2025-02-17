@@ -2,6 +2,7 @@ package com.moda.moda_api.category.infrastructure.repository;
 
 import com.moda.moda_api.category.domain.Category;
 import com.moda.moda_api.category.domain.CategoryOrderRepository;
+import com.moda.moda_api.category.infrastructure.entity.CategoryOrderEntiy;
 import com.moda.moda_api.category.infrastructure.mapper.CategoryEntityMapper;
 import com.moda.moda_api.user.domain.UserId;
 import lombok.RequiredArgsConstructor;
@@ -34,4 +35,10 @@ public class CategoryOrderRepositoryImpl implements CategoryOrderRepository {
     public void save(Category category) {
         categoryOrderJpaRepository.save(categoryEntityMapper.toEntity(category));
     }
+
+    @Override
+    public void saveAllEntities(List<CategoryOrderEntiy> entities) {
+        categoryOrderJpaRepository.saveAll(entities);
+    }
+
 }

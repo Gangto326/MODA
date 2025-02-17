@@ -41,9 +41,6 @@ public class RefreshTokenEntity {
 	@Builder.Default
 	private LocalDateTime createdAt = LocalDateTime.now();
 
-	@Column(name = "user_name")
-	private String UserName;
-
 	@Column(name = "is_active")
 	@Builder.Default
 	private boolean isActive = true;

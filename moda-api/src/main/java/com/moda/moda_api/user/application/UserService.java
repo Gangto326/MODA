@@ -3,6 +3,7 @@ package com.moda.moda_api.user.application;
 import org.springframework.stereotype.Service;
 
 import com.moda.moda_api.card.exception.UnauthorizedException;
+import com.moda.moda_api.category.application.service.CategoryService;
 import com.moda.moda_api.common.infrastructure.TokenService;
 import com.moda.moda_api.common.jwt.TokenDto;
 import com.moda.moda_api.common.util.JwtUtil;
@@ -34,6 +35,7 @@ public class UserService {
     private final JwtUtil jwtUtil;
     private final PasswordEncrypt passwordEncrypt;
     private final TokenService tokenService;
+    private final CategoryService categoryService;
 
 
     /**
@@ -47,7 +49,11 @@ public class UserService {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
         }
-        userRepository.save(userMapper.signupRequestToUser(request));
+
+        User user = userRepository.save(userMapper.signupRequestToUser(request));
+
+        categoryService.initCategoryPosition(user.getUserId().getValue());
+
         return true;
     }
 
@@ -79,6 +85,7 @@ public class UserService {
          // 토큰 저장
          tokenService.saveAccessToken(user.getUserId(), accessToken.getTokenValue());
          tokenService.saveRefreshToken(user.getUserId(), refreshToken);
+
 
          return AuthResponse.builder()
                  .accessToken(accessToken.getTokenValue())

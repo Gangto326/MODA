@@ -178,7 +178,6 @@ public class CardService {
 
 				notificationService.sendFCMNotification(userIdObj.getValue(), NotificationType.card,card);
 
-
 				return true;
 			});
 	}
