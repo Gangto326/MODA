@@ -28,16 +28,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -261,8 +261,8 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
             else WindowManager.LayoutParams.TYPE_PHONE,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
-            WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
@@ -296,10 +296,10 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
 
                 val offsetX by animateFloatAsState(
                     targetValue =
-                        if (isCaptured)
-                            targetX.toFloat() + iconSize / 2
-                        else
-                            0f,
+                    if (isCaptured)
+                        targetX.toFloat() + iconSize / 2 - screenWidth / 2
+                    else
+                        0f,
                     animationSpec = tween(
                         durationMillis = duration,
                         easing = EaseInOutCirc
@@ -308,10 +308,10 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
 
                 val offsetY by animateFloatAsState(
                     targetValue =
-                        if (isCaptured)
-                            targetY.toFloat() + iconSize / 2
-                        else
-                            0f,
+                    if (isCaptured)
+                        targetY.toFloat() + iconSize / 2 - screenHeight / 2
+                    else
+                        0f,
                     animationSpec = tween(
                         durationMillis = duration,
                         easing = EaseInOutCirc
@@ -330,7 +330,8 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
                     Box(
                         modifier = Modifier.offset {
                             IntOffset(offsetX.roundToInt(), offsetY.roundToInt())
-                        }
+                        },
+                        contentAlignment = Alignment.Center
                     ) {
                         capturedBitmap?.let { bmp ->
                             Image(
@@ -341,8 +342,9 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
                                     .graphicsLayer(
                                         scaleX = bounce,
                                         scaleY = bounce,
-                                    )
-                                    .clip(RoundedCornerShape(corner)),
+                                        transformOrigin = TransformOrigin(0.5f, 0.5f)
+                                    ),
+//                                    .clip(RoundedCornerShape(corner)),
                                 contentScale = ContentScale.Crop
                             )
                         }
@@ -461,7 +463,7 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
         return x in backgroundParams!!.x - iconSize / 2..backgroundParams!!.x + iconSize / 2 &&
                 y in backgroundParams!!.y - iconSize / 2..backgroundParams!!.y + iconSize / 2
     }
-    
+
     /**
      * 현재 URL 캡처 및 저장
      * 화면 캡처 후 애니메이션을 통해 시각적 피드백 제공
