@@ -31,7 +31,7 @@ class PostSummary:
         while True:
             self.summary_content('anpigon/qwen2.5-7b-instruct-kowiki')
 
-            if not self.detect_chinese(self.content):
+            if not await self.detect_chinese(self.content):
                 break
         await asyncio.gather(
             self.make_keywords('anpigon/qwen2.5-7b-instruct-kowiki'),
@@ -123,15 +123,32 @@ class PostSummary:
         }
 
         response = self.chat(model = model, messages = messages, format = format)
-        print('전체')
-        print(response)
-        print()
-        print()
-        print('for문')
-        for item in json.loads(response):
-            print(f"제목: {item['title']}")
-            print(f"내용: {item['content']}")
-            print("-" * 20)  # 구분선
+
+        contents = []
+
+        for paragraph in response:
+            # 제목 저장
+            contents.append('# ' + paragraph.title)
+
+            # 각 줄을 분리
+            lines = paragraph.content.strip().split('\n')
+
+            # 각 줄 처리
+            processed_lines = []
+            for line in lines:
+                # <<숫자>> 패턴 제거
+                # 정규식을 사용하지 않고 기본 문자열 처리로 구현
+                if '<<' in line and '>>' in line:
+                    line = line[:line.find('<<')]
+
+                # 앞에 '- ' 추가하고 공백 제거
+                processed_line = '- ' + line.strip()
+                processed_lines.append(processed_line)
+
+            # 결과 합치기
+            contents.append('\n'.join(processed_lines))
+
+        self.content = '\n'.join(contents)
 
     #keywords를 생성하는 함수
     async def make_keywords(self, model: str):
@@ -175,6 +192,7 @@ class PostSummary:
             if line.strip():
                 result = await translator.detect(line)
                 if 'zh' in result.lang:
+                    print(f'중국어가 감지되었습니다: {line}')
                     return True
 
         return False
