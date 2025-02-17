@@ -15,6 +15,7 @@ import android.media.projection.MediaProjectionManager
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
+import android.util.Patterns
 import android.view.Gravity
 import android.view.WindowManager
 import android.widget.Toast
@@ -33,9 +34,6 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
@@ -63,6 +61,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.roundToInt
 
 class OverlayService : LifecycleService(), SavedStateRegistryOwner {
@@ -70,11 +69,12 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
     override val savedStateRegistry: SavedStateRegistry
         get() = savedStateRegistryController.savedStateRegistry
 
+    private val context = this@OverlayService
     private var windowManager: WindowManager? = null
 
     // 메인 오버레이 뷰 (사용자가 드래그할 수 있는 아이콘)
     private var overlayView: ComposeView? = null
-    private lateinit var params: WindowManager.LayoutParams
+    private lateinit var overlayParams: WindowManager.LayoutParams
 
     // 휴지통 뷰 (드래그 시 나타나는 삭제 영역)
     private var backgroundView: ComposeView? = null
@@ -92,6 +92,7 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
     private val isCollapsedState = _isCollapsedState.asStateFlow()
 
     // 현재 화면 캡처 중인지 여부
+    private val isCapturingAtomic = AtomicBoolean(false)
     private val _isCapturedState = MutableStateFlow(false)
     private val isCapturedState = _isCapturedState.asStateFlow()
 
@@ -341,7 +342,7 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
             }
         }
 
-        params = WindowManager.LayoutParams(
+        overlayParams = WindowManager.LayoutParams(
             iconSize,
             iconSize,
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)
@@ -361,9 +362,6 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
             setViewTreeSavedStateRegistryOwner(this@OverlayService)
 
             setContent {
-                var isSuccess by remember { mutableStateOf(false) }
-                var isError by remember { mutableStateOf(false) }
-
                 OverlayIcon(
                     onDoubleTab = { captureUrl() },
                     onDrag = { offset ->
@@ -371,33 +369,27 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
                     },
                     onDragStart = { showBackground() },
                     onDragEnd = { hideBackground() },
-                    isSuccess = isSuccess,
-                    isError = isError,
-                    onAnimationComplete = {
-                        isSuccess = false
-                        isError = false
-                    }
                 )
             }
         }
 
         windowManager?.addView(captureView, captureParams)
-        windowManager?.addView(overlayView, params)
+        windowManager?.addView(overlayView, overlayParams)
 
         lifecycleScope.launch {
             BrowserAccessibilityService.canOverlayState.collect { canOverlay ->
                 if (canOverlay) {
-                    params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    overlayParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     overlayView?.alpha = 1f
                 } else {
-                    params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                    overlayParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                             WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
                     overlayView?.alpha = 0f
                 }
 
                 overlayView?.let { view ->
                     if (view.isAttachedToWindow) {
-                        windowManager?.updateViewLayout(view, params)
+                        windowManager?.updateViewLayout(view, overlayParams)
                     }
                 }
             }
@@ -409,16 +401,16 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
      * 휴지통과의 충돌 검사도 수행
      */
     private fun movePosition(offset: IntOffset) {
-        params.x += offset.x
-        params.y += offset.y
+        overlayParams.x += offset.x
+        overlayParams.y += offset.y
 
-        _targetXState.value = params.x
-        _targetYState.value = params.y
-        _isCollapsedState.value = isPointInCollapsedTrash(params.x, params.y)
+        _targetXState.value = overlayParams.x
+        _targetYState.value = overlayParams.y
+        _isCollapsedState.value = isPointInCollapsedTrash(overlayParams.x, overlayParams.y)
 
         Log.d("OverlayService", if (_isCollapsedState.value) "겹침" else "안겹침")
 
-        windowManager?.updateViewLayout(overlayView, params)
+        windowManager?.updateViewLayout(overlayView, overlayParams)
     }
 
     private fun showBackground() {
@@ -458,68 +450,43 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
         return x in backgroundParams!!.x - iconSize / 2..backgroundParams!!.x + iconSize / 2 &&
                 y in backgroundParams!!.y - iconSize / 2..backgroundParams!!.y + iconSize / 2
     }
-
-    private fun showSuccessFeedback() {
-        overlayView?.setContent {
-            var isSuccess by remember { mutableStateOf(true) }
-            OverlayIcon(
-                onDoubleTab = { captureUrl() },
-                onDrag = { offset ->
-                    movePosition(offset)
-                },
-                onDragStart = { showBackground() },
-                onDragEnd = { hideBackground() },
-                isSuccess = isSuccess,
-                isError = false,
-                onAnimationComplete = { isSuccess = false }
-            )
-        }
-    }
-
-    private fun showErrorFeedback() {
-        overlayView?.setContent {
-            var isError by remember { mutableStateOf(true) }
-            OverlayIcon(
-                onDoubleTab = { captureUrl() },
-                onDrag = { offset ->
-                    movePosition(offset)
-                },
-                onDragStart = { showBackground() },
-                onDragEnd = { hideBackground() },
-                isSuccess = false,
-                isError = isError,
-                onAnimationComplete = { isError = false }
-            )
-        }
-    }
     
     /**
      * 현재 URL 캡처 및 저장
      * 화면 캡처 후 애니메이션을 통해 시각적 피드백 제공
      */
     private fun captureUrl() {
+        if (!isCapturingAtomic.compareAndSet(false, true)) {
+            Log.d("OverlayService", "캡처가 불가능합니다.")
+            Toast.makeText(applicationContext, "잠시 후 시도해 주십시오.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         CoroutineScope(Dispatchers.IO).launch {
-            withContext(Dispatchers.Main) {
-                ScreenCaptureManager.captureBitmap() // 현재 화면을 캡처
-                _isCapturedState.value = true
-                delay(duration.toLong())
-                _isCapturedState.value = false
-                delay(duration.toLong())
-                ScreenCaptureManager.clearCapturedBitmap() // 캡처된 비트맵 정리
+            try {
+                withContext(Dispatchers.Main) {
+                    ScreenCaptureManager.captureBitmap() // 현재 화면을 캡처
+                    _isCapturedState.value = true
+                    delay(duration.toLong())
+                    _isCapturedState.value = false
+                    delay(duration.toLong())
+                    ScreenCaptureManager.clearCapturedBitmap() // 캡처된 비트맵 정리
+                }
+
+                var url = BrowserAccessibilityService.currentUrl ?: "Unknown URL"
+                if (!url.let { Patterns.WEB_URL.matcher(it).matches() }) {
+                    Log.d("OverlayService", "URL 감지 실패")
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(applicationContext, "링크를 감지할 수 없습니다.", Toast.LENGTH_SHORT).show()
+                    }
+                    return@launch
+                }
+
+                Log.d("OverlayService", "요청할 URL: $url")
+                saveToDatabase(url)
+            } finally {
+                isCapturingAtomic.set(false)
             }
-
-            var url: String? = null
-            for (i in 1..5) { // 5번까지 재시도
-                url = BrowserAccessibilityService.currentUrl
-                if (!url.isNullOrEmpty() && url != "Unknown URL") break
-                Log.d("OverlayService", "URL 가져오기 시도 $i: $url") // 로그 추가
-                delay(500) // 0.5초 대기 후 다시 확인
-            }
-
-            url = url ?: "Unknown URL"
-            Log.d("OverlayService", "최종 URL 저장: $url") // 로그 추가
-
-            saveToDatabase(url)
         }
     }
 
@@ -529,31 +496,30 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
                 var finalUrl = url
 
                 // URL이 http:// 또는 https://로 시작하지 않으면 자동으로 추가
-                if (!finalUrl.startsWith("http")) {
+                if (!finalUrl.startsWith("https://")) {
                     finalUrl = "https://$finalUrl"
                     Log.d("OverlayService", "URL 보정됨: $finalUrl") // URL 수정된 것 로그로 확인
                 }
 
                 // 보정 후에도 여전히 URL 형식이 맞지 않으면 저장하지 않음
-                if (!finalUrl.startsWith("http")) {
+                if (!finalUrl.startsWith("https://")) {
                     Log.e("OverlayService", "잘못된 URL 형식 (보정 실패): $finalUrl")
-                    withContext(Dispatchers.Main) { showErrorFeedback() }
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(applicationContext, "링크를 감지할 수 없습니다.", Toast.LENGTH_SHORT).show()
+                    }
                     return@launch
                 }
 
                 repository.createCard(finalUrl) // 백엔드 서버와 통신하여 카드 저장
                 Log.d("OverlayService", "URL 저장 완료: $finalUrl") // 저장 로그 추가
-
-                withContext(Dispatchers.Main) {
-                    showSuccessFeedback()
-                    Toast.makeText(applicationContext, "정보 저장 성공 ! $url", Toast.LENGTH_SHORT).show() //  Toast 추가
-                }
+//                withContext(Dispatchers.Main) {
+//                    Toast.makeText(applicationContext, "정보 저장 성공!", Toast.LENGTH_SHORT).show()
+//                }
             } catch (e: Exception) {
                 e.printStackTrace()
                 Log.e("OverlayService", "URL 저장 중 오류 발생: ${e.message}")
                 withContext(Dispatchers.Main) {
-                    showErrorFeedback()
-                    Toast.makeText(applicationContext, "URL 저장 실패", Toast.LENGTH_SHORT).show() // 실패 시에도 Toast 추가
+                    Toast.makeText(applicationContext, "링크 저장 실패", Toast.LENGTH_SHORT).show()
                 }
             }
         }
