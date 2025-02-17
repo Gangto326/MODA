@@ -13,6 +13,11 @@ class CardSelectionViewModel<T> : ViewModel() {
     private val _selectedCards = MutableStateFlow<Set<String>>(emptySet())  // cardId 기반
     val selectedCards = _selectedCards.asStateFlow()
 
+    fun resetSelection() {
+        _selectedCards.value = emptySet()
+        _isSelectionMode.value = false
+    }
+
     fun toggleSelectionMode(enable: Boolean) {
         _isSelectionMode.value = enable
         if (!enable) {

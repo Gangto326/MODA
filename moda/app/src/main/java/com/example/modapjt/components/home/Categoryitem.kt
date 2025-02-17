@@ -1,17 +1,30 @@
 package com.example.modapjt.components.home
 
 import android.widget.Toast
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.StateFactoryMarker
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -20,7 +33,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.modapjt.R
 import com.example.modapjt.domain.model.Category
-
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun CategoryItem(
@@ -28,6 +42,12 @@ fun CategoryItem(
     navController: NavController,
     isVisible: Boolean
 ) {
+    var rippleCenter by remember { mutableStateOf(Offset.Zero) }
+    var rippleRadius by remember { mutableStateOf(0f) }
+    var rippleAlpha by remember { mutableStateOf(0f) }
+    val rippleAnimatable = remember { Animatable(0f) }
+    val scope = rememberCoroutineScope()
+
     val categoryNameMap = mapOf(
         "All" to "전체",
         "Trends" to "트렌드",
@@ -63,9 +83,33 @@ fun CategoryItem(
     Column(
         modifier = Modifier
             .padding(4.dp)  // 패딩 값 축소
+            .graphicsLayer { alpha = 0.99f }
+            .drawBehind {
+                drawCircle(
+                    color = Color.Gray.copy(alpha = rippleAlpha),
+                    radius = rippleRadius,
+                    center = rippleCenter
+                )
+            }
             .then (
                 if (isVisible) {
-                    Modifier.clickable { navController.navigate("categoryDetail/${category.categoryId}") }
+                    Modifier.pointerInput(Unit) {
+                        detectTapGestures { offset ->
+                            rippleCenter = offset
+                            scope.launch {
+                                rippleAnimatable.snapTo(0f)
+                                rippleAnimatable.animateTo(
+                                    targetValue = 1f,
+                                    animationSpec = tween(300)
+                                ) {
+                                    rippleRadius = this.value * maxOf(size.width, size.height) * 1.2f
+                                    rippleAlpha = (1f - this.value) * 0.15f
+                                }
+                            }
+                            navController.navigate("categoryDetail/${category.categoryId}")
+                        }
+                    }
+//                    Modifier.clickable { navController.navigate("categoryDetail/${category.categoryId}") }
                 } else {
                     Modifier.clickable {
                         Toast.makeText(

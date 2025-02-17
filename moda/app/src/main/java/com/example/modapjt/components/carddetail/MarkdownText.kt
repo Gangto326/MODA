@@ -243,8 +243,8 @@ private fun MarkdownSection(
                     .padding(
                         top = when {
                             // level 2(##)이면서 이전에 level 2 헤딩이 없는 경우 (첫 번째 ## 헤딩)
-                            node.level == 2 && !hasPreviousLevelTwoHeading(node) -> 16.dp
-                            node.level == 2 -> 32.dp  // ## 로 시작하는 헤딩의 경우 위 패딩을 더 크게
+                            node.level == 2 && !hasPreviousLevelTwoHeading(node) -> 20.dp
+                            node.level == 2 -> 40.dp  // ## 로 시작하는 헤딩의 경우 위 패딩을 더 크게
                             node.level == 3 -> 20.dp
                             node.previous != null -> 10.dp
                             else -> 0.dp
@@ -255,10 +255,10 @@ private fun MarkdownSection(
                 style = MaterialTheme.typography.bodyLarge.copy(
                     color = color,
                     fontSize = when (node.level) {
-                        1 -> 24.sp
-                        2 -> 20.sp
-                        3 -> 18.sp
-                        else -> 16.sp
+                        1 -> 20.sp
+                        2 -> 18.sp
+                        3 -> 16.sp
+                        else -> 14.sp
                     },
                     fontWeight = FontWeight.Bold
                 ),
@@ -311,7 +311,7 @@ private fun MarkdownSection(
                     ),
                 style = MaterialTheme.typography.bodyLarge.copy(
                     color = color,
-                    lineHeight = 24.sp
+                    lineHeight = 18.sp
                 ),
                 onClick = { offset ->
                     paragraphText.getStringAnnotations("CLICKABLE", offset, offset)
@@ -361,10 +361,10 @@ private fun AnnotatedString.Builder.processParagraphNode(
 }
 
 val highlightColors = listOf(
-    Color(0xFFFFEB3B),  // 형광 노란색
-    Color(0xFF00FF90),  // 형광 민트색
-    Color(0xFFFF8080),  // 형광 핑크색
-    Color(0xFFE040FB)   // 형광 보라색
+    Color(0xFFFFF9C4),  // 연한 노란색
+    Color(0xFFB2FFD6),  // 연한 민트색
+    Color(0xFFFFCDD2),  // 연한 핑크색
+    Color(0xFFE1BEE7)   // 연한 보라색
 )
 
 private fun AnnotatedString.Builder.processTextContent(

@@ -1,7 +1,9 @@
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,10 +20,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -40,6 +49,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.app.ui.theme.customTypography
 import com.example.modapjt.R
 import com.example.modapjt.components.carddetail.ImageSlider
@@ -51,7 +61,7 @@ import java.time.format.DateTimeFormatter
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun BlogDetailScreen(cardDetail: CardDetail) {
+fun BlogDetailScreen(cardDetail: CardDetail, navController: NavController) {
     val searchViewModel: SearchViewModel = viewModel()
     val uriHandler = LocalUriHandler.current
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -71,9 +81,9 @@ fun BlogDetailScreen(cardDetail: CardDetail) {
 
     // 화면 크기에 따른 글자 크기 스케일 계산
     val fontScale = when {
-        screenWidth > 600 -> 1.0f  // 태블릿
-        screenWidth > 400 -> 0.8f  // 일반 폰
-        else -> 0.6f              // 작은 폰
+        screenWidth > 600 -> 0.8f  // 태블릿
+        screenWidth > 400 -> 0.6f  // 일반 폰
+        else -> 0.4f              // 작은 폰
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -104,7 +114,8 @@ fun BlogDetailScreen(cardDetail: CardDetail) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 16.dp),
+                        .padding(top = 16.dp)
+                        .padding(horizontal = 1.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
@@ -153,38 +164,52 @@ fun BlogDetailScreen(cardDetail: CardDetail) {
 
             // 🔥 키워드 간격 적용
             item {
-                FlowRow(
+                // 키워드와 공유버튼
+                Row(
                     modifier = Modifier
                         .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp), // 키워드 사이 간격 설정
-                    verticalArrangement = Arrangement.spacedBy(4.dp) // 여러 줄일 경우 간격 조정
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    limitedKeywords.take(3).forEach { keyword ->  // 최대 3개의 키워드만 표시
-                        Box(
-                            modifier = Modifier
-                                .height(32.dp)
-                                .border(1.dp, Color(0xFFB8ACA5), RoundedCornerShape(50)) // 테두리 추가
-                                .padding(horizontal = 14.dp) // 키워드 패딩
-                                .clip(RoundedCornerShape(50)), // 원형 모양으로 둥글게 처리
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = keyword, // 해시태그 형식
-//                                style = customTypography.bodySmall,
-                                style = customTypography.bodySmall.copy(
-                                    lineHeight = 16.sp,  // 라인 높이 설정
-                                    textAlign = TextAlign.Center,  // 텍스트 정렬
-                                ),
-                                color = Color(0xFFBAADA4),
-                                fontSize = 12.sp,
-                                textAlign = TextAlign.Center
-//                                modifier = Modifier.offset(y = 1.dp)
-                            )
+                    FlowRow(
+                        modifier = Modifier.weight(1f),
+                        horizontalArrangement = Arrangement.Start,
+                        maxItemsInEachRow = 3
+                    ) {
+                        cardDetail.keywords.take(3).forEach { keyword ->
+                            Surface(
+                                shape = RoundedCornerShape(20.dp),
+                                border = BorderStroke(1.dp, Color.Gray.copy(alpha = 0.3f)),
+                                color = Color.Transparent,
+                                modifier = Modifier
+                                    .padding(end = 8.dp, bottom = 16.dp)
+                                    .clickable {
+                                        if (keyword.isNotBlank()) {
+                                            navController.navigate("newSearchCardListScreen/$keyword")
+                                        }
+                                    }
+                            ) {
+                                Text(
+                                    text = keyword,
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Color.Gray
+                                )
+                            }
+
                         }
+                    }
+
+                    IconButton(onClick = { uriHandler.openUri(cardDetail.originalUrl) }) {
+                        Icon(
+                            imageVector = Icons.Default.Share,
+                            contentDescription = "Share",
+                            modifier = Modifier.padding(bottom = 16.dp),
+                            tint = Color.Gray
+                        )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+//                Spacer(modifier = Modifier.height(10.dp))
                 Divider(color = Color(0xFFF1F1F1), thickness = 6.dp, modifier = Modifier.padding(horizontal = 0.dp))
             }
 
@@ -199,25 +224,7 @@ fun BlogDetailScreen(cardDetail: CardDetail) {
                     }
                 )
                 Spacer(modifier = Modifier.height(20.dp))
-                Divider(color = Color(0xFFF1F1F1), thickness = 6.dp, modifier = Modifier.padding(horizontal = 0.dp))
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(20.dp))
-                Button(
-                    onClick = { uriHandler.openUri(cardDetail.originalUrl) },
-                    modifier = Modifier.padding(vertical = 8.dp)
-                ) {
-                    Text("원문 보기")
-                }
-            }
-
-            item {
-                Text(
-                    text = "생성 날짜: $formattedDate",
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
+//                Divider(color = Color(0xFFF1F1F1), thickness = 6.dp, modifier = Modifier.padding(horizontal = 0.dp))
             }
         }
     }
