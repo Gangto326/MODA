@@ -173,7 +173,7 @@ fun newCardDetailScreen(
                     val cardDetail = (uiState as CardDetailUiState.Success).cardDetail
 
                     when (cardDetail.typeId) {
-                        1 -> VideoDetailScreen(cardDetail) // ✅ 동영상 UI
+                        1 -> VideoDetailScreen(cardDetail, navController) // ✅ 동영상 UI
                         2 -> BlogDetailScreen(cardDetail) // ✅ 블로그 UI
                         3 -> NewsDetailScreen(cardDetail) // ✅ 뉴스 UI
                         4 -> ImageDetailScreen(cardDetail) // ✅ 이미지 UI

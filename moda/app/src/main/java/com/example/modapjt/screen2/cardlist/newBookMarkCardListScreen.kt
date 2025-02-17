@@ -550,7 +550,8 @@ fun newBookMarkCardListScreen(
                                                     keywords = currentCard.keywords,
                                                     imageUrl = currentCard.thumbnailUrl ?: "",
                                                     isMine = currentCard.isMine,
-                                                    isSelected = isSelected
+                                                    isSelected = isSelected,
+                                                    description = currentCard.thumbnailContent?:""
                                                 )
                                             }
                                         } else {

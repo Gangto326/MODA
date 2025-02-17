@@ -195,7 +195,8 @@ fun MarkdownText(
     modifier: Modifier = Modifier,
     keywords: List<String>,
     color: Color = MaterialTheme.colorScheme.onSurface,
-    onKeywordClick: (String) -> Unit
+    onKeywordClick: (String) -> Unit,
+    onHeaderClick: (String) -> Unit = {} // 헤더 클릭 콜백 추가
 ) {
     val parser = remember { Parser.builder().build() }
     val document = remember(markdown) { parser.parse(markdown) }
@@ -219,6 +220,12 @@ fun MarkdownText(
                     .getStringAnnotations("CLICKABLE", offset, offset)
                     .firstOrNull()?.let { annotation ->
                         onKeywordClick(annotation.item)
+                    }
+                // 헤더 클릭 처리
+                annotatedString
+                    .getStringAnnotations("HEADER", offset, offset)
+                    .firstOrNull()?.let { annotation ->
+                        onHeaderClick(annotation.item)
                     }
             }
         )
@@ -254,6 +261,9 @@ private fun AnnotatedString.Builder.processNode(
     when (node) {
         is Heading -> {
             append("\n")
+            //헤어의 시작 위치 저장
+            val start = length
+
             pushStyle(
                 SpanStyle(
                     fontWeight = FontWeight.Bold,
@@ -265,7 +275,23 @@ private fun AnnotatedString.Builder.processNode(
                     }
                 )
             )
+
+            //헤더 텍스트를 클릭 가능한 영역으로 만들기
+            pushStringAnnotation(
+                tag = "HEADER",
+                annotation = node.firstChild?.let {
+                    when (it) {
+                        is Text -> it.literal
+                        else -> ""
+                    }
+                } ?: ""
+            )
+
+
             node.firstChild?.let { processNode(it, listLevel, keywords) }
+
+            //헤더 클릭 영역 종료
+            pop()
             pop()
             append("\n")
         }

@@ -59,18 +59,19 @@ fun BlogBig(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+
         ) {
             // 상단 영역 (블로그 플랫폼 아이콘 + 제목)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)  // 아이콘과 텍스트 간격 조정
             ) {
-                Icon(
-                    imageVector = Icons.Default.AccountBox, // 아이콘 (예제: 블로그 아이콘)
-                    contentDescription = "블로그",
-                    modifier = Modifier.size(40.dp),
-                    tint = Color.Gray
-                )
+//                Icon(
+//                    imageVector = Icons.Default.AccountBox, // 아이콘 (예제: 블로그 아이콘)
+//                    contentDescription = "블로그",
+//                    modifier = Modifier.size(40.dp),
+//                    tint = Color.Gray
+//                )
                 Text(
                     text = title, // 블로그 제목
                     fontSize = 16.sp,
