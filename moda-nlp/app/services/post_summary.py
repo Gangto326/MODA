@@ -112,7 +112,10 @@ class PostSummary:
                         'type': 'string'
                     },
                     'content': {
-                        'type': 'string'
+                        'type': 'array',
+                        'items': {
+                            'type': 'string'
+                        }
                     }
                 }
             },
@@ -120,8 +123,11 @@ class PostSummary:
         }
 
         response = self.chat(model = model, messages = messages, format = format)
+        print('전체')
         print(response)
         print()
+        print()
+        print('for문')
         for item in json.loads(response):
             print(f"제목: {item['title']}")
             print(f"내용: {item['content']}")
