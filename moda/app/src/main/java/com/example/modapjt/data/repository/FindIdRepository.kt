@@ -10,7 +10,7 @@ import java.io.IOException
 class FindIdRepository {
     private val findIdApiService: FindIdApiService = RetrofitInstance.findIdApi
 
-    suspend fun sendEmailVerification(email: String): Resource<Boolean> {
+    suspend fun sendEmailVerification(email: String): Resource<String> {  // Boolean -> String으로 변경
         return try {
             val response = findIdApiService.sendEmailVerification(
                 EmailVerificationRequest(email = email)

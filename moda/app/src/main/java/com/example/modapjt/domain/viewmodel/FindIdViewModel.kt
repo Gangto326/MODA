@@ -35,7 +35,7 @@ class FindIdViewModel : ViewModel() {
             when (val result = repository.sendEmailVerification(state.value.email)) {
                 is Resource.Success -> {
                     _state.value = state.value.copy(
-                        isEmailVerificationSent = true,
+                        isEmailVerificationSent = result.data == "true",  // String 비교로 변경
                         error = null,
                         isLoading = false
                     )
