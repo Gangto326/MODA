@@ -229,19 +229,26 @@ import BlogBig
 import NewsBig
 import TypeSelectBar
 import VideoBig
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -252,13 +259,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.modapjt.components.bar.BottomBarComponent
 import com.example.modapjt.components.bar.CategoryHeaderBar
+import com.example.modapjt.components.cardlist.BlogSelectionItem
+import com.example.modapjt.components.cardlist.NewsSelectionItem
+import com.example.modapjt.components.cardlist.VideoSelectionItem
 import com.example.modapjt.components.cardtab.SwipableCardList
+import com.example.modapjt.domain.model.Card
+import com.example.modapjt.domain.viewmodel.CardSelectionViewModel
 import com.example.modapjt.domain.viewmodel.CardUiState
 import com.example.modapjt.domain.viewmodel.CardViewModel
 import kotlinx.coroutines.delay
@@ -277,6 +294,22 @@ fun newBookMarkCardListScreen(
 
     // LazyListState to keep track of the scroll position
     val lazyListState = rememberLazyListState()
+
+    // 다중 선택을 위한 ViewModel
+    val selectionViewModel: CardSelectionViewModel<Card> = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return CardSelectionViewModel<Card>() as T
+            }
+        }
+    )
+
+    // 다중 선택 상태 관리
+    val isSelectionMode by selectionViewModel.isSelectionMode.collectAsState()
+    val selectedCardIds by selectionViewModel.selectedCards.collectAsState()
+
+    // 진동
+    val haptics = LocalHapticFeedback.current
 
     LaunchedEffect(selectedCategory, selectedSort) {
         viewModel.resetPagination()
@@ -365,28 +398,60 @@ fun newBookMarkCardListScreen(
                                 if (state.videos.isEmpty() && !loadingMore) {
                                     item { EmptyMessage3("저장된 즐겨찾기가 없습니다") }
                                 } else {
-                                    items(state.videos) { card ->
+                                    items(
+                                        items = state.videos,
+                                        key = { it.cardId }
+                                    ) { card ->
                                         // Determine if this video is the first visible item
                                         val isTopVideo = lazyListState.firstVisibleItemIndex == state.videos.indexOf(card)
+                                        if (!isSelectionMode) {  // 일반 모드일 때
+                                            SwipableCardList(
+                                                cards = listOf(card),
+                                                onDelete = { selectedCards ->
+                                                    viewModel.deleteCard(selectedCards.map { it.cardId })
+                                                },
+                                                onCardDetail = { selectedCard ->
+                                                    navController.navigate("cardDetail/${selectedCard.cardId}")
+                                                },
+                                                selectionViewModel = selectionViewModel,
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .heightIn(max = Dp.Unspecified)
+                                            ) { currentCard, isSelected ->
+                                                // Wait for 2 seconds before auto-playing the first video
+                                                LaunchedEffect(lazyListState.firstVisibleItemIndex) {
+                                                    // Add delay before auto-playing the video
+                                                    delay(2000) // 2 seconds delay
+                                                }
 
-                                        SwipableCardList(
-                                            cards = listOf(card),
-                                            onDelete = { viewModel.deleteCard(listOf(card.cardId)) }
-                                        ) {
-                                            // Wait for 2 seconds before auto-playing the first video
-                                            LaunchedEffect(lazyListState.firstVisibleItemIndex) {
-                                                // Add delay before auto-playing the video
-                                                delay(2000) // 2 seconds delay
+                                                VideoBig(
+                                                    videoId = currentCard.thumbnailUrl ?: "",
+                                                    title = currentCard.title,
+                                                    isMine = currentCard.isMine,
+                                                    thumbnailContent = currentCard.thumbnailContent
+                                                        ?: "",
+                                                    isSelected = isSelected,
+                                                    keywords = currentCard.keywords.take(3),
+                                                    //                                                onClick = { navController.navigate("cardDetail/${card.cardId}") },
+                                                    isTopVideo = isTopVideo
+                                                    )
                                             }
-
-                                            VideoBig(
+                                        } else {
+                                            VideoSelectionItem(
                                                 videoId = card.thumbnailUrl ?: "",
                                                 title = card.title,
                                                 isMine = card.isMine,
+                                                bookMark = card.bookMark,
+                                                keywords = card.keywords,
+                                                isSelected = selectedCardIds.contains(card.cardId),
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .heightIn(max = Dp.Unspecified),
                                                 thumbnailContent = card.thumbnailContent ?: "",
-                                                keywords = card.keywords.take(3),
-                                                onClick = { navController.navigate("cardDetail/${card.cardId}") },
-                                                isTopVideo = isTopVideo // Only autoplay the video that is on top of the screen
+                                                onClick = {
+                                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                                    selectionViewModel.toggleCardSelection(card)
+                                                }
                                             )
                                         }
                                         // 각 비디오 사이에 구분선 추가
@@ -403,18 +468,47 @@ fun newBookMarkCardListScreen(
                                 if (state.blogs.isEmpty() && !loadingMore) {
                                     item { EmptyMessage3("저장된 즐겨찾기가 없습니다") }
                                 } else {
-                                    items(state.blogs) { card ->
-                                        SwipableCardList(
-                                            cards = listOf(card),
-                                            onDelete = { viewModel.deleteCard(listOf(card.cardId)) }
-                                        ) {
-                                            BlogBig(
+                                    items(
+                                        items = state.blogs,
+                                        key = { it.cardId }
+                                    ) { card ->
+                                        if (!isSelectionMode) {  // 일반 모드일 때
+                                            SwipableCardList(
+                                                cards = listOf(card),
+                                                onDelete = { selectedCards ->
+                                                    viewModel.deleteCard(selectedCards.map { it.cardId })
+                                                },
+                                                onCardDetail = { selectedCard ->
+                                                    navController.navigate("cardDetail/${selectedCard.cardId}")
+                                                },
+                                                selectionViewModel = selectionViewModel,
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .heightIn(max = Dp.Unspecified)
+                                            ) { currentCard, isSelected ->
+                                                BlogBig(
+                                                    title = currentCard.title,
+                                                    description = currentCard.thumbnailContent
+                                                        ?: "",
+                                                    imageUrl = currentCard.thumbnailUrl ?: "",
+                                                    isMine = currentCard.isMine,
+                                                    isSelected = isSelected,
+                                                    keywords = currentCard.keywords
+                                                    //                                                onClick = { navController.navigate("cardDetail/${card.cardId}") }
+                                                )
+                                            }
+                                        } else { // 선택 모드일 때
+                                            BlogSelectionItem(
                                                 title = card.title,
                                                 description = card.thumbnailContent ?: "",
                                                 imageUrl = card.thumbnailUrl ?: "",
                                                 isMine = card.isMine,
                                                 keywords = card.keywords,
-                                                onClick = { navController.navigate("cardDetail/${card.cardId}") }
+                                                isSelected = selectedCardIds.contains(card.cardId),
+                                                onClick = {
+                                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                                    selectionViewModel.toggleCardSelection(card)
+                                                }
                                             )
                                         }
                                         // 각 블로그 사이에 구분선 추가
@@ -431,17 +525,44 @@ fun newBookMarkCardListScreen(
                                 if (state.news.isEmpty() && !loadingMore) {
                                     item { EmptyMessage3("저장된 즐겨찾기가 없습니다") }
                                 } else {
-                                    items(state.news) { card ->
-                                        SwipableCardList(
-                                            cards = listOf(card),
-                                            onDelete = { viewModel.deleteCard(listOf(card.cardId)) }
-                                        ) {
-                                            NewsBig(
+                                    items(
+                                        items = state.news,
+                                        key = { it.cardId }
+                                    ) { card ->
+                                        if (!isSelectionMode) {
+                                            SwipableCardList(
+                                                cards = listOf(card),
+                                                onDelete = { selectedCards ->
+                                                    viewModel.deleteCard(selectedCards.map { it.cardId })
+                                                },
+                                                onCardDetail = { selectedCard ->
+                                                    navController.navigate("cardDetail/${selectedCard.cardId}")
+                                                },
+                                                selectionViewModel = selectionViewModel,
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .heightIn(max = Dp.Unspecified)
+                                            ) { currentCard, isSelected ->
+                                                NewsBig(
+                                                    title = currentCard.title,
+                                                    keywords = currentCard.keywords,
+                                                    imageUrl = currentCard.thumbnailUrl ?: "",
+                                                    isMine = currentCard.isMine,
+                                                    isSelected = isSelected
+                                                )
+                                            }
+                                        } else {
+                                            NewsSelectionItem(
                                                 title = card.title,
-                                                keywords = card.keywords,
+                                                description = card.thumbnailContent ?: "",
                                                 imageUrl = card.thumbnailUrl ?: "",
                                                 isMine = card.isMine,
-                                                onClick = { navController.navigate("cardDetail/${card.cardId}") }
+                                                keywords = card.keywords,
+                                                isSelected = selectedCardIds.contains(card.cardId),
+                                                onClick = {
+                                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                                    selectionViewModel.toggleCardSelection(card)
+                                                }
                                             )
                                         }
                                         // 각 뉴스 사이에 구분선 추가
@@ -464,6 +585,55 @@ fun newBookMarkCardListScreen(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     CircularProgressIndicator()
+                                }
+                            }
+                        }
+                    }
+                    // 하단 고정 버튼을 Box의 자식으로 이동
+                    AnimatedVisibility (
+                        visible = isSelectionMode,
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.surface)
+                            .padding(16.dp)
+                    ) {
+                        Row (
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                "${selectedCardIds.size}개 선택됨",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                TextButton (
+                                    onClick = {
+                                        selectionViewModel.clearSelection()
+                                        selectionViewModel.toggleSelectionMode(false)
+                                    }
+                                ) {
+                                    Text("취소")
+                                }
+                                Button(
+                                    onClick = {
+                                        val cardsToDelete = when(selectedCategory) {
+                                            "블로그" -> state.blogs
+                                            "동영상" -> state.videos
+                                            "뉴스" -> state.news
+                                            else -> emptyList()
+                                        }.filter { card ->
+                                            selectedCardIds.contains(card.cardId)
+                                        }
+                                        viewModel.deleteCard(cardsToDelete.map { it.cardId })
+                                        selectionViewModel.toggleSelectionMode(false)
+                                    },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.error
+                                    )
+                                ) {
+                                    Text("삭제")
                                 }
                             }
                         }
