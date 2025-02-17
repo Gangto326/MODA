@@ -53,17 +53,31 @@ import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -74,11 +88,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.modapjt.domain.model.CardDetail
 import com.example.modapjt.domain.viewmodel.SearchViewModel
@@ -94,13 +113,14 @@ import java.time.format.DateTimeFormatter
 
 const val REQUEST_PERMISSION_CODE = 100
 
+@OptIn(ExperimentalLayoutApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ImageDetailScreen(cardDetail: CardDetail) {
-    val searchViewModel: SearchViewModel = viewModel()
+fun ImageDetailScreen(cardDetail: CardDetail, navController: NavController) {
+    var showPermissionDialog by remember { mutableStateOf(false) }
+
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    var showPermissionDialog by remember { mutableStateOf(false) }
 
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     val formattedDate = LocalDateTime.parse(cardDetail.createdAt).format(formatter)
@@ -111,63 +131,106 @@ fun ImageDetailScreen(cardDetail: CardDetail) {
             .padding(16.dp)
     ) {
         item {
+            // 이미지 표시
             cardDetail.thumbnailUrl?.let { imageUrl ->
-                Box(
+                Image(
+                    painter = rememberAsyncImagePainter(imageUrl),
+                    contentDescription = "이미지",
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(300.dp)
-                ) {
-                    Image(
-                        painter = rememberAsyncImagePainter(imageUrl),
-                        contentDescription = "이미지",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-
-                    Button(
-                        onClick = {
-                            if (checkStoragePermission(context)) {
-                                scope.launch {
-                                    saveImageToGallery(context, imageUrl)
-                                }
-                            } else {
-                                showPermissionDialog = true
-                            }
-                        },
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(8.dp)
-                    ) {
-                        Text("이미지 저장")
-                    }
-                }
+                        .height(300.dp),
+                    contentScale = ContentScale.Crop
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            val limitedKeywords = cardDetail.keywords
-            Text(
-                text = "키워드: ${limitedKeywords.take(3).joinToString(", ")}",
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(vertical = 4.dp)
-            )
-
-            cardDetail.content?.let { content ->
-                MarkdownText(
-                    markdown = content,
-                    modifier = Modifier.padding(vertical = 8.dp),
-                    keywords = limitedKeywords,
-                    onKeywordClick = { keyword ->
-                        searchViewModel.onKeywordClick(keyword)
-                    }
+            // 카테고리 & 날짜 추가
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = when (cardDetail.categoryId) {
+                        1 -> "전체"
+                        2 -> "트렌드"
+                        3 -> "오락"
+                        4 -> "금융"
+                        5 -> "여행"
+                        6 -> "음식"
+                        7 -> "IT"
+                        8 -> "디자인"
+                        9 -> "사회"
+                        10 -> "건강"
+                        else -> "기타"
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray
+                )
+                Text(
+                    text = formattedDate,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray
                 )
             }
 
-            Text(
-                text = "생성 날짜: $formattedDate",
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(top = 8.dp)
-            )
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // 키워드 및 이미지 저장 버튼 추가
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                FlowRow(
+                    modifier = Modifier.weight(1f),
+                    horizontalArrangement = Arrangement.Start,
+                    maxItemsInEachRow = 3
+                ) {
+                    cardDetail.keywords.take(3).forEach { keyword ->
+                        Surface(
+                            shape = RoundedCornerShape(20.dp),
+                            border = BorderStroke(1.dp, Color.Gray.copy(alpha = 0.3f)),
+                            color = Color.Transparent,
+                            modifier = Modifier
+                                .padding(end = 8.dp, bottom = 16.dp)
+                                .clickable {
+                                    if (keyword.isNotBlank()) {
+                                        navController.navigate("newSearchCardListScreen/$keyword")
+                                    }
+                                }
+                        ) {
+                            Text(
+                                text = keyword,
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Gray
+                            )
+                        }
+                    }
+                }
+
+                // ✅ 4️⃣ 아이콘 버튼을 이용한 이미지 저장 버튼
+                IconButton(
+                    onClick = {
+                        scope.launch {
+                            if (checkStoragePermission(context)) {
+                                saveImageToGallery(context, cardDetail.thumbnailUrl ?: "")
+                            } else {
+                                showPermissionDialog = true
+                            }
+                        }
+                    },
+                    modifier = Modifier.padding(start = 8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AddCircle,
+                        contentDescription = "이미지 저장",
+                        modifier = Modifier.padding(bottom = 16.dp),
+                        tint = Color.Gray                    )
+                }
+            }
         }
     }
 
