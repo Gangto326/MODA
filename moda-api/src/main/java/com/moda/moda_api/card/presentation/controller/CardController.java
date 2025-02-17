@@ -154,7 +154,7 @@ public class CardController {
 	}
 
 	@GetMapping("/status")
-	public ResponseEntity<UserCardStatsResponse> getUserCardStat( String userId){ // @UserId
+	public ResponseEntity<UserCardStatsResponse> getUserCardStat(@UserId String userId){
 
 		UserCardStatsResponse userCardStats = cardService.getUserCardStats(userId);
 
