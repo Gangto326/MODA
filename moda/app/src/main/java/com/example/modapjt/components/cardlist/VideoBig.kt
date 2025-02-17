@@ -33,19 +33,26 @@ fun VideoBig(
     title: String,
     isMine: Boolean,
     thumbnailContent: String,
+    isSelected: Boolean = false,
     keywords: List<String>,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit = {},
+//    onClick: () -> Unit = {},
     isTopVideo: Boolean // 파라미터 이름을 수정
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .clickable(onClick = onClick), // 클릭 가능하도록 설정
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+//            .clickable(onClick = onClick), // 클릭 가능하도록 설정
         shape = RoundedCornerShape(8.dp),
+
         colors = CardDefaults.cardColors(
-            containerColor = if (!isMine) Color.Gray else Color.White
+            containerColor = when {
+                isSelected -> Color.LightGray.copy(alpha = 0.3f)  // 선택됐을 때 색상
+                !isMine -> Color.Gray
+                else -> Color.White
+            }
+//            containerColor = if (!isMine) Color.Gray else Color.White
         ),
         // elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
