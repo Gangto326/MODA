@@ -20,3 +20,17 @@ data class FindUserIdRequest(
     val email: String,
     val code: String
 )
+
+
+data class VerifyPasswordChangeRequest(
+    val email: String,
+    val userId: String,
+    val code: String
+)
+
+data class ResetPasswordRequest(
+    val email: String,
+    val newPassword: String,
+    val newPasswordConfirm: String,
+    val userId: String
+)

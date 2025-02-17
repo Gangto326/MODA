@@ -30,29 +30,20 @@ data class FindIdState(
     val isEmailVerified: Boolean = false
 )
 
-// FindPasswordState.kt
 data class FindPasswordState(
     val username: String = "",
     val email: String = "",
     val verificationCode: String = "",
     val newPassword: String = "",
     val confirmNewPassword: String = "",
+    val isEmailVerificationSent: Boolean = false,
+    val canChangePassword: Boolean = false,
+    val isPasswordResetSuccessful: Boolean = false,
     val isLoading: Boolean = false,
     val error: String? = null,
-    val isEmailVerificationSent: Boolean = false,
-    val isEmailVerified: Boolean = false,
-    val canChangePassword: Boolean = false
+    val remainingTime: Int = 0 // 인증번호 제한시간 (초)
 )
 
-// FindIdEvent.kt
-sealed class FindIdEvent {
-    data class EmailChanged(val email: String) : FindIdEvent()
-    data class VerificationCodeChanged(val code: String) : FindIdEvent()
-    object SendVerification : FindIdEvent()
-    object VerifyCode : FindIdEvent()
-}
-
-// FindPasswordEvent.kt
 sealed class FindPasswordEvent {
     data class UsernameChanged(val username: String) : FindPasswordEvent()
     data class EmailChanged(val email: String) : FindPasswordEvent()
@@ -63,3 +54,12 @@ sealed class FindPasswordEvent {
     object VerifyCode : FindPasswordEvent()
     object SubmitNewPassword : FindPasswordEvent()
 }
+
+// FindIdEvent.kt
+sealed class FindIdEvent {
+    data class EmailChanged(val email: String) : FindIdEvent()
+    data class VerificationCodeChanged(val code: String) : FindIdEvent()
+    object SendVerification : FindIdEvent()
+    object VerifyCode : FindIdEvent()
+}
+

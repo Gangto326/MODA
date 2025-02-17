@@ -67,6 +67,12 @@ object RetrofitInstance {
         retrofit.create(FindIdApiService::class.java)
     }
 
+    // 비밀번호 찾기 API
+    val findPasswordApi: FindPasswordApiService by lazy {
+        retrofit.create(FindPasswordApiService::class.java)
+    }
+
+
 }
 
 
