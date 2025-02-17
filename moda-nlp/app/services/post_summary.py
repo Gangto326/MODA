@@ -97,7 +97,16 @@ class PostSummary:
         has_html_tag = any(tag in self.origin_content for tag in ['<h1>', '<h2>', '<h3>'])
 
         messages = make_summary_prompt(self.category, self.origin_content, has_html_tag)
-        format = None
+
+        format = {
+            'type': 'object',
+            'properties': {
+                'category': {
+                    'type': 'string'
+                }
+            },
+            'required': ['category']
+        }
 
         response = self.chat(model = model, messages = messages, format = format)
         self.content = str(response).removeprefix("```markdown\n").removesuffix("```")

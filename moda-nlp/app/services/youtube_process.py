@@ -14,7 +14,8 @@ class YoutubeProcess:
     MAX_CATEGORY_TRIES = 10
 
     def __init__(self, origin_paragraph: List[TitleAndContent]):
-        self.origin_content = json.dumps([p.model_dump() for p in origin_paragraph], ensure_ascii=False)
+        # self.origin_content = json.dumps([p.model_dump() for p in origin_paragraph], ensure_ascii=False)
+        self.origin_paragraph = origin_paragraph
         self.embedder = Embedding()
         self.category = ''
 
@@ -55,11 +56,37 @@ class YoutubeProcess:
 
     #origin_paragraph의 데이터를 처리하는 함수
     def process_paragraph(self, model: str):
-        messages = make_process_prompt(self.origin_content)
-        format = None
+        contents = []
 
-        response = self.chat(model = model, messages = messages, format = format)
-        self.content = str(response).removeprefix("```markdown\n").removesuffix("```")
+        for paragraph in self.origin_paragraph:
+            # 제목 저장
+            contents.append('# ' + paragraph.title)
+
+            # 각 줄을 분리
+            lines = paragraph.content.strip().split('\n')
+
+            # 각 줄 처리
+            processed_lines = []
+            for line in lines:
+                # <<숫자>> 패턴 제거
+                # 정규식을 사용하지 않고 기본 문자열 처리로 구현
+                if '<<' in line and '>>' in line:
+                    line = line[:line.find('<<')]
+
+                # 앞에 '- ' 추가하고 공백 제거
+                processed_line = '- ' + line.strip()
+                processed_lines.append(processed_line)
+
+            # 결과 합치기
+            contents.append('\n'.join(processed_lines))
+
+        self.content = '\n'.join(contents)
+
+        # messages = make_process_prompt(self.origin_content)
+        # format = None
+        #
+        # response = self.chat(model = model, messages = messages, format = format)
+        # self.content = str(response).removeprefix("```markdown\n").removesuffix("```")
 
     #category를 선택하는 함수
     async def choose_category(self, model: str):
