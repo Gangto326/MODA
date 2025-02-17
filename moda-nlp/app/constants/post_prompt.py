@@ -56,7 +56,7 @@ def make_thumbnail_content_prompt(content: str):
         },
         {
             'role': 'user',
-            'content': f'당신은 주어진 텍스트에서 가장 핵심적인 내용을 1-2줄로 간단히 요약하는 전문가입니다.\n다음 텍스트의 핵심 내용을 "한글"을 사용하여 1-2줄로 요약해주세요:\n\n{content}'
+            'content': f'당신은 주어진 텍스트에서 가장 핵심적인 내용을 1-2줄로 간단히 요약하는 전문가입니다.\n다음 텍스트의 핵심 내용을 1-2줄로 요약해주세요:\n\n{content}'
         }
     ]
 
