@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.modapjt.R
+import com.example.modapjt.data.dto.response.TopScore
 import com.example.modapjt.domain.model.Card
 import com.example.modapjt.screen2.EmptyMessage
 
@@ -35,57 +36,132 @@ fun AllTabCard(
     videoCards: List<Card>,
     blogCards: List<Card>,
     newsCards: List<Card>,
+    topScores: List<TopScore>?, // nullable로 변경
     onImageMoreClick: () -> Unit = {},
     onVideoMoreClick: () -> Unit = {},
     onBlogMoreClick: () -> Unit = {},
     onNewsMoreClick: () -> Unit = {}
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-//            .padding(16.dp),
-//        verticalArrangement = Arrangement.spacedBy(24.dp) // 섹션 간 간격 설정
-    ) {
-        // 동영상 섹션
-        SectionBlock(
+//    println(topScores)
+
+    // 모든 가능한 섹션 정보를 먼저 생성
+    val defaultSections = listOf(
+        SectionInfo(
+            contentType = "VIDEO",
             title = "동영상",
-            items = videoCards,
+            cards = videoCards,
             isImage = false,
             onMoreClick = onVideoMoreClick,
-            navController = navController // NavController 전달
-        )
-        SectionDivider() // 동영상 섹션 후 구분선
-
-        // 블로그 섹션
-        SectionBlock(
+            defaultOrder = 0 // 기본 순서 지정
+        ),
+        SectionInfo(
+            contentType = "BLOG",
             title = "블로그",
-            items = blogCards,
+            cards = blogCards,
             isImage = false,
             onMoreClick = onBlogMoreClick,
-            navController = navController // NavController 전달
-        )
-        SectionDivider() // 블로그 섹션 후 구분선
-
-        // 뉴스 섹션
-        SectionBlock(
+            defaultOrder = 1
+        ),
+        SectionInfo(
+            contentType = "NEWS",
             title = "뉴스",
-            items = newsCards,
+            cards = newsCards,
             isImage = false,
             onMoreClick = onNewsMoreClick,
-            navController = navController // NavController 전달
-        )
-        SectionDivider() // 이미지 섹션 후 구분선
-
-        // 이미지 섹션
-        SectionBlock(
+            defaultOrder = 2
+        ),
+        SectionInfo(
+            contentType = "IMG",
             title = "이미지",
-            items = imageCards,
+            cards = imageCards,
             isImage = true,
             onMoreClick = onImageMoreClick,
-            navController = navController // NavController 전달
+            defaultOrder = 3
         )
+    )
+
+    // TopScore 맵 생성 (없는 경우 빈 맵)
+    val scoreMap = topScores?.associate { it.contentType to it.score } ?: emptyMap()
+
+    // 섹션 정렬
+    val sortedSections = defaultSections
+        .filter { it.cards.isNotEmpty() } // 콘텐츠가 있는 섹션만 필터링
+        .sortedWith(
+            compareByDescending<SectionInfo> { scoreMap[it.contentType] } // score 기준 정렬 (null은 가장 뒤로)
+                .thenBy { it.defaultOrder } // score가 없거나 같은 경우 기본 순서로 정렬
+        )
+
+    Column(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        sortedSections.forEachIndexed { index, section ->
+            SectionBlock(
+                title = section.title,
+                items = section.cards,
+                isImage = section.isImage,
+                onMoreClick = section.onMoreClick,
+                navController = navController
+            )
+            if (index < sortedSections.size - 1) {
+                SectionDivider()
+            }
+        }
     }
+//    Column(
+//        modifier = Modifier
+//            .fillMaxWidth()
+////            .padding(16.dp),
+////        verticalArrangement = Arrangement.spacedBy(24.dp) // 섹션 간 간격 설정
+//    ) {
+//        // 동영상 섹션
+//        SectionBlock(
+//            title = "동영상",
+//            items = videoCards,
+//            isImage = false,
+//            onMoreClick = onVideoMoreClick,
+//            navController = navController // NavController 전달
+//        )
+//        SectionDivider() // 동영상 섹션 후 구분선
+//
+//        // 블로그 섹션
+//        SectionBlock(
+//            title = "블로그",
+//            items = blogCards,
+//            isImage = false,
+//            onMoreClick = onBlogMoreClick,
+//            navController = navController // NavController 전달
+//        )
+//        SectionDivider() // 블로그 섹션 후 구분선
+//
+//        // 뉴스 섹션
+//        SectionBlock(
+//            title = "뉴스",
+//            items = newsCards,
+//            isImage = false,
+//            onMoreClick = onNewsMoreClick,
+//            navController = navController // NavController 전달
+//        )
+//        SectionDivider() // 이미지 섹션 후 구분선
+//
+//        // 이미지 섹션
+//        SectionBlock(
+//            title = "이미지",
+//            items = imageCards,
+//            isImage = true,
+//            onMoreClick = onImageMoreClick,
+//            navController = navController // NavController 전달
+//        )
+//    }
 }
+
+private data class SectionInfo(
+    val contentType: String,
+    val title: String,
+    val cards: List<Card>,
+    val isImage: Boolean,
+    val onMoreClick: () -> Unit,
+    val defaultOrder: Int // 기본 순서 추가
+)
 
 // 각 섹션을 공통적으로 처리하는 컴포넌트
 @Composable

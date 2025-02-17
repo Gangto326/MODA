@@ -1,5 +1,6 @@
 package com.example.modapjt.data.dto.response
 
+import com.example.modapjt.domain.model.AllTabData
 import com.example.modapjt.domain.model.Card
 import com.google.gson.annotations.SerializedName
 
@@ -40,4 +41,16 @@ fun AllTabCardApiResponse.toDomain(): List<Card> {
     val news = contentResults?.get("NEWS")?.map { it.toDomain() } ?: emptyList()
     val videos = contentResults?.get("VIDEO")?.map { it.toDomain() } ?: emptyList()
     return images + blogs + news + videos
+}
+
+// TopScore 변환을 위한 새로운 확장 함수
+fun AllTabCardApiResponse.toTopScores(): List<TopScore> {
+    return topScores?.map { it.toDomain() } ?: emptyList()
+}
+
+fun TopScore.toDomain(): TopScore {
+    return TopScore(
+        contentType = this.contentType,
+        score = this.score
+    )
 }
