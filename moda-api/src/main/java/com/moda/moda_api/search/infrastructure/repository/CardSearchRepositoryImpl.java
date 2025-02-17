@@ -9,6 +9,7 @@ import java.util.stream.StreamSupport;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.*;
 import com.moda.moda_api.card.domain.CardId;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
@@ -32,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 
 @Repository
 @RequiredArgsConstructor
+@Slf4j
 public class CardSearchRepositoryImpl implements CardSearchRepository {
     private static final float MIN_SCORE = 1.4f;
 
@@ -220,6 +222,9 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
     public List<CardDocument> searchByKeyword(UserId userId, String keyword, List<Integer> typeIds, Pageable pageable) {
         BoolQuery.Builder boolQuery = new BoolQuery.Builder();
 
+        log.info("Search params - userId: {}, keyword: {}, typeIds: {}", userId.getValue(), keyword, typeIds);
+        log.info("Generated ES query: {}", boolQuery.toString());
+
         boolQuery.must(Query.of(query -> query
                         .term(term -> term
                                 .field("keywords.keyword")
@@ -240,7 +245,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                 // userId에 대한 must 조건 매칭
                 .must(Query.of(query -> query
                             .term(term -> term
-                                    .field("userId")
+                                    .field("userId.keyword")
                                     .value(userId.getValue())
                             )
                 ));
@@ -249,10 +254,14 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                 .withQuery(boolQuery.build()._toQuery())
                 .build();
 
+        log.info("Final ES query: {}", query.toString());
+
         SearchHits<CardDocumentEntity> searchHits = elasticsearchOperations.search(
                 query,
                 CardDocumentEntity.class
         );
+
+        log.info("Total hits: {}", searchHits.getTotalHits());
 
         return searchHits.stream()
                 .map(hit -> cardDocumentMapper.toDomain(hit.getContent()))
