@@ -62,6 +62,12 @@ object RetrofitInstance {
         createRetrofit().create(FcmApiService::class.java)
     }
 
+    //회원가입 API 추가
+    val signupApi: SignUpApiService by lazy{
+        createRetrofit().create(SignUpApiService::class.java)
+    }
+
+
 //    val api: CategoryApiService by lazy {
 //        Retrofit.Builder()
 //            .baseUrl(BASE_URL)
