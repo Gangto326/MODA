@@ -50,13 +50,13 @@ public class NotificationService {
 					.setTitle( "카드가 생성이 되었습니다. 모다모다~")
 					.setBody(CardContentType.getContentTypeString(card.getTypeId()))
 					.build())
+				.putData("cardId", card.getCardId().getValue())  // data 필드로 전달
 				.setAndroidConfig(AndroidConfig.builder()
 					.setTtl(3600 * 1000)
 					.setNotification(AndroidNotification.builder()
 						.setColor("#FFFFFF")
 						.setIcon("icon_round.webp")
 						.setClickAction("OPEN_ACTIVITY")
-						.setImage(imageUrl)  // 이미지 URL을 여기에 설정
 						.setDefaultVibrateTimings(true)
 						.setDefaultSound(true)
 						.setNotificationCount(1)
