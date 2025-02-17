@@ -3,6 +3,7 @@ package com.example.modapjt.navigation
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,7 +42,7 @@ import newHomeScreen
 import newLinkUploadScreen
 
 @RequiresApi(Build.VERSION_CODES.O)
-@OptIn(ExperimentalAnimationApi::class)
+@OptIn(ExperimentalAnimationApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun NavGraph(
     navController: NavHostController, // AnimatedNavController 사용

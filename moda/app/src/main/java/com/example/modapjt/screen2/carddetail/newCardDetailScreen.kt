@@ -176,7 +176,7 @@ fun newCardDetailScreen(
                         1 -> VideoDetailScreen(cardDetail, navController) // ✅ 동영상 UI
                         2 -> BlogDetailScreen(cardDetail, navController) // ✅ 블로그 UI
                         3 -> NewsDetailScreen(cardDetail) // ✅ 뉴스 UI
-                        4 -> ImageDetailScreen(cardDetail) // ✅ 이미지 UI
+                        4 -> ImageDetailScreen(cardDetail, navController) // ✅ 이미지 UI
                         else -> Text("알 수 없는 카드 타입입니다.")
                     }
                 }
