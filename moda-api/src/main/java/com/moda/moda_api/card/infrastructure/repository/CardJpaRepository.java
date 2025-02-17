@@ -2,6 +2,7 @@ package com.moda.moda_api.card.infrastructure.repository;
 
 import com.moda.moda_api.card.infrastructure.entity.CardDtoEntity;
 import com.moda.moda_api.card.infrastructure.entity.CardEntity;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Range;
 import org.springframework.data.domain.Slice;
@@ -121,4 +122,8 @@ public interface CardJpaRepository extends JpaRepository<CardEntity, String> {
             "AND c.categoryId BETWEEN 2 AND 10 " +
             "GROUP BY c.categoryId")
     List<Object[]> findCategoryExistenceByUserId(@Param("userId") String userId);
+
+    Slice<CardEntity> findByTypeIdAndUserIdAndDeletedAtIsNull(Integer typeId, String userId, PageRequest pageRequest);
+
+    Slice<CardEntity> findByTypeIdAndCategoryIdAndUserIdAndDeletedAtIsNull(Integer typeId, Long categoryId, String userId, PageRequest pageRequest);
 }
