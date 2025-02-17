@@ -83,7 +83,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                 // userId 필터
                 .must(Query.of(query -> query
                         .term(term -> term
-                                .field("userId")
+                                .field("userId.keyword")
                                 .value(userId.getValue())
                         )
                 ))
@@ -152,7 +152,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
         // UserId에 대한 term 쿼리 매칭
         boolQuery.must(Query.of(query -> query
                 .term(term -> term
-                        .field("userId")
+                        .field("userId.keyword")
                         .value(userId.getValue())
                 )));
 
@@ -222,9 +222,6 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
     public List<CardDocument> searchByKeyword(UserId userId, String keyword, List<Integer> typeIds, Pageable pageable) {
         BoolQuery.Builder boolQuery = new BoolQuery.Builder();
 
-        log.info("Search params - userId: {}, keyword: {}, typeIds: {}", userId.getValue(), keyword, typeIds);
-        log.info("Generated ES query: {}", boolQuery.toString());
-
         boolQuery.must(Query.of(query -> query
                         .term(term -> term
                                 .field("keywords.keyword")
@@ -254,14 +251,10 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                 .withQuery(boolQuery.build()._toQuery())
                 .build();
 
-        log.info("Final ES query: {}", query.toString());
-
         SearchHits<CardDocumentEntity> searchHits = elasticsearchOperations.search(
                 query,
                 CardDocumentEntity.class
         );
-
-        log.info("Total hits: {}", searchHits.getTotalHits());
 
         return searchHits.stream()
                 .map(hit -> cardDocumentMapper.toDomain(hit.getContent()))
@@ -299,7 +292,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                         .should(Query.of(q -> q
                                 // userId는 term 조건으로 매칭 후 가중치 추가
                                 .term(term -> term
-                                        .field("userId")
+                                        .field("userId.keyword")
                                         .value(userId.getValue())
                                         .boost(1.8f)
                                 )
@@ -356,7 +349,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                 ))
                 .must(Query.of(query -> query
                         .term(term -> term
-                                .field("userId")
+                                .field("userId.keyword")
                                 .value(userId.getValue())
                                 .boost(1000.0f)
                         )
@@ -386,7 +379,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                 ))
                 .must(Query.of(query -> query
                         .term(term -> term
-                                .field("userId")
+                                .field("userId.keyword")
                                 .value(userId.getValue())
                                 .boost(1000.0f)
                         )
@@ -410,7 +403,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
         NativeQuery query = NativeQuery.builder()
                 .withQuery(boolQuery.build()._toQuery())
                 .withPageable(pageable)
-//                .withMinScore(MIN_SCORE)
+                .withMinScore(MIN_SCORE)
                 .withTrackScores(true)  // 점수 추적 활성화
                 .withSort(Sort.by(
                         Sort.Order.desc("_score")
