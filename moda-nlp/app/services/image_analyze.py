@@ -88,10 +88,12 @@ class ImageAnalyze:
         while attempt_count < self.MAX_CATEGORY_TRIES:
             response = self.chat(model = model, messages = messages, format = format)
 
+            print(f" 카테고리 선택 시도 ${attempt_count} - ${response}")
+
             for idx, category in enumerate(categories_name()):
                 if category.lower() in response.lower():
                     find_category = True
-                    self.category_id = idx
+                    self.category_id = idx + 1
                     self.category = category
                     break
 
@@ -101,7 +103,7 @@ class ImageAnalyze:
             attempt_count += 1
 
         if attempt_count == self.MAX_CATEGORY_TRIES:
-            self.category_id = 0
+            self.category_id = 1
             self.category = 'ALL'
 
     #keywords를 생성하는 함수

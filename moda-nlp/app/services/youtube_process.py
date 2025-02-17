@@ -5,7 +5,7 @@ from typing import List
 import ollama
 
 from app.constants.category import categories_name
-from app.constants.youtube_prompt import make_category_prompt, make_keywords_content_prompt, make_process_prompt
+from app.constants.youtube_prompt import make_category_prompt, make_keywords_content_prompt
 from app.schemas.youtube import YoutubeResponse, TitleAndContent
 from app.services.embedding import Embedding
 
@@ -106,10 +106,12 @@ class YoutubeProcess:
         while attempt_count < self.MAX_CATEGORY_TRIES:
             response = self.chat(model = model, messages = messages, format = format)
 
+            print(f" 카테고리 선택 시도 ${attempt_count} - ${response}")
+
             for idx, category in enumerate(categories_name()):
                 if category.lower() in response.lower():
                     find_category = True
-                    self.category_id = idx
+                    self.category_id = idx + 1
                     self.category = category
                     break
 
@@ -119,7 +121,7 @@ class YoutubeProcess:
             attempt_count += 1
 
         if attempt_count == self.MAX_CATEGORY_TRIES:
-            self.category_id = 0
+            self.category_id = 1
             self.category = 'ALL'
 
     #keywords를 생성하는 함수

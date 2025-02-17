@@ -89,7 +89,7 @@ class PostSummary:
             attempt_count += 1
 
         if attempt_count == self.MAX_CATEGORY_TRIES:
-            self.category_id = 0
+            self.category_id = 1
             self.category = 'All'
 
     #origin_content를 요약하는 함수
