@@ -28,17 +28,21 @@ fun NewsBig(
     keywords: List<String>,
     imageUrl: String,
     isMine: Boolean,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit = {}
+    isSelected: Boolean = false,
+    modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .clickable(onClick = onClick),
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (!isMine) Color.Gray else Color.White // ✅ 배경색 적용
+            containerColor = when {
+                isSelected -> Color.LightGray.copy(alpha = 0.3f)  // 선택됐을 때 색상
+                !isMine -> Color.Gray
+                else -> Color.White
+            }
+//            containerColor = if (!isMine) Color.Gray else Color.White // ✅ 배경색 적용
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
