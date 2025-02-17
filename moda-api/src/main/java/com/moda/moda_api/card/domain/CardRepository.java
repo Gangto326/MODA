@@ -47,4 +47,8 @@ public interface CardRepository {
     Slice<Card> findByTypeIdAndUserId(Integer typeId, UserId userId, PageRequest pageRequest);
 
     Slice<Card> findByTypeIdAndCategoryIdAndUserId(Integer typeId, CategoryId categoryId, UserId userId, PageRequest pageRequest);
+
+    Long countByUserIdAndDeletedAtIsNull(UserId userId);
+
+    Long countByUserIdAndBookmarkTrueAndDeletedAtIsNull(UserId userId);
 }

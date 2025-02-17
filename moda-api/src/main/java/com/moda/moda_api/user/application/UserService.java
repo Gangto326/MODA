@@ -156,7 +156,7 @@ public class UserService {
     @Transactional
     public boolean resetPassword(PasswordResetRequest passwordResetRequest) {
         // 사용자 ID와 이메일로 사용자 찾기
-        User user = userRepository.findById(passwordResetRequest.getUserId())
+        User user = userRepository.findByEmail(passwordResetRequest.getEmail())
             .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
 
         // 이메일 일치 여부 확인

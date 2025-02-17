@@ -22,6 +22,7 @@ import com.moda.moda_api.card.application.response.CardDetailResponse;
 import com.moda.moda_api.card.application.response.CardListResponse;
 import com.moda.moda_api.card.application.response.CardMainResponse;
 import com.moda.moda_api.card.application.response.HotTopicResponse;
+import com.moda.moda_api.card.application.response.UserCardStatsResponse;
 import com.moda.moda_api.card.application.service.CardService;
 import com.moda.moda_api.card.presentation.request.CardBookmarkRequest;
 import com.moda.moda_api.card.presentation.request.CardRequest;
@@ -150,5 +151,13 @@ public class CardController {
 	) {
 		List<HotTopicResponse> responseList = cardService.getHotTopics(limit);
 		return ResponseEntity.ok(responseList);
+	}
+
+	@GetMapping("/status")
+	public ResponseEntity<UserCardStatsResponse> getUserCardStat(@UserId String userId){
+
+		UserCardStatsResponse userCardStats = cardService.getUserCardStats(userId);
+
+		return ResponseEntity.ok(userCardStats);
 	}
 }

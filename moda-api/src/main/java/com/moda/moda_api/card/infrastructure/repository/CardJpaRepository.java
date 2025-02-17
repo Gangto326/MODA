@@ -126,4 +126,9 @@ public interface CardJpaRepository extends JpaRepository<CardEntity, String> {
     Slice<CardEntity> findByTypeIdAndUserIdAndDeletedAtIsNull(Integer typeId, String userId, PageRequest pageRequest);
 
     Slice<CardEntity> findByTypeIdAndCategoryIdAndUserIdAndDeletedAtIsNull(Integer typeId, Long categoryId, String userId, PageRequest pageRequest);
+
+    Long countByUserIdAndDeletedAtIsNull(String userId);
+
+    Long countByUserIdAndBookmarkTrueAndDeletedAtIsNull(String userId);
 }
+

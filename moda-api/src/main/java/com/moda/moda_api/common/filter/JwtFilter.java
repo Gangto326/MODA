@@ -43,12 +43,13 @@ public class JwtFilter extends OncePerRequestFilter {
 			"/api/auth/find-user-id",
 			"/api/auth/check-user-name",
 			"/api/auth/refresh",
-			"/swagger-ui",  // 수정
-			"/v3/api-docs",  // 수정
+			"/swagger-ui",
+			"/v3/api-docs",
 			"/swagger-resources",
 			"/webjars",
 			"/api/user/check-user-name",
-			"/api/auth/password-change-check"
+			"/api/auth/password-change-check",
+			"/api/user/reset-password"
 		};
 
 		String path = request.getRequestURI();
