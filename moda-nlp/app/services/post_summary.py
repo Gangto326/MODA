@@ -99,22 +99,33 @@ class PostSummary:
 
     #origin_content를 요약하는 함수
     def summary_content(self, model: str):
-        has_html_tag = any(tag in self.origin_content for tag in ['<h1>', '<h2>', '<h3>'])
+        # has_html_tag = any(tag in self.origin_content for tag in ['<h1>', '<h2>', '<h3>'])
+        has_html_tag = False
 
         messages = make_summary_prompt(self.category, self.origin_content, has_html_tag)
-
         format = {
-            'type': 'object',
-            'properties': {
-                'category': {
-                    'type': 'string'
+            'type': 'array',
+            'items': {
+                'type': 'object',
+                'properties': {
+                    'title': {
+                        'type': 'string'
+                    },
+                    'content': {
+                        'type': 'string'
+                    }
                 }
             },
-            'required': ['category']
+            'required': ['title', 'content']
         }
 
         response = self.chat(model = model, messages = messages, format = format)
-        self.content = str(response).removeprefix("```markdown\n").removesuffix("```")
+        print(response)
+        print()
+        for item in json.loads(response):
+            print(f"제목: {item['title']}")
+            print(f"내용: {item['content']}")
+            print("-" * 20)  # 구분선
 
     #keywords를 생성하는 함수
     async def make_keywords(self, model: str):
