@@ -1,4 +1,3 @@
-import asyncio
 import json
 from typing import List
 
@@ -27,11 +26,9 @@ class YoutubeProcess:
     #YoutubeProcess 객체가 실행되면 가장 먼저 실행되는 함수
     async def execute(self):
         self.process_paragraph('anpigon/qwen2.5-7b-instruct-kowiki')
-        await asyncio.gather(
-            self.choose_category('anpigon/qwen2.5-7b-instruct-kowiki'),
-            self.make_keywords('anpigon/qwen2.5-7b-instruct-kowiki'),
-            self.make_embedding_vector()
-        )
+        self.choose_category('anpigon/qwen2.5-7b-instruct-kowiki'),
+        self.make_keywords('anpigon/qwen2.5-7b-instruct-kowiki'),
+        self.make_embedding_vector()
 
     #Response 형태로 만들어주는 함수
     def get_response(self) -> YoutubeResponse:
@@ -89,7 +86,7 @@ class YoutubeProcess:
         # self.content = str(response).removeprefix("```markdown\n").removesuffix("```")
 
     #category를 선택하는 함수
-    async def choose_category(self, model: str):
+    def choose_category(self, model: str):
         messages = make_category_prompt(self.content)
         format = {
             'type': 'object',
@@ -125,7 +122,7 @@ class YoutubeProcess:
             self.category = 'ALL'
 
     #keywords를 생성하는 함수
-    async def make_keywords(self, model: str):
+    def make_keywords(self, model: str):
         messages = make_keywords_content_prompt(self.content)
         format = {
             'type': 'object',
@@ -145,5 +142,5 @@ class YoutubeProcess:
         self.keywords = [keyword for keyword in self.keywords if len(keyword) <=  10 and keyword in self.content]
 
     #embeeding_vector를 생성하는 함수
-    async def make_embedding_vector(self):
+    def make_embedding_vector(self):
         self.embedding_vector = self.embedder.embed_document(self.content)

@@ -1,4 +1,3 @@
-import asyncio
 import json
 
 import googletrans
@@ -33,11 +32,9 @@ class PostSummary:
 
             if not await self.detect_chinese(self.content):
                 break
-        await asyncio.gather(
-            self.make_keywords('anpigon/qwen2.5-7b-instruct-kowiki'),
-            self.make_thumbnail_content('anpigon/qwen2.5-7b-instruct-kowiki'),
-            self.make_embedding_vector()
-        )
+        self.make_keywords('anpigon/qwen2.5-7b-instruct-kowiki'),
+        self.make_thumbnail_content('anpigon/qwen2.5-7b-instruct-kowiki'),
+        self.make_embedding_vector()
 
     #Response 형태로 만들어주는 함수
     def get_response(self) -> PostResponse:
@@ -151,7 +148,7 @@ class PostSummary:
         print("포스트 요약본 생성")
 
     #keywords를 생성하는 함수
-    async def make_keywords(self, model: str):
+    def make_keywords(self, model: str):
         messages = make_keywords_content_prompt(self.content)
         format = {
             'type': 'object',
@@ -171,7 +168,7 @@ class PostSummary:
         self.keywords = [keyword for keyword in self.keywords if len(keyword) <=  10 and keyword in self.content]
 
     # thumbnail_content를 생성하는 함수
-    async def make_thumbnail_content(self, model: str):
+    def make_thumbnail_content(self, model: str):
         messages = make_thumbnail_content_prompt(self.content)
         format = None
 
@@ -179,7 +176,7 @@ class PostSummary:
         self.thumbnail_content = response
 
     #embeeding_vector를 생성하는 함수
-    async def make_embedding_vector(self):
+    def make_embedding_vector(self):
         self.embedding_vector = self.embedder.embed_document(self.content)
 
     #AI 결과에 중국어가 포함되어 있는지 확인하는 함수

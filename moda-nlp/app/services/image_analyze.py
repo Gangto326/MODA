@@ -31,7 +31,7 @@ class ImageAnalyze:
         self.encode_base64()
         await self.analyze_image()
         self.choose_category()
-        await self.make_keywords()
+        self.make_keywords()
         self.make_embedding_vector()
 
     #Response 형태로 만들어주는 함수
@@ -106,7 +106,7 @@ class ImageAnalyze:
             self.category = 'ALL'
 
     #keywords를 생성하는 함수
-    async def make_keywords(self):
+    def make_keywords(self):
         model = self.MODEL
         messages = make_keywords_content_prompt(self.content, self.base64_image)
         format = {
