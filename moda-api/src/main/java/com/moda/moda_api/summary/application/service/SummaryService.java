@@ -16,7 +16,7 @@ public class SummaryService {
 
 	public CompletableFuture<SummaryResultDto> getSummary(String url) {
 		// YouTube일 경우
-		if (url.contains("youtube.com")) {
+		if (url.contains("youtube.com") || url.contains("youtu.be/") || url.contains("m.youtube.com") ) {
 			return lilysSummaryService.summarize(url);
 		}
 		// 일반 웹사이트일 경우

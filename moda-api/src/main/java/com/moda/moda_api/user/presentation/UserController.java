@@ -68,28 +68,28 @@ public class UserController {
      */
      @PostMapping("/login")
      public ResponseEntity<Boolean> login(@RequestBody LoginRequest request) {
-         return ResponseEntity.ok(Boolean.TRUE);
+         // return ResponseEntity.ok(Boolean.TRUE);
 
-         // AuthResponse authResponse = userService.login(request);
-         //
-         // HttpHeaders httpHeaders = new HttpHeaders();
-         //
-         // httpHeaders.add(HeaderUtil.getAuthorizationHeaderName(), HeaderUtil.getTokenPrefix() + authResponse.getAccessToken());
-         //
-         // // RefreshToken을 HttpOnly Cookie로 전달.
-         // ResponseCookie responseCookie = ResponseCookie
-         //         .from(HeaderUtil.getRefreshCookieName(), authResponse.getRefreshToken())
-         //         .path("/") // 위 사이트에서 쿠키를 허용할 경로를 설정.
-         //         .httpOnly(true) // HTTP 통신을 위해서만 사용하도록 설정.
-         //         .secure(true) // Set-Cookie 설정.
-         //         .maxAge(authResponse.getMaxAge() / 1000) // RefreshToken과 동일한 만료 시간으로 설정.
-         //         .build();
-         //
-         // return ResponseEntity.ok()
-         //         .headers(httpHeaders)
-         //         .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
-         //         .header("Access-Control-Expose-Headers", "Set-Cookie")
-         //         .body(true);
+         AuthResponse authResponse = userService.login(request);
+
+         HttpHeaders httpHeaders = new HttpHeaders();
+
+         httpHeaders.add(HeaderUtil.getAuthorizationHeaderName(), HeaderUtil.getTokenPrefix() + authResponse.getAccessToken());
+
+         // RefreshToken을 HttpOnly Cookie로 전달.
+         ResponseCookie responseCookie = ResponseCookie
+                 .from(HeaderUtil.getRefreshCookieName(), authResponse.getRefreshToken())
+                 .path("/") // 위 사이트에서 쿠키를 허용할 경로를 설정.
+                 .httpOnly(true) // HTTP 통신을 위해서만 사용하도록 설정.
+                 .secure(true) // Set-Cookie 설정.
+                 .maxAge(authResponse.getMaxAge() / 1000) // RefreshToken과 동일한 만료 시간으로 설정.
+                 .build();
+
+         return ResponseEntity.ok()
+                 .headers(httpHeaders)
+                 .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
+                 .header("Access-Control-Expose-Headers", "Set-Cookie")
+                 .body(true);
      }
 
     @DeleteMapping("/logout")

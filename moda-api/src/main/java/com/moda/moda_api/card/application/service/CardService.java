@@ -82,7 +82,7 @@ public class CardService {
 	 */
 	@Transactional
 	public CompletableFuture<Boolean> createCard(String userId, String url) {
-		UserId userIdObj = new UserId("user");
+		UserId userIdObj = new UserId(userId);
 		String urlHash = UrlCache.generateHash(url);
 
 		if (cardRepository.existsByUserIdAndUrlHashAndDeletedAtIsNull(userIdObj, urlHash))
@@ -113,7 +113,6 @@ public class CardService {
 			cache.getCachedTitle(),
 			cache.getCachedContent(),
 			cache.getCachedThumbnailContent(),
-			// TODO: 2-14 종원 확인 필요
 			cache.getCachedThumbnailUrl(),
 			cache.getCachedEmbedding(),
 			cache.getCachedKeywords(),
