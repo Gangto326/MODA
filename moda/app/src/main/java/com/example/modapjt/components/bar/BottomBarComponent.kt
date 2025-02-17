@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
@@ -17,7 +18,9 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -25,6 +28,16 @@ import androidx.navigation.NavController
 
 @Composable
 fun BottomBarComponent(navController: NavController, currentRoute: String) {
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp.dp
+    val screenWidth = configuration.screenWidthDp.dp
+
+    // 화면 높이의 비율로 계산
+    val barHeight = (screenHeight * 0.095f).coerceIn(48.dp, 80.dp)
+
+    // 화면 크기에 따른 텍스트 크기 계산
+    val iconSize = (screenWidth * 0.05f).coerceIn(20.dp, 28.dp)
+
     Row( // ✅ NavigationBar를 감싸는 Row 추가 (좌우 패딩 조절용)
         modifier = androidx.compose.ui.Modifier
             .fillMaxWidth()
@@ -35,10 +48,17 @@ fun BottomBarComponent(navController: NavController, currentRoute: String) {
             contentColor = Color(0xFF665F5B),
             modifier = androidx.compose.ui.Modifier
                 .fillMaxWidth()
-                .height(56.dp) // ✅ 높이 줄이기 (기본 56.dp → 48.dp)
+                .height(barHeight) // ✅ 높이 줄이기 (기본 56.dp → 48.dp)
         ) {
             NavigationBarItem(
-                icon = { Icon(Icons.Default.Home, contentDescription = "Home", tint = Color(0xFF000000)) },
+                icon = {
+                    Icon(
+                        Icons.Default.Home,
+                        contentDescription = "Home",
+                        modifier = Modifier.size(iconSize),
+                        tint = Color(0xFF000000)
+                    )
+                       },
                 label = { Text("홈", fontSize = 10.sp, color = Color(0xFF665F5B)) },
                 selected = currentRoute == "home",
                 onClick = {
