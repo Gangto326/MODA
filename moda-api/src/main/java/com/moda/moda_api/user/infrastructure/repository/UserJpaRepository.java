@@ -13,12 +13,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
  */
 public interface UserJpaRepository extends JpaRepository<UserEntity, String> {
 
-<<<<<<< Updated upstream
     UserEntity findByUserName(String userName);
 
 
     UserEntity findByEmail(String email);
-=======
     /**
      * 주어진 이메일로 사용자 엔티티를 찾습니다.
      * JpaRepository를 상속받아 기본적인 CRUD 기능을 제공받습니다.
@@ -27,7 +25,6 @@ public interface UserJpaRepository extends JpaRepository<UserEntity, String> {
      * @return 해당 이메일을 가진 UserEntity, 없으면 null
      */
     UserEntity findByUserId(String email);
->>>>>>> Stashed changes
 
     /**
      * 주어진 닉네임으로 사용자 엔티티를 찾습니다.
