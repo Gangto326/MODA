@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 public class LilysSummaryService {
 	private final LilysAiClient lilysWebClient;
 	private final PythonAnalysisService pythonAnalysisService;
-	private static final int MAX_ATTEMPTS = 50;
+	private static final int MAX_ATTEMPTS = 100;
 	private static final Duration POLLING_INTERVAL = Duration.ofSeconds(200);
 	private final YoutubeApiClient youtubeApiClient;
 
@@ -134,10 +134,10 @@ public class LilysSummaryService {
 					return CompletableFuture.completedFuture(status);
 				}
 				if ("pending".equals(status)) {
-					log.info("Summary is still pending. Will retry in 60 seconds. Attempt: {}", attempt + 1);
+					log.info("Summary is still pending. Will retry in 15 seconds. Attempt: {}", attempt + 1);
 					return CompletableFuture.supplyAsync(
 						() -> checkStatusWithRetry(requestId, attempt + 1),
-						CompletableFuture.delayedExecutor(60, TimeUnit.SECONDS)
+						CompletableFuture.delayedExecutor(15, TimeUnit.SECONDS)
 					).thenCompose(future -> future);
 				}
 				return CompletableFuture.failedFuture(
