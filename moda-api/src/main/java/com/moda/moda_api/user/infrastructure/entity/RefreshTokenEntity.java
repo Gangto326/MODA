@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Getter
@@ -20,6 +21,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Table(name = "refresh_tokens")
+@ToString
 public class RefreshTokenEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,6 +33,9 @@ public class RefreshTokenEntity {
 
 	@Column(name = "expires_at", nullable = false)
 	private LocalDateTime expiresAt;
+
+	@Column(name = "user_Id", nullable = false)
+	private String userId;
 
 	@Column(name = "created_at")
 	@Builder.Default

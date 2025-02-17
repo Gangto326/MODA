@@ -83,7 +83,7 @@ public class Card {
 
     public void validateOwnership(UserId userId) {
         if (!this.userId.equals(userId)) {
-            throw new UnauthorizedException("권한이 존재하지 않습니다.");
+            throw new UnauthorizedException("권한이 존재하지 않습니다.", "UNAUTHORIZED_ACCESS");
         }
     }
 

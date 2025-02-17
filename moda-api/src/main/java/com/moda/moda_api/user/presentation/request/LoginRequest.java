@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class LoginRequest {
-    private String email;
+    private String userId;
     private String password;
-    private String hashedPassword;
 }

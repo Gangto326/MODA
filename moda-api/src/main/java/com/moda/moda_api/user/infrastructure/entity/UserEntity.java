@@ -36,7 +36,7 @@ public class UserEntity {
     private String email;
 
     @Column(name = "password", length = 255, nullable = false)
-    private String password;
+    private String hashedPassword;
 
     @Column(name = "user_name", length = 100, nullable = false)
     private String userName;

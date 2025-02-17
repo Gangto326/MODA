@@ -19,34 +19,6 @@ import java.util.UUID;
 @Component
 public class UserMapper {
 
-    /**
-     * User 도메인 객체를 UserResponse DTO로 변환합니다.
-     *
-     * @param user 변환할 User 도메인 객체
-     * @return 변환된 UserResponse 객체
-     */
-    public UserResponse toUserResponse(User user) {
-        return UserResponse.builder()
-                .email(user.getEmail())
-                .nickname(user.getNickname())
-                .createdAt(user.getCreatedAt())
-                .build();
-    }
-    /**
-     * User 도메인 객체를 UserProfileResponse DTO로 변환합니다.
-     *
-     * @param user 변환할 User 도메인 객체
-     * @return 변환된 UserProfileResponse 객체
-     */
-    public UserProfileResponse toUserProfileResponse(User user) {
-        return UserProfileResponse.builder()
-                .userId(user.getUserId().getValue())
-                .email(user.getEmail())
-                .nickname(user.getNickname())
-                .createdAt(user.getCreatedAt())
-                .isDeleted(user.isDeleted())
-                .build();
-    }
 
     /**
      * SignupRequest DTO를 User 도메인 객체로 변환합니다.
@@ -59,7 +31,8 @@ public class UserMapper {
                 .userId(new UserId(UUID.randomUUID().toString()))
                 .email(request.getEmail())
                 .userName(request.getUserName())
-                .password(PasswordEncrypt.encrypt(request.getPassword()))
+                .nickname(request.getNickname())
+                .hashedPassword(PasswordEncrypt.encrypt(request.getPassword()))
                 .build();
     }
 
@@ -86,9 +59,9 @@ public class UserMapper {
      * @param request 로그인 요청 DTO
      * @return 이메일 정보
      */
-    public String getEmailFromLoginRequest(LoginRequest request) {
-        return request.getEmail();
-    }
+    // public String getEmailFromLoginRequest(LoginRequest request) {
+    //     return request.getEmail();
+    // }
 
 
 }

@@ -11,50 +11,42 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * @see JpaRepository
  * @see UserEntity
  */
-// public interface UserJpaRepository extends JpaRepository<UserEntity, String> {
-//     /**
-//      * 주어진 이메일로 사용자 엔티티를 찾습니다.
-//      * JpaRepository를 상속받아 기본적인 CRUD 기능을 제공받습니다.
-//      *
-//      * @param email 찾고자 하는 사용자의 이메일
-//      * @return 해당 이메일을 가진 UserEntity, 없으면 null
-//      */
-//     UserEntity findByEmail(String email);
-//
-//     /**
-//      * 주어진 닉네임으로 사용자 엔티티를 찾습니다.
-//      * 메서드 이름 규칙에 따라 자동으로 쿼리가 생성됩니다.
-//      *
-//      * @param nickname 찾고자 하는 사용자의 닉네임
-//      * @return 해당 닉네임을 가진 UserEntity, 없으면 null
-//      */
-//     UserEntity findByNickname(String nickname);
-//
-//     /**
-//      * 주어진 이메일이 데이터베이스에 존재하는지 확인합니다.
-//      * 회원가입 시 이메일 중복 체크 등에 사용됩니다.
-//      *
-//      * @param email 중복 체크할 이메일
-//      * @return 이메일이 존재하면 true, 없으면 false
-//      */
-//     boolean existsByEmail(String email);
-//
-//     /**
-//      * 주어진 닉네임이 데이터베이스에 존재하는지 확인합니다.
-//      * 회원가입 또는 프로필 수정 시 닉네임 중복 체크에 사용됩니다.
-//      *
-//      * @param nickname 중복 체크할 닉네임
-//      * @return 닉네임이 존재하면 true, 없으면 false
-//      */
-//     boolean existsByNickname(String nickname);
-//
-//     /**
-//      * 주어진 이메일과 상태값으로 사용자 엔티티를 찾습니다.
-//      * 로그인 시 활성 상태인 사용자만 조회하는 등의 용도로 사용됩니다.
-//      *
-//      * @param email 찾고자 하는 사용자의 이메일
-//      * @param status 사용자의 상태값 (예: "ACTIVE", "INACTIVE")
-//      * @return 조건에 맞는 UserEntity, 없으면 null
-//      */
-//     UserEntity findByEmailAndStatus(String email, String status);
-// }
+public interface UserJpaRepository extends JpaRepository<UserEntity, String> {
+
+    UserEntity findByUserName(String userName);
+
+
+    UserEntity findByEmail(String email);
+
+    /**
+     * 주어진 닉네임으로 사용자 엔티티를 찾습니다.
+     * 메서드 이름 규칙에 따라 자동으로 쿼리가 생성됩니다.
+     *
+     * @param nickname 찾고자 하는 사용자의 닉네임
+     * @return 해당 닉네임을 가진 UserEntity, 없으면 null
+     */
+    UserEntity findByNickname(String nickname);
+
+    /**
+     * 주어진 이메일이 데이터베이스에 존재하는지 확인합니다.
+     * 회원가입 시 이메일 중복 체크 등에 사용됩니다.
+     *
+     * @param email 중복 체크할 이메일
+     * @return 이메일이 존재하면 true, 없으면 false
+     */
+    boolean existsByEmail(String email);
+
+    /**
+     * 주어진 닉네임이 데이터베이스에 존재하는지 확인합니다.
+     * 회원가입 또는 프로필 수정 시 닉네임 중복 체크에 사용됩니다.
+     *
+     * @param nickname 중복 체크할 닉네임
+     * @return 닉네임이 존재하면 true, 없으면 false
+     */
+    boolean existsByNickname(String nickname);
+
+
+	boolean existsByUserName(String userName);
+
+
+}

@@ -8,8 +8,10 @@ import java.util.Optional;
  * 특정 기술(JPA 등)에 의존하지 않는 순수한 인터페이스입니다.
  */
 public interface UserRepository {
-    public Optional<User> findByEmail(String email);
+    // 해당 Id로 User찾기
+    Optional<User> findByUserName(String userName);
 
+    Optional<User> findByEmail(String email);
 
     // ID로 사용자 찾기
     // 반환값: 해당 ID의 사용자가 있으면 User 객체, 없으면 null
@@ -28,7 +30,7 @@ public interface UserRepository {
     // 반환값: 닉네임이 존재하면 true, 없으면 false
     boolean existsByNickname(String nickname);
 
-    // 이메일과 상태로 사용자 찾기 (예: 활성 상태인 사용자만 찾기)
-    // 반환값: 조건에 맞는 사용자가 있으면 User 객체, 없으면 null
-    Optional<User> findByEmailAndStatus(String email, String status);
+    // 유저 로그인 아이디 중복 확인
+    boolean existsByUserName(String userName);
+
 }
