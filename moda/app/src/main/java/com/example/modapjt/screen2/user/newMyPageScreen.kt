@@ -1,5 +1,6 @@
 package com.example.modapjt.screen2.user
 
+import UserProfileCard
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -10,16 +11,21 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -44,15 +50,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.modapjt.components.bar.BottomBarComponent
 import com.example.modapjt.components.setting.SettingItem
-import com.example.modapjt.components.user.InterestKeywords
 import com.example.modapjt.components.user.MyPageHeader
-import com.example.modapjt.components.user.UserProfileCard
 import com.example.modapjt.domain.viewmodel.AuthViewModel
 import com.example.modapjt.domain.viewmodel.UserViewModel
 import com.example.modapjt.overlay.OverlayService
@@ -148,8 +153,8 @@ fun MyPageScreen(
                         CircularProgressIndicator()
                     } else {
                         UserProfileCard(
-                            profileImage = null,
-                            nickname = userStatus?.nickname ?: "사용자"
+                            nickname = userStatus?.nickname ?: "사용자",
+                            itemCount = userStatus?.allCount?.toIntOrNull() ?: 0
                         )
 
                         Spacer(modifier = Modifier.height(8.dp))
@@ -201,6 +206,7 @@ fun MyPageScreen(
                         Column(
                             modifier = Modifier.padding(16.dp)
                         ) {
+                            // 기존 Switch -> 커스텀 토글 버튼 변경
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -212,43 +218,12 @@ fun MyPageScreen(
                                     fontSize = 16.sp
                                 )
 
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    Text(
-                                        text = "오버레이",
-                                        fontSize = 14.sp,
-                                        color = if (!isGestureMode) Color(0xFFFFC107) else Color.Gray
-                                    )
-                                    Text(
-                                        text = "|",
-                                        fontSize = 14.sp,
-                                        color = Color.Gray
-                                    )
-                                    Text(
-                                        text = "제스처",
-                                        fontSize = 14.sp,
-                                        color = if (isGestureMode) Color(0xFFFFC107) else Color.Gray
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Switch(
-                                        checked = isGestureMode,
-                                        onCheckedChange = {
-                                            isGestureMode = it
-                                            isGestureActive = false
-                                        },
-                                        colors = SwitchDefaults.colors(
-                                            checkedThumbColor = Color.Black,
-                                            checkedTrackColor = Color.White,
-                                            checkedBorderColor = Color.Black,
-                                            uncheckedThumbColor = Color.Black,
-                                            uncheckedTrackColor = Color.White,
-                                            uncheckedBorderColor = Color.Black
-                                        )
-                                    )
-                                }
+                                CustomToggleSwitch(
+                                    isGestureMode = isGestureMode,
+                                    onToggleChange = { isGestureMode = it }
+                                )
                             }
+
 
                             Spacer(modifier = Modifier.height(16.dp))
 
@@ -363,6 +338,50 @@ fun LogoutDialog(viewModel: AuthViewModel, navController: NavController, onDismi
     )
 }
 
+
+@Composable
+fun CustomToggleSwitch(isGestureMode: Boolean, onToggleChange: (Boolean) -> Unit) {
+    Row(
+        modifier = Modifier
+            .width(130.dp) // 버튼 전체 너비
+            .height(35.dp) // 버튼 높이
+            .background(Color.LightGray, shape = CircleShape) // 전체 배경색 (회색 계열)
+            .padding(4.dp), // 안쪽 패딩 추가
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
+                .background(if (!isGestureMode) Color.White else Color.Transparent, shape = CircleShape)
+                .clickable { onToggleChange(false) },
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "오버레이",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                color = if (!isGestureMode) Color.Black else Color.White
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
+                .background(if (isGestureMode) Color.White else Color.Transparent, shape = CircleShape)
+                .clickable { onToggleChange(true) },
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "제스처",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                color = if (isGestureMode) Color.Black else Color.White
+            )
+        }
+    }
+}
 
 
 
@@ -484,3 +503,4 @@ fun LogoutDialog(viewModel: AuthViewModel, navController: NavController, onDismi
 //            }
 //        }
 //    }
+
