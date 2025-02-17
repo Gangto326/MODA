@@ -146,6 +146,7 @@ class PostSummary:
             contents.append('\n'.join(processed_lines))
 
         self.content = '\n'.join(contents)
+        print("포스트 요약본 생성")
 
     #keywords를 생성하는 함수
     async def make_keywords(self, model: str):
