@@ -2,6 +2,7 @@ package com.moda.moda_api.common.infrastructure;
 
 import com.moda.moda_api.card.exception.UnauthorizedException;
 import com.moda.moda_api.common.jwt.TokenDto;
+import com.moda.moda_api.common.util.JwtUtil;
 import com.moda.moda_api.user.domain.RefreshToken;
 import com.moda.moda_api.user.domain.RefreshTokenRepository;
 import com.moda.moda_api.user.domain.UserId;
@@ -22,8 +23,10 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class TokenService {
 
+
     private final RedisTemplate<String, String> jwtRedisTemplate;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final JwtUtil jwtUtil;
 
     private static final String ACCESS_TOKEN_PREFIX = "access_token:";
     private static final long ACCESS_TOKEN_EXPIRE_TIME = 30 * 60; // 30분
@@ -56,23 +59,37 @@ public class TokenService {
 
 
 	// AccessToken 제거하기
-    public void invalidateAccessToken(UserId userId) {
-        String key = ACCESS_TOKEN_PREFIX + userId.getValue();
-		jwtRedisTemplate.delete(key);
-    }
+    public void invalidateAccessToken(String accessToken) {
+        // accessToken에서 userId 추출
+        String userId = jwtUtil.getUserId(accessToken, "AccessToken");
+        String key = ACCESS_TOKEN_PREFIX + userId;
 
-    // refreshToken 제거하기
-    public void invalidateRefreshToken(UserId userId) {
-        // 해당 유저의 모든 active한 refresh token을 찾아서 비활성화
-        List<RefreshToken> refreshTokens = refreshTokenRepository.findAllByUserNameAndIsActiveTrue(userId);
+        // 해당 키의 토큰 값 확인
+        String storedToken = jwtRedisTemplate.opsForValue().get(key);
 
-        for (RefreshToken refreshToken : refreshTokens) {
-            System.out.println("refreshToken 삭제 하기전 :" + refreshToken);
-            refreshToken.deactivate();
-            refreshTokenRepository.save(refreshToken);
+        if (storedToken != null && storedToken.equals(accessToken)) {
+            jwtRedisTemplate.delete(key);
         }
     }
 
+
+    // refreshToken 제거하기
+    public void invalidateRefreshToken(String refreshToken) {
+        // refreshToken에서 userId 추출
+        String userId = jwtUtil.getUserId(refreshToken, "RefreshToken");
+
+        // 해당 유저의 active한 refresh token들을 조회
+        List<RefreshToken> refreshTokens = refreshTokenRepository.findAllByUserIdAndIsActiveTrue(userId);
+
+        // 주어진 refreshToken과 일치하는 것만 비활성화
+        for (RefreshToken token : refreshTokens) {
+            if (token.getToken().equals(refreshToken)) {
+                token.deactivate();
+                refreshTokenRepository.save(token);
+                break;  // 일치하는 토큰을 찾았으므로 반복 중단
+            }
+        }
+    }
 
 	// AccessToken 살아 있는지 체크하기
     public boolean validateAccessToken(UserId userId, String accessToken) {

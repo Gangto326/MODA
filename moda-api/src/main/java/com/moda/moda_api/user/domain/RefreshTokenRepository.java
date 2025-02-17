@@ -1,7 +1,5 @@
 package com.moda.moda_api.user.domain;
 
-import org.apache.el.stream.Stream;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -14,6 +12,8 @@ public interface RefreshTokenRepository {
 	void deleteExpiredTokens(LocalDateTime dateTime);
 
 	Optional<RefreshToken> findByTokenAndIsActiveTrue(String token);
+
+	List<RefreshToken> findAllByUserIdAndIsActiveTrue(String userId);
 
 	List<RefreshToken> findAllByUserNameAndIsActiveTrue(UserId userId);
 }

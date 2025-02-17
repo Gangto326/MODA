@@ -47,6 +47,15 @@ public class RefreshTokenRepositoryImpl implements RefreshTokenRepository {
 				.map(refreshTokenMapper::toDomain);
 	}
 
+	@Override
+	public List<RefreshToken> findAllByUserIdAndIsActiveTrue(String userId) {
+		return refreshTokenJpaRepository
+			.findAllByUserIdAndIsActiveTrue(userId)
+			.map(entities -> entities.stream()
+				.map(refreshTokenMapper::toDomain)
+				.collect(Collectors.toList()))
+			.orElse(Collections.emptyList());
+	}
 
 	@Override
 	public List<RefreshToken> findAllByUserNameAndIsActiveTrue(UserId userId) {

@@ -24,6 +24,7 @@ import com.moda.moda_api.user.presentation.request.LoginRequest;
 import com.moda.moda_api.user.presentation.request.PasswordResetRequest;
 import com.moda.moda_api.user.presentation.request.SignupRequest;
 
+import jakarta.mail.Header;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -94,9 +95,13 @@ public class UserController {
 
         // HTTP Header의 Authorization (AccessToken) 추출.
         String accessToken = HeaderUtil.getAccessToken(request);
+        String refreshToken = HeaderUtil.getRefreshToken(request);
 
-        System.out.println(accessToken);
-        userService.logout(accessToken);
+        System.out.println("UserController.logout");
+        System.out.println("refreshToken = " + refreshToken);
+        System.out.println("accessToken = " + accessToken);
+
+        userService.logout(refreshToken , accessToken);
 
 
         // maxAge(0)으로 RefreshToken 삭제.

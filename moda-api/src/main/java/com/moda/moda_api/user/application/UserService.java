@@ -93,11 +93,14 @@ public class UserService {
      * Redis의 엑세스 토큰를 삭제하고, RefreshToken을 비활성화 합니다.
      * @param accessToken
      */
-    public void logout(String accessToken) {
+    public void logout(String refreshToken, String accessToken) {
         UserId userId = new UserId(jwtUtil.getUserId(accessToken, "AccessToken"));
 
-        tokenService.invalidateAccessToken(userId);
-        tokenService.invalidateRefreshToken(userId);
+        //AccessToken 비활
+        tokenService.invalidateAccessToken(accessToken);
+
+        //RefreshToken
+        tokenService.invalidateRefreshToken(refreshToken);
     }
 
     /**
