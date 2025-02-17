@@ -71,9 +71,11 @@ class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
             is LoginEvent.UsernameChanged -> {
                 _loginState.value = _loginState.value.copy(username = event.username)
             }
+
             is LoginEvent.PasswordChanged -> {
                 _loginState.value = _loginState.value.copy(password = event.password)
             }
+
             is LoginEvent.Submit -> {
                 login()
             }
