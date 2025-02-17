@@ -123,19 +123,16 @@ class PostSummary:
         }
 
         response = self.chat(model = model, messages = messages, format = format)
+        data = json.loads(response)
 
         contents = []
-
-        for paragraph in json.loads(response):
+        for paragraph in data:
             # 제목 저장
             contents.append('# ' + paragraph['title'])
 
-            # 각 줄을 분리
-            lines = paragraph['content'].strip().split('\n')
-
             # 각 줄 처리
             processed_lines = []
-            for line in lines:
+            for line in paragraph['content']:
                 # <<숫자>> 패턴 제거
                 # 정규식을 사용하지 않고 기본 문자열 처리로 구현
                 if '<<' in line and '>>' in line:
