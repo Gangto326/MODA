@@ -2,6 +2,7 @@ package com.moda.moda_api.card.infrastructure.repository;
 
 import com.moda.moda_api.card.infrastructure.entity.CardDtoEntity;
 import com.moda.moda_api.card.infrastructure.entity.CardEntity;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Range;
 import org.springframework.data.domain.Slice;
@@ -16,12 +17,15 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CardJpaRepository extends JpaRepository<CardEntity, String> {
-    Slice<CardEntity> findByUserId(String value, Pageable pageable);
+    Slice<CardEntity> findByUserIdAndDeletedAtIsNull(String value, Pageable pageable);
 
-    Slice<CardEntity> findByUserIdAndCategoryId(String userId, Long categoryId, Pageable pageable);
+    Slice<CardEntity> findByUserIdAndCategoryIdAndDeletedAtIsNull(String userId, Long categoryId, Pageable pageable);
 
-    @Query("SELECT c FROM CardEntity c LEFT JOIN FETCH c.urlCache WHERE c.userId = :userId AND c.cardId = :cardId")
+    @Query("SELECT c FROM CardEntity c LEFT JOIN FETCH c.urlCache WHERE c.userId = :userId AND c.cardId = :cardId AND c.deletedAt IS NULL")
     Optional<CardEntity> findByUserIdAndCardId(String userId, String cardId);
+
+    @Query("SELECT c FROM CardEntity c LEFT JOIN FETCH c.urlCache WHERE c.cardId = :cardId AND c.deletedAt IS NULL")
+    Optional<CardEntity> findByCardIdAndDeletedAtIsNull(String cardId);
 
 //    @Query("SELECT new com.moda.moda_api.card.dto.CardDTO(c, u.originalUrl) " +
 //            "FROM CardEntity c " +
@@ -111,4 +115,15 @@ public interface CardJpaRepository extends JpaRepository<CardEntity, String> {
     void updateViewCount(@Param("cardId") String cardId, @Param("increment") int increment);
 
     Boolean existsByUserIdAndUrlHashAndDeletedAtIsNull(String value, String urlHash);
+
+    @Query("SELECT c.categoryId, COUNT(c) " +
+            "FROM CardEntity c " +
+            "WHERE c.userId = :userId " +
+            "AND c.categoryId BETWEEN 2 AND 10 " +
+            "GROUP BY c.categoryId")
+    List<Object[]> findCategoryExistenceByUserId(@Param("userId") String userId);
+
+    Slice<CardEntity> findByTypeIdAndUserIdAndDeletedAtIsNull(Integer typeId, String userId, PageRequest pageRequest);
+
+    Slice<CardEntity> findByTypeIdAndCategoryIdAndUserIdAndDeletedAtIsNull(Integer typeId, Long categoryId, String userId, PageRequest pageRequest);
 }

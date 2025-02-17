@@ -1,12 +1,10 @@
 package com.moda.moda_api.card.application.service;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 
 import com.moda.moda_api.card.application.response.CardMainResponse;
 import com.moda.moda_api.card.application.response.HotTopicResponse;
@@ -14,6 +12,7 @@ import com.moda.moda_api.card.domain.*;
 import com.moda.moda_api.card.exception.DuplicateCardException;
 import com.moda.moda_api.card.exception.InvalidCardContentException;
 import com.moda.moda_api.card.presentation.request.CardBookmarkRequest;
+
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +29,7 @@ import com.moda.moda_api.common.infrastructure.ImageStorageService;
 import com.moda.moda_api.common.pagination.SliceRequestDto;
 import com.moda.moda_api.common.pagination.SliceResponseDto;
 import com.moda.moda_api.notification.application.NotificationService;
+import com.moda.moda_api.notification.domain.NotificationType;
 import com.moda.moda_api.search.domain.CardSearchRepository;
 import com.moda.moda_api.summary.application.service.SummaryService;
 import com.moda.moda_api.summary.infrastructure.api.PythonAiClient;
@@ -57,6 +57,7 @@ public class CardService {
 	private final ImageStorageService imageStorageService;
 	private final PythonAiClient pythonAiClient;
 	private final CardSearchRepository cardSearchRepository;
+	private final NotificationService notificationService;
 
 	/**
 	 * URL을 입력 받고 새로운 카드 생성 후 알맞은 보드로 이동합니다.
@@ -69,9 +70,8 @@ public class CardService {
 		UserId userIdObj = new UserId(userId);
 		String urlHash = UrlCache.generateHash(url);
 
-		if (cardRepository.existsByUserIdAndUrlHashAndDeletedAtIsNull(userIdObj, urlHash)) {
+		if (cardRepository.existsByUserIdAndUrlHashAndDeletedAtIsNull(userIdObj, urlHash))
 			throw new DuplicateCardException("같은 URL을 가진 카드가 이미 존재합니다.");
-		}
 
 		return urlCacheRepository.findByUrlHash(urlHash)
 			.map(cache -> createCardFromCache(userIdObj, urlHash))
@@ -113,6 +113,7 @@ public class CardService {
 
 		cardRepository.save(card);
 		cardSearchRepository.save(card);
+		notificationService.sendFCMNotification(userIdObj.getValue(), NotificationType.card,card);
 
 		return CompletableFuture.completedFuture(true);
 	}
@@ -175,6 +176,9 @@ public class CardService {
 				cardRepository.save(card);
 				cardSearchRepository.save(card);
 
+				notificationService.sendFCMNotification(userIdObj.getValue(), NotificationType.card,card);
+
+
 				return true;
 			});
 	}
@@ -216,6 +220,7 @@ public class CardService {
 						.subContents(null)
 						.build();
 
+
 				} catch (Exception e) {
 					throw new RuntimeException("Failed to process image", e);
 				}
@@ -225,6 +230,9 @@ public class CardService {
 		cards.forEach(System.out::println);
 		cardRepository.saveAll(cards);
 		cardSearchRepository.save(cards.get(0));
+
+		notificationService.sendFCMNotification(userIdObj.getValue(), NotificationType.card,cards.get(0));
+
 		return true;
 	}
 
@@ -276,12 +284,12 @@ public class CardService {
 	public CardDetailResponse getCardDetail(String userId, String cardId) {
 		UserId userIdObj = new UserId(userId);
 		CardId cardIdObj = new CardId(cardId);
-		
+
 		// 조회수 증가 로직
 		cardViewCountRepository.incrementViewCount(cardIdObj);
 
 		// 카드 탐색
-		Card card = findCard(userIdObj, cardIdObj);
+		Card card = findCardDetail(cardIdObj);
 		return cardDtoMapper.toDetailResponse(userIdObj, card);
 	}
 
@@ -384,6 +392,11 @@ public class CardService {
 			.orElseThrow(() -> new CardNotFoundException("카드를 찾을 수 없습니다."));
 	}
 
+	private Card findCardDetail(CardId cardId) {
+		return cardRepository.findByCardId(cardId)
+				.orElseThrow(() -> new CardNotFoundException("카드를 찾을 수 없습니다."));
+	}
+
 	/**
 	 * CardIdList에 존재하는 모든 Card를 찾습니다.
 	 * @param cardIdList
@@ -437,11 +450,38 @@ public class CardService {
 	 */
 	public CardMainResponse getMainKeywords(String userId) {
 		UserId userIdObj = new UserId(userId);
+		List<Object[]> results = cardRepository.findCategoryExistenceByUserId(userIdObj);
+
+		// 기본적으로 모든 categoryId(2~10) 값에 대해 false로 초기화
+		Map<Long, Boolean> categories = LongStream.rangeClosed(2, 10)
+				.boxed()
+				.collect(Collectors.toMap(category -> category, category -> false));
+
+
+		// 전체 콘텐츠(1번) 값 초기화
+		boolean hasAnyContent = false;
+
+		// 쿼리 결과를 기반으로 존재하는 categoryId를 true로 설정
+		for (Object[] result : results) {
+			Long categoryId = (Long) result[0];
+			Long count = (Long) result[1];
+
+			boolean exists = count > 0;
+			categories.put(categoryId, count > 0);
+
+			// 하나라도 count > 0 이면 전체 콘텐츠(1번)를 true로 설정
+			if (exists) {
+				hasAnyContent = true;
+			}
+		}
+
+		categories.put(1L, hasAnyContent);
 
 		return CardMainResponse.builder()
-				.topKeywords(userKeywordRepository.getTopKeywords(userIdObj, 5))
-				.creator(videoCreatorRepository.getCreatorByUserId(userIdObj))
-				.build();
+			.topKeywords(userKeywordRepository.getTopKeywords(userIdObj, 5))
+			.creator(videoCreatorRepository.getCreatorByUserId(userIdObj))
+				.categories(categories)
+			.build();
 	}
 
 	/**

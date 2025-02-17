@@ -2,6 +2,7 @@ package com.moda.moda_api.card.domain;
 
 import com.moda.moda_api.card.infrastructure.entity.CardEntity;
 import com.moda.moda_api.category.domain.CategoryId;
+import com.moda.moda_api.search.domain.CardDocument;
 import com.moda.moda_api.user.domain.UserId;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -38,4 +39,12 @@ public interface CardRepository {
     Slice<Card> findByUserIdAndBookmarkTrueAndTypeIdAndDeletedAtIsNull(UserId userId, Integer typeId, Pageable pageable);
 
     Boolean existsByUserIdAndUrlHashAndDeletedAtIsNull(UserId userId, String urlHash);
+
+    Optional<Card> findByCardId(CardId cardId);
+
+    List<Object[]> findCategoryExistenceByUserId(UserId userId);
+
+    Slice<Card> findByTypeIdAndUserId(Integer typeId, UserId userId, PageRequest pageRequest);
+
+    Slice<Card> findByTypeIdAndCategoryIdAndUserId(Integer typeId, CategoryId categoryId, UserId userId, PageRequest pageRequest);
 }

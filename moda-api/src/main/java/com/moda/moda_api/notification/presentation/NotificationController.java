@@ -29,16 +29,16 @@ import lombok.extern.slf4j.Slf4j;
 public class NotificationController {
 	private final NotificationApplicationService notificationService;
 
-	@PostMapping("")
-	public ResponseEntity<?> testSendNotification(){
-		String userId = "user";
-		NotificationType notificationType = NotificationType.card;
-		String contentId = "contentId";
-		String content = "내용물";
-		notificationService.sendNotification(userId,notificationType,contentId,content);
-		return ResponseEntity.ok().build();
-
-	}
+	// @PostMapping("")
+	// public ResponseEntity<?> testSendNotification(){
+	// 	String userId = "user";
+	// 	NotificationType notificationType = NotificationType.card;
+	// 	String contentId = "contentId";
+	// 	String content = "내용물";
+	// 	notificationService.sendNotification(userId,notificationType,contentId,content);
+	// 	return ResponseEntity.ok().build();
+	//
+	// }
 
 	@GetMapping("token")
 	public ResponseEntity<Set<String>> getTokenByUserId(@UserId String userId){

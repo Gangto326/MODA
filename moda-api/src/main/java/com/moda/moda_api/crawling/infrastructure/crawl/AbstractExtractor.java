@@ -13,10 +13,10 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.stereotype.Service;
 
 import com.moda.moda_api.common.infrastructure.ImageStorageService;
+import com.moda.moda_api.crawling.application.service.WebDriverService;
 import com.moda.moda_api.crawling.domain.model.CrawledContent;
 import com.moda.moda_api.crawling.domain.model.ExtractedContent;
 import com.moda.moda_api.crawling.domain.model.Url;
@@ -33,15 +33,15 @@ import lombok.extern.slf4j.Slf4j;
 public class AbstractExtractor {
 	private final PlatformExtractorFactory extractorFactory;
 	private final ImageStorageService imageStorageService;
-	private final ObjectFactory<WebDriver> webDriverFactory;  // prototype scope의 WebDriver를 생성하기 위한 factory
+	private final WebDriverService webDriverService;
 
 	// URL을 추출하는 Method
 	public List<Url> extractUrl(String url) {
 		WebDriver driver = null;
 
 		try {
+			driver = webDriverService.getDriver();
 
-			driver = webDriverFactory.getObject();  // 새로운 WebDriver 인스턴스 생성
 			ExtractorConfig config = extractorFactory.getConfig(url);
 			driver.get(url);
 
@@ -51,11 +51,6 @@ public class AbstractExtractor {
 
 			// 페이지 로딩을 위한 초기 대기 추가
 			Thread.sleep(1000);
-
-			// 먼저 페이지가 완전히 로드될 때까지 대기
-			wait.until(webDriver -> ((JavascriptExecutor)webDriver)
-				.executeScript("return document.readyState").equals("complete"));
-
 			// 그 다음 요소들을 찾음
 			List<WebElement> elements = wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(
 				By.cssSelector(config.getUrlSelector())
@@ -91,8 +86,11 @@ public class AbstractExtractor {
 		WebDriver driver = null;
 
 		try {
-			driver = webDriverFactory.getObject();  // 새로운 WebDriver 인스턴스 생성
+			driver = webDriverService.getDriver();
+
 			ExtractorConfig config = extractorFactory.getConfig(url);
+			System.out.println(config.getPattern());
+
 			driver.get(url);
 
 			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
@@ -113,7 +111,7 @@ public class AbstractExtractor {
 		} catch (Exception e) {
 			throw new Exception("Failed to crawl content: " + e.getMessage());
 		} finally {
-			if (driver.switchTo() != null) {
+			if (driver != null && driver.switchTo() != null) {  // driver null 체크 추가
 				driver.switchTo().defaultContent();
 			}
 		}
@@ -198,4 +196,5 @@ public class AbstractExtractor {
 			!url.contains("logo") &&
 			url.length() > 10;
 	}
+
 }

@@ -2,10 +2,12 @@ version: '3'
 
 services:
   selenium-server:
-    image: selenium/standalone-chrome
+    image: seleniarm/standalone-chromium
     container_name: selenium-server
     ports:
      - "4444:4444"
+    environment:
+     - SE_OPTS=--session-timeout 2592000
     networks:
      - mynetwork 
   moda-api:

@@ -23,7 +23,7 @@ public class EmbeddingVector {
                 this.values[i] = random.nextFloat();
             }
         } else {
-      // /      validateVector(values);
+            validateVector(values);
             this.values = values.clone();
         }
     }
@@ -31,12 +31,12 @@ public class EmbeddingVector {
         return values.clone();
     }
     //
-    // private void validateVector(float[] values) {
-    //     if (values == null) {
-    //         throw new InvalidVectorException("벡터 배열은 null일 수 없습니다.");
-    //     }
-    //     if (values.length != DIMENSION) {
-    //         throw new InvalidVectorException("백터 배열의 길이는 " + DIMENSION + "이어야 합니다.");
-    //     }
-    // }
+    private void validateVector(float[] values) {
+        if (values == null) {
+            throw new InvalidVectorException("벡터 배열은 null일 수 없습니다.");
+        }
+        if (values.length != DIMENSION) {
+            throw new InvalidVectorException("백터 배열의 길이는 " + DIMENSION + "이어야 합니다.");
+        }
+    }
 }

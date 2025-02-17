@@ -32,22 +32,6 @@ public class CardFactory {
 			.subContents(subContent)
 			.build();
 	}
-	public Card createFromImage(UserId userId,String imageUrl,String urlHash , AIAnalysisResponseDTO aiAnalysis) {
-		return Card.builder()
-			.userId(userId)
-			.cardId(generateCardId())
-			.categoryId(aiAnalysis.getCategoryId())
-			.typeId(CardContentType.IMG.getTypeId())
-			.title("ImageTitle")
-			.keywords(aiAnalysis.getKeywords())
-			.thumbnailContent("Image ThumbNail Content")
-			.embedding(aiAnalysis.getEmbeddingVector())
-			.content(imageUrl)
-			.thumbnailUrl(imageUrl)
-			.urlHash(urlHash)
-			.createdAt(LocalDateTime.now())
-			.build();
-	}
 
 	// Card의 ID를 생성. common의 UUID 메서드 사용 예정
 	private CardId generateCardId() {

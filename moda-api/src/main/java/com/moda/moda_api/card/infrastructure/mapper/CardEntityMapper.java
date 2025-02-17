@@ -69,6 +69,24 @@ public class CardEntityMapper {
                 .build();
     }
 
+    public Card toDomainByCardList(CardEntity entity) {
+
+        return Card.builder()
+                .cardId(new CardId(entity.getCardId()))
+                .userId(new UserId(entity.getUserId()))
+                .categoryId(new CategoryId(entity.getCategoryId()))
+                .typeId(entity.getTypeId())
+                .title(entity.getTitle())
+                .content(entity.getContent())
+                .thumbnailContent(entity.getThumbnailContent())
+                .thumbnailUrl(entity.getThumbnailUrl())
+                .embedding(new EmbeddingVector(entity.getEmbedding()))
+                .keywords(entity.getKeywords())
+                .bookmark(entity.getBookmark())
+                .createdAt(entity.getCreatedAt())
+                .build();
+    }
+
     public List<Card> toDomain(List<CardEntity> entities) {
         return entities.stream()
             .map(this::toDomain)

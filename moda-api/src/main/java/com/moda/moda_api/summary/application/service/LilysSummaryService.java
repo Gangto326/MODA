@@ -1,7 +1,6 @@
 package com.moda.moda_api.summary.application.service;
 
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -10,14 +9,12 @@ import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.moda.moda_api.card.domain.EmbeddingVector;
 import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.summary.application.dto.SummaryResultDto;
 import com.moda.moda_api.summary.exception.SummaryProcessingException;
 import com.moda.moda_api.summary.infrastructure.api.LilysAiClient;
 import com.moda.moda_api.summary.infrastructure.api.YoutubeApiClient;
 import com.moda.moda_api.summary.infrastructure.dto.AIAnalysisResponseDTO;
-import com.moda.moda_api.summary.infrastructure.dto.LilysRequestIdResponse;
 import com.moda.moda_api.summary.infrastructure.dto.LilysSummary;
 import com.moda.moda_api.summary.infrastructure.dto.YoutubeAPIResponseDTO;
 
@@ -49,6 +46,8 @@ public class LilysSummaryService {
 				);
 			})
 			.thenCompose(lilysSummary -> {
+
+				// 서버 전용
 				// getSummaryResults 완료 후 병렬로 실행 가능한 작업들
 				// CompletableFuture<AIAnalysisResponseDTO> aiAnalysisFuture =
 				// 	CompletableFuture.supplyAsync(() ->
@@ -67,6 +66,7 @@ public class LilysSummaryService {
 						.build()
 				);
 
+
 				CompletableFuture<YoutubeAPIResponseDTO> youtubeApiFuture =
 					CompletableFuture.supplyAsync(() ->
 						youtubeApiClient.getVideoData(lilysSummary.getThumbnailUrl())
@@ -77,12 +77,13 @@ public class LilysSummaryService {
 					.thenApply(v -> {
 						AIAnalysisResponseDTO aiAnalysis = aiAnalysisFuture.join();
 						YoutubeAPIResponseDTO youtubeAPI = youtubeApiFuture.join();
-						String[] keywords = getKeyWords(aiAnalysis,youtubeAPI);
+						String[] keywords = getKeyWords(aiAnalysis, youtubeAPI);
 						String[] subContents = getSubContents(lilysSummary, youtubeAPI);
+
 
 						return SummaryResultDto.builder()
 							.typeId(lilysSummary.getTypeId())
-							.title(lilysSummary.getTitle())
+							.title(youtubeAPI.getTitle())
 							.content(aiAnalysis.getContent())
 							.thumbnailContent(youtubeAPI.getChannelTitle())
 							.embeddingVector(aiAnalysis.getEmbeddingVector())
@@ -94,9 +95,10 @@ public class LilysSummaryService {
 					});
 			});
 	}
-	private String[] getKeyWords(AIAnalysisResponseDTO aiAnalysis, YoutubeAPIResponseDTO youtubeAPI ){
+
+	private String[] getKeyWords(AIAnalysisResponseDTO aiAnalysis, YoutubeAPIResponseDTO youtubeAPI) {
 		return Stream.of(
-				new String[]{youtubeAPI.getChannelTitle()},
+				new String[] {youtubeAPI.getChannelTitle()},
 				aiAnalysis.getKeywords(),
 				youtubeAPI.getTags()
 			)
@@ -132,10 +134,10 @@ public class LilysSummaryService {
 					return CompletableFuture.completedFuture(status);
 				}
 				if ("pending".equals(status)) {
-					log.info("Summary is still pending. Will retry in 15 seconds. Attempt: {}", attempt + 1);
+					log.info("Summary is still pending. Will retry in 60 seconds. Attempt: {}", attempt + 1);
 					return CompletableFuture.supplyAsync(
 						() -> checkStatusWithRetry(requestId, attempt + 1),
-						CompletableFuture.delayedExecutor(15, TimeUnit.SECONDS)
+						CompletableFuture.delayedExecutor(60, TimeUnit.SECONDS)
 					).thenCompose(future -> future);
 				}
 				return CompletableFuture.failedFuture(

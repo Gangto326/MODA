@@ -26,6 +26,7 @@ public class CrawlingSummaryService {
 		return CompletableFuture.supplyAsync(() -> {
 				try {
 					// 1단계: 크롤링 수행
+					System.out.println("크롤링하기 직전");
 					return crawlingService.crawlByUrl(url);
 				} catch (Exception e) {
 					throw new CompletionException("Crawling failed", e);
@@ -46,12 +47,11 @@ public class CrawlingSummaryService {
 				// 		}
 				// 	});
 
-				// AI TEST용
 				CompletableFuture<AIAnalysisResponseDTO> pythonAnalysisFuture = CompletableFuture.completedFuture(
 					AIAnalysisResponseDTO.builder()
-						.categoryId(new CategoryId(3L))  // null 허용
-						.keywords(new String[]{"test"})
-						.thumbnailContent("sample")
+						.categoryId(new CategoryId(2L))  // null 허용
+						.keywords(new String[]{"박종원 test박종원 test박종원 test박종원 test박종원 test"})
+						.thumbnailContent("박종원 test박종원 test박종원 test박종원 test")
 						.content(crawledContent.getExtractedContent().getText())
 						.embeddingVector(new EmbeddingVector(null))
 						.build()

@@ -12,6 +12,7 @@ import com.moda.moda_api.user.domain.UserId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Repository;
@@ -37,13 +38,13 @@ public class CardRepositoryImpl implements CardRepository {
 
     @Override
     public Slice<Card> findByUserId(UserId userId, Pageable pageable) {
-        Slice<CardEntity> cardEntities = cardJpaRepository.findByUserId(userId.getValue(), pageable);
+        Slice<CardEntity> cardEntities = cardJpaRepository.findByUserIdAndDeletedAtIsNull(userId.getValue(), pageable);
         return cardEntities.map(cardEntityMapper::toDomain);
     }
 
     @Override
     public Slice<Card> findByUserIdAndCategoryId(UserId userId, CategoryId categoryId, Pageable pageable) {
-        Slice<CardEntity> cardEntities = cardJpaRepository.findByUserIdAndCategoryId(userId.getValue(),
+        Slice<CardEntity> cardEntities = cardJpaRepository.findByUserIdAndCategoryIdAndDeletedAtIsNull(userId.getValue(),
             categoryId.getValue(), pageable);
         return cardEntities.map(cardEntityMapper::toDomain);
     }
@@ -127,5 +128,32 @@ public class CardRepositoryImpl implements CardRepository {
     @Override
     public Boolean existsByUserIdAndUrlHashAndDeletedAtIsNull(UserId userId, String urlHash) {
         return cardJpaRepository.existsByUserIdAndUrlHashAndDeletedAtIsNull(userId.getValue(), urlHash);
+    }
+
+    @Override
+    public Optional<Card> findByCardId(CardId cardId) {
+        Optional<CardEntity> entity = cardJpaRepository.findByCardIdAndDeletedAtIsNull(cardId.getValue());
+        return entity.map(card -> cardEntityMapper.toDomain(card));
+    }
+
+    @Override
+    public List<Object[]> findCategoryExistenceByUserId(UserId userId) {
+        return cardJpaRepository.findCategoryExistenceByUserId(userId.getValue());
+    }
+
+    @Override
+    public Slice<Card> findByTypeIdAndUserId(Integer typeId, UserId userId, PageRequest pageRequest) {
+        Slice<CardEntity> cardEntities = cardJpaRepository.findByTypeIdAndUserIdAndDeletedAtIsNull(
+                typeId, userId.getValue(), pageRequest);
+
+        return cardEntities.map(cardEntityMapper::toDomainByCardList);
+    }
+
+    @Override
+    public Slice<Card> findByTypeIdAndCategoryIdAndUserId(Integer typeId, CategoryId categoryId, UserId userId, PageRequest pageRequest) {
+        Slice<CardEntity> cardEntities = cardJpaRepository.findByTypeIdAndCategoryIdAndUserIdAndDeletedAtIsNull(
+                typeId, categoryId.getValue(), userId.getValue(), pageRequest);
+
+        return cardEntities.map(cardEntityMapper::toDomainByCardList);
     }
 }

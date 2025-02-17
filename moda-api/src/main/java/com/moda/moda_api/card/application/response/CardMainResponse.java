@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Builder
@@ -14,4 +15,5 @@ import java.util.List;
 public class CardMainResponse {
     private List<String> topKeywords;
     private String creator;
+    private Map<Long, Boolean> categories;
 }
