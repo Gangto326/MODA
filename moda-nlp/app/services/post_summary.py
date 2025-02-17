@@ -129,7 +129,7 @@ class PostSummary:
 
         response = self.chat(model = model, messages = messages, format = format)
         self.keywords = json.loads(response)['keyword'][:5]
-        self.keywords = [keyword for keyword in self.keywords if keyword in self.content]
+        self.keywords = [keyword for keyword in self.keywords if len(keyword) <=  10 and keyword in self.content]
 
     # thumbnail_content를 생성하는 함수
     async def make_thumbnail_content(self, model: str):

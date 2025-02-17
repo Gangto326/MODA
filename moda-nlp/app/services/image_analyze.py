@@ -1,4 +1,3 @@
-import asyncio
 import base64
 import json
 
@@ -125,7 +124,7 @@ class ImageAnalyze:
 
         response = self.chat(model = model, messages = messages, format = format)
         self.keywords = json.loads(response)['keyword'][:5]
-        self.keywords = await asyncio.gather(*[self.translate_text(keyword) for keyword in self.keywords])
+        self.keywords = [keyword for keyword in self.keywords if len(keyword) <=  10 and keyword in self.content]
 
     #embeeding_vector를 생성하는 함수
     def make_embedding_vector(self):
