@@ -57,6 +57,8 @@ public class LilysAiClient {
 	}
 
 	public LilysSummary getSummaryResults(String requestId, String url) {
+		System.out.println("getSummaryResults requestId : " + requestId);
+		System.out.println("getSummaryResults url : " + url);
 
 		// 첫 번째 Future: summaryNote 가져오기
 		CompletableFuture<JsonNode> contentFuture = getResult(requestId, "summaryNote");
