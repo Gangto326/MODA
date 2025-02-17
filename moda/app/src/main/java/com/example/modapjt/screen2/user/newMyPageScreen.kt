@@ -73,11 +73,12 @@ fun MyPageScreen(
 
     // 🌟 제스처 모드 상태 관리
     var isGestureMode by remember { mutableStateOf(true) }
+    var isGestureActive by remember { mutableStateOf(false) }
 
-    val user by viewModel.user.collectAsState()
 
+    val userStatus by viewModel.userStatus.collectAsState()
     LaunchedEffect(Unit) {
-        viewModel.fetchUser()
+        viewModel.fetchUserStatus()
     }
 
     val mediaProjectionManager = context.getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
@@ -121,7 +122,7 @@ fun MyPageScreen(
     }
 
 
-    val keywords by viewModel.interestKeywords.collectAsState(initial = emptyList())
+//    val keywords by viewModel.interestKeywords.collectAsState(initial = emptyList())
 
     Scaffold(
         bottomBar = {
@@ -143,12 +144,12 @@ fun MyPageScreen(
             ) {
                 // 프로필 및 정보 통계
                 item {
-                    if (user == null) {
+                    if (userStatus == null) {
                         CircularProgressIndicator()
                     } else {
                         UserProfileCard(
-                            profileImage = user?.profileImage,
-                            nickname = user?.nickname ?: "사용자"
+                            profileImage = null,
+                            nickname = userStatus?.nickname ?: "사용자"
                         )
 
                         Spacer(modifier = Modifier.height(8.dp))
@@ -167,11 +168,19 @@ fun MyPageScreen(
                                 horizontalArrangement = Arrangement.SpaceEvenly
                             ) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-//                                    Text(text = "${user?.allCount ?: 0}", fontSize = 20.sp, color = Color(0xFF4285F4))
+                                    Text(
+                                        text = userStatus?.allCount ?: "0",
+                                        fontSize = 20.sp,
+                                        color = Color(0xFF4285F4)
+                                    )
                                     Text(text = "내 정보", fontSize = 14.sp, color = Color.Gray)
                                 }
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-//                                    Text(text = "${user?.bookmarkCount ?: 0}", fontSize = 20.sp, color = Color(0xFF4285F4))
+                                    Text(
+                                        text = userStatus?.bookmarkCount ?: "0",
+                                        fontSize = 20.sp,
+                                        color = Color(0xFF4285F4)
+                                    )
                                     Text(text = "즐겨찾기", fontSize = 14.sp, color = Color.Gray)
                                 }
                             }
@@ -180,10 +189,8 @@ fun MyPageScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
-                // 제스처 / 오버레이 전환 토글
+                // 제스처/오버레이 토글 카드
                 item {
-                    var isGestureActive by remember { mutableStateOf(false) }
-
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -194,7 +201,6 @@ fun MyPageScreen(
                         Column(
                             modifier = Modifier.padding(16.dp)
                         ) {
-                            // 한 줄에 모든 요소 배치
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -246,7 +252,6 @@ fun MyPageScreen(
 
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            // 버튼
                             Button(
                                 onClick = {
                                     if (isGestureMode) {
