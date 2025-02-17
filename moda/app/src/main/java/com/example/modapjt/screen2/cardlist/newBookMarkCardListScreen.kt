@@ -290,6 +290,7 @@ fun newBookMarkCardListScreen(
     val selectedCategory by viewModel.selectedCategory.collectAsState()
     var selectedSort by remember { mutableStateOf("최신순") }
     val uiState by viewModel.uiState.collectAsState()
+    val topScoreState by viewModel.topScoreState.collectAsState()  // TopScore 상태 추가
     val loadingMore by viewModel.loadingMore.collectAsState()
 
     // LazyListState to keep track of the scroll position
@@ -370,6 +371,7 @@ fun newBookMarkCardListScreen(
                                         blogCards = state.blogs,
                                         videoCards = state.videos,
                                         newsCards = state.news,
+                                        topScores = topScoreState.scores,
                                         onImageMoreClick = { viewModel.updateSelectedCategory("이미지") },
                                         onBlogMoreClick = { viewModel.updateSelectedCategory("블로그") },
                                         onVideoMoreClick = { viewModel.updateSelectedCategory("동영상") },
