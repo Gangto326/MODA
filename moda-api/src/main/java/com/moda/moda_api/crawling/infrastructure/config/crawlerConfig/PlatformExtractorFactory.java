@@ -52,9 +52,9 @@ public class PlatformExtractorFactory {
 			.build();
 	}
 
-		//////////////////////////////////////////////////////////////
-		////////////여기 위로는 모바일 밑으로는 pc////////////////////////
-		/////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////
+	////////////여기 위로는 모바일 밑으로는 pc////////////////////////
+	/////////////////////////////////////////////////////////////
 		private static ExtractorConfig createDesktopNaverBlogConfig() {
 			return ExtractorConfig.builder()
 				.pattern("blog.naver.com")
@@ -125,6 +125,17 @@ public class PlatformExtractorFactory {
 			.urlDomainType(UrlDomainType.UNCLASSIFIED)
 			.build();
 	}
+
+
+
+
+
+
+
+
+
+
+
 
 	// 하나씩 꺼내보면서 맞는 사이트가 있는지 찾아보는 과정
 	public ExtractorConfig getConfig(String url) {

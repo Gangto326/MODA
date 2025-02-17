@@ -151,14 +151,48 @@ public class LilysAiClient {
 
 	private String getVideoId(String url) {
 		try {
-			if (url.contains("youtube.com/watch?v=")) {
-				String videoId = url.split("v=")[1].split("&")[0];  // 파라미터 제거
-				return videoId;
+			if (url == null || url.trim().isEmpty()) {
+				throw new IllegalArgumentException("URL cannot be null or empty");
 			}
-			throw new IllegalArgumentException("Not a YouTube URL");
+
+			String videoId = null;
+
+			// 1. youtube.com/watch?v= 형식
+			if (url.contains("youtube.com/watch?v=")) {
+				videoId = url.split("v=")[1];
+				if (videoId.contains("&")) {
+					videoId = videoId.split("&")[0];
+				}
+			}
+			// 2. youtu.be/ 형식 (단축 URL)
+			else if (url.contains("youtu.be/")) {
+				videoId = url.split("youtu.be/")[1];
+				if (videoId.contains("?")) {
+					videoId = videoId.split("\\?")[0];
+				}
+			}
+			// 3. youtube.com/embed/ 형식 (임베드 URL)
+			else if (url.contains("youtube.com/embed/")) {
+				videoId = url.split("embed/")[1];
+				if (videoId.contains("?")) {
+					videoId = videoId.split("\\?")[0];
+				}
+			}
+			// 4. youtube.com/v/ 형식 (구버전)
+			else if (url.contains("youtube.com/v/")) {
+				videoId = url.split("v/")[1];
+				if (videoId.contains("?")) {
+					videoId = videoId.split("\\?")[0];
+				}
+			}
+
+			if (videoId == null || videoId.trim().isEmpty()) {
+				throw new IllegalArgumentException("Could not extract video ID from URL");
+			}
+
+			return videoId.trim();
 		} catch (Exception e) {
-			throw new IllegalArgumentException("Invalid YouTube URL format", e);
+			throw new IllegalArgumentException("Invalid YouTube URL format: " + e.getMessage(), e);
 		}
 	}
-
 }
