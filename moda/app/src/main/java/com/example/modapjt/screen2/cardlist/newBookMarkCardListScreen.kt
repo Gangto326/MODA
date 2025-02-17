@@ -272,6 +272,7 @@ import com.example.modapjt.components.bar.BottomBarComponent
 import com.example.modapjt.components.bar.CategoryHeaderBar
 import com.example.modapjt.components.cardlist.BlogSelectionItem
 import com.example.modapjt.components.cardlist.NewsSelectionItem
+import com.example.modapjt.components.cardlist.ScrollToTopButton
 import com.example.modapjt.components.cardlist.VideoSelectionItem
 import com.example.modapjt.components.cardtab.SwipableCardList
 import com.example.modapjt.domain.model.Card
@@ -649,6 +650,8 @@ fun newBookMarkCardListScreen(
                     )
                 }
             }
+            // Scroll to Top 버튼 추가
+            ScrollToTopButton(scrollState = lazyListState)
         }
     }
 }

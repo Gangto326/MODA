@@ -25,6 +25,7 @@ import com.example.modapjt.components.bar.HeaderBar
 import com.example.modapjt.components.bar.LinkAddHeaderBar
 import com.example.modapjt.components.button.LinkAddButton
 import com.example.modapjt.data.repository.CardRepository
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -39,6 +40,8 @@ fun newLinkUploadScreen(navController: NavController, currentRoute: String, repo
     var message by remember { mutableStateOf<String?>(null) }
 
     val coroutineScope = rememberCoroutineScope() // CoroutineScope 획득
+    var showWaitingMessage by remember { mutableStateOf(false) } // "카드 생성 중입니다" 표시 여부
+
 
     // Scaffold: 화면의 기본 레이아웃을 설정하는 컴포넌트
     Scaffold(
@@ -80,11 +83,17 @@ fun newLinkUploadScreen(navController: NavController, currentRoute: String, repo
                             val result = repository.createCard(linkText) // 카드 추가 요청
                             isLoading = false // 요청 완료 후 로딩 해제
 
-                            result.onSuccess {
-                                message = "✅ URL 저장 성공!" // 성공 메시지
-                                linkText = "" // 입력 필드 초기화
-                            }.onFailure { e ->
-                                message = "❌ 저장 실패: ${e.message}" // 실패 메시지
+                            if (result.isSuccess) {
+                                isLoading = false
+                                message = "✅ URL 저장 성공!"
+                                linkText = ""
+                            } else {
+                                // 실패 응답을 받으면 1분간 "카드 생성 중입니다..." 표시
+                                showWaitingMessage = true
+                                delay(60000) // ⏳ 1분(60초) 대기
+                                isLoading = false
+                                showWaitingMessage = false
+                                message = "❌ 저장 실패: ${result.exceptionOrNull()?.message}"
                             }
                         }
                     } else {
@@ -94,6 +103,15 @@ fun newLinkUploadScreen(navController: NavController, currentRoute: String, repo
             )
 
             Spacer(modifier = Modifier.height(8.dp)) // 버튼과 메시지 사이 간격 추가
+            // 실패 응답을 받은 경우 1분 동안 "카드 생성 중입니다..." 표시
+            if (showWaitingMessage) {
+                Text(
+                    text = "⏳ 카드 생성 중입니다...",
+                    color = Color.Black,
+                    fontSize = 14.sp
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
 
             // 성공 또는 실패 메시지 표시
             message?.let {
