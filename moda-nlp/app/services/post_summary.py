@@ -1,6 +1,7 @@
 import asyncio
 import json
 
+import googletrans
 import ollama
 
 from app.constants.category import categories_name
@@ -27,7 +28,11 @@ class PostSummary:
     #PostSummary 객체가 실행되면 가장 먼저 실행되는 함수
     async def execute(self):
         self.choose_category('anpigon/qwen2.5-7b-instruct-kowiki')
-        self.summary_content('anpigon/qwen2.5-7b-instruct-kowiki')
+        while True:
+            self.summary_content('anpigon/qwen2.5-7b-instruct-kowiki')
+
+            if not self.detect_chinese(self.content):
+                break
         await asyncio.gather(
             self.make_keywords('anpigon/qwen2.5-7b-instruct-kowiki'),
             self.make_thumbnail_content('anpigon/qwen2.5-7b-instruct-kowiki'),
@@ -142,3 +147,17 @@ class PostSummary:
     #embeeding_vector를 생성하는 함수
     async def make_embedding_vector(self):
         self.embedding_vector = self.embedder.embed_document(self.content)
+
+    #AI 결과에 중국어가 포함되어 있는지 확인하는 함수
+    async def detect_chinese(self, content: str) -> bool:
+        lines = content.split('\n')
+
+        translator = googletrans.Translator()
+
+        for line in lines:
+            if line.strip():
+                result = await translator.detect(line)
+                if 'zh' in result.lang:
+                    return True
+
+        return False
