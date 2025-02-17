@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,24 +32,47 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.modapjt.R
 import com.example.modapjt.domain.model.FindPasswordEvent
-import com.example.modapjt.domain.viewmodel.AuthViewModel
+import com.example.modapjt.domain.viewmodel.FindPasswordViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FindPasswordScreen(
-    viewModel: AuthViewModel,
+    viewModel: FindPasswordViewModel,
     onNavigateBack: () -> Unit
 ) {
-    val state = viewModel.findPasswordState.value
+    val state = viewModel.state.value
     val scrollState = rememberScrollState()
     var isKeyboardVisible by remember { mutableStateOf(false) }
     var keyboardHeight by remember { mutableStateOf(0) }
+    val context = LocalContext.current
+
+    // 비밀번호 재설정 성공 시 처리
+    LaunchedEffect(state.isPasswordResetSuccessful) {
+        if (state.isPasswordResetSuccessful) {
+            // Toast 메시지 표시
+            android.widget.Toast.makeText(
+                context,
+                "비밀번호 변경이 완료되었습니다",
+                android.widget.Toast.LENGTH_SHORT
+            ).show()
+            // 상태 초기화
+            viewModel.resetState()
+            // 로그인 화면으로 돌아가기
+            onNavigateBack()
+        }
+    }
+
+    // 화면이 처음 표시될 때 상태 초기화
+    LaunchedEffect(Unit) {
+        viewModel.resetState()
+    }
 
     // 키보드 가시성 감지
     val view = LocalView.current
@@ -149,19 +173,28 @@ fun FindPasswordScreen(
                     .padding(vertical = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                OutlinedTextField(
-                    value = state.verificationCode,
-                    onValueChange = { viewModel.onFindPasswordEvent(FindPasswordEvent.VerificationCodeChanged(it)) },
-                    label = { Text("인증번호") },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(8.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedBorderColor = Color(0xFFBBAEA4),
-                        focusedBorderColor = Color(0xFFBBAEA4),
-                        unfocusedLabelColor = Color.Gray,
-                        focusedLabelColor = Color(0xFFBBAEA4),
+                Column(modifier = Modifier.weight(1f)) {
+                    OutlinedTextField(
+                        value = state.verificationCode,
+                        onValueChange = { viewModel.onFindPasswordEvent(FindPasswordEvent.VerificationCodeChanged(it)) },
+                        label = { Text("인증번호") },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            unfocusedBorderColor = Color(0xFFBBAEA4),
+                            focusedBorderColor = Color(0xFFBBAEA4),
+                            unfocusedLabelColor = Color.Gray,
+                            focusedLabelColor = Color(0xFFBBAEA4),
+                        )
                     )
-                )
+                    if (state.remainingTime > 0) {
+                        Text(
+                            text = "남은 시간: ${state.remainingTime / 60}:${String.format("%02d", state.remainingTime % 60)}",
+                            color = Color.Red,
+                            modifier = Modifier.padding(start = 8.dp, top = 4.dp)
+                        )
+                    }
+                }
 
                 Button(
                     onClick = { viewModel.onFindPasswordEvent(FindPasswordEvent.VerifyCode) },

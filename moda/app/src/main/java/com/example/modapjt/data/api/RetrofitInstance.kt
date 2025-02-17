@@ -1,68 +1,66 @@
 package com.example.modapjt.data.api
 
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.scalars.ScalarsConverterFactory
 
 object RetrofitInstance {
-//    private const val BASE_URL = "http://localhost:8080/" // API 서버 주소 입력
+    private const val BASE_URL = "http://10.0.2.2:8080/" // localhost → 10.0.2.2 변경 (에뮬레이터 전용)
 
-    private const val BASE_URL = "http://10.0.2.2:8080" // localhost → 10.0.2.2 변경 (에뮬레이터 전용)
-//    private const val BASE_URL = "https://i12a805.p.ssafy.io" // 우리 서버!
-
-//    private const val BASE_URL = "http://0.0.0.0:8080"  // 내 PC의 IP 주소로 변경
-
-    val api: CategoryApiService by lazy {
-        Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(CategoryApiService::class.java)
+    // 로깅 인터셉터 추가
+    private val loggingInterceptor = HttpLoggingInterceptor().apply {
+        level = HttpLoggingInterceptor.Level.BODY
     }
 
-    val cardApi: CardApiService by lazy {
-        Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(CardApiService::class.java)
-    }
-
-    val apiService: SearchApiService by lazy {
-        Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(SearchApiService::class.java)
-    }
+    private val client = OkHttpClient.Builder()
+        .addInterceptor(loggingInterceptor)
+        .build()
 
     private val retrofit by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
+            .client(client)
+            .addConverterFactory(ScalarsConverterFactory.create())  // String 응답을 위해 추가
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
 
-    val userApi: UserApiService by lazy {
-        retrofit.create(UserApiService::class.java)
-
-
+    // 기존 API 서비스들은 그대로 유지
+    val api: CategoryApiService by lazy {
+        retrofit.create(CategoryApiService::class.java)
     }
 
-    // ✅ Search API 추가
+    val cardApi: CardApiService by lazy {
+        retrofit.create(CardApiService::class.java)
+    }
+
+    val apiService: SearchApiService by lazy {
+        retrofit.create(SearchApiService::class.java)
+    }
+
+    val userApi: UserApiService by lazy {
+        retrofit.create(UserApiService::class.java)
+    }
+
     val searchApi: SearchApiService by lazy {
         retrofit.create(SearchApiService::class.java)
     }
 
-    val fcmTokenApi: FcmApiService by lazy{
+    val fcmTokenApi: FcmApiService by lazy {
         retrofit.create(FcmApiService::class.java)
     }
 
-    //회원가입 API 추가
-    val signupApi: SignUpApiService by lazy{
+    val signupApi: SignUpApiService by lazy {
         retrofit.create(SignUpApiService::class.java)
     }
 
+    val findIdApi: FindIdApiService by lazy {
+        retrofit.create(FindIdApiService::class.java)
+    }
+
+    val findPasswordApi: FindPasswordApiService by lazy {
+        retrofit.create(FindPasswordApiService::class.java)
+    }
 }
-
-
-// addConverterFactory : JSON 데이터를 Kotlin 객체로 변환
