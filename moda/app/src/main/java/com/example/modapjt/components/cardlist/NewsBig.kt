@@ -1,16 +1,14 @@
-
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -20,72 +18,119 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.app.ui.theme.customTypography
 
-
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun NewsBig(
     title: String,
     keywords: List<String>,
+    description: String,
     imageUrl: String,
+    modifier: Modifier = Modifier,
     isMine: Boolean,
-    isSelected: Boolean = false,
-    modifier: Modifier = Modifier
+    isSelected: Boolean = false
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        shape = RoundedCornerShape(12.dp),
+            .padding(horizontal = 20.dp, vertical = 8.dp),
         colors = CardDefaults.cardColors(
             containerColor = when {
-                isSelected -> Color.LightGray.copy(alpha = 0.3f)  // 선택됐을 때 색상
+                isSelected -> Color.LightGray.copy(alpha = 0.3f)
                 !isMine -> Color.Gray
                 else -> Color.White
             }
-//            containerColor = if (!isMine) Color.Gray else Color.White // ✅ 배경색 적용
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+
         ) {
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+            // 상단 헤더: 뉴스 아이콘 + 제목
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
+//                Icon(
+//                    imageVector = Icons.Default.MailOutline,
+//                    contentDescription = "뉴스",
+//                    modifier = Modifier.size(32.dp),
+//                    tint = Color.Gray
+//                )
                 Text(
                     text = title,
-                    fontSize = 18.sp,
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f),
+                    lineHeight = 20.sp
                 )
+            }
+            // 뉴스 설명 (요약)
+            Text(
+                text = description,
+                style = customTypography.bodyMedium,
+                color = Color(0xFF665F5B),
+                lineHeight = 20.sp, // 설명의 행간 설정
+                maxLines = 3, // 최대 2줄까지만 표시
+                overflow = TextOverflow.Ellipsis, // 길면 ...으로 생략
+                modifier = Modifier.padding(top = 8.dp) // 위쪽 여백 추가
+            )
 
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    keywords.take(3).forEach { keyword ->
+            // 키워드 FlowRow
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                keywords.take(3).forEach { keyword ->
+                    Box(
+                        modifier = Modifier
+                            .border(
+                                width = 1.dp,
+                                color = Color(0xFFB8ACA5),
+                                shape = RoundedCornerShape(50)
+                            )
+                            .padding(horizontal = 14.dp, vertical = 6.dp)
+                            .clip(RoundedCornerShape(50)),
+                        contentAlignment = Alignment.Center
+                    ) {
                         Text(
-                            text = "# $keyword",
-                            color = Color(0xFF1E88E5),
+                            text = keyword,
+                            color = Color(0xFFBAADA4),
                             fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium
+                            fontWeight = FontWeight.Medium,
+                            style = customTypography.bodySmall
                         )
                     }
                 }
             }
 
-            AsyncImage(
-                model = imageUrl,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
+            // 뉴스 이미지
+            Box(
                 modifier = Modifier
-                    .size(100.dp)
+                    .fillMaxWidth()
+                    .padding(top = 12.dp, bottom = 16.dp)
                     .clip(RoundedCornerShape(8.dp))
-            )
+                    .border(
+                        width = 1.dp,
+                        color = Color(0xFFF4F1ED),
+                        shape = RoundedCornerShape(8.dp)
+                    )
+            ) {
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
+            }
         }
     }
 }
