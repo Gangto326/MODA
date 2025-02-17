@@ -1,17 +1,12 @@
 package com.moda.moda_api.card.application.service;
 
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
-
-import com.moda.moda_api.card.application.response.CardMainResponse;
-import com.moda.moda_api.card.application.response.HotTopicResponse;
-import com.moda.moda_api.card.domain.*;
-import com.moda.moda_api.card.exception.DuplicateCardException;
-import com.moda.moda_api.card.exception.InvalidCardContentException;
-import com.moda.moda_api.card.presentation.request.CardBookmarkRequest;
 
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -21,7 +16,23 @@ import org.springframework.web.multipart.MultipartFile;
 import com.moda.moda_api.card.application.mapper.CardDtoMapper;
 import com.moda.moda_api.card.application.response.CardDetailResponse;
 import com.moda.moda_api.card.application.response.CardListResponse;
+import com.moda.moda_api.card.application.response.CardMainResponse;
+import com.moda.moda_api.card.application.response.HotTopicResponse;
+import com.moda.moda_api.card.application.response.UserCardStatsResponse;
+import com.moda.moda_api.card.domain.Card;
+import com.moda.moda_api.card.domain.CardFactory;
+import com.moda.moda_api.card.domain.CardId;
+import com.moda.moda_api.card.domain.CardRepository;
+import com.moda.moda_api.card.domain.CardViewCountRepository;
+import com.moda.moda_api.card.domain.EmbeddingVector;
+import com.moda.moda_api.card.domain.HotTopicRepository;
+import com.moda.moda_api.card.domain.UrlCache;
+import com.moda.moda_api.card.domain.UrlCacheRepository;
+import com.moda.moda_api.card.domain.UserKeywordRepository;
+import com.moda.moda_api.card.domain.VideoCreatorRepository;
 import com.moda.moda_api.card.exception.CardNotFoundException;
+import com.moda.moda_api.card.exception.DuplicateCardException;
+import com.moda.moda_api.card.presentation.request.CardBookmarkRequest;
 import com.moda.moda_api.card.presentation.request.MoveCardRequest;
 import com.moda.moda_api.card.presentation.request.UpdateCardRequest;
 import com.moda.moda_api.category.domain.CategoryId;
@@ -34,8 +45,10 @@ import com.moda.moda_api.search.domain.CardSearchRepository;
 import com.moda.moda_api.summary.application.service.SummaryService;
 import com.moda.moda_api.summary.infrastructure.api.PythonAiClient;
 import com.moda.moda_api.summary.infrastructure.dto.AIAnalysisResponseDTO;
-import com.moda.moda_api.summary.infrastructure.dto.AiImageRequestDTO;
+import com.moda.moda_api.user.domain.User;
 import com.moda.moda_api.user.domain.UserId;
+import com.moda.moda_api.user.domain.UserRepository;
+import com.moda.moda_api.user.exception.UserNotFoundException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -58,6 +71,7 @@ public class CardService {
 	private final PythonAiClient pythonAiClient;
 	private final CardSearchRepository cardSearchRepository;
 	private final NotificationService notificationService;
+	private final UserRepository userRepository;
 
 	/**
 	 * URL을 입력 받고 새로운 카드 생성 후 알맞은 보드로 이동합니다.
@@ -491,5 +505,22 @@ public class CardService {
 	public List<HotTopicResponse> getHotTopics(Integer limit) {
 
 		return hotTopicRepository.getTopKeywordsWithChange(limit);
+	}
+
+	public UserCardStatsResponse getUserCardStats(String userId) {
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
+
+		// 전체 카드 수 조회
+		Long allCount = cardRepository.countByUserIdAndDeletedAtIsNull(new UserId(userId));
+
+		// 북마크된 카드 수 조회
+		Long bookmarkCount = cardRepository.countByUserIdAndBookmarkTrueAndDeletedAtIsNull(new UserId(userId));
+
+		return UserCardStatsResponse.builder()
+			.nickname(user.getNickname())
+			.allCount(String.valueOf(allCount))
+			.bookmarkCount(String.valueOf(bookmarkCount))
+			.build();
 	}
 }

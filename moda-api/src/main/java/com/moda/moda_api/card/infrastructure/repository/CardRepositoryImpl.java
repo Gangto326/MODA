@@ -156,4 +156,15 @@ public class CardRepositoryImpl implements CardRepository {
 
         return cardEntities.map(cardEntityMapper::toDomainByCardList);
     }
+
+    @Override
+    public Long countByUserIdAndDeletedAtIsNull(UserId userId) {
+        return cardJpaRepository.countByUserIdAndDeletedAtIsNull(userId.getValue());
+    }
+
+    @Override
+    public Long countByUserIdAndBookmarkTrueAndDeletedAtIsNull(UserId userId) {
+        return cardJpaRepository.countByUserIdAndBookmarkTrueAndDeletedAtIsNull(userId.getValue());
+    }
+
 }
