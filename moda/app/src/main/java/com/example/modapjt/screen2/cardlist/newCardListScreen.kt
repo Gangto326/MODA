@@ -7,24 +7,43 @@ import BlogBig
 import NewsBig
 import TypeSelectBar
 import VideoBig
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.PaddingValues
 //import androidx.compose.foundation.layout.BoxScopeInstance.align
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -33,6 +52,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -46,6 +66,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -72,7 +93,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-
+@ExperimentalFoundationApi
 @Composable
 fun newCardListScreen(
     navController: NavController,
@@ -107,6 +128,14 @@ fun newCardListScreen(
     // 진동
     val haptics = LocalHapticFeedback.current
 
+    val displayCount = remember { mutableStateOf(0) }
+
+    LaunchedEffect(selectedCardIds.size) {
+        if (selectedCardIds.size > 0) {
+            displayCount.value = selectedCardIds.size
+        }
+    }
+
     // 카테고리나 정렬 변경시 페이지네이션 리셋
     LaunchedEffect(categoryId, selectedCategory, selectedSort) {
         viewModel.resetPagination()
@@ -115,6 +144,12 @@ fun newCardListScreen(
         categoryId?.let {
             viewModel.loadCards(it, selectedCategory, sortDirection)
             categoryViewModel.updateCategoryName(it)
+        }
+    }
+
+    LaunchedEffect(selectedCardIds.size) {
+        if (selectedCardIds.isEmpty() && isSelectionMode) {
+            selectionViewModel.toggleSelectionMode(false)
         }
     }
 
@@ -143,7 +178,11 @@ fun newCardListScreen(
                             TypeSelectBar(
                                 selectedCategory = selectedCategory,
                                 selectedSort = selectedSort,
+//                                onCategorySelected = { category ->
+//                                    viewModel.updateSelectedCategory(category)
+//                                },
                                 onCategorySelected = { category ->
+                                    selectionViewModel.resetSelection() // 선택 상태 초기화
                                     viewModel.updateSelectedCategory(category)
                                 },
                                 onSortSelected = { selectedSort = it }
@@ -256,44 +295,62 @@ fun newCardListScreen(
                                         items = state.blogs,
                                         key = { it.cardId }
                                     ) { card ->
-                                        if (!isSelectionMode) {  // 일반 모드일 때
-                                            SwipableCardList(
-                                                cards = listOf(card),
-                                                onDelete = { selectedCards ->
-                                                    viewModel.deleteCard(selectedCards.map { it.cardId })
-                                                },
-                                                onCardDetail = { selectedCard ->
-                                                    navController.navigate("cardDetail/${selectedCard.cardId}")
-                                                },
-                                                selectionViewModel = selectionViewModel,
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .heightIn(max = Dp.Unspecified)
-                                            ) { currentCard, isSelected ->
-                                                BlogBig(
-                                                    title = currentCard.title,
-                                                    description = currentCard.thumbnailContent
-                                                        ?: "",
-                                                    imageUrl = currentCard.thumbnailUrl ?: "",
-                                                    isMine = currentCard.isMine,
-                                                    isSelected = isSelected,
-                                                    keywords = currentCard.keywords
-                                                    //                                                onClick = { navController.navigate("cardDetail/${card.cardId}") }
+                                        Box(
+                                            modifier = Modifier
+                                                .animateContentSize(
+                                                    animationSpec = spring(
+                                                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                                                        stiffness = if (isSelectionMode) Spring.StiffnessLow else Spring.StiffnessMediumLow
+                                                    )
+                                                )
+                                                .animateItemPlacement(
+                                                    animationSpec = spring(
+                                                        dampingRatio = Spring.DampingRatioNoBouncy,
+                                                        stiffness = if (isSelectionMode) Spring.StiffnessLow else Spring.StiffnessMediumLow
+                                                    )
+                                                )
+                                        ) {
+                                            if (!isSelectionMode) {  // 일반 모드일 때
+                                                SwipableCardList(
+                                                    cards = listOf(card),
+                                                    onDelete = { selectedCards ->
+                                                        viewModel.deleteCard(selectedCards.map { it.cardId })
+                                                    },
+                                                    onCardDetail = { selectedCard ->
+                                                        navController.navigate("cardDetail/${selectedCard.cardId}")
+                                                    },
+                                                    selectionViewModel = selectionViewModel,
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .heightIn(max = Dp.Unspecified)
+                                                ) { currentCard, isSelected ->
+                                                    BlogBig(
+                                                        title = currentCard.title,
+                                                        description = currentCard.thumbnailContent
+                                                            ?: "",
+                                                        imageUrl = currentCard.thumbnailUrl ?: "",
+                                                        isMine = currentCard.isMine,
+                                                        isSelected = isSelected,
+                                                        keywords = currentCard.keywords
+                                                        //                                                onClick = { navController.navigate("cardDetail/${card.cardId}") }
+                                                    )
+                                                }
+                                            } else { // 선택 모드일 때
+                                                BlogSelectionItem(
+                                                    title = card.title,
+                                                    description = card.thumbnailContent ?: "",
+                                                    imageUrl = card.thumbnailUrl ?: "",
+                                                    isMine = card.isMine,
+                                                    keywords = card.keywords,
+                                                    isSelected = selectedCardIds.contains(card.cardId),
+                                                    onClick = {
+                                                        haptics.performHapticFeedback(
+                                                            HapticFeedbackType.TextHandleMove
+                                                        )
+                                                        selectionViewModel.toggleCardSelection(card)
+                                                    }
                                                 )
                                             }
-                                        } else { // 선택 모드일 때
-                                            BlogSelectionItem(
-                                                title = card.title,
-                                                description = card.thumbnailContent ?: "",
-                                                imageUrl = card.thumbnailUrl ?: "",
-                                                isMine = card.isMine,
-                                                keywords = card.keywords,
-                                                isSelected = selectedCardIds.contains(card.cardId),
-                                                onClick = {
-                                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                                    selectionViewModel.toggleCardSelection(card)
-                                                }
-                                            )
                                         }
 
                                         // 각 블로그 사이에 구분선 추가
@@ -375,51 +432,101 @@ fun newCardListScreen(
                             }
                         }
                     }
-                    // 하단 고정 버튼을 Box의 자식으로 이동
-                    AnimatedVisibility (
+                    AnimatedVisibility(
                         visible = isSelectionMode,
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.surface)
-                            .padding(16.dp)
+                        enter = slideInVertically(initialOffsetY = { it }),
+                        exit = slideOutVertically(targetOffsetY = { it }),
+                        modifier = Modifier.align(Alignment.BottomCenter)
                     ) {
-                        Row (
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                "${selectedCardIds.size}개 선택됨",
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                TextButton (
-                                    onClick = {
-                                        selectionViewModel.clearSelection()
-                                        selectionViewModel.toggleSelectionMode(false)
-                                    }
-                                ) {
-                                    Text("취소")
-                                }
-                                Button(
-                                    onClick = {
-                                        val cardsToDelete = when(selectedCategory) {
-                                            "블로그" -> state.blogs
-                                            "동영상" -> state.videos
-                                            "뉴스" -> state.news
-                                            else -> emptyList()
-                                        }.filter { card ->
-                                            selectedCardIds.contains(card.cardId)
-                                        }
-                                        viewModel.deleteCard(cardsToDelete.map { it.cardId })
-                                        selectionViewModel.toggleSelectionMode(false)
-                                    },
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.error
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(80.dp)
+                                .background(
+                                    brush = Brush.verticalGradient(
+                                        colors = listOf(
+                                            Color.Transparent,
+                                            Color.Black.copy(alpha = 0.8f)
+                                        ),
+                                        startY = 0f,
+                                        endY = 80f
                                     )
+                                )
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(
+                                        color = Color.White.copy(alpha = 0.1f),
+                                        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+                                    )
+                            )
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 24.dp)
+                                    .padding(bottom = 16.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.Bottom
+                            ) {
+                                Text(
+                                    text = "${displayCount.value}개 선택됨",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = Color.White,
+                                    modifier = Modifier.padding(bottom = 8.dp)
+                                )
+
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text("삭제")
+                                    TextButton(
+                                        onClick = {
+                                            selectionViewModel.clearSelection()
+                                            selectionViewModel.toggleSelectionMode(false)
+                                        },
+                                        colors = ButtonDefaults.textButtonColors(
+                                            contentColor = Color.White.copy(alpha = 0.8f)
+                                        )
+                                    ) {
+                                        Text(
+                                            "취소",
+                                            style = MaterialTheme.typography.labelLarge
+                                        )
+                                    }
+
+                                    Button(
+                                        onClick = {
+                                            val cardsToDelete = when(selectedCategory) {
+                                                "블로그" -> state.blogs
+                                                "동영상" -> state.videos
+                                                "뉴스" -> state.news
+                                                else -> emptyList()
+                                            }.filter { card ->
+                                                selectedCardIds.contains(card.cardId)
+                                            }
+                                            viewModel.deleteCard(cardsToDelete.map { it.cardId })
+                                        },
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = Color(0xFFFF3B30)
+                                        ),
+                                        shape = RoundedCornerShape(10.dp),
+                                        contentPadding = PaddingValues(
+                                            horizontal = 16.dp
+//                                            vertical = 6.dp
+                                        )
+                                    ) {
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                "삭제",
+                                                style = MaterialTheme.typography.labelLarge
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
