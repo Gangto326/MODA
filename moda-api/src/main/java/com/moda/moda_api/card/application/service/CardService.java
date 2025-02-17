@@ -45,6 +45,7 @@ import com.moda.moda_api.search.domain.CardSearchRepository;
 import com.moda.moda_api.summary.application.service.SummaryService;
 import com.moda.moda_api.summary.infrastructure.api.PythonAiClient;
 import com.moda.moda_api.summary.infrastructure.dto.AIAnalysisResponseDTO;
+import com.moda.moda_api.summary.infrastructure.dto.AiImageRequestDTO;
 import com.moda.moda_api.user.domain.User;
 import com.moda.moda_api.user.domain.UserId;
 import com.moda.moda_api.user.domain.UserRepository;
@@ -81,7 +82,7 @@ public class CardService {
 	 */
 	@Transactional
 	public CompletableFuture<Boolean> createCard(String userId, String url) {
-		UserId userIdObj = new UserId(userId);
+		UserId userIdObj = new UserId("user");
 		String urlHash = UrlCache.generateHash(url);
 
 		if (cardRepository.existsByUserIdAndUrlHashAndDeletedAtIsNull(userIdObj, urlHash))
@@ -198,7 +199,7 @@ public class CardService {
 
 	@Transactional
 	public Boolean createImages(String userId, List<MultipartFile> multipartFiles) {
-		UserId userIdObj = new UserId(userId);
+		UserId userIdObj = new UserId("user");
 
 		List<Card> cards = multipartFiles.stream()
 			.map(file -> {
@@ -207,16 +208,16 @@ public class CardService {
 					String urlHash = UrlCache.generateHash(s3Url);
 
 					// 실제 AI 분석
-					// AIAnalysisResponseDTO aiAnalysisResponseDTO = pythonAiClient.imageAnalysis(new AiImageRequestDTO(s3Url));
+					AIAnalysisResponseDTO aiAnalysisResponseDTO = pythonAiClient.imageAnalysis(new AiImageRequestDTO(s3Url));
 
 					// AI Test생성
-					AIAnalysisResponseDTO aiAnalysisResponseDTO = AIAnalysisResponseDTO.builder()
-						.keywords(new String[] {"3차"})
-						.embeddingVector(new EmbeddingVector(null))
-						.categoryId(new CategoryId(3L))
-						.content("AIContnet")
-						.thumbnailContent("abcd")
-						.build();
+					// AIAnalysisResponseDTO aiAnalysisResponseDTO = AIAnalysisResponseDTO.builder()
+					// 	.keywords(new String[] {"3차"})
+					// 	.embeddingVector(new EmbeddingVector(null))
+					// 	.categoryId(new CategoryId(3L))
+					// 	.content("AIContnet")
+					// 	.thumbnailContent("abcd")
+					// 	.build();
 
 					return Card.builder()
 						.cardId(new CardId(UUID.randomUUID().toString()))
