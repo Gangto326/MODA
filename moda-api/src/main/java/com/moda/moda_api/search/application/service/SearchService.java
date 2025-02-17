@@ -132,13 +132,13 @@ public class SearchService {
 			CategoryId categoryIdObj = new CategoryId(categoryId);
 
 			// 각 타입별 검색을 비동기로 실행
-			List<CompletableFuture<Map.Entry<CardContentType, List<CardDocument>>>> futures = executeAsyncSearchesByCategory(
+			List<CompletableFuture<Map.Entry<CardContentType, List<Card>>>> futures = executeAsyncSearchesByCategory(
 				userIdObj, categoryIdObj, targetTypes, typeSizes);
 
 			// 모든 비동기 작업이 완료되면 결과 합치기. topScores 메타데이터는 null입니다.
 			return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
 				.thenApply(v -> {
-					Map<CardContentType, List<CardDocumentListResponse>> results = processSearchResults(futures, "",
+					Map<CardContentType, List<CardDocumentListResponse>> results = processCardResults(futures, "",
 						userIdObj);
 
 					return SearchResultByCardList.builder()
@@ -343,7 +343,7 @@ public class SearchService {
 	 * @param typeSizes
 	 * @return
 	 */
-	private List<CompletableFuture<Map.Entry<CardContentType, List<CardDocument>>>> executeAsyncSearchesByCategory(
+	private List<CompletableFuture<Map.Entry<CardContentType, List<Card>>>> executeAsyncSearchesByCategory(
 		UserId userId, CategoryId categoryId, List<Integer> targetTypes, Map<Integer, Integer> typeSizes) {
 
 		return targetTypes.stream()
@@ -354,11 +354,11 @@ public class SearchService {
 				);
 
 				// 타입별 카테고리 기준 데이터 가져오기
-				Slice<CardDocument> results = categoryId.equals(CategoryId.all())
+				Slice<Card> results = categoryId.equals(CategoryId.all())
 						// 카테고리가 ALL인 경우
-						? cardSearchRepository.searchByAllCategoryAndType(typeId, userId, pageRequest)
+						? cardRepository.findByTypeIdAndUserId(typeId, userId, pageRequest)
 						// 카테고리가 지정된 경우
-						: cardSearchRepository.searchByCategoryAndType(typeId, categoryId, userId, pageRequest);
+						: cardRepository.findByTypeIdAndCategoryIdAndUserId(typeId, categoryId, userId, pageRequest);
 
 				return Map.entry(
 					CardContentType.from(typeId),
@@ -390,6 +390,29 @@ public class SearchService {
 					.map(cardDocument -> cardSearchDtoMapper.toListResponse(cardDocument, searchText, userId))
 					.collect(Collectors.toList())
 			));
+	}
+
+	/**
+	 * 검색 결과를 처리합니다.
+	 * @param futures
+	 * @param searchText
+	 * @return
+	 */
+	private Map<CardContentType, List<CardDocumentListResponse>> processCardResults(
+			List<CompletableFuture<Map.Entry<CardContentType, List<Card>>>> futures,
+			String searchText, UserId userId) {
+
+		return futures.stream()
+				.map(CompletableFuture::join)
+				.filter(entry -> !entry.getValue().isEmpty())
+
+				// 각 ContentType별 cardList를 Key: Value 형식으로 매핑
+				.collect(Collectors.toMap(
+						Map.Entry::getKey,
+						entry -> entry.getValue().stream()
+								.map(card -> cardSearchDtoMapper.toListResponse(card, userId))
+								.collect(Collectors.toList())
+				));
 	}
 
 	/**

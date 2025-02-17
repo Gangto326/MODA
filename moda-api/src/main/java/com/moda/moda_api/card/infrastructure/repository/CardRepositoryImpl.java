@@ -12,6 +12,7 @@ import com.moda.moda_api.user.domain.UserId;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Repository;
@@ -138,5 +139,21 @@ public class CardRepositoryImpl implements CardRepository {
     @Override
     public List<Object[]> findCategoryExistenceByUserId(UserId userId) {
         return cardJpaRepository.findCategoryExistenceByUserId(userId.getValue());
+    }
+
+    @Override
+    public Slice<Card> findByTypeIdAndUserId(Integer typeId, UserId userId, PageRequest pageRequest) {
+        Slice<CardEntity> cardEntities = cardJpaRepository.findByTypeIdAndUserIdAndDeletedAtIsNull(
+                typeId, userId.getValue(), pageRequest);
+
+        return cardEntities.map(cardEntityMapper::toDomainByCardList);
+    }
+
+    @Override
+    public Slice<Card> findByTypeIdAndCategoryIdAndUserId(Integer typeId, CategoryId categoryId, UserId userId, PageRequest pageRequest) {
+        Slice<CardEntity> cardEntities = cardJpaRepository.findByTypeIdAndCategoryIdAndUserIdAndDeletedAtIsNull(
+                typeId, categoryId.getValue(), userId.getValue(), pageRequest);
+
+        return cardEntities.map(cardEntityMapper::toDomainByCardList);
     }
 }
