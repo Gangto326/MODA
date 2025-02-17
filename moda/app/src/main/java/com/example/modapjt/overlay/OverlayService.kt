@@ -5,7 +5,6 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
-import android.content.res.Resources
 import android.graphics.PixelFormat
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
@@ -27,6 +26,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -39,6 +39,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -104,12 +105,12 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
 
     // 애니메이션 관련 설정
     private val duration = if (_isCapturedState.value) 1 else 1000
-    private val easing = EaseInOutCirc
 
     // 화면 크기 관련 변수들
-    private val screenWidth by lazy { resources.displayMetrics.widthPixels.toFloat() }
-    private val screenHeight by lazy { resources.displayMetrics.heightPixels.toFloat() }
-    private val iconSize by lazy { screenWidth.roundToInt() / 6 }
+    private val screenWidth by lazy { resources.displayMetrics.widthPixels }
+    private val screenHeight by lazy { resources.displayMetrics.heightPixels }
+    private val screenDensity by lazy { resources.displayMetrics.densityDpi }
+    private val iconSize by lazy { screenWidth / 6 }
 
     // 화면 캡처를 위한 MediaProjection 관련 변수들
     private var mediaProjection: MediaProjection? = null
@@ -194,11 +195,6 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
      * 가상 디스플레이 설정 및 이미지 캡처 리스너 등록
      */
     private fun setupVirtualDisplay() {
-        val metrics = Resources.getSystem().displayMetrics
-        val screenWidth = metrics.widthPixels
-        val screenHeight = metrics.heightPixels
-        val screenDensity = metrics.densityDpi
-
         val imageReader = ImageReader.newInstance(
             screenWidth, screenHeight,
             PixelFormat.RGBA_8888, 1
@@ -235,7 +231,7 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
-            x = ((screenWidth - iconSize) / 2).roundToInt()
+            x = ((screenWidth - iconSize) / 2)
             y = (screenHeight * 0.8).roundToInt()
         }
 
@@ -282,34 +278,43 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
                 val targetX by targetXState.collectAsState()
                 val targetY by targetYState.collectAsState()
 
-                val sizeX by animateFloatAsState(
-                    targetValue = if (isCaptured) 1f else screenWidth,
+                val scale by animateFloatAsState(
+                    targetValue = if (isCaptured) 0f else 1f,
                     animationSpec = tween(
-                        durationMillis = (duration * 0.8).toInt(),
-                        easing = easing
+                        durationMillis = duration,
+                        easing = EaseInOutCirc
                     )
                 )
-                val sizeY by animateFloatAsState(
-                    targetValue = if (isCaptured) 1f else screenHeight,
+
+                val bounce by animateFloatAsState(
+                    targetValue = if (isCaptured) 1f else 1.1f,
                     animationSpec = tween(
-                        durationMillis = (duration * 0.8).toInt(),
-                        easing = easing
+                        durationMillis = duration / 2,
+                        easing = EaseInOutCirc
                     )
                 )
 
                 val offsetX by animateFloatAsState(
-                    targetValue = if (isCaptured) targetX.toFloat() + iconSize / 2 else 0f,
+                    targetValue =
+                        if (isCaptured)
+                            targetX.toFloat() + iconSize / 2
+                        else
+                            0f,
                     animationSpec = tween(
                         durationMillis = duration,
-                        easing = easing
+                        easing = EaseInOutCirc
                     )
                 )
 
                 val offsetY by animateFloatAsState(
-                    targetValue = if (isCaptured) targetY.toFloat() + iconSize / 2 else 0f,
+                    targetValue =
+                        if (isCaptured)
+                            targetY.toFloat() + iconSize / 2
+                        else
+                            0f,
                     animationSpec = tween(
                         durationMillis = duration,
-                        easing = easing
+                        easing = EaseInOutCirc
                     )
                 )
 
@@ -317,22 +322,26 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
                     targetValue = if (isCaptured) 100 else 0,
                     animationSpec = tween(
                         durationMillis = duration,
-                        easing = easing
+                        easing = EaseInOutCirc
                     )
                 )
 
-                captureParams.x = (offsetX).roundToInt()
-                captureParams.y = (offsetY).roundToInt()
-                windowManager?.updateViewLayout(captureView, captureParams)
-
                 if (isCaptured) {
-                    Box() {
+                    Box(
+                        modifier = Modifier.offset {
+                            IntOffset(offsetX.roundToInt(), offsetY.roundToInt())
+                        }
+                    ) {
                         capturedBitmap?.let { bmp ->
                             Image(
                                 bitmap = bmp.asImageBitmap(),
                                 contentDescription = null,
                                 modifier = Modifier
-                                    .size(sizeX.dp, sizeY.dp)
+                                    .size((screenWidth * scale).dp, (screenHeight * scale).dp)
+                                    .graphicsLayer(
+                                        scaleX = bounce,
+                                        scaleY = bounce,
+                                    )
                                     .clip(RoundedCornerShape(corner)),
                                 contentScale = ContentScale.Crop
                             )
@@ -407,6 +416,8 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
         _targetXState.value = overlayParams.x
         _targetYState.value = overlayParams.y
         _isCollapsedState.value = isPointInCollapsedTrash(overlayParams.x, overlayParams.y)
+
+
 
         Log.d("OverlayService", if (_isCollapsedState.value) "겹침" else "안겹침")
 
