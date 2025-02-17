@@ -3,6 +3,7 @@ package com.example.modapjt.data.repository
 import com.example.modapjt.data.api.RetrofitInstance
 import com.example.modapjt.data.dto.request.BookmarkRequest
 import com.example.modapjt.data.dto.request.CardRequest
+import com.example.modapjt.data.dto.response.AllTabCardApiResponse
 import com.example.modapjt.data.dto.response.toDomain
 import com.example.modapjt.domain.model.Card
 import java.io.IOException
@@ -37,15 +38,15 @@ class CardRepository {
 //        }
 //    }
     // ✅ 전체탭 카드 리스트 가져오기 - 페이징 없음
-    suspend fun getAllTabCards(userId: String, query: String, categoryId: Int): Result<List<Card>> {
+    suspend fun getAllTabCards(query: String, categoryId: Int): Result<AllTabCardApiResponse> {
         return try {
-            val response = api.getAllTabCardList(userId, query, categoryId)
+            val response = api.getAllTabCardList(query, categoryId)
             println("[CardRepository] 전체탭 응답 코드: ${response.code()}, 메시지: ${response.message()}")
 
             if (response.isSuccessful) {
                 val body = response.body()
                 println("[CardRepository] 전체탭 응답 데이터: $body")
-                Result.success(body?.toDomain() ?: emptyList())
+                Result.success(body ?: AllTabCardApiResponse(null, null))
             } else {
                 Result.failure(Exception("전체탭 카드 리스트 불러오기 실패"))
             }
@@ -84,7 +85,6 @@ class CardRepository {
 //    }
     // ✅ 특정탭 카드 리스트 가져오기 - 페이징 포함
     suspend fun getTabCards(
-        userId: String,
         query: String,
         categoryId: Int,
         typeId: Int,
@@ -92,10 +92,9 @@ class CardRepository {
         sortDirection: String
     ): Result<Pair<List<Card>, Boolean>> {
         return try {
-            println("[CardRepository] 특정탭 API 요청: userId=$userId, categoryId=$categoryId, typeId=$typeId, sortDirection=$sortDirection")
+            println("[CardRepository] 특정탭 API 요청: categoryId=$categoryId, typeId=$typeId, sortDirection=$sortDirection")
 
             val response = api.getTabCardList(
-                userId = userId,
                 query = query,
                 categoryId = categoryId,
                 typeId = typeId,
@@ -207,9 +206,9 @@ class CardRepository {
 //        }
 //    }
     // ✅ 즐겨찾기 전체탭 카드 리스트 가져오기 - 페이징 없음
-    suspend fun getAllTabBookMarkCards(userId: String): Result<List<Card>> {
+    suspend fun getAllTabBookMarkCards(): Result<List<Card>> {
         return try {
-            val response = api.getAllTabBookMarkCardList(userId)
+            val response = api.getAllTabBookMarkCardList()
 
             if (response.isSuccessful) {
                 val body = response.body()
@@ -252,7 +251,6 @@ class CardRepository {
 //    }
     // ✅ 즐겨찾기 특정탭 카드 리스트 가져오기 - 페이징 포함
     suspend fun getTabBookMarkCards(
-        userId: String,
         typeId: Int,
         page: Int,
         size: Int = 15,
@@ -260,7 +258,6 @@ class CardRepository {
     ): Result<Pair<List<Card>, Boolean>> {
         return try {
             val response = api.getTabBookMarkCardList(
-                userId = userId,
                 typeId = typeId,
                 page = page,
                 size = size,

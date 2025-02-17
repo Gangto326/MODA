@@ -5,11 +5,13 @@ import com.example.modapjt.data.dto.response.toDomain
 import com.example.modapjt.domain.model.Category
 
 class CategoryRepository {
-    private val api = RetrofitInstance.api
+//    private val api = RetrofitInstance.api
+    private val api = RetrofitInstance.categoryApi
 
-    suspend fun getCategories(userId: String): Result<List<Category>> {
+
+    suspend fun getCategories(): Result<List<Category>> {
         return try {
-            val response = api.getCategoryList(userId)
+            val response = api.getCategoryList()
             if (response.isSuccessful) {
                 Result.success(response.body()?.toDomain() ?: emptyList())
             } else {

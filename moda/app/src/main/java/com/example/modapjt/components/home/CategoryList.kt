@@ -1,6 +1,7 @@
 package com.example.modapjt.components.home
 
 // `CategoryItem.kt`에서 이미 정의된 `CategoryItem` 가져오기
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,7 +34,7 @@ fun CategoryList(
     val visibleCategories by homeKeywordViewModel.visibleCategories.collectAsState(initial = emptyMap())
 
     LaunchedEffect(Unit) {
-        viewModel.loadCategories("user")
+        viewModel.loadCategories()
     }
 
     Column(

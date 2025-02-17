@@ -10,12 +10,15 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
@@ -27,6 +30,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -48,6 +53,7 @@ import com.example.modapjt.components.setting.SettingItem
 import com.example.modapjt.components.user.InterestKeywords
 import com.example.modapjt.components.user.MyPageHeader
 import com.example.modapjt.components.user.UserProfileCard
+import com.example.modapjt.domain.viewmodel.AuthViewModel
 import com.example.modapjt.domain.viewmodel.UserViewModel
 import com.example.modapjt.overlay.OverlayService
 import com.example.modapjt.overlay.OverlayStateManager
@@ -55,8 +61,8 @@ import com.example.modapjt.overlay.OverlayStateManager
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MyPageScreen(
-    userId: String,
     navController: NavController,
+    authViewModel: AuthViewModel, // AuthViewModel 추가
     currentRoute: String = ""
 ) {
     val viewModel: UserViewModel = viewModel()
@@ -64,6 +70,16 @@ fun MyPageScreen(
 
     val isOverlayActive by OverlayStateManager.isOverlayActive.collectAsState()
     var showLogoutDialog by remember { mutableStateOf(false) }
+
+    // 🌟 제스처 모드 상태 관리
+    var isGestureMode by remember { mutableStateOf(true) }
+    var isGestureActive by remember { mutableStateOf(false) }
+
+
+    val userStatus by viewModel.userStatus.collectAsState()
+    LaunchedEffect(Unit) {
+        viewModel.fetchUserStatus()
+    }
 
     val mediaProjectionManager = context.getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
 
@@ -105,13 +121,8 @@ fun MyPageScreen(
         }
     }
 
-    LaunchedEffect(userId) {
-        viewModel.fetchUser(userId)
-        viewModel.fetchInterestKeywords(userId)
-    }
 
-    val user by viewModel.user.collectAsState()
-    val keywords by viewModel.interestKeywords.collectAsState(initial = emptyList())
+//    val keywords by viewModel.interestKeywords.collectAsState(initial = emptyList())
 
     Scaffold(
         bottomBar = {
@@ -131,32 +142,54 @@ fun MyPageScreen(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                // 프로필 및 정보 통계
                 item {
-                    if (user == null) {
+                    if (userStatus == null) {
                         CircularProgressIndicator()
                     } else {
                         UserProfileCard(
-                            profileImage = user?.profileImage,
-                            nickname = user?.nickname ?: "사용자"
+                            profileImage = null,
+                            nickname = userStatus?.nickname ?: "사용자"
                         )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                horizontalArrangement = Arrangement.SpaceEvenly
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(
+                                        text = userStatus?.allCount ?: "0",
+                                        fontSize = 20.sp,
+                                        color = Color(0xFF4285F4)
+                                    )
+                                    Text(text = "내 정보", fontSize = 14.sp, color = Color.Gray)
+                                }
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(
+                                        text = userStatus?.bookmarkCount ?: "0",
+                                        fontSize = 20.sp,
+                                        color = Color(0xFF4285F4)
+                                    )
+                                    Text(text = "즐겨찾기", fontSize = 14.sp, color = Color.Gray)
+                                }
+                            }
+                        }
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
-                item {
-                    Divider(
-                        color = Color(0xFFDCDCDC),
-                        thickness = 4.dp,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-
-                item {
-                    InterestKeywords(keywords)
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-
+                // 제스처/오버레이 토글 카드
                 item {
                     Card(
                         modifier = Modifier
@@ -168,69 +201,131 @@ fun MyPageScreen(
                         Column(
                             modifier = Modifier.padding(16.dp)
                         ) {
-                            Text(
-                                text = "링크 저장 기능",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontSize = 16.sp
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "클릭 시 브라우저로 이동합니다.",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.Gray
-                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "저장 방법",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontSize = 16.sp
+                                )
+
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Text(
+                                        text = "오버레이",
+                                        fontSize = 14.sp,
+                                        color = if (!isGestureMode) Color(0xFFFFC107) else Color.Gray
+                                    )
+                                    Text(
+                                        text = "|",
+                                        fontSize = 14.sp,
+                                        color = Color.Gray
+                                    )
+                                    Text(
+                                        text = "제스처",
+                                        fontSize = 14.sp,
+                                        color = if (isGestureMode) Color(0xFFFFC107) else Color.Gray
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Switch(
+                                        checked = isGestureMode,
+                                        onCheckedChange = {
+                                            isGestureMode = it
+                                            isGestureActive = false
+                                        },
+                                        colors = SwitchDefaults.colors(
+                                            checkedThumbColor = Color.Black,
+                                            checkedTrackColor = Color.White,
+                                            checkedBorderColor = Color.Black,
+                                            uncheckedThumbColor = Color.Black,
+                                            uncheckedTrackColor = Color.White,
+                                            uncheckedBorderColor = Color.Black
+                                        )
+                                    )
+                                }
+                            }
+
                             Spacer(modifier = Modifier.height(16.dp))
 
                             Button(
                                 onClick = {
-                                    if (!isOverlayActive) {
-                                        try {
-                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                            permissionLauncher.launch(arrayOf(
-                                                android.Manifest.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION
-                                            ))
-                                            } else {
-                                                // 권한이 필요없는 경우 바로 미디어 프로젝션 권한 요청
-                                                screenCaptureContract.launch(mediaProjectionManager.createScreenCaptureIntent())
-                                            }
-                                        } catch (e: Exception) {
-                                            // 크롬이 설치되어 있지 않은 경우 알림 설정
-                                            Toast.makeText(context, "크롬 브라우저를 사용할 수 없습니다.", Toast.LENGTH_SHORT).show()
-                                        }
+                                    if (isGestureMode) {
+                                        isGestureActive = !isGestureActive
                                     } else {
-                                        val serviceIntent = Intent(context, OverlayService::class.java)
-                                        context.stopService(serviceIntent)
-                                        OverlayStateManager.setOverlayActive(false)
+                                        if (!isOverlayActive) {
+                                            try {
+                                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                                    permissionLauncher.launch(arrayOf(
+                                                        android.Manifest.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION
+                                                    ))
+                                                } else {
+                                                    screenCaptureContract.launch(mediaProjectionManager.createScreenCaptureIntent())
+                                                }
+                                            } catch (e: Exception) {
+                                                Toast.makeText(context, "크롬 브라우저를 사용할 수 없습니다.", Toast.LENGTH_SHORT).show()
+                                            }
+                                        } else {
+                                            val serviceIntent = Intent(context, OverlayService::class.java)
+                                            context.stopService(serviceIntent)
+                                            OverlayStateManager.setOverlayActive(false)
+                                        }
                                     }
                                 },
                                 modifier = Modifier.fillMaxWidth(),
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFCC80))
                             ) {
-                                Text(if (isOverlayActive) "오버레이 종료" else "오버레이 시작", color = Color.Black)
+                                Text(
+                                    text = when {
+                                        isGestureMode -> if (isGestureActive) "제스처 종료" else "제스처 시작"
+                                        else -> if (isOverlayActive) "오버레이 종료" else "오버레이 시작"
+                                    },
+                                    color = Color.Black
+                                )
                             }
                         }
                     }
                 }
 
+                // 기타 메뉴 : 공지사항, 휴지통, ..
                 item {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp)
                     ) {
-                        SettingItem(title = "알림 설정") { /* TODO: 알림 설정 추가 */ }
-                        SettingItem(title = "로그아웃") { showLogoutDialog = true }
+                        SettingItem(title = "MODA 200% 활용하기") { }
+                        SettingItem(title = "공지사항") { }
+                        SettingItem(title = "휴지통") { }
+                    }
+                }
+
+                // 로그아웃 버튼
+                item {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Button(
+                            onClick = { showLogoutDialog = true },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray)
+                        ) {
+                            Text("로그아웃", color = Color.Black)
+                        }
                     }
 
-                    // ✅ LazyColumn 내부에서 다이얼로그 호출
                     if (showLogoutDialog) {
                         LogoutDialog(
-                            onConfirm = {
-                                showLogoutDialog = false
-                                navController.navigate("login") {
-                                    popUpTo("home") { inclusive = true }
-                                }
-                            },
+                            viewModel = authViewModel,
+                            navController = navController,
                             onDismiss = { showLogoutDialog = false }
                         )
                     }
@@ -238,17 +333,25 @@ fun MyPageScreen(
             }
         }
     }
+
 }
 
-// ✅ 별도 @Composable 함수로 로그아웃 다이얼로그 분리
+
 @Composable
-fun LogoutDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+fun LogoutDialog(viewModel: AuthViewModel, navController: NavController, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("로그아웃") },
         text = { Text("로그아웃 하시겠습니까?") },
         confirmButton = {
-            Button(onClick = onConfirm) {
+            Button(onClick = {
+                viewModel.logout {
+                    navController.navigate("home") {
+                        popUpTo("home") { inclusive = true }
+                    }
+                }
+                onDismiss()
+            }) {
                 Text("확인")
             }
         },
@@ -259,3 +362,125 @@ fun LogoutDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
         }
     )
 }
+
+
+
+
+// 아래는 기존 설정 코드 : 오버레이 때문에 혹시 몰라서 남겨둠 ,,,!!
+//    Scaffold(
+//        bottomBar = {
+//            navController?.let {
+//                BottomBarComponent(it, currentRoute)
+//            }
+//        }
+//    ) { paddingValues ->
+//        Column(
+//            modifier = Modifier
+//                .fillMaxSize()
+//                .padding(paddingValues)
+//        ) {
+//            MyPageHeader()
+//
+//            LazyColumn(
+//                modifier = Modifier.fillMaxSize(),
+//                horizontalAlignment = Alignment.CenterHorizontally
+//            ) {
+//                item {
+//                    if (user == null) {
+//                        CircularProgressIndicator()
+//                    } else {
+//                        UserProfileCard(
+//                            profileImage = user?.profileImage,
+//                            nickname = user?.nickname ?: "사용자"
+//                        )
+//                    }
+//                    Spacer(modifier = Modifier.height(8.dp))
+//                }
+//
+//                item {
+//                    Divider(
+//                        color = Color(0xFFDCDCDC),
+//                        thickness = 4.dp,
+//                        modifier = Modifier.fillMaxWidth()
+//                    )
+//                    Spacer(modifier = Modifier.height(16.dp))
+//                }
+//
+//
+//                item {
+//                    Card(
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .padding(horizontal = 16.dp, vertical = 8.dp),
+//                        shape = RoundedCornerShape(12.dp),
+//                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
+//                    ) {
+//                        Column(
+//                            modifier = Modifier.padding(16.dp)
+//                        ) {
+//                            Text(
+//                                text = "링크 저장 기능",
+//                                style = MaterialTheme.typography.titleMedium,
+//                                fontSize = 16.sp
+//                            )
+//                            Spacer(modifier = Modifier.height(8.dp))
+//                            Text(
+//                                text = "클릭 시 브라우저로 이동합니다.",
+//                                style = MaterialTheme.typography.bodyMedium,
+//                                color = Color.Gray
+//                            )
+//                            Spacer(modifier = Modifier.height(16.dp))
+//
+//                            Button(
+//                                onClick = {
+//                                    if (!isOverlayActive) {
+//                                        try {
+//                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+//                                            permissionLauncher.launch(arrayOf(
+//                                                android.Manifest.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION
+//                                            ))
+//                                            } else {
+//                                                // 권한이 필요없는 경우 바로 미디어 프로젝션 권한 요청
+//                                                screenCaptureContract.launch(mediaProjectionManager.createScreenCaptureIntent())
+//                                            }
+//                                        } catch (e: Exception) {
+//                                            // 크롬이 설치되어 있지 않은 경우 알림 설정
+//                                            Toast.makeText(context, "크롬 브라우저를 사용할 수 없습니다.", Toast.LENGTH_SHORT).show()
+//                                        }
+//                                    } else {
+//                                        val serviceIntent = Intent(context, OverlayService::class.java)
+//                                        context.stopService(serviceIntent)
+//                                        OverlayStateManager.setOverlayActive(false)
+//                                    }
+//                                },
+//                                modifier = Modifier.fillMaxWidth(),
+//                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFCC80))
+//                            ) {
+//                                Text(if (isOverlayActive) "오버레이 종료" else "오버레이 시작", color = Color.Black)
+//                            }
+//                        }
+//                    }
+//                }
+//
+//                item {
+//                    Column(
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .padding(16.dp)
+//                    ) {
+//                        SettingItem(title = "MODA 200% 활용하기") { /* TODO: 알림 설정 추가 */ }
+//                        SettingItem(title = "휴지통") { /* TODO: 알림 설정 추가 */ }
+//                        SettingItem(title = "로그아웃") { showLogoutDialog = true }
+//                    }
+//
+//                    if (showLogoutDialog) {
+//                        LogoutDialog(
+//                            viewModel = authViewModel, // AuthViewModel 전달
+//                            navController = navController,
+//                            onDismiss = { showLogoutDialog = false }
+//                        )
+//                    }
+//                }
+//            }
+//        }
+//    }

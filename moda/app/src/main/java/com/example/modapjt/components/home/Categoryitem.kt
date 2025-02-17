@@ -21,6 +21,7 @@ import androidx.navigation.NavController
 import com.example.modapjt.R
 import com.example.modapjt.domain.model.Category
 
+
 @Composable
 fun CategoryItem(
     category: Category,
@@ -71,7 +72,7 @@ fun CategoryItem(
                             context,
                             "$categoryName 컨텐츠를 채워 활성화해주세요.",
                             Toast.LENGTH_SHORT)
-                        .show()
+                            .show()
                     }
                 }
             ),
@@ -94,3 +95,5 @@ fun CategoryItem(
         )
     }
 }
+
+

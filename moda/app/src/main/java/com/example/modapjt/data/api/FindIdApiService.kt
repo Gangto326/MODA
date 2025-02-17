@@ -15,5 +15,5 @@ interface FindIdApiService {
     @POST("/api/auth/find-user-id")
     suspend fun findUserId(
         @Body request: FindUserIdRequest
-    ): String
+    ): Response<String>
 }

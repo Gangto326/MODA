@@ -343,7 +343,7 @@ class SignUpViewModel : ViewModel() {
 
 
 
-            is Resource.Loading -> {
+                is Resource.Loading -> {
                     _signUpState.value = state.copy(
                         isLoading = true
                     )
@@ -358,4 +358,3 @@ class SignUpViewModel : ViewModel() {
         timerJob?.cancel()
     }
 }
-

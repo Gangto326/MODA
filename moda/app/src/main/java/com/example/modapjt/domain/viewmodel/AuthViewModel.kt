@@ -1,9 +1,14 @@
 package com.example.modapjt.domain.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.modapjt.data.api.RetrofitInstance
+import com.example.modapjt.data.dto.request.LoginRequest
+import com.example.modapjt.data.storage.TokenManager
 import com.example.modapjt.domain.model.FindIdEvent
 import com.example.modapjt.domain.model.FindIdState
 import com.example.modapjt.domain.model.FindPasswordEvent
@@ -15,18 +20,51 @@ import com.example.modapjt.domain.model.SignUpState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class AuthViewModel : ViewModel() {
+class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
     private val _loginState = mutableStateOf(LoginState())
     val loginState: State<LoginState> = _loginState
+
+    // 추가
+    private val _isLoggedIn = mutableStateOf(false)
+    val isLoggedIn: State<Boolean> = _isLoggedIn
 
     private val _signUpState = mutableStateOf(SignUpState())
     val signUpState: State<SignUpState> = _signUpState
 
+    // 추가
+    init {
+        checkLoginStatus()
+    }
     private var onLoginSuccess: () -> Unit = {}
 
     fun setOnLoginSuccess(callback: () -> Unit) {
         onLoginSuccess = callback
     }
+
+    // 추가
+    fun checkLoginStatus() {
+        _isLoggedIn.value = !tokenManager.getAccessToken().isNullOrEmpty()
+    }
+
+    // 추가 : 로그아웃
+    fun logout(onLogoutSuccess: () -> Unit) {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitInstance.userApi.logout()
+
+                if (response.isSuccessful) {
+                    tokenManager.clearTokens() // 토큰 삭제
+                    _isLoggedIn.value = false
+                    onLogoutSuccess() // 로그아웃 성공 시 실행할 콜백
+                } else {
+                    Log.e("AuthViewModel", "로그아웃 실패: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                Log.e("AuthViewModel", "로그아웃 중 오류 발생", e)
+            }
+        }
+    }
+
 
     fun onLoginEvent(event: LoginEvent) {
         when (event) {
@@ -44,6 +82,29 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+//    private fun login() {
+//        val username = _loginState.value.username
+//        val password = _loginState.value.password
+//
+//        if (username.isEmpty() || password.isEmpty()) {
+//            _loginState.value = _loginState.value.copy(error = "아이디와 비밀번호를 입력해주세요.")
+//            return
+//        }
+//
+//        // 임시 로그인 로직 (실제로는 API 호출로 대체)
+//        if (username == "user" && password == "1234") {
+//            _loginState.value = _loginState.value.copy(isLoading = true)
+//
+//            viewModelScope.launch {
+//                delay(1000)
+//                _loginState.value = _loginState.value.copy(isLoading = false, error = null)
+//                onLoginSuccess()
+//            }
+//        } else {
+//            _loginState.value = _loginState.value.copy(error = "아이디 또는 비밀번호가 잘못되었습니다.")
+//        }
+//    }
+    // 수정
     private fun login() {
         val username = _loginState.value.username
         val password = _loginState.value.password
@@ -53,17 +114,42 @@ class AuthViewModel : ViewModel() {
             return
         }
 
-        // 임시 로그인 로직 (실제로는 API 호출로 대체)
-        if (username == "user" && password == "1234") {
-            _loginState.value = _loginState.value.copy(isLoading = true)
+        viewModelScope.launch {
+            try {
+                _loginState.value = _loginState.value.copy(isLoading = true)
 
-            viewModelScope.launch {
-                delay(1000)
-                _loginState.value = _loginState.value.copy(isLoading = false, error = null)
-                onLoginSuccess()
+                val response = RetrofitInstance.userApi.login(LoginRequest(username, password))
+
+                if (response.isSuccessful) {
+                    // ✅ 헤더에서 Access Token 가져오기
+                    val accessToken = response.headers()["Authorization"]
+                    print(accessToken)
+    //                    val refreshToken = response.headers()["Refresh-Token"] // -> 헤더 X, 쿠키에 있음
+    //                    print(refreshToken)
+                    if (!accessToken.isNullOrEmpty()) {
+                        tokenManager.saveAccessToken(accessToken)
+                        _isLoggedIn.value = true
+                        _loginState.value = _loginState.value.copy(isLoading = false, error = null)
+                        onLoginSuccess() // 여기에 콜백 실행 추가
+                    } else {
+                        _loginState.value = _loginState.value.copy(
+                            isLoading = false,
+                            error = "서버 응답에 토큰이 없습니다."
+                        )
+                    }
+                } else {
+                    _loginState.value = _loginState.value.copy(
+                        isLoading = false,
+                        error = "로그인 실패: 아이디 또는 비밀번호가 잘못되었습니다."
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e("AuthViewModel", "Login error", e) // 로깅 추가
+                _loginState.value = _loginState.value.copy(
+                    isLoading = false,
+                    error = "네트워크 오류: ${e.message}"
+                )
             }
-        } else {
-            _loginState.value = _loginState.value.copy(error = "아이디 또는 비밀번호가 잘못되었습니다.")
         }
     }
 
@@ -120,6 +206,8 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+
+
     private fun verifyUsername() {
         val username = _signUpState.value.username
         if (username.isEmpty()) {
@@ -140,6 +228,7 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+
     private fun sendEmailVerification() {
         val email = _signUpState.value.email
         if (email.isEmpty()) {
@@ -159,6 +248,7 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+
     private fun verifyEmailCode() {
         val code = _signUpState.value.emailVerificationCode
         if (code.isEmpty()) {
@@ -177,6 +267,7 @@ class AuthViewModel : ViewModel() {
             )
         }
     }
+
 
     private fun submitSignUp() {
         val state = _signUpState.value
@@ -227,6 +318,8 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+
+
     private val _findIdState = mutableStateOf(FindIdState())
     val findIdState: State<FindIdState> = _findIdState
 
@@ -258,6 +351,7 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+
     private fun sendFindIdVerification() {
         val email = _findIdState.value.email
         if (email.isEmpty()) {
@@ -276,6 +370,7 @@ class AuthViewModel : ViewModel() {
             )
         }
     }
+
 
     private fun verifyFindIdCode() {
         val code = _findIdState.value.verificationCode
@@ -297,5 +392,14 @@ class AuthViewModel : ViewModel() {
             )
         }
     }
+}
 
+class AuthViewModelFactory(private val tokenManager: TokenManager) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(AuthViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return AuthViewModel(tokenManager) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
 }

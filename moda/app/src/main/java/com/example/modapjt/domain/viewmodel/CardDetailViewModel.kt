@@ -18,11 +18,11 @@ class CardDetailViewModel : ViewModel() {
     val uiState: StateFlow<CardDetailUiState> = _uiState
 
     // 카드 상세 정보 불러오기
-    fun loadCardDetail(userId: String, cardId: String) {  // ✅ cardId 타입 String 유지
+    fun loadCardDetail(cardId: String) {  // ✅ cardId 타입 String 유지
         viewModelScope.launch {
             _uiState.value = CardDetailUiState.Loading
             try {
-                val result = repository.getCardDetail(userId, cardId)  // ✅ 수정된 Repository 사용
+                val result = repository.getCardDetail(cardId)  // ✅ 수정된 Repository 사용
                 if (result.isSuccess) {
                     val cardDetail = result.getOrNull()
                     if (cardDetail != null) {

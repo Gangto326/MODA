@@ -28,14 +28,13 @@ import com.example.modapjt.domain.viewmodel.SearchViewModel
 @Composable
 fun WeeklyKeywordList(
     homeKeywordViewModel: SearchViewModel = viewModel(),
-    userId: String
 ) {
     val topKeywords by homeKeywordViewModel.topKeywords.collectAsState()
     val selectedKeyword by homeKeywordViewModel.selectedKeyword.collectAsState()
 
     LaunchedEffect(topKeywords) {
         if (topKeywords.isNotEmpty() && selectedKeyword == null) {
-            homeKeywordViewModel.updateKeywordAndFetchData(topKeywords.first(), userId)
+            homeKeywordViewModel.updateKeywordAndFetchData(topKeywords.first())
         }
     }
 
@@ -65,7 +64,7 @@ fun WeeklyKeywordList(
                         }
                         .padding(horizontal = 14.dp, vertical = 2.dp)
                         .clickable {
-                            homeKeywordViewModel.updateKeywordAndFetchData(keyword, userId)
+                            homeKeywordViewModel.updateKeywordAndFetchData(keyword)
                         },
                     contentAlignment = Alignment.Center
                 ) {

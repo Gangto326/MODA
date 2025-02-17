@@ -46,3 +46,4 @@ sealed class SignUpEvent {
     object VerifyEmailCode : SignUpEvent()
     object Submit : SignUpEvent()
 }
+

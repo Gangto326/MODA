@@ -9,15 +9,12 @@ data class LoginState(
 )
 
 
-
 // 로그인 관련 이벤트
 sealed class LoginEvent {
     data class UsernameChanged(val username: String) : LoginEvent()
     data class PasswordChanged(val password: String) : LoginEvent()
     object Submit : LoginEvent()
 }
-
-
 
 // FindIdState.kt
 data class FindIdState(
@@ -44,6 +41,17 @@ data class FindPasswordState(
     val remainingTime: Int = 0 // 인증번호 제한시간 (초)
 )
 
+
+
+// FindIdEvent.kt
+sealed class FindIdEvent {
+    data class EmailChanged(val email: String) : FindIdEvent()
+    data class VerificationCodeChanged(val code: String) : FindIdEvent()
+    object SendVerification : FindIdEvent()
+    object VerifyCode : FindIdEvent()
+}
+
+// FindPasswordEvent.kt
 sealed class FindPasswordEvent {
     data class UsernameChanged(val username: String) : FindPasswordEvent()
     data class EmailChanged(val email: String) : FindPasswordEvent()
@@ -54,12 +62,3 @@ sealed class FindPasswordEvent {
     object VerifyCode : FindPasswordEvent()
     object SubmitNewPassword : FindPasswordEvent()
 }
-
-// FindIdEvent.kt
-sealed class FindIdEvent {
-    data class EmailChanged(val email: String) : FindIdEvent()
-    data class VerificationCodeChanged(val code: String) : FindIdEvent()
-    object SendVerification : FindIdEvent()
-    object VerifyCode : FindIdEvent()
-}
-

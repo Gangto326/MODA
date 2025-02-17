@@ -37,17 +37,23 @@ fun BlogBig(
     imageUrl: String, // 블로그 썸네일 이미지 URL
     modifier: Modifier = Modifier,
     isMine: Boolean,
+    isSelected: Boolean = false,  // isSelected 파라미터 추가
     keywords: List<String>,
-    onClick: () -> Unit = {} // 클릭 시 실행할 동작
+//    onClick: () -> Unit = {} // 클릭 시 실행할 동작
 ) {
     // 카드 UI (터치 가능)
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 8.dp)
-            .clickable(onClick = onClick), // 클릭 이벤트 추가
+            .padding(horizontal = 20.dp, vertical = 8.dp),
+//            .clickable(onClick = onClick), // 클릭 이벤트 추가
         colors = CardDefaults.cardColors(
-            containerColor = if (!isMine) Color.Gray else Color.White // ✅ 배경색 적용
+            containerColor = when {
+                isSelected -> Color.LightGray.copy(alpha = 0.3f)  // 선택됐을 때 색상
+                !isMine -> Color.Gray
+                else -> Color.White
+            }
+//            containerColor = if (!isMine) Color.Gray else Color.White // ✅ 배경색 적용
         ),
     ) {
         Column(

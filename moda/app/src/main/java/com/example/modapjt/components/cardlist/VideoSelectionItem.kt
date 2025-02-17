@@ -1,0 +1,137 @@
+package com.example.modapjt.components.cardlist
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import com.example.app.ui.theme.customTypography
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun VideoSelectionItem(
+    videoId: String,
+    title: String,
+    isMine: Boolean,
+    bookMark: Boolean,
+    keywords: List<String>,
+    isSelected: Boolean,
+    modifier: Modifier = Modifier,
+    thumbnailContent: String,
+    onClick: () -> Unit = {}
+) {
+    Surface (
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(12.dp),
+        shadowElevation = 2.dp,
+        color = when {
+            isSelected -> MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+            !isMine -> Color.Gray.copy(alpha = 0.1f)
+            else -> Color.White
+        }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Row(
+                modifier = modifier
+                    .fillMaxWidth()
+            ) {
+                // 🔹 썸네일 영역 (왼쪽)
+                Box(
+                    modifier = Modifier
+                        .size(width = 135.dp, height = (140 * 9 / 16).dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(if (!isMine) Color.White.copy(alpha = 0.8f) else Color.Black)
+                ) {
+                    AsyncImage(
+                        model = "https://img.youtube.com/vi/$videoId/0.jpg",
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(14.dp))
+
+                // 🔹 제목 + 채널명 상단 정렬, 키워드 하단 정렬
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(), // 🔥 키워드가 항상 하단 정렬되도록 Column을 전체 크기로 확장
+                ) {
+                    // ✅ 제목과 채널명을 상단 고정
+                    Column(
+                        modifier = Modifier.fillMaxWidth(), // ✅ 제목+채널명이 전체 가로를 차지하도록 설정
+                        verticalArrangement = Arrangement.Top // ✅ 제목과 채널명을 상단 정렬
+                    ) {
+                        Text(
+                            text = title,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            lineHeight = 20.sp,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+
+                        Text(
+                            text = thumbnailContent,
+                            fontSize = 12.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+
+                    // 🔹 키워드가 항상 하단에 위치하도록 설정
+                    Spacer(modifier = Modifier.weight(1f)) // ✅ 키워드를 밀어내는 역할
+
+                    FlowRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.Start), // ✅ 키워드를 왼쪽 정렬
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        keywords.forEach { keyword ->
+                            Text(
+                                text = "# $keyword",
+                                color = Color(0xFFBAADA4),
+                                style = customTypography.bodySmall
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

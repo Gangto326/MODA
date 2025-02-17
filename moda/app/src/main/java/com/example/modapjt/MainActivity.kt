@@ -3,13 +3,21 @@ package com.example.modapjt
 import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.modapjt.data.storage.TokenManager
+import com.example.modapjt.domain.viewmodel.AuthViewModel
+import com.example.modapjt.domain.viewmodel.AuthViewModelFactory
 import com.example.modapjt.navigation.NavGraph
 import com.example.modapjt.overlay.BrowserAccessibilityService
 import com.example.modapjt.overlay.OverlayService
@@ -20,6 +28,7 @@ import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 @OptIn(ExperimentalAnimationApi::class)
 class MainActivity : ComponentActivity() {
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -31,9 +40,18 @@ class MainActivity : ComponentActivity() {
 
 
             ModapjtTheme {
+                // TokenManager 초기화 (Compose에서 remember로 관리)
+                val context = LocalContext.current
+                val tokenManager = remember { TokenManager(context) }
+
+                val authViewModel: AuthViewModel = viewModel(
+                    factory = AuthViewModelFactory(tokenManager)
+                )
+
                 val navController = rememberAnimatedNavController()
                 NavGraph(
                     navController = navController,
+                    authViewModel = authViewModel,
                     onStartOverlay = { checkOverlayPermission() }
                 )
             }

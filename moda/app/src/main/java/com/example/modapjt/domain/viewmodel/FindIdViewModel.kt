@@ -1,5 +1,6 @@
 package com.example.modapjt.domain.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -59,11 +60,14 @@ class FindIdViewModel : ViewModel() {
         viewModelScope.launch {
             _state.value = state.value.copy(isLoading = true)
 
+            Log.d("FindIdViewModel", "verifyAndFindId() 실행됨")  // ✅ 로그 추가
+
             when (val result = repository.findUserId(
                 email = state.value.email,
                 code = state.value.verificationCode
             )) {
                 is Resource.Success -> {
+                    Log.d("FindIdViewModel", "아이디 찾기 성공: ${result.data}")  // ✅ 성공 로그
                     _state.value = state.value.copy(
                         foundId = result.data,
                         error = null,
@@ -71,6 +75,7 @@ class FindIdViewModel : ViewModel() {
                     )
                 }
                 is Resource.Error -> {
+                    Log.e("FindIdViewModel", "아이디 찾기 실패: ${result.message}")  // ✅ 실패 로그
                     _state.value = state.value.copy(
                         error = result.message,
                         isLoading = false

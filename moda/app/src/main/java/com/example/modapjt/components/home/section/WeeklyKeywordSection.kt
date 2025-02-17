@@ -21,7 +21,6 @@ import com.example.modapjt.domain.viewmodel.SearchViewModel
 @Composable
 fun WeeklyKeywordSection(
     homeKeywordViewModel: SearchViewModel,
-    userId: String,
     navController: NavController,
     searchViewModel: SearchViewModel
 ) {
@@ -38,7 +37,7 @@ fun WeeklyKeywordSection(
     }
 
     if (topKeywords.isNotEmpty()) {
-        WeeklyKeywordList(homeKeywordViewModel, userId)
+        WeeklyKeywordList(homeKeywordViewModel)
         Spacer(
             modifier = Modifier
                 .height(20.dp)
