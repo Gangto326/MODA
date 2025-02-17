@@ -126,12 +126,12 @@ class PostSummary:
 
         contents = []
 
-        for paragraph in response:
+        for paragraph in json.loads(response):
             # 제목 저장
-            contents.append('# ' + paragraph.title)
+            contents.append('# ' + paragraph['title'])
 
             # 각 줄을 분리
-            lines = paragraph.content.strip().split('\n')
+            lines = paragraph['content'].strip().split('\n')
 
             # 각 줄 처리
             processed_lines = []
