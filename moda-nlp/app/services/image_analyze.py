@@ -127,11 +127,11 @@ class ImageAnalyze:
                 similarity = 0
 
                 for idx in range(len(categories)):
-                    compare_result = vector_compare(embedding, categories[idx + 1][1])
+                    compare_result = vector_compare(embedding, categories[idx][1])
                     if compare_result > similarity:
                         similarity = compare_result
                         category_id = idx + 1
-                        category = categories[idx + 1][0]
+                        category = categories[idx][0]
 
                 print(f"임베딩 카테고리 {self.category_id} {self.category}")
         except Exception as e:
