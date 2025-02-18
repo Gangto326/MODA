@@ -9,7 +9,7 @@ from app.constants.category import categories_name, categories
 from app.constants.post_prompt import make_summary_prompt, make_keywords_content_prompt, \
     make_thumbnail_content_prompt, make_category_prompt
 from app.schemas.post import PostResponse
-from app.services.embedding import Embedding
+from app.services.embedding import Embedding, vector_compare
 
 
 class PostSummary:
@@ -116,7 +116,7 @@ class PostSummary:
                 similarity = 0
 
                 for idx in range(len(categories)):
-                    compare_result = self.vector_compare(embedding, categories[idx + 1][1])
+                    compare_result = vector_compare(embedding, categories[idx + 1][1])
                     if compare_result > similarity:
                         similarity = compare_result
                         category_id = idx + 1
