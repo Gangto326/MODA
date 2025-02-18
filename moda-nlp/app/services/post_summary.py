@@ -28,15 +28,15 @@ class PostSummary:
 
     #PostSummary 객체가 실행되면 가장 먼저 실행되는 함수
     async def execute(self):
-        self.choose_category('anpigon/qwen2.5-7b-instruct-kowiki')
+        self.choose_category('kwangsuklee/Qwen2.5-14B-Gutenberg-1e-Delta.Q5_K_M')
         while True:
-            self.summary_content('anpigon/qwen2.5-7b-instruct-kowiki')
+            self.summary_content('kwangsuklee/Qwen2.5-14B-Gutenberg-1e-Delta.Q5_K_M')
 
             if not await self.detect_chinese(self.content):
                 break
-        self.make_keywords('anpigon/qwen2.5-7b-instruct-kowiki')
+        self.make_keywords('kwangsuklee/Qwen2.5-14B-Gutenberg-1e-Delta.Q5_K_M')
         while True:
-            self.make_thumbnail_content('anpigon/qwen2.5-7b-instruct-kowiki')
+            self.make_thumbnail_content('kwangsuklee/Qwen2.5-14B-Gutenberg-1e-Delta.Q5_K_M')
 
             if not await self.detect_chinese(self.thumbnail_content):
                 break
