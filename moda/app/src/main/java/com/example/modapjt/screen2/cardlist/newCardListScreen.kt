@@ -161,7 +161,7 @@ fun newCardListScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(Color.White)
+//                .background(Color.White)
         ) {
             when (val state = uiState) {
                 is CardUiState.Loading -> {
@@ -456,10 +456,10 @@ fun newCardListScreen(
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .background(
-                                        color = Color.White.copy(alpha = 0.1f),
-                                        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
-                                    )
+//                                    .background(
+//                                        color = Color.White.copy(alpha = 0.1f),
+//                                        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+//                                    )
                             )
 
                             Row(
@@ -556,7 +556,7 @@ fun EmptyMessage(message: String) {
     ) {
         Text(
             text = message,
-            color = Color.Gray,
+            color = MaterialTheme.colorScheme.secondary,
             textAlign = TextAlign.Center
         )
     }

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -316,7 +317,7 @@ private fun SectionHeader(title: String) {
         // 섹션 제목 텍스트
         Text(
             text = title,
-            color = Color(0xFF2B2826),
+            color = MaterialTheme.colorScheme.onPrimary,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold // 텍스트는 굵게 설정
         )
@@ -333,7 +334,7 @@ private fun SectionAdd(
         modifier = Modifier
             .fillMaxWidth()
             .height(44.dp)
-            .border(1.dp, Color(0xFFFFC107), shape = RoundedCornerShape(16.dp)), // 테두리 추가
+            .border(1.dp, MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(16.dp)), // 테두리 추가
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -344,7 +345,7 @@ private fun SectionAdd(
             Text(
                 text = text,
                 fontSize = 12.sp,
-                color = Color(0xFF2B2826)
+                color = MaterialTheme.colorScheme.secondary
             )
         }
     }

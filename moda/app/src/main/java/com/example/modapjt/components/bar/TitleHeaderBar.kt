@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,8 +27,8 @@ fun TitleHeaderBar(modifier: Modifier = Modifier, titleName: String) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp)  // 높이 설정
-            .background(Color.White),  // 배경색 설정
+            .height(56.dp),  // 높이 설정
+//            .background(Color.White),  // 배경색 설정
         contentAlignment = Alignment.Center
     ) {
         // 중앙 타이틀
@@ -35,7 +36,7 @@ fun TitleHeaderBar(modifier: Modifier = Modifier, titleName: String) {
             text = titleName,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.Black
+            color = MaterialTheme.colorScheme.onPrimary
         )
     }
 }

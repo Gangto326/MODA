@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -66,6 +67,7 @@ fun NewsSmall(
                     text = headline,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimary,
 //                    style = customTypography.titleMedium ,
                     maxLines = 2, // 최대 2줄까지 표시
                     overflow = TextOverflow.Ellipsis, // 넘치는 텍스트는 ...으로 표시
@@ -74,7 +76,7 @@ fun NewsSmall(
                 Text(
                     text = description,
                     style = customTypography.bodyMedium,
-                    color = Color(0xFF797069),
+                    color = MaterialTheme.colorScheme.secondary,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.padding(top = 6.dp)
@@ -124,7 +126,7 @@ fun NewsSmall(
                         text = "# $keyword",
 //                        fontSize = 12.sp,
                         style = customTypography.bodySmall,
-                        color = Color(0xFFBAADA4), // 키워드는 파란색으로 표시( 고민 )
+                        color = MaterialTheme.colorScheme.onSecondary, // 키워드는 파란색으로 표시( 고민 )
                     )
                 }
             }

@@ -88,7 +88,7 @@ fun SearchScreenBar(
 
     Surface(
         modifier = modifier.fillMaxWidth().height(56.dp),
-        color = Color.White
+//        color = Color.White
     ) {
         Row(
             modifier = Modifier
@@ -104,7 +104,7 @@ fun SearchScreenBar(
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = "Back",
-                    tint = Color.Black,
+                    tint = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -115,7 +115,7 @@ fun SearchScreenBar(
                     .weight(1f)
                     .border(
                         width = 1.dp,
-                        color = Color(0xFFFFCC80),
+                        color = MaterialTheme.colorScheme.primary,
                         shape = RoundedCornerShape(8.dp)
                     )
                     .heightIn(min = 48.dp)
@@ -135,7 +135,7 @@ fun SearchScreenBar(
                         if (searchText.isEmpty()) {
                             Text(
                                 text = "찾고 싶은 내용을 입력하세요",
-                                color = Color.Gray,
+                                color = MaterialTheme.colorScheme.secondary,
                                 style = MaterialTheme.typography.bodyLarge.copy(
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Normal,
@@ -156,7 +156,7 @@ fun SearchScreenBar(
                                 .onFocusChanged { focusState -> onFocusChanged(focusState.isFocused) }
                                 .padding(vertical = 8.dp),
                             textStyle = TextStyle(
-                                color = Color.Black,
+                                color = MaterialTheme.colorScheme.onPrimary,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Normal,
                                 letterSpacing = 0.sp,
@@ -192,7 +192,7 @@ fun SearchScreenBar(
                             Icon(
                                 imageVector = Icons.Default.Clear,
                                 contentDescription = "Clear text",
-                                tint = Color.Gray,
+                                tint = MaterialTheme.colorScheme.secondary,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
@@ -239,7 +239,7 @@ fun SearchListBar(
 
     Surface(
         modifier = modifier.fillMaxWidth().height(56.dp),
-        color = Color.White // 배경색을 흰색으로 통일
+//        color = Color.White // 배경색을 흰색으로 통일
     ) {
         Row(
             modifier = Modifier
@@ -256,7 +256,7 @@ fun SearchListBar(
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = "Back",
-                    tint = Color.Black,
+                    tint = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -270,7 +270,7 @@ fun SearchListBar(
                 if (searchText.isEmpty()) {
                     Text(
                         text = "찾고 싶은 내용을 입력하세요",
-                        color = Color.Gray,
+                        color = MaterialTheme.colorScheme.secondary,
                         style = MaterialTheme.typography.bodyLarge.copy(
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Normal,
@@ -290,7 +290,7 @@ fun SearchListBar(
                         .fillMaxWidth()
                         .padding(vertical = 8.dp),
                     textStyle = TextStyle(
-                        color = Color.Black,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Normal,
                         letterSpacing = 0.sp,
@@ -329,7 +329,7 @@ fun SearchListBar(
                     Icon(
                         imageVector = Icons.Default.Clear,
                         contentDescription = "Clear text",
-                        tint = Color.Gray,
+                        tint = MaterialTheme.colorScheme.secondary,
                         modifier = Modifier.size(20.dp)
                     )
                 }

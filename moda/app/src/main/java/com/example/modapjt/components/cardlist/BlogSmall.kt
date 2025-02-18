@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.app.ui.theme.customTypography
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.remember
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -51,14 +52,14 @@ fun BlogSmall(
                 Text(
                     text = title,
                     style = customTypography.headlineMedium,
-                    color = Color(0xFF2B2826),
+                    color = MaterialTheme.colorScheme.onPrimary,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = description,
                     style = customTypography.bodyMedium,
-                    color = Color(0xFF797069),
+                    color = MaterialTheme.colorScheme.secondary,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.padding(top = 6.dp)
@@ -89,7 +90,7 @@ fun BlogSmall(
                 Text(
                     text = "# $keyword",
                     style = customTypography.bodySmall,
-                    color = Color(0xFFBAADA4),
+                    color = MaterialTheme.colorScheme.onSecondary,
                 )
             }
         }

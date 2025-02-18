@@ -6,6 +6,7 @@ import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -37,9 +38,9 @@ fun NewsBig(
             .padding(horizontal = 20.dp, vertical = 8.dp),
         colors = CardDefaults.cardColors(
             containerColor = when {
-                isSelected -> Color.LightGray.copy(alpha = 0.3f)
-                !isMine -> Color.Gray
-                else -> Color.White
+                isSelected -> MaterialTheme.colorScheme.onTertiary.copy(alpha = 0.3f)
+                !isMine -> MaterialTheme.colorScheme.onSecondary
+                else -> MaterialTheme.colorScheme.tertiary
             }
         ),
     ) {
@@ -64,6 +65,7 @@ fun NewsBig(
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     maxLines = 2,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f),
                     lineHeight = 20.sp
@@ -73,7 +75,7 @@ fun NewsBig(
             Text(
                 text = description,
                 style = customTypography.bodyMedium,
-                color = Color(0xFF665F5B),
+                color = MaterialTheme.colorScheme.secondary,
                 lineHeight = 20.sp, // 설명의 행간 설정
                 maxLines = 3, // 최대 2줄까지만 표시
                 overflow = TextOverflow.Ellipsis, // 길면 ...으로 생략
@@ -93,7 +95,7 @@ fun NewsBig(
                         modifier = Modifier
                             .border(
                                 width = 1.dp,
-                                color = Color(0xFFB8ACA5),
+                                color = MaterialTheme.colorScheme.onSecondary,
                                 shape = RoundedCornerShape(50)
                             )
                             .padding(horizontal = 14.dp, vertical = 6.dp)
@@ -102,7 +104,7 @@ fun NewsBig(
                     ) {
                         Text(
                             text = keyword,
-                            color = Color(0xFFBAADA4),
+                            color = MaterialTheme.colorScheme.onSecondary,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Medium,
                             style = customTypography.bodySmall
@@ -119,7 +121,7 @@ fun NewsBig(
                     .clip(RoundedCornerShape(8.dp))
                     .border(
                         width = 1.dp,
-                        color = Color(0xFFF4F1ED),
+                        color = MaterialTheme.colorScheme.onSecondary,
                         shape = RoundedCornerShape(8.dp)
                     )
             ) {
