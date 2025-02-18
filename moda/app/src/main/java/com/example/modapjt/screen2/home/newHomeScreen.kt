@@ -12,9 +12,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -22,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.ContentScale
@@ -114,15 +117,32 @@ fun newHomeScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
+//            item {
+//                Box(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .height(50.dp)
+//                        .offset(y = headerOffsetY)
+//                        .alpha(headerAlpha)
+//                ) {
+//                    HeaderBar(modifier = Modifier)
+//                }
+//            }
+            // -> 기존 헤더바
+
+            // 검색바 상단에 로고 배치
             item {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(50.dp)
-                        .offset(y = headerOffsetY)
-                        .alpha(headerAlpha)
+                        .height(100.dp), // 로고 크기에 맞춰 조절
+                    contentAlignment = Alignment.Center // 로고 가운데 정렬
                 ) {
-                    HeaderBar(modifier = Modifier)
+                    Image(
+                        painter = painterResource(id = R.drawable.moda_logo), // moda_logo.png 사용
+                        contentDescription = "Moda Logo",
+                        modifier = Modifier.size(90.dp) // 원하는 크기로 조절
+                    )
                 }
             }
 
