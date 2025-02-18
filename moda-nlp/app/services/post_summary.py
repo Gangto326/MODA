@@ -33,7 +33,11 @@ class PostSummary:
             if not await self.detect_chinese(self.content):
                 break
         self.make_keywords('anpigon/qwen2.5-7b-instruct-kowiki')
-        self.make_thumbnail_content('anpigon/qwen2.5-7b-instruct-kowiki')
+        while True:
+            self.make_thumbnail_content('anpigon/qwen2.5-7b-instruct-kowiki')
+
+            if not await self.detect_chinese(self.thumbnail_content):
+                break
         self.make_embedding_vector()
 
     #Response 형태로 만들어주는 함수

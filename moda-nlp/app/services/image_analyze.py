@@ -1,5 +1,6 @@
 import base64
 import json
+from typing import List
 
 import googletrans
 import ollama
@@ -107,7 +108,7 @@ class ImageAnalyze:
             self.category = 'ALL'
 
     #keywords를 생성하는 함수
-    def make_keywords(self):
+    async def make_keywords(self):
         model = self.MODEL
         messages = make_keywords_content_prompt(self.content, self.base64_image)
         format = {
@@ -124,8 +125,9 @@ class ImageAnalyze:
         }
 
         response = self.chat(model = model, messages = messages, format = format)
-        self.keywords = json.loads(response)['keyword']
-        self.keywords = [keyword for keyword in self.keywords if len(keyword) <=  10 and keyword in self.content]
+        response = json.loads(response)['keyword']
+        response = await self.translate_list(response)
+        self.keywords = [keyword for keyword in response if len(keyword) <=  10 and keyword in response]
         print("키워드 생성")
 
     #embeeding_vector를 생성하는 함수
@@ -138,3 +140,10 @@ class ImageAnalyze:
         translator = googletrans.Translator()
         result = await translator.translate(text, dest = 'ko', src = 'en')
         return result.text
+
+    async def translate_list(self, list: List[str]):
+        translator = googletrans.Translator()
+
+        result = await translator.translate(list, dest = 'ko', src = 'en')
+
+        return [word.text for word in result]
