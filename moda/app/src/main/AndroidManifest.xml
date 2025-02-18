@@ -59,6 +59,12 @@
             android:enabled="true"
             android:exported="false" />
 
+        <!-- 제스처 서비스 추가 -->
+        <service
+            android:name=".overlay.GestureService"
+            android:enabled="true"
+            android:exported="false" />
+
         <!-- 접근성 서비스 추가 -->
         <service
             android:name=".overlay.BrowserAccessibilityService"
