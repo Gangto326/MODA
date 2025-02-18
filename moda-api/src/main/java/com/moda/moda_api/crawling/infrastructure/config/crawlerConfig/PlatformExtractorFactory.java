@@ -17,6 +17,9 @@ public class PlatformExtractorFactory {
 		// Mobile configurations
 		configs.add(createMobileNaverBlogConfig());
 		configs.add(createMobileTistoryConfig());
+		configs.add(createNaverNewsConfig());
+		configs.add(createMobileSportsNaverConfig());
+
 
 		// Desktop configurations
 		configs.add(createDesktopNaverBlogConfig());
@@ -25,6 +28,7 @@ public class PlatformExtractorFactory {
 		configs.add(createVelogConfig());
 		configs.add(createDaumNewsConfig());
 		configs.add(createGoogleSearchConfig());
+
 		// configs.add(createNamuwikiConfig()); // Added Namuwiki configuration
 
 		return configs;
@@ -36,12 +40,13 @@ public class PlatformExtractorFactory {
 	private static ExtractorConfig createMobileNaverBlogConfig() {
 		return ExtractorConfig.builder()
 			.pattern("m.blog.naver.com")
-			.contentSelector(".se_component_wrap.__se_component_area, .se-main-container")
+			.contentSelector(".se_component_wrap.__se_component_area, .se-main-container, .post_ct")
 			.imageSelector(".se_mediaImage")
 			.requiresFrame(false)
 			.urlDomainType(UrlDomainType.NAVER_BLOG)
 			.build();
 	}
+
 
 
 	private static ExtractorConfig createMobileTistoryConfig() {
@@ -54,13 +59,23 @@ public class PlatformExtractorFactory {
 			.build();
 	}
 
+	private static ExtractorConfig createMobileSportsNaverConfig(){
+		return ExtractorConfig.builder()
+			.pattern(".m.sports.naver.com")
+			.contentSelector("._article_content")
+			.imageSelector("img")
+			.requiresFrame(false)
+			.urlDomainType(UrlDomainType.TISTORY)
+			.build();
+	}
+
 	//////////////////////////////////////////////////////////////
 	////////////여기 위로는 모바일 밑으로는 pc////////////////////////
 	/////////////////////////////////////////////////////////////
 	private static ExtractorConfig createDesktopNaverBlogConfig() {
 		return ExtractorConfig.builder()
 			.pattern("blog.naver.com")
-			.contentSelector(".se-main-container, se_component_wrap.sect_dsc __se_component_area")
+			.contentSelector(".se-main-container, se_component_wrap.sect_dsc __se_component_area, .post_ct")
 			.imageSelector(".se-image img, .se-module-image img")
 			.requiresFrame(true)
 			.frameId("mainFrame")

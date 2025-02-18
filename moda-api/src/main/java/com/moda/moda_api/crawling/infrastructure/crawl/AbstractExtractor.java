@@ -132,13 +132,21 @@ public class AbstractExtractor {
 			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
 
 			// 컨텐츠 요소 찾기
-			WebElement contentElement = wait.until(ExpectedConditions.presenceOfElementLocated(
-				By.cssSelector(config.getContentSelector())
-			));
+			WebElement contentElement;
+			try {
+				contentElement = wait.until(ExpectedConditions.presenceOfElementLocated(
+					By.cssSelector(config.getContentSelector())
+				));
+				log.info("Found content element: {}", contentElement.getAttribute("class"));
+			} catch (TimeoutException | NoSuchElementException e) {
+				log.warn("Failed to find specific content element, falling back to body: {}", e.getMessage());
+				contentElement = driver.findElement(By.tagName("body"));
+				log.info("Using body as fallback content element");
+			}
 
-			log.info("Trying to find content with selector: {}", config.getContentSelector());
+			log.info("Trying to find content with selector: {}",
+				contentElement.getTagName().equals("body") ? "body" : config.getContentSelector());
 
-			log.info("Found content element: {}", contentElement.getAttribute("class"));
 
 			// 텍스트 추출 - 전체 텍스트를 한 번에 가져옴
 			String text = contentElement.getText().trim();
