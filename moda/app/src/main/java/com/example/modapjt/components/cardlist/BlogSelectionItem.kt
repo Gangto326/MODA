@@ -1,5 +1,6 @@
 package com.example.modapjt.components.cardlist
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -57,13 +58,17 @@ fun BlogSelectionItem(
                 indication = null, // 클릭 효과 제거
                 interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
                 ),
+        shape = RoundedCornerShape(8.dp),
         color = when {
             isSelected -> Color.LightGray.copy(alpha = 0.3f)  // 선택됐을 때 색상
             !isMine -> Color.Gray
             else -> Color.White
         }
     ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()

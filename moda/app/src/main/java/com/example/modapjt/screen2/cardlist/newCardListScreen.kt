@@ -130,6 +130,14 @@ fun newCardListScreen(
 
     val displayCount = remember { mutableStateOf(0) }
 
+    // 선택된 카드 목록 업데이트
+    LaunchedEffect(selectedCardIds, selectedCategory, uiState) {
+        if (uiState is CardUiState.Success) {
+            viewModel.updateCardsToDelete(selectedCategory,
+                uiState as CardUiState.Success, selectedCardIds)
+        }
+    }
+
     LaunchedEffect(selectedCardIds.size) {
         if (selectedCardIds.size > 0) {
             displayCount.value = selectedCardIds.size
@@ -153,163 +161,86 @@ fun newCardListScreen(
         }
     }
 
-    Scaffold(
-        topBar = { CategoryHeaderBar(categoryName = categoryName, navController = navController) },
-        bottomBar = { BottomBarComponent(navController, currentRoute) }
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-//                .background(Color.White)
-        ) {
-            when (val state = uiState) {
-                is CardUiState.Loading -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            topBar = {
+                CategoryHeaderBar(
+                    categoryName = categoryName,
+                    navController = navController
+                )
+            },
+            bottomBar = {
+                AnimatedVisibility(
+                    visible = !isSelectionMode,
+                    enter = slideInVertically(initialOffsetY = { it }),
+                    exit = slideOutVertically(targetOffsetY = { it })
+                ) {
+                    BottomBarComponent(navController, currentRoute)
                 }
+            }
+        ) { paddingValues ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+//                .background(Color.White)
+            ) {
+                when (val state = uiState) {
+                    is CardUiState.Loading -> {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    }
 
-                is CardUiState.Success -> {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        state = lazyListState, // LazyListState 연결
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        item {
-                            TypeSelectBar(
-                                selectedCategory = selectedCategory,
-                                selectedSort = selectedSort,
+                    is CardUiState.Success -> {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            state = lazyListState, // LazyListState 연결
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            item {
+                                TypeSelectBar(
+                                    selectedCategory = selectedCategory,
+                                    selectedSort = selectedSort,
 //                                onCategorySelected = { category ->
 //                                    viewModel.updateSelectedCategory(category)
 //                                },
-                                onCategorySelected = { category ->
-                                    selectionViewModel.resetSelection() // 선택 상태 초기화
-                                    viewModel.updateSelectedCategory(category)
-                                },
-                                onSortSelected = { selectedSort = it }
-                            )
-                        }
-
-                        when (selectedCategory) {
-                            "전체" -> {
-                                item {
-                                    AllTabCard(
-                                        navController = navController,
-                                        imageCards = state.images,
-                                        blogCards = state.blogs,
-                                        videoCards = state.videos,
-                                        newsCards = state.news,
-                                        topScores = topScoreState.scores,
-                                        onImageMoreClick = { viewModel.updateSelectedCategory("이미지") },
-                                        onBlogMoreClick = { viewModel.updateSelectedCategory("블로그") },
-                                        onVideoMoreClick = { viewModel.updateSelectedCategory("동영상") },
-                                        onNewsMoreClick = { viewModel.updateSelectedCategory("뉴스") }
-                                    )
-                                }
+                                    onCategorySelected = { category ->
+                                        selectionViewModel.resetSelection() // 선택 상태 초기화
+                                        viewModel.updateSelectedCategory(category)
+                                    },
+                                    onSortSelected = { selectedSort = it }
+                                )
                             }
 
-                            "동영상" -> {
-                                if (state.videos.isEmpty() && !loadingMore) {
-                                    item { EmptyMessage("저장된 영상이 없습니다") }
-                                } else {
-                                    items(
-                                        items = state.videos,
-                                        key = { it.cardId }
-                                    ) { card ->
-                                        val isTopVideo = lazyListState.firstVisibleItemIndex == state.videos.indexOf(card)
-                                        if (!isSelectionMode) {  // 일반 모드일 때
-                                            SwipableCardList(
-                                                cards = listOf(card),
-                                                onDelete = { selectedCards ->
-                                                    viewModel.deleteCard(selectedCards.map { it.cardId })
-                                                },
-                                                onCardDetail = { selectedCard ->
-                                                    navController.navigate("cardDetail/${selectedCard.cardId}")
-                                                },
-                                                selectionViewModel = selectionViewModel,
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .heightIn(max = Dp.Unspecified)
-                                            ) { currentCard, isSelected ->
-                                                // 비디오 표시
-                                                VideoBig(
-                                                    videoId = currentCard.thumbnailUrl ?: "",
-                                                    title = currentCard.title,
-                                                    isMine = currentCard.isMine,
-                                                    thumbnailContent = currentCard.thumbnailContent
-                                                        ?: "",
-                                                    isSelected = isSelected,
-                                                    keywords = currentCard.keywords.take(3),
-                                                    //                                                onClick = { navController.navigate("cardDetail/${card.cardId}") },
-                                                    isTopVideo = isTopVideo
-                                                )
-                                            }
-                                        } else {
-                                            VideoSelectionItem(
-                                                videoId = card.thumbnailUrl ?: "",
-                                                title = card.title,
-                                                isMine = card.isMine,
-                                                bookMark = card.bookMark,
-                                                keywords = card.keywords,
-                                                isSelected = selectedCardIds.contains(card.cardId),
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .heightIn(max = Dp.Unspecified),
-                                                thumbnailContent = card.thumbnailContent ?: "",
-                                                onClick = {
-                                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                                    selectionViewModel.toggleCardSelection(card)
-                                                }
-                                            )
-                                        }
-
-                                        // 각 비디오 사이에 구분선 추가
-                                        Divider(
-                                            color = Color(0xFFF1F1F1),
-                                            thickness = 1.dp,
-                                            modifier = Modifier.padding(start = 16.dp, end = 16.dp) // 양쪽에 패딩 추가
-                                        )
-                                    }
-                                }
-                            }
-
-                            "이미지" -> {
-                                if (state.images.isEmpty() && !loadingMore) {
-                                    item { EmptyMessage("저장된 이미지가 없습니다") }
-                                } else {
+                            when (selectedCategory) {
+                                "전체" -> {
                                     item {
-                                        MasonryImageGrid(
-                                            imageUrls = state.images.map { it.thumbnailUrl ?: "" },
-                                            isMineList = state.images.map { it.isMine },
-                                            cardIdList = state.images.map { it.cardId },
-                                            onImageClick = { cardId -> navController.navigate("cardDetail/$cardId") }
+                                        AllTabCard(
+                                            navController = navController,
+                                            imageCards = state.images,
+                                            blogCards = state.blogs,
+                                            videoCards = state.videos,
+                                            newsCards = state.news,
+                                            topScores = topScoreState.scores,
+                                            onImageMoreClick = { viewModel.updateSelectedCategory("이미지") },
+                                            onBlogMoreClick = { viewModel.updateSelectedCategory("블로그") },
+                                            onVideoMoreClick = { viewModel.updateSelectedCategory("동영상") },
+                                            onNewsMoreClick = { viewModel.updateSelectedCategory("뉴스") }
                                         )
                                     }
                                 }
-                            }
 
-                            "블로그" -> {
-                                if (state.blogs.isEmpty() && !loadingMore) {
-                                    item { EmptyMessage("저장된 블로그가 없습니다") }
-                                } else {
-                                    items(
-                                        items = state.blogs,
-                                        key = { it.cardId }
-                                    ) { card ->
-                                        Box(
-                                            modifier = Modifier
-                                                .animateContentSize(
-                                                    animationSpec = spring(
-                                                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                                                        stiffness = if (isSelectionMode) Spring.StiffnessLow else Spring.StiffnessMediumLow
-                                                    )
+                                "동영상" -> {
+                                    if (state.videos.isEmpty() && !loadingMore) {
+                                        item { EmptyMessage("저장된 영상이 없습니다") }
+                                    } else {
+                                        items(
+                                            items = state.videos,
+                                            key = { it.cardId }
+                                        ) { card ->
+                                            val isTopVideo =
+                                                lazyListState.firstVisibleItemIndex == state.videos.indexOf(
+                                                    card
                                                 )
-                                                .animateItemPlacement(
-                                                    animationSpec = spring(
-                                                        dampingRatio = Spring.DampingRatioNoBouncy,
-                                                        stiffness = if (isSelectionMode) Spring.StiffnessLow else Spring.StiffnessMediumLow
-                                                    )
-                                                )
-                                        ) {
                                             if (!isSelectionMode) {  // 일반 모드일 때
                                                 SwipableCardList(
                                                     cards = listOf(card),
@@ -324,19 +255,186 @@ fun newCardListScreen(
                                                         .fillMaxWidth()
                                                         .heightIn(max = Dp.Unspecified)
                                                 ) { currentCard, isSelected ->
-                                                    BlogBig(
+                                                    // 비디오 표시
+                                                    VideoBig(
+                                                        videoId = currentCard.thumbnailUrl ?: "",
                                                         title = currentCard.title,
-                                                        description = currentCard.thumbnailContent
+                                                        isMine = currentCard.isMine,
+                                                        thumbnailContent = currentCard.thumbnailContent
                                                             ?: "",
+                                                        isSelected = isSelected,
+                                                        keywords = currentCard.keywords.take(3),
+                                                        //                                                onClick = { navController.navigate("cardDetail/${card.cardId}") },
+                                                        isTopVideo = isTopVideo
+                                                    )
+                                                }
+                                            } else {
+                                                VideoSelectionItem(
+                                                    videoId = card.thumbnailUrl ?: "",
+                                                    title = card.title,
+                                                    isMine = card.isMine,
+                                                    bookMark = card.bookMark,
+                                                    keywords = card.keywords,
+                                                    isSelected = selectedCardIds.contains(card.cardId),
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .heightIn(max = Dp.Unspecified),
+                                                    thumbnailContent = card.thumbnailContent ?: "",
+                                                    onClick = {
+                                                        haptics.performHapticFeedback(
+                                                            HapticFeedbackType.TextHandleMove
+                                                        )
+                                                        selectionViewModel.toggleCardSelection(card)
+                                                    }
+                                                )
+                                            }
+
+                                            // 각 비디오 사이에 구분선 추가
+                                            Divider(
+                                                color = Color(0xFFF1F1F1),
+                                                thickness = 1.dp,
+                                                modifier = Modifier.padding(
+                                                    start = 16.dp,
+                                                    end = 16.dp
+                                                ) // 양쪽에 패딩 추가
+                                            )
+                                        }
+                                    }
+                                }
+
+                                "이미지" -> {
+                                    if (state.images.isEmpty() && !loadingMore) {
+                                        item { EmptyMessage("저장된 이미지가 없습니다") }
+                                    } else {
+                                        item {
+                                            MasonryImageGrid(
+                                                imageUrls = state.images.map {
+                                                    it.thumbnailUrl ?: ""
+                                                },
+                                                isMineList = state.images.map { it.isMine },
+                                                cardIdList = state.images.map { it.cardId },
+                                                onImageClick = { cardId -> navController.navigate("cardDetail/$cardId") }
+                                            )
+                                        }
+                                    }
+                                }
+
+                                "블로그" -> {
+                                    if (state.blogs.isEmpty() && !loadingMore) {
+                                        item { EmptyMessage("저장된 블로그가 없습니다") }
+                                    } else {
+                                        items(
+                                            items = state.blogs,
+                                            key = { it.cardId }
+                                        ) { card ->
+                                            Box(
+                                                modifier = Modifier
+                                                    .animateContentSize(
+                                                        animationSpec = spring(
+                                                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                                                            stiffness = if (isSelectionMode) Spring.StiffnessLow else Spring.StiffnessMediumLow
+                                                        )
+                                                    )
+                                                    .animateItemPlacement(
+                                                        animationSpec = spring(
+                                                            dampingRatio = Spring.DampingRatioNoBouncy,
+                                                            stiffness = if (isSelectionMode) Spring.StiffnessLow else Spring.StiffnessMediumLow
+                                                        )
+                                                    )
+                                            ) {
+                                                if (!isSelectionMode) {  // 일반 모드일 때
+                                                    SwipableCardList(
+                                                        cards = listOf(card),
+                                                        onDelete = { selectedCards ->
+                                                            viewModel.deleteCard(selectedCards.map { it.cardId })
+                                                        },
+                                                        onCardDetail = { selectedCard ->
+                                                            navController.navigate("cardDetail/${selectedCard.cardId}")
+                                                        },
+                                                        selectionViewModel = selectionViewModel,
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .heightIn(max = Dp.Unspecified)
+                                                    ) { currentCard, isSelected ->
+                                                        BlogBig(
+                                                            title = currentCard.title,
+                                                            description = currentCard.thumbnailContent
+                                                                ?: "",
+                                                            imageUrl = currentCard.thumbnailUrl
+                                                                ?: "",
+                                                            isMine = currentCard.isMine,
+                                                            isSelected = isSelected,
+                                                            keywords = currentCard.keywords
+                                                            //                                                onClick = { navController.navigate("cardDetail/${card.cardId}") }
+                                                        )
+                                                    }
+                                                } else { // 선택 모드일 때
+                                                    BlogSelectionItem(
+                                                        title = card.title,
+                                                        description = card.thumbnailContent ?: "",
+                                                        imageUrl = card.thumbnailUrl ?: "",
+                                                        isMine = card.isMine,
+                                                        keywords = card.keywords,
+                                                        isSelected = selectedCardIds.contains(card.cardId),
+                                                        onClick = {
+                                                            haptics.performHapticFeedback(
+                                                                HapticFeedbackType.TextHandleMove
+                                                            )
+                                                            selectionViewModel.toggleCardSelection(
+                                                                card
+                                                            )
+                                                        }
+                                                    )
+                                                }
+                                            }
+
+                                            // 각 블로그 사이에 구분선 추가
+                                            Divider(
+                                                color = Color(0xFFF1F1F1),
+                                                thickness = 1.dp,
+                                                modifier = Modifier.padding(
+                                                    start = 16.dp,
+                                                    end = 16.dp
+                                                ) // 양쪽에 패딩 추가
+                                            )
+                                        }
+                                    }
+                                }
+
+                                "뉴스" -> {
+                                    if (state.news.isEmpty() && !loadingMore) {
+                                        item { EmptyMessage("저장된 뉴스가 없습니다") }
+                                    } else {
+                                        items(
+                                            items = state.news,
+                                            key = { it.cardId }
+                                        ) { card ->
+                                            if (!isSelectionMode) {
+                                                SwipableCardList(
+                                                    cards = listOf(card),
+                                                    onDelete = { selectedCards ->
+                                                        viewModel.deleteCard(selectedCards.map { it.cardId })
+                                                    },
+                                                    onCardDetail = { selectedCard ->
+                                                        navController.navigate("cardDetail/${selectedCard.cardId}")
+                                                    },
+                                                    selectionViewModel = selectionViewModel,
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .heightIn(max = Dp.Unspecified)
+                                                ) { currentCard, isSelected ->
+                                                    NewsBig(
+                                                        title = currentCard.title,
+                                                        keywords = currentCard.keywords,
                                                         imageUrl = currentCard.thumbnailUrl ?: "",
                                                         isMine = currentCard.isMine,
                                                         isSelected = isSelected,
-                                                        keywords = currentCard.keywords
-                                                        //                                                onClick = { navController.navigate("cardDetail/${card.cardId}") }
+                                                        description = currentCard.thumbnailContent
+                                                            ?: ""
                                                     )
                                                 }
-                                            } else { // 선택 모드일 때
-                                                BlogSelectionItem(
+                                            } else {
+                                                NewsSelectionItem(
                                                     title = card.title,
                                                     description = card.thumbnailContent ?: "",
                                                     imageUrl = card.thumbnailUrl ?: "",
@@ -351,197 +449,131 @@ fun newCardListScreen(
                                                     }
                                                 )
                                             }
-                                        }
 
-                                        // 각 블로그 사이에 구분선 추가
-                                        Divider(
-                                            color = Color(0xFFF1F1F1),
-                                            thickness = 1.dp,
-                                            modifier = Modifier.padding(start = 16.dp, end = 16.dp) // 양쪽에 패딩 추가
-                                        )
-                                    }
-                                }
-                            }
-
-                            "뉴스" -> {
-                                if (state.news.isEmpty() && !loadingMore) {
-                                    item { EmptyMessage("저장된 뉴스가 없습니다") }
-                                } else {
-                                    items(
-                                        items = state.news,
-                                        key = { it.cardId }
-                                    ) { card ->
-                                        if (!isSelectionMode) {
-                                            SwipableCardList(
-                                                cards = listOf(card),
-                                                onDelete = { selectedCards ->
-                                                    viewModel.deleteCard(selectedCards.map { it.cardId })
-                                                },
-                                                onCardDetail = { selectedCard ->
-                                                    navController.navigate("cardDetail/${selectedCard.cardId}")
-                                                },
-                                                selectionViewModel = selectionViewModel,
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .heightIn(max = Dp.Unspecified)
-                                            ) { currentCard, isSelected ->
-                                                NewsBig(
-                                                    title = currentCard.title,
-                                                    keywords = currentCard.keywords,
-                                                    imageUrl = currentCard.thumbnailUrl ?: "",
-                                                    isMine = currentCard.isMine,
-                                                    isSelected = isSelected,
-                                                    description = currentCard.thumbnailContent?: ""
-                                                )
-                                            }
-                                        } else {
-                                            NewsSelectionItem(
-                                                title = card.title,
-                                                description = card.thumbnailContent ?: "",
-                                                imageUrl = card.thumbnailUrl ?: "",
-                                                isMine = card.isMine,
-                                                keywords = card.keywords,
-                                                isSelected = selectedCardIds.contains(card.cardId),
-                                                onClick = {
-                                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                                    selectionViewModel.toggleCardSelection(card)
-                                                }
+                                            // 각 뉴스 사이에 구분선 추가
+                                            Divider(
+                                                color = Color(0xFFF1F1F1),
+                                                thickness = 1.dp,
+                                                modifier = Modifier.padding(
+                                                    start = 16.dp,
+                                                    end = 16.dp
+                                                ) // 양쪽에 패딩 추가
                                             )
                                         }
-
-                                        // 각 뉴스 사이에 구분선 추가
-                                        Divider(
-                                            color = Color(0xFFF1F1F1),
-                                            thickness = 1.dp,
-                                            modifier = Modifier.padding(start = 16.dp, end = 16.dp) // 양쪽에 패딩 추가
-                                        )
                                     }
                                 }
                             }
-                        }
-                        if (loadingMore) {
-                            item {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    CircularProgressIndicator()
+                            if (loadingMore) {
+                                item {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator()
+                                    }
                                 }
                             }
                         }
                     }
-                    AnimatedVisibility(
-                        visible = isSelectionMode,
-                        enter = slideInVertically(initialOffsetY = { it }),
-                        exit = slideOutVertically(targetOffsetY = { it }),
-                        modifier = Modifier.align(Alignment.BottomCenter)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(80.dp)
-                                .background(
-                                    brush = Brush.verticalGradient(
-                                        colors = listOf(
-                                            Color.Transparent,
-                                            Color.Black.copy(alpha = 0.8f)
-                                        ),
-                                        startY = 0f,
-                                        endY = 80f
-                                    )
-                                )
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-//                                    .background(
-//                                        color = Color.White.copy(alpha = 0.1f),
-//                                        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
-//                                    )
-                            )
 
+                    is CardUiState.Error -> {
+                        Text(
+                            text = state.message,
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
+                }
+                // Scroll to Top 버튼 추가
+                ScrollToTopButton(scrollState = lazyListState)
+            }
+        }
+
+        AnimatedVisibility(
+            visible = isSelectionMode,
+            enter = slideInVertically(initialOffsetY = { it }),
+            exit = slideOutVertically(targetOffsetY = { it }),
+            modifier = Modifier.align(Alignment.BottomCenter)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(100.dp)
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                Color.Black.copy(alpha = 0.8f)
+                            ),
+                            startY = 0f,
+                            endY = 80f
+                        )
+                    )
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize()
+                )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 24.dp)
+                        .padding(bottom = 28.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                    Text(
+                        text = "${displayCount.value}개 선택됨",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Color.White,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        TextButton(
+                            onClick = {
+                                selectionViewModel.clearSelection()
+                                selectionViewModel.toggleSelectionMode(false)
+                            },
+                            colors = ButtonDefaults.textButtonColors(
+                                contentColor = Color.White.copy(alpha = 0.8f)
+                            )
+                        ) {
+                            Text(
+                                "취소",
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                        }
+
+                        Button(
+                            onClick = {
+                                viewModel.deleteCard(viewModel.selectedCardsToDelete.value.map { it.cardId })
+                                selectionViewModel.clearSelection()
+                                selectionViewModel.toggleSelectionMode(false)
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFFFF3B30)
+                            ),
+                            shape = RoundedCornerShape(10.dp),
+                            contentPadding = PaddingValues(horizontal = 16.dp)
+                        ) {
                             Row(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(horizontal = 24.dp)
-                                    .padding(bottom = 16.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.Bottom
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "${displayCount.value}개 선택됨",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = Color.White,
-                                    modifier = Modifier.padding(bottom = 8.dp)
+                                    "삭제",
+                                    style = MaterialTheme.typography.labelLarge
                                 )
-
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    TextButton(
-                                        onClick = {
-                                            selectionViewModel.clearSelection()
-                                            selectionViewModel.toggleSelectionMode(false)
-                                        },
-                                        colors = ButtonDefaults.textButtonColors(
-                                            contentColor = Color.White.copy(alpha = 0.8f)
-                                        )
-                                    ) {
-                                        Text(
-                                            "취소",
-                                            style = MaterialTheme.typography.labelLarge
-                                        )
-                                    }
-
-                                    Button(
-                                        onClick = {
-                                            val cardsToDelete = when(selectedCategory) {
-                                                "블로그" -> state.blogs
-                                                "동영상" -> state.videos
-                                                "뉴스" -> state.news
-                                                else -> emptyList()
-                                            }.filter { card ->
-                                                selectedCardIds.contains(card.cardId)
-                                            }
-                                            viewModel.deleteCard(cardsToDelete.map { it.cardId })
-                                        },
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = Color(0xFFFF3B30)
-                                        ),
-                                        shape = RoundedCornerShape(10.dp),
-                                        contentPadding = PaddingValues(
-                                            horizontal = 16.dp
-//                                            vertical = 6.dp
-                                        )
-                                    ) {
-                                        Row(
-                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Text(
-                                                "삭제",
-                                                style = MaterialTheme.typography.labelLarge
-                                            )
-                                        }
-                                    }
-                                }
                             }
                         }
                     }
                 }
-
-                is CardUiState.Error -> {
-                    Text(
-                        text = state.message,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
             }
-            // Scroll to Top 버튼 추가
-            ScrollToTopButton(scrollState = lazyListState)
         }
     }
 }

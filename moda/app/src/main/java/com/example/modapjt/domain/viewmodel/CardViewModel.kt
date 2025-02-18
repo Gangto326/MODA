@@ -1,5 +1,7 @@
 package com.example.modapjt.domain.viewmodel
 
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.modapjt.data.dto.response.TopScore
@@ -265,6 +267,22 @@ class CardViewModel : ViewModel() {
                 }
             }
         }
+    }
+
+    // 삭제할 카드 목록을 관리하는 상태 추가
+    private val _selectedCardsToDelete = mutableStateOf<List<Card>>(emptyList())
+    val selectedCardsToDelete: State<List<Card>> = _selectedCardsToDelete
+
+    fun updateCardsToDelete(selectedCategory: String, state: CardUiState.Success, selectedCardIds: Set<String>) {
+        val cardsToDelete = when (selectedCategory) {
+            "블로그" -> state.blogs
+            "동영상" -> state.videos
+            "뉴스" -> state.news
+            else -> emptyList()
+        }.filter { card ->
+            selectedCardIds.contains(card.cardId)
+        }
+        _selectedCardsToDelete.value = cardsToDelete
     }
 }
 

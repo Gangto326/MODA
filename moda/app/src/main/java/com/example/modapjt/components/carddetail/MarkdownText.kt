@@ -243,51 +243,51 @@ private fun MarkdownSection(
     onKeywordClick: (String) -> Unit
 ) {
     when (node) {
-        is Heading -> {
-            val headingText = remember(node, keywords) {
-                buildAnnotatedString {
-                    processHeadingNode(node, keywords)
-                }
-            }
-
-            ClickableText(
-                text = headingText,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        top = when {
-                            // level 1(#)이면서 이전에 level 1 헤딩이 없는 경우 (첫 번째 # 헤딩)
-                            node.level == 1 && !hasPreviousHeading(node) -> 30.dp
-                            node.level == 1 -> 50.dp  // # 로 시작하는 헤딩의 경우 위 패딩을 더 크게
-                            node.level == 3 -> 20.dp
-                            node.previous != null -> 10.dp
-                            else -> 0.dp
-                        },
-                        bottom = 10.dp,
-                    ),
-//                    .padding(top = if (node.previous != null) 16.dp else 0.dp, bottom = 4.dp),
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    color = color,
-                    fontSize = when (node.level) {
-//                        1 -> 20.sp
-//                        2 -> 18.sp
-//                        3 -> 16.sp
-//                        else -> 14.sp
-                        1 -> 18.sp
-                        2 -> 14.sp
-                        3 -> 14.sp
-                        else -> 12.sp
-                    },
-                    fontWeight = FontWeight.Bold
-                ),
-                onClick = { offset ->
-                    headingText.getStringAnnotations("CLICKABLE", offset, offset)
-                        .firstOrNull()?.let { annotation ->
-                            onKeywordClick(annotation.item)
-                        }
-                }
-            )
-        }
+//        is Heading -> {
+//            val headingText = remember(node, keywords) {
+//                buildAnnotatedString {
+//                    processHeadingNode(node, keywords)
+//                }
+//            }
+//
+//            ClickableText(
+//                text = headingText,
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .padding(
+//                        top = when {
+//                            // level 1(#)이면서 이전에 level 1 헤딩이 없는 경우 (첫 번째 # 헤딩)
+//                            node.level == 1 && !hasPreviousHeading(node) -> 30.dp
+//                            node.level == 1 -> 50.dp  // # 로 시작하는 헤딩의 경우 위 패딩을 더 크게
+//                            node.level == 3 -> 20.dp
+//                            node.previous != null -> 10.dp
+//                            else -> 0.dp
+//                        },
+//                        bottom = 10.dp,
+//                    ),
+////                    .padding(top = if (node.previous != null) 16.dp else 0.dp, bottom = 4.dp),
+//                style = MaterialTheme.typography.bodyLarge.copy(
+//                    color = color,
+//                    fontSize = when (node.level) {
+////                        1 -> 20.sp
+////                        2 -> 18.sp
+////                        3 -> 16.sp
+////                        else -> 14.sp
+//                        1 -> 18.sp
+//                        2 -> 14.sp
+//                        3 -> 14.sp
+//                        else -> 12.sp
+//                    },
+//                    fontWeight = FontWeight.Bold
+//                ),
+//                onClick = { offset ->
+//                    headingText.getStringAnnotations("CLICKABLE", offset, offset)
+//                        .firstOrNull()?.let { annotation ->
+//                            onKeywordClick(annotation.item)
+//                        }
+//                }
+//            )
+//        }
         is ListItem -> {
             val listItemText = buildAnnotatedString {
                 append("• ")  // bullet point 추가

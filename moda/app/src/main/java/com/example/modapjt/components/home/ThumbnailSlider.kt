@@ -1,5 +1,11 @@
 package com.example.modapjt.components.home
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -7,6 +13,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.modapjt.domain.viewmodel.SearchViewModel
@@ -20,7 +28,13 @@ fun ThumbnailSlider(
     val searchData by viewModel.searchData.collectAsState()
     var currentIndex by remember { mutableStateOf(0) }
     var dragOffset by remember { mutableStateOf(0f) }
-    val dragThreshold = 100f
+//    val dragThreshold = 100f
+
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp.value
+    val dragThreshold = screenWidth * 0.4f // 화면 너비의 40%를 임계값으로 설정
+
+    // targetIndex를 추가하여 애니메이션 방향 결정
+    var targetIndex by remember { mutableStateOf(0) }
 
     // 기본 온보딩 이미지 리스트
     val defaultOnboardingImages = listOf(
@@ -45,7 +59,8 @@ fun ThumbnailSlider(
             } else {
                 searchData?.thumbnails?.size ?: defaultOnboardingImages.size
             }
-            currentIndex = (currentIndex + 1) % totalItems
+            targetIndex = (currentIndex + 1) % totalItems
+            currentIndex = targetIndex
         }
     }
 
@@ -66,10 +81,12 @@ fun ThumbnailSlider(
                             }
                             when {
                                 dragOffset > dragThreshold -> {
-                                    currentIndex = if (currentIndex == 0) totalItems - 1 else currentIndex - 1
+                                    targetIndex = if (currentIndex == 0) totalItems - 1 else currentIndex - 1
+                                    currentIndex = targetIndex
                                 }
                                 dragOffset < -dragThreshold -> {
-                                    currentIndex = (currentIndex + 1) % totalItems
+                                    targetIndex = (currentIndex + 1) % totalItems
+                                    currentIndex = targetIndex
                                 }
                             }
                             dragOffset = 0f
@@ -80,30 +97,45 @@ fun ThumbnailSlider(
                     )
                 }
         ) {
-            if (searchData?.thumbnails?.isEmpty() == true) {
-                // 기본 온보딩 이미지 표시
-                TopThumbnail(
-                    imageUrl = defaultOnboardingImages[currentIndex],
-                    title = "온보딩 이미지 ${currentIndex + 1}",
-                    content = "환영합니다!",
-                    currentIndex = currentIndex,
-                    totalItems = defaultOnboardingImages.size,
-                    onClick = { /* 온보딩 이미지는 클릭 동작 없음 */ }
-                )
-            } else {
-                searchData?.thumbnails?.let { thumbnails ->
-                    if (thumbnails.isNotEmpty()) {
-                        val currentItem = thumbnails[currentIndex]
-                        TopThumbnail(
-                            imageUrl = currentItem.thumbnailUrl ?: "https://example.com/default.jpg",
-                            title = currentItem.title,
-                            content = currentItem.thumbnailContent,
-                            currentIndex = currentIndex,
-                            totalItems = thumbnails.size,
-                            onClick = {
-                                navController.navigate("cardDetail/${currentItem.cardId}")
-                            }
-                        )
+            AnimatedContent(
+                targetState = currentIndex,
+                transitionSpec = {
+                    val direction = if (targetIndex > initialState) AnimatedContentTransitionScope.SlideDirection.Left
+                    else AnimatedContentTransitionScope.SlideDirection.Right
+                    slideIntoContainer(
+                        towards = direction,
+                        animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
+                    ) togetherWith slideOutOfContainer(
+                        towards = direction,
+                        animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
+                    )
+                },
+                label = "thumbnail_slider"
+            ) { index ->
+                if (searchData?.thumbnails?.isEmpty() == true) {
+                    TopThumbnail(
+                        imageUrl = defaultOnboardingImages[index],
+                        title = "온보딩 이미지 ${index + 1}",
+                        content = "환영합니다!",
+                        currentIndex = index,
+                        totalItems = defaultOnboardingImages.size,
+                        onClick = { /* 온보딩 이미지는 클릭 동작 없음 */ }
+                    )
+                } else {
+                    searchData?.thumbnails?.let { thumbnails ->
+                        if (thumbnails.isNotEmpty()) {
+                            val currentItem = thumbnails[index]
+                            TopThumbnail(
+                                imageUrl = currentItem.thumbnailUrl ?: "https://example.com/default.jpg",
+                                title = currentItem.title,
+                                content = currentItem.thumbnailContent,
+                                currentIndex = index,
+                                totalItems = thumbnails.size,
+                                onClick = {
+                                    navController.navigate("cardDetail/${currentItem.cardId}")
+                                }
+                            )
+                        }
                     }
                 }
             }
