@@ -8,6 +8,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Build
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.core.app.NotificationCompat
 import com.bumptech.glide.Glide
 import com.example.modapjt.MainActivity
@@ -20,6 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 
+@ExperimentalMaterial3Api
 class MyFirebaseMessagingService : FirebaseMessagingService()  {
     private val api = RetrofitInstance.fcmTokenApi
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)

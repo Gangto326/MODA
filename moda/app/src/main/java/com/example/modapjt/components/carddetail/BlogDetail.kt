@@ -1,6 +1,12 @@
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.repeatable
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -48,11 +54,14 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -75,14 +84,17 @@ import com.example.modapjt.components.carddetail.ImageSlider
 import com.example.modapjt.domain.model.CardDetail
 import com.example.modapjt.domain.viewmodel.SearchViewModel
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.commonmark.node.Heading
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import org.commonmark.node.Text
 import org.commonmark.parser.Parser
+import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.roundToInt
+import kotlin.math.sin
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalLayoutApi::class)
@@ -119,9 +131,8 @@ fun BlogDetailScreen(cardDetail: CardDetail, navController: NavController) {
         calculateActiveIndex(listState, headerItemCount)
     }
 
-//    var isDragging by remember { mutableStateOf(false) }
     var isExpanded by remember { mutableStateOf(false) }
-    var selectedIndex by remember { mutableStateOf(activeIndex) }
+    var selectedIndex by remember { mutableStateOf(0) }
 
     // 화면 크기에 따른 동적 패딩 계산
     val horizontalPadding = (screenWidth * 0.04f).dp  // 화면 너비의 4%
@@ -291,18 +302,46 @@ fun BlogDetailScreen(cardDetail: CardDetail, navController: NavController) {
                         )
                     }
 
-                    items(sections) { section ->
-                        MarkdownText(
-                            markdown = section,
-                            modifier = Modifier
-                                .padding(horizontal = horizontalPadding)
-                                .padding(vertical = 8.dp)
-                                .padding(end = 4.dp),
-                            keywords = limitedKeywords,
-                            onKeywordClick = { keyword ->
-                                searchViewModel.onKeywordClick(keyword)
-                            }
-                        )
+//                    items(sections) { section ->
+//                        MarkdownText(
+//                            markdown = section,
+//                            modifier = Modifier
+//                                .padding(horizontal = horizontalPadding)
+//                                .padding(vertical = 8.dp)
+//                                .padding(end = 4.dp),
+//                            keywords = limitedKeywords,
+//                            onKeywordClick = { keyword ->
+//                                searchViewModel.onKeywordClick(keyword)
+//                            }
+//                        )
+//                    }
+                    items(sections.withIndex().toList()) { (index, section) ->
+                        Column(modifier = Modifier
+                            .padding(horizontal = horizontalPadding)
+                            .padding(vertical = 8.dp)
+                        ) {
+                            // 섹션 제목 추출
+                            val sectionTitle = getSectionTitle(section)
+
+                            ShakingTitle(
+                                text = sectionTitle,
+                                isActive = index == activeIndex,
+                                isFirst = index == 0,
+                                isExpanded = isExpanded,
+                                modifier = Modifier
+                                    .padding(horizontal = 6.dp)
+                                    .padding(bottom = 14.dp)
+                            )
+
+                            MarkdownText(
+                                markdown = section,
+                                modifier = Modifier.padding(end = 4.dp),
+                                keywords = limitedKeywords,
+                                onKeywordClick = { keyword ->
+                                    searchViewModel.onKeywordClick(keyword)
+                                }
+                            )
+                        }
                     }
                     item {
                         Spacer(modifier = Modifier.height(20.dp))
@@ -323,6 +362,22 @@ fun BlogDetailScreen(cardDetail: CardDetail, navController: NavController) {
                 ) {
 
                     var sliderPosition by remember { mutableStateOf(selectedIndex.toFloat()) }
+                    // sliderPosition이 변경될 때마다 타이머를 재설정하는 로직 추가
+                    var lastInteractionTime by remember { mutableStateOf(0L) }
+
+                    // 1.5초 후 자동으로 닫히는 effect
+                    LaunchedEffect(sliderPosition) {
+                        lastInteractionTime = System.currentTimeMillis()
+
+                        while (isExpanded) {
+                            delay(100) // 100ms 간격으로 체크
+                            val currentTime = System.currentTimeMillis()
+                            if (currentTime - lastInteractionTime >= 1500) { // 1.5초
+                                isExpanded = false
+                                break
+                            }
+                        }
+                    }
 
                     if (!isExpanded) {
                         // 기본 목차 버튼들
@@ -362,7 +417,7 @@ fun BlogDetailScreen(cardDetail: CardDetail, navController: NavController) {
                                     .offset(x = (2).dp),
                                 value = sliderPosition,
                                 onValueChange = { newValue ->
-                                    // 불필요한 계산 줄이기
+                                    lastInteractionTime = System.currentTimeMillis()
                                     val roundedValue = newValue.roundToInt()
                                     if (selectedIndex != roundedValue) {
                                         sliderPosition = newValue
@@ -373,7 +428,7 @@ fun BlogDetailScreen(cardDetail: CardDetail, navController: NavController) {
                                 valueRange = 0f..(sections.size - 1).toFloat(),
                                 steps = sections.size - 2,
                                 colors = SliderDefaults.colors(
-                                    thumbColor = Color(0xFFFFCD69),
+                                    thumbColor = Color(0xFFFDEEB0),
                                     activeTrackColor = MaterialTheme.colorScheme.primary,
                                     inactiveTrackColor = Color.Transparent
                                 ),
@@ -399,7 +454,8 @@ fun BlogDetailScreen(cardDetail: CardDetail, navController: NavController) {
                                         for (i in 0 until tickCount) {
                                             val x = i * tickSpacing
                                             drawCircle(
-                                                color = Color(0xFF000000).copy(alpha = 0.3f),
+//                                                color = Color(0xFF000000).copy(alpha = 0.3f),
+                                                color = Color(0xFFFDEEB0),
                                                 radius = 6f,  // tick 크기 조절
                                                 center = Offset(x, yCenter)
                                             )
@@ -408,63 +464,8 @@ fun BlogDetailScreen(cardDetail: CardDetail, navController: NavController) {
                                 }
                             )
                         }
-
-                        // 선택된 섹션 제목 표시 (옵션)
-//                        if (selectedIndex in sections.indices) {
-//                            Text(
-//                                text = getSectionTitle(sections[selectedIndex]),
-//                                style = MaterialTheme.typography.bodySmall,
-//                                modifier = Modifier
-//                                    .align(Alignment.CenterEnd)
-//                                    .padding(end = 70.dp)
-//                                    .background(
-//                                        color = Color.White.copy(alpha = 0.9f),
-//                                        shape = RoundedCornerShape(4.dp)
-//                                    )
-//                                    .padding(4.dp)
-//                            )
-//                        }
-
                     }
                 }
-
-//
-//                // 목차 버튼들 (오버레이)
-//                Column(
-//                    modifier = Modifier
-//                        .align(Alignment.CenterEnd)
-//                        .padding(end = 16.dp),
-//                    verticalArrangement = Arrangement.spacedBy(8.dp),
-//                    horizontalAlignment = Alignment.End
-//                ) {
-//                    sections.forEachIndexed { index, _ ->
-//                        Box(
-//                            modifier = Modifier
-//                                .size(8.dp)
-//                                .background(
-//                                    color = if (index == activeIndex) {
-//                                         Color(0xFFFFCD69) // 더 진한 노란색
-//                                    } else {
-//                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-//                                    },
-//                                    shape = CircleShape
-//                                )
-////                                .clickable {
-////                                    coroutineScope.launch {
-////                                        // 스크롤 오프셋 미세 조정
-////                                        val targetIndex = index + headerItemCount
-////                                        val viewportHeight = listState.layoutInfo.viewportEndOffset
-////                                        val itemOffset = (viewportHeight * 0.15).toInt() // viewport 상단 15% 위치로 조정
-////
-////                                        listState.animateScrollToItem(
-////                                            index = targetIndex,
-////                                            scrollOffset = -itemOffset
-////                                        )
-////                                    }
-////                                }
-//                        )
-//                    }
-//                }
             }
         }
     }
@@ -522,4 +523,36 @@ private fun calculateActiveIndex(
             listState.layoutInfo.totalItemsCount - headerItemCount - 1
         )
     } ?: 0
+}
+
+@Composable
+fun ShakingTitle(
+    text: String,
+    isActive: Boolean,
+    isFirst: Boolean,
+    isExpanded: Boolean,
+    modifier: Modifier = Modifier
+) {
+
+    val shake by animateFloatAsState(
+        targetValue = if (isActive) 1f else 0f,
+        animationSpec = spring(
+            dampingRatio = 0.3f,
+            stiffness = 500f
+        )
+    )
+
+    val offset = if (isActive && isExpanded) (sin(shake * PI) * 8).toFloat().dp else 0.dp
+
+    Text(
+        text = text,
+        modifier = modifier
+            .offset(x = offset)
+            .padding(top = if (isFirst) 22.dp else 48.dp),
+        style = MaterialTheme.typography.titleMedium.copy(
+            color = Color.Black,
+            fontWeight = FontWeight.Bold,
+            fontSize = 19.sp
+        )
+    )
 }
