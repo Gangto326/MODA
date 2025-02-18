@@ -52,7 +52,7 @@ fun BlogSelectionItem(
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .clickable(onClick = onClick),
         color = when {
-//            isSelected -> Color.LightGray.copy(alpha = 0.3f)  // 선택됐을 때 색상
+            isSelected -> Color.LightGray.copy(alpha = 0.3f)  // 선택됐을 때 색상
             !isMine -> Color.Gray
             else -> Color.White
         }
@@ -123,8 +123,8 @@ fun BlogSelectionItem(
                     color = Color(0xFF2167F3),
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
-                        .padding(top = 16.dp, end = 24.dp, bottom = 16.dp)
-                        .size(16.dp)
+                        .padding(top = 16.dp, end = 17.dp, bottom = 16.dp)
+                        .size(18.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Check,

@@ -164,6 +164,7 @@ import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -206,7 +207,18 @@ fun MarkdownText(
     onKeywordClick: (String) -> Unit
 ) {
     val parser = remember { Parser.builder().build() }
-    val document = remember(markdown) { parser.parse(markdown) }
+    val document = remember(markdown) {
+        println("Parsing markdown: $markdown")
+        parser.parse(markdown) }
+
+    LaunchedEffect(markdown) {
+        // 마크다운 구조 확인을 위한 로깅
+        var currentNode = document.firstChild
+        while (currentNode != null) {
+            println("Node type: ${currentNode.javaClass.simpleName}, Content: ${currentNode}")
+            currentNode = currentNode.next
+        }
+    }
 
     Column(modifier = modifier
         .fillMaxWidth()
@@ -232,8 +244,10 @@ private fun MarkdownSection(
 ) {
     when (node) {
         is Heading -> {
-            val headingText = buildAnnotatedString {
-                processHeadingNode(node, keywords)
+            val headingText = remember(node, keywords) {
+                buildAnnotatedString {
+                    processHeadingNode(node, keywords)
+                }
             }
 
             ClickableText(
@@ -242,23 +256,27 @@ private fun MarkdownSection(
                     .fillMaxWidth()
                     .padding(
                         top = when {
-                            // level 2(##)이면서 이전에 level 2 헤딩이 없는 경우 (첫 번째 ## 헤딩)
-                            node.level == 2 && !hasPreviousLevelTwoHeading(node) -> 20.dp
-                            node.level == 2 -> 40.dp  // ## 로 시작하는 헤딩의 경우 위 패딩을 더 크게
+                            // level 1(#)이면서 이전에 level 1 헤딩이 없는 경우 (첫 번째 # 헤딩)
+                            node.level == 1 && !hasPreviousHeading(node) -> 30.dp
+                            node.level == 1 -> 50.dp  // # 로 시작하는 헤딩의 경우 위 패딩을 더 크게
                             node.level == 3 -> 20.dp
                             node.previous != null -> 10.dp
                             else -> 0.dp
                         },
-                        bottom = 4.dp,
+                        bottom = 10.dp,
                     ),
 //                    .padding(top = if (node.previous != null) 16.dp else 0.dp, bottom = 4.dp),
                 style = MaterialTheme.typography.bodyLarge.copy(
                     color = color,
                     fontSize = when (node.level) {
-                        1 -> 20.sp
-                        2 -> 18.sp
-                        3 -> 16.sp
-                        else -> 14.sp
+//                        1 -> 20.sp
+//                        2 -> 18.sp
+//                        3 -> 16.sp
+//                        else -> 14.sp
+                        1 -> 18.sp
+                        2 -> 14.sp
+                        3 -> 14.sp
+                        else -> 12.sp
                     },
                     fontWeight = FontWeight.Bold
                 ),
@@ -334,10 +352,10 @@ private fun MarkdownSection(
 }
 
 // 이전에 level 2 헤딩이 있는지 확인하는 함수
-private fun hasPreviousLevelTwoHeading(node: Node): Boolean {
+private fun hasPreviousHeading(node: Node): Boolean {
     var currentNode = node.previous
     while (currentNode != null) {
-        if (currentNode is Heading && currentNode.level == 2) {
+        if (currentNode is Heading && currentNode.level == 1) {
             return true
         }
         currentNode = currentNode.previous
