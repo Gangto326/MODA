@@ -1,8 +1,10 @@
 package com.example.modapjt.ui.theme
 
 import android.app.Activity
+import android.graphics.Color
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.DatePicker
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -12,16 +14,32 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import com.example.app.ui.theme.customTypography
 
+//val PurpleGrey40: Color
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+//    primary = Purple80,
+//    secondary = PurpleGrey80,
+//    tertiary = Pink80
+    primary = DarkPointColor,
+    onPrimary = DarkColorA,
+    secondary = DarkColorB,
+    onSecondary = DarkColorC,
+    tertiary = DarkColorD,
+    onTertiary = DarkColorE
+
+
+
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+//    primary = Purple40,
+//    secondary = PurpleGrey40,
+//    tertiary = Pink40
+    primary = LightPointColor,
+    onPrimary = LightColorA,
+    secondary = LightColorB,
+    onSecondary = LightColorC,
+    tertiary = LightColorD,
+    onTertiary = LightColorE
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
