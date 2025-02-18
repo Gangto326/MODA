@@ -124,7 +124,7 @@ fun newSearchCardListScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(Color.White)
+//                .background(Color.White)
         ) {
             when (val state = uiState) {
                 is CardUiState.Loading -> {
@@ -448,7 +448,7 @@ fun EmptyMessage2(message: String) {
     ) {
         Text(
             text = message,
-            color = Color.Gray,
+            color = MaterialTheme.colorScheme.secondary,
             textAlign = TextAlign.Center
         )
     }

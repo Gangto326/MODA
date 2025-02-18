@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.remember
 
 @Composable
@@ -96,7 +97,7 @@ fun ImageSmall(
             Icon(
                 imageVector = Icons.Filled.Star, // 별 모양 아이콘
                 contentDescription = "즐겨찾기됨",
-                tint = Color(0xFFFFCD69),
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
                     .size(30.dp) // 아이콘 크기
                     .align(Alignment.TopEnd) // 우측 하단에 배치

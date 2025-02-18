@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -52,9 +53,9 @@ fun VideoBig(
 
         colors = CardDefaults.cardColors(
             containerColor = when {
-                isSelected -> Color.LightGray.copy(alpha = 0.3f)  // 선택됐을 때 색상
-                !isMine -> Color.Gray
-                else -> Color.White
+                isSelected -> MaterialTheme.colorScheme.onTertiary.copy(alpha = 0.3f)  // 선택됐을 때 색상
+                !isMine -> MaterialTheme.colorScheme.onSecondary
+                else -> MaterialTheme.colorScheme.tertiary
             }
 //            containerColor = if (!isMine) Color.Gray else Color.White
         ),
@@ -79,7 +80,7 @@ fun VideoBig(
                 text = title,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF2B2826),
+                color = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier.padding(start = 4.dp, end = 4.dp,top = 12.dp),
                 maxLines = 2, // 최대 2줄까지 표시
                 overflow = TextOverflow.Ellipsis, // 2줄 이상일 경우 "..."로 표시
@@ -91,7 +92,7 @@ fun VideoBig(
                 text = thumbnailContent,
                 fontSize = 14.sp,
                 maxLines = 1,
-                color = Color(0xFF665F5B),
+                color = MaterialTheme.colorScheme.secondary,
                 fontWeight = FontWeight.Medium,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.padding(start = 4.dp, end = 4.dp, top = 2.dp)
@@ -123,7 +124,7 @@ fun VideoBig(
                     keywords.take(3).forEach { keyword ->  // 최대 3개의 키워드만 표시
                         Box(
                             modifier = Modifier
-                                .border(1.dp, Color(0xFFB8ACA5), RoundedCornerShape(50)) // 테두리 추가
+                                .border(1.dp, MaterialTheme.colorScheme.onSecondary, RoundedCornerShape(50)) // 테두리 추가
                                 .padding(horizontal = 14.dp, vertical = 6.dp) // 키워드 패딩
                                 .clip(RoundedCornerShape(50)), // 원형 모양으로 둥글게 처리
                             contentAlignment = Alignment.Center
@@ -131,7 +132,7 @@ fun VideoBig(
                             Text(
                                 text = keyword, // 해시태그 형식
                                 style = customTypography.bodySmall,
-                                color = Color(0xFFBAADA4),
+                                color = MaterialTheme.colorScheme.onSecondary,
                                 fontSize = 12.sp
                             )
                         }

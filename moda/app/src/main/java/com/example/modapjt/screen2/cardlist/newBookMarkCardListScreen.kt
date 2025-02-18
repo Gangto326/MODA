@@ -340,7 +340,7 @@ fun newBookMarkCardListScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(Color.White)
+//                .background(Color.White)
         ) {
             when (val state = uiState) {
                 is CardUiState.Loading -> {
@@ -668,7 +668,7 @@ fun EmptyMessage3(message: String) {
     ) {
         Text(
             text = message,
-            color = Color.Gray,
+            color = MaterialTheme.colorScheme.secondary,
             textAlign = TextAlign.Center
         )
     }

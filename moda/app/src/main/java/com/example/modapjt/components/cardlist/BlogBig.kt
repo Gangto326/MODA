@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -53,9 +54,9 @@ fun BlogBig(
 //            ), // 클릭 이벤트 추가
         colors = CardDefaults.cardColors(
             containerColor = when {
-                isSelected -> Color.LightGray.copy(alpha = 0.3f)  // 선택됐을 때 색상
-                !isMine -> Color.Gray
-                else -> Color.White
+                isSelected -> MaterialTheme.colorScheme.onTertiary.copy(alpha = 0.3f)  // 선택됐을 때 색상 : lightgray
+                !isMine -> MaterialTheme.colorScheme.onSecondary // gray
+                else -> MaterialTheme.colorScheme.tertiary // white
             }
 //            containerColor = if (!isMine) Color.Gray else Color.White // ✅ 배경색 적용
         ),
@@ -81,6 +82,7 @@ fun BlogBig(
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     maxLines = 2, // 한 줄까지만 표시
+                    color = MaterialTheme.colorScheme.onPrimary,
                     overflow = TextOverflow.Ellipsis, // 길면 ...으로 생략
                     modifier = Modifier.weight(1f), // 남은 공간을 최대한 차지
                     lineHeight = 20.sp // 제목의 행간 설정
@@ -90,7 +92,7 @@ fun BlogBig(
             Text(
                 text = description,
                 style = customTypography.bodyMedium,
-                color = Color(0xFF665F5B),
+                color = MaterialTheme.colorScheme.secondary,
                 lineHeight = 20.sp, // 설명의 행간 설정
                 maxLines = 3, // 최대 2줄까지만 표시
                 overflow = TextOverflow.Ellipsis, // 길면 ...으로 생략
@@ -108,7 +110,7 @@ fun BlogBig(
                 keywords.take(3).forEach { keyword ->  // 최대 3개의 키워드만 표시
                     Box(
                         modifier = Modifier
-                            .border(1.dp, Color(0xFFB8ACA5), RoundedCornerShape(50)) // 테두리 추가
+                            .border(1.dp, MaterialTheme.colorScheme.onSecondary, RoundedCornerShape(50)) // 테두리 추가
                             .padding(horizontal = 14.dp, vertical = 6.dp) // 키워드 패딩
                             .clip(RoundedCornerShape(50)), // 원형 모양으로 둥글게 처리
                         contentAlignment = Alignment.Center
@@ -116,7 +118,7 @@ fun BlogBig(
                         Text(
                             text = keyword, // 해시태그 형식
                             style = customTypography.bodySmall,
-                            color = Color(0xFFBAADA4),
+                            color = MaterialTheme.colorScheme.onSecondary,
                             fontSize = 12.sp
                         )
                     }
@@ -129,7 +131,7 @@ fun BlogBig(
                     .fillMaxWidth()
                     .padding(top = 12.dp, bottom = 16.dp) // 위쪽 여백 추가
                     .clip(RoundedCornerShape(8.dp)) // 모서리 둥글게 처리
-                    .border(1.dp, Color(0xFFF4F1ED), RoundedCornerShape(8.dp)) // 회색 테두리 추가
+                    .border(1.dp, MaterialTheme.colorScheme.onSecondary, RoundedCornerShape(8.dp)) // 회색 테두리 추가
             ) {
                 AsyncImage(
                     model = imageUrl, // 썸네일 이미지 URL

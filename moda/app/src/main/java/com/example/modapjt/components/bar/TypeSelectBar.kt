@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -55,7 +56,7 @@ fun TypeSelectBar( // 상단 타입 선택 바
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(Color.White) // 수정완료
+//            .background(Color.White) // 수정완료
             .padding(horizontal = 16.dp, vertical = 10.dp), // 수정완료( 상단 타입 선택바 세로 길이 )
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
@@ -142,7 +143,7 @@ private fun CategoryTab(
             // 🔹 카테고리 텍스트
             Text(
                 text = title,
-                color = if (isSelected) Color(0xFF665F5B) else Color(0xFFBAADA4),
+                color = if (isSelected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSecondary,
                 fontSize = 16.sp, // 🔥 폰트 크기 설정 (sp 단위)
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
 //                fontWeight = FontWeight.Bold // 🔥 폰트 굵기 설정
@@ -158,7 +159,8 @@ private fun CategoryTab(
                 modifier = Modifier
                     .width(with(density) { rowWidth.toDp() } + 12.dp) // 🔥 아이콘 포함한 Row 길이로 설정 + 12dp
                     .height(2.dp)
-                    .background(Color(0xFFFFCD69))
+//                    .background(MaterialTheme.colorScheme.tertiary)
+                    .background(MaterialTheme.colorScheme.primary)
             )
         }
     }
@@ -188,8 +190,8 @@ fun SortDropdown(
         Row(
             modifier = Modifier
                 .clip(RoundedCornerShape(16.dp))
-                .border(1.dp, Color(0xFFFFCC80), RoundedCornerShape(16.dp)) // 노란색 테두리 추가
-                .background(Color.Transparent)
+                .border(1.dp, MaterialTheme.colorScheme.onSecondary, RoundedCornerShape(16.dp)) // 연회색 테두리
+//                .background(Color.Transparent)
                 .clickable(
                     indication = null, // 클릭 효과 제거
                     interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
@@ -199,13 +201,13 @@ fun SortDropdown(
         ) {
             Text(
                 text = selectedSort,
-                color = Color(0xFFBDBDBD),
+                color = MaterialTheme.colorScheme.secondary,
                 fontSize = 14.sp
             )
             Icon(
                 imageVector = Icons.Filled.ArrowDropDown,
                 contentDescription = "드롭다운",
-                tint = Color(0xFFBDBDBD)
+                tint = MaterialTheme.colorScheme.secondary
             )
         }
 
@@ -213,18 +215,18 @@ fun SortDropdown(
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            modifier = Modifier.background(Color.White)
+//            modifier = Modifier.background(Color.White)
         ) {
             listOf("최신순", "오래된순").forEach { sortOption ->
                 DropdownMenuItem(
                     text = {
                         Text(
                             text = sortOption,
-                            color = if (selectedSort == sortOption) Color.Black else Color.DarkGray
+                            color = if (selectedSort == sortOption) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.secondary
                         )
                     },
                     modifier = Modifier
-                        .background(if (selectedSort == sortOption) Color(0xFFFFCC80) else Color.White),
+                        .background(if (selectedSort == sortOption) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary),
                     onClick = {
                         onSortSelected(sortOption)
                         expanded = false

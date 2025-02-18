@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -86,6 +87,7 @@ fun VideoSmall(
                     text = title,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     lineHeight = 20.sp,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
@@ -94,6 +96,7 @@ fun VideoSmall(
                 Text(
                     text = thumbnailContent,
                     fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.secondary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -112,7 +115,7 @@ fun VideoSmall(
                 keywords.forEach { keyword ->
                     Text(
                         text = "# $keyword",
-                        color = Color(0xFFBAADA4),
+                        color = MaterialTheme.colorScheme.onSecondary,
                         style = customTypography.bodySmall
                     )
                 }
