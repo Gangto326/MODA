@@ -97,6 +97,7 @@ public class NotificationService {
 					.setNotification(AndroidNotification.builder()
 						.setColor("#FFFFFF")
 						.setIcon("icon_round")
+						.setImage("https://a805bucket.s3.ap-northeast-2.amazonaws.com/images/logo/naverLogo.jpg")
 						.setClickAction("OPEN_ACTIVITY")
 						.setDefaultVibrateTimings(true)
 						.setDefaultSound(true)

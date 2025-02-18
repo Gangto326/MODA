@@ -36,7 +36,7 @@ public class PlatformExtractorFactory {
 	private static ExtractorConfig createMobileNaverBlogConfig() {
 		return ExtractorConfig.builder()
 			.pattern("m.blog.naver.com")
-			.contentSelector(".dsadsadasd") //.se_component_wrap.__se_component_area, .se-main-container
+			.contentSelector(".se_component_wrap.__se_component_area, .se-main-container")
 			.imageSelector(".se_mediaImage")
 			.requiresFrame(false)
 			.urlDomainType(UrlDomainType.NAVER_BLOG)
