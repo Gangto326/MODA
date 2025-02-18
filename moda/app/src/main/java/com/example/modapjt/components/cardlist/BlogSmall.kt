@@ -36,7 +36,7 @@ fun BlogSmall(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(if (!isMine) Color.Gray.copy(alpha = 0.2f) else Color.White)
+            .background(if (!isMine) MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.2f) else MaterialTheme.colorScheme.tertiary)
             .clickable(
                 onClick = onClick,
                 indication = null, // 클릭 효과 제거
