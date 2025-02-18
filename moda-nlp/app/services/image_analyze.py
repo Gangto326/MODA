@@ -67,6 +67,7 @@ class ImageAnalyze:
 
         response =  self.chat(model = model, messages = messages, format = format)
         self.content = await self.translate_text(response)
+        print("이미지 분석")
 
     #category를 선택하는 함수
     def choose_category(self):
@@ -123,12 +124,14 @@ class ImageAnalyze:
         }
 
         response = self.chat(model = model, messages = messages, format = format)
-        self.keywords = json.loads(response)['keyword'][:5]
+        self.keywords = json.loads(response)['keyword']
         self.keywords = [keyword for keyword in self.keywords if len(keyword) <=  10 and keyword in self.content]
+        print("키워드 생성")
 
     #embeeding_vector를 생성하는 함수
     def make_embedding_vector(self):
         self.embedding_vector = self.embedder.embed_document(self.content)
+        print("임베딩 생성")
 
     #한글로 번역하는 함수
     async def translate_text(self, text: str):

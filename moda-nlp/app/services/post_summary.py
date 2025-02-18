@@ -32,8 +32,8 @@ class PostSummary:
 
             if not await self.detect_chinese(self.content):
                 break
-        self.make_keywords('anpigon/qwen2.5-7b-instruct-kowiki'),
-        self.make_thumbnail_content('anpigon/qwen2.5-7b-instruct-kowiki'),
+        self.make_keywords('anpigon/qwen2.5-7b-instruct-kowiki')
+        self.make_thumbnail_content('anpigon/qwen2.5-7b-instruct-kowiki')
         self.make_embedding_vector()
 
     #Response 형태로 만들어주는 함수
@@ -166,6 +166,7 @@ class PostSummary:
         response = self.chat(model = model, messages = messages, format = format)
         self.keywords = json.loads(response)['keyword'][:5]
         self.keywords = [keyword for keyword in self.keywords if len(keyword) <=  10 and keyword in self.content]
+        print("키워드 생성")
 
     # thumbnail_content를 생성하는 함수
     def make_thumbnail_content(self, model: str):
@@ -174,10 +175,12 @@ class PostSummary:
 
         response = self.chat(model = model, messages = messages, format = format)
         self.thumbnail_content = response
+        print("썸네일 생성")
 
     #embeeding_vector를 생성하는 함수
     def make_embedding_vector(self):
         self.embedding_vector = self.embedder.embed_document(self.content)
+        print("임베딩 생성")
 
     #AI 결과에 중국어가 포함되어 있는지 확인하는 함수
     async def detect_chinese(self, content: str) -> bool:
