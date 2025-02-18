@@ -117,11 +117,10 @@ class PostSummary:
 
                 for idx in range(1, len(categories)):
                     compare_result = vector_compare(embedding, categories[idx][1])
-                    print(f"비교 결과 {categories[idx][0]} {compare_result} {similarity}")
                     if compare_result > similarity:
                         similarity = compare_result
-                        category_id = idx + 1
-                        category = categories[idx][0]
+                        self.category_id = idx + 1
+                        self.category = categories[idx][0]
 
                 print(f"임베딩 카테고리 {self.category_id} {self.category}")
         except Exception as e:
