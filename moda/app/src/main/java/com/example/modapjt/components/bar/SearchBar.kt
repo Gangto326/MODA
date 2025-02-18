@@ -43,7 +43,7 @@ fun SearchBar(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .height(56.dp)
+            .height(50.dp)
             .clickable(
                 indication = null, // 클릭 효과 제거
                 interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
@@ -59,7 +59,7 @@ fun SearchBar(
                 .border(
                     width = 2.dp,
                     color = Color(0xFFFFCC80),
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(16.dp)
                 )
                 .padding(4.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -69,8 +69,8 @@ fun SearchBar(
                 painter = painterResource(id = R.drawable.ic_search),
                 contentDescription = "Search Icon",
                 modifier = Modifier
-                    .size(23.dp)
-                    .padding(start = 8.dp)
+                    .size(30.dp)
+                    .padding(start = 16.dp)
             )
 
             Box(modifier = Modifier.weight(1f)) {
@@ -78,14 +78,14 @@ fun SearchBar(
                     value = searchText,
                     onValueChange = { /* Disabled in home screen */ },
                     enabled = false,
-                    textStyle = TextStyle(fontSize = 16.sp, color = Color.Black),
+                    textStyle = TextStyle(fontSize = 14.sp, color = Color.Black),
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 Text(
-                    text = "찾고 싶은 내용을 입력하세요",
+                    text = "찾고 싶은 정보의 키워드를 입력하세요",
                     color = Color.Gray,
-                    fontSize = 16.sp
+                    fontSize = 14.sp
                 )
             }
         }
