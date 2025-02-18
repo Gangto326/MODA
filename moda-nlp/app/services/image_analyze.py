@@ -1,6 +1,7 @@
 import base64
 import json
 import random
+import time
 from typing import List
 
 import googletrans
@@ -50,12 +51,16 @@ class ImageAnalyze:
              messages,
              model: str = MODEL,
              format = None):
+        current_seed = int(time.time() * 1000) + random.randint(1, 1000000)
+
         response = ollama.chat(
             model = model,
             messages = messages,
             format = format,
             options = {
-                'seed': random.randint(1, 1000000)
+                'seed': current_seed,
+                'temperature': random.uniform(0.7, 0.9),  # 랜덤 temperature 값
+                'top_p': random.uniform(0.8, 0.95)       # 랜덤 top_p 값
             }
         )
         return response['message']['content']

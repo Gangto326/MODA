@@ -66,7 +66,9 @@ class PostSummary:
             messages = messages,
             format = format,
             options = {
-                'seed': current_seed
+                'seed': current_seed,
+                'temperature': random.uniform(0.7, 0.9),  # 랜덤 temperature 값
+                'top_p': random.uniform(0.8, 0.95)       # 랜덤 top_p 값
             }
         )
         return response['message']['content']
