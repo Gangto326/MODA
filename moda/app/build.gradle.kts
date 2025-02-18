@@ -150,5 +150,7 @@ dependencies {
 
 //    implementation("org.commonmark:commonmark:0.21.0")
 //    implementation("com.github.jeziellago:compose-markdown:0.5.6")
+    // workmanager 의존성 추가
+    implementation("androidx.work:work-runtime-ktx:2.10.0")
 
 }
