@@ -23,6 +23,7 @@ import androidx.navigation.NavController
 import com.example.modapjt.components.bar.BottomBarComponent
 import com.example.modapjt.components.bar.HeaderBar
 import com.example.modapjt.components.bar.LinkAddHeaderBar
+import com.example.modapjt.components.bar.TitleHeaderBar
 import com.example.modapjt.components.button.LinkAddButton
 import com.example.modapjt.data.repository.CardRepository
 import kotlinx.coroutines.delay
@@ -47,7 +48,7 @@ fun newLinkUploadScreen(navController: NavController, currentRoute: String, repo
     Scaffold(
         // topBar: 화면 상단에 표시할 컴포넌트 (헤더 바)
         topBar = {
-            HeaderBar(modifier = Modifier) // HeaderBar 컴포넌트가 상단 바를 표시
+            TitleHeaderBar(titleName = "링크 추가")
         },
 
         // bottomBar: 화면 하단에 표시할 컴포넌트 (하단 바)
