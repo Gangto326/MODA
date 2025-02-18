@@ -60,7 +60,7 @@ fun VideoSmall(
             modifier = Modifier
                 .size(width = 135.dp, height = (140 * 9 / 16).dp)
                 .clip(RoundedCornerShape(8.dp))
-                .background(if (!isMine) Color.White.copy(alpha = 0.8f) else Color.Black)
+                .background(if (!isMine) MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.2f) else MaterialTheme.colorScheme.tertiary)
         ) {
             AsyncImage(
                 model = "https://img.youtube.com/vi/$videoId/0.jpg",

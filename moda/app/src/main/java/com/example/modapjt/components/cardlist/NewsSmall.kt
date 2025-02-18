@@ -43,7 +43,7 @@ fun NewsSmall(
         modifier = modifier
             .fillMaxWidth() // 가로 전체 너비 사용
 //            .clip(RoundedCornerShape(12.dp)) // 모서리 둥글게 처리
-            .background(if (!isMine) Color.Gray else Color.White) // 저장 여부에 따른 배경색
+            .background(if (!isMine) MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.2f) else MaterialTheme.colorScheme.tertiary) // 저장 여부에 따른 배경색
             .clickable(
                 onClick = onClick,
                 indication = null, // 클릭 효과 제거

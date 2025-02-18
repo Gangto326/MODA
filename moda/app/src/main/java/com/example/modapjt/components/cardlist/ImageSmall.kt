@@ -78,7 +78,7 @@ fun ImageSmall(
         modifier = modifier
             .size(imageSize)
             .clip(RoundedCornerShape(8.dp)) // 🔥 모서리 둥글게 처리
-            .background(if (!isMine) Color.Gray else Color.White)
+            .background(if (!isMine) MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.2f) else MaterialTheme.colorScheme.tertiary)
             .clickable(
                 onClick = onClick,
                 indication = null, // 클릭 효과 제거
