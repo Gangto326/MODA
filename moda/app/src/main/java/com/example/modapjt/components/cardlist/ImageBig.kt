@@ -17,9 +17,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.*
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.runtime.remember
 import androidx.compose.ui.draw.clip
 
 
@@ -38,7 +40,11 @@ fun ImageBig(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp)) // 둥근 모서리 적용
-            .clickable(onClick = onClick)
+            .clickable(
+                onClick = onClick,
+                indication = null, // 클릭 효과 제거
+                interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
+            )
             .then(
                 if (!isMine) Modifier.border(2.dp, Color.Red, RoundedCornerShape(12.dp)) else Modifier // isMine이 false면 빨간 테두리
             )

@@ -2,6 +2,7 @@ package com.example.modapjt.components.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -71,7 +73,10 @@ fun VideoItem(videoUrl: String, title: String, cardId: String, navController: Na
             textAlign = TextAlign.Left, // 왼쪽 정렬
             modifier = Modifier
                 .fillMaxWidth() // 가로 최대 크기
-                .clickable { // ✅ 클릭 시 상세 페이지로 이동
+                .clickable(
+                    indication = null, // 클릭 효과 제거
+                    interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
+                ) { // ✅ 클릭 시 상세 페이지로 이동
                     navController.navigate("cardDetail/$cardId")
                 }
 //                .padding(4.dp) // 내부 여백 추가

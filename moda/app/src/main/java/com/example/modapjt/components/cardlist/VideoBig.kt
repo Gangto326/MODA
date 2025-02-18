@@ -43,7 +43,11 @@ fun VideoBig(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
-//            .clickable(onClick = onClick), // 클릭 가능하도록 설정
+//            .clickable(
+//            onClick = onClick,
+//              indication = null, // 클릭 효과 제거
+//            interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
+//            ), // 클릭 가능하도록 설정
         shape = RoundedCornerShape(8.dp),
 
         colors = CardDefaults.cardColors(

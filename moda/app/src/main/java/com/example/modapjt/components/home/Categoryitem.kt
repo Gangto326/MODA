@@ -6,6 +6,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -111,7 +112,10 @@ fun CategoryItem(
                     }
 //                    Modifier.clickable { navController.navigate("categoryDetail/${category.categoryId}") }
                 } else {
-                    Modifier.clickable {
+                    Modifier.clickable (
+                        indication = null, // 클릭 효과 제거
+                        interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
+                    ){
                         Toast.makeText(
                             context,
                             "$categoryName 컨텐츠를 채워 활성화해주세요.",

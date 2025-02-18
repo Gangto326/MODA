@@ -45,8 +45,8 @@ fun SearchBar(
             .fillMaxWidth()
             .height(56.dp)
             .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = rememberRipple(bounded = true)  // 클릭 효과 추가
+                indication = null, // 클릭 효과 제거
+                interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
             ) {
                 navController?.navigate("search")
             },

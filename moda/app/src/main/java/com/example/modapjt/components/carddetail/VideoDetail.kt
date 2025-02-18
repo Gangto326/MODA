@@ -260,6 +260,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -371,7 +372,10 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .clickable { showTimeline = false }
+                    .clickable(
+                        indication = null, // 클릭 효과 제거
+                        interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
+                    ) { showTimeline = false }
             )
         }
 
@@ -489,7 +493,10 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
                                         color = Color.Transparent,
                                         modifier = Modifier
                                             .padding(end = 8.dp, bottom = 8.dp)
-                                            .clickable {
+                                            .clickable (
+                                                indication = null, // 클릭 효과 제거
+                                                interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
+                                            ) {
                                                 if (keyword.isNotBlank()) {
                                                     navController.navigate("newSearchCardListScreen/$keyword")
                                                 }
@@ -553,7 +560,11 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
                     .align(Alignment.CenterEnd)
                     .width(250.dp)
                     .padding(end = 16.dp)
-                    .clickable(enabled = false) {},
+                    .clickable(
+                        enabled = false,
+                        indication = null, // 클릭 효과 제거
+                        interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
+                    ) {},
                 color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
                 shape = RoundedCornerShape(8.dp),
                 border = BorderStroke(1.dp, Color.Gray.copy(alpha = 0.3f))
@@ -572,7 +583,10 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable {
+                                .clickable (
+                                    indication = null, // 클릭 효과 제거
+                                    interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
+                                ) {
                                     player?.seekTo(header.timeStamp)
                                     scope.launch {
                                         // 스크롤 위치 계산 개선

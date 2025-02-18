@@ -3,6 +3,7 @@ package com.example.modapjt.components.home
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -72,7 +73,10 @@ fun VideoList(navController: NavController, videos: List<VideoItemData>) {
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .size(40.dp) // 버튼 크기 조정
-                    .clickable { if (currentIndex > 0) currentIndex-- }
+                    .clickable (
+                        indication = null, // 클릭 효과 제거
+                        interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
+                    ){ if (currentIndex > 0) currentIndex-- }
                     .padding(4.dp)
             )
 
@@ -108,7 +112,10 @@ fun VideoList(navController: NavController, videos: List<VideoItemData>) {
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .size(40.dp) // 버튼 크기 조정
-                    .clickable { if (currentIndex < videos.size - 1) currentIndex++ }
+                    .clickable(
+                        indication = null, // 클릭 효과 제거
+                        interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
+                    ) { if (currentIndex < videos.size - 1) currentIndex++ }
                     .padding(4.dp)
             )
         }

@@ -2,6 +2,7 @@ package com.example.modapjt.components.search
 
 import android.content.Context
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,6 +31,7 @@ import com.example.modapjt.datastore.SearchKeywordDataStore
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
+
 @Composable
 fun SearchKeywordList(context: Context, navController: NavController) {
     val scope = rememberCoroutineScope()
@@ -57,7 +59,10 @@ fun SearchKeywordList(context: Context, navController: NavController) {
                 text = "전체 삭제",
                 style = MaterialTheme.typography.bodySmall.copy(color = Color.Gray, fontSize = 12.sp),
                 modifier = Modifier
-                    .clickable {
+                    .clickable(
+                        indication = null, // 클릭 효과 제거
+                        interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
+                    ) {
                         scope.launch {
                             SearchKeywordDataStore.saveKeywords(context, emptyList()) // 🔹 DataStore 초기화
                             keywords = emptyList() // 🔹 UI 업데이트

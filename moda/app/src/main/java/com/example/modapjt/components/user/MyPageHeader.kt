@@ -3,6 +3,7 @@ package com.example.modapjt.components.user
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material3.Icon
@@ -44,7 +45,10 @@ fun MyPageHeader() {
                 contentDescription = "Notification",
                 modifier = Modifier
                     .size(24.dp)
-                    .clickable { /* TODO: 알림 클릭 이벤트 */ }
+                    .clickable(
+                        indication = null, // 클릭 효과 제거
+                        interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
+                    ) { /* TODO: 알림 클릭 이벤트 */ }
             )
             Spacer(modifier = Modifier.width(16.dp))
             Icon(
@@ -52,7 +56,10 @@ fun MyPageHeader() {
                 contentDescription = "Settings",
                 modifier = Modifier
                     .size(24.dp)
-                    .clickable { /* TODO: 설정 클릭 이벤트 */ }
+                    .clickable(
+                        indication = null, // 클릭 효과 제거
+                        interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
+                    ) { /* TODO: 설정 클릭 이벤트 */ }
             )
         }
     }

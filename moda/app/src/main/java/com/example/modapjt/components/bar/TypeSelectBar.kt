@@ -3,6 +3,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -111,7 +112,11 @@ private fun CategoryTab(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .clickable(onClick = onClick)
+            .clickable(
+                onClick = onClick,
+                indication = null, // 클릭 효과 제거
+                interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
+            )
             .padding(horizontal = 4.dp) // 🔹 선택된 탭의 여백 조정 (필요시 수정)
     ) {
         // 🔹 아이콘 + 텍스트를 감싸는 Row (너비 측정 대상)
@@ -185,7 +190,10 @@ fun SortDropdown(
                 .clip(RoundedCornerShape(16.dp))
                 .border(1.dp, Color(0xFFFFCC80), RoundedCornerShape(16.dp)) // 노란색 테두리 추가
                 .background(Color.Transparent)
-                .clickable { expanded = true }
+                .clickable(
+                    indication = null, // 클릭 효과 제거
+                    interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
+                ) { expanded = true }
                 .padding(horizontal = 12.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {

@@ -1,6 +1,7 @@
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
@@ -17,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.app.ui.theme.customTypography
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.runtime.remember
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -34,7 +36,11 @@ fun BlogSmall(
         modifier = modifier
             .fillMaxWidth()
             .background(if (!isMine) Color.Gray.copy(alpha = 0.2f) else Color.White)
-            .clickable(onClick = onClick)
+            .clickable(
+                onClick = onClick,
+                indication = null, // 클릭 효과 제거
+                interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
+                )
     ) {
         Row(
             verticalAlignment = Alignment.Top // 이미지 상단에 맞춤

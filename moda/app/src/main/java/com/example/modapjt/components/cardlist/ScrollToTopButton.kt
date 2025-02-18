@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -47,7 +48,10 @@ fun ScrollToTopButton(scrollState: LazyListState) {
                     .size(56.dp) // 크기 지정
                     .background(Color.White, shape = CircleShape) // 배경을 원형으로
                     .border(2.dp, Color.LightGray, CircleShape) // 테두리 추가
-                    .clickable {
+                    .clickable(
+                        indication = null, // 클릭 효과 제거
+                        interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
+                    ) {
                         coroutineScope.launch {
                             scrollState.animateScrollToItem(0)
                         }

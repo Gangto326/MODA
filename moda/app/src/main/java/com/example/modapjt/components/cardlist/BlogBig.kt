@@ -46,7 +46,11 @@ fun BlogBig(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp, vertical = 8.dp),
-//            .clickable(onClick = onClick), // 클릭 이벤트 추가
+//            .clickable(
+//            onClick = onClick,
+//              indication = null, // 클릭 효과 제거
+//            interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
+//            ), // 클릭 이벤트 추가
         colors = CardDefaults.cardColors(
             containerColor = when {
                 isSelected -> Color.LightGray.copy(alpha = 0.3f)  // 선택됐을 때 색상
