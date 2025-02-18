@@ -59,6 +59,8 @@ class PostSummary:
              format = None):
         current_seed = int(time.time() * 1000) + random.randint(1, 1000000)
 
+        print(f"올라마 챗: {messages}")
+
         response = ollama.chat(
             model = model,
             messages = messages,
