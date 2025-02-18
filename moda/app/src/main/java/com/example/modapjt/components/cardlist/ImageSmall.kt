@@ -1,6 +1,7 @@
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -20,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.runtime.remember
 
 @Composable
 fun ImageGrid(
@@ -76,7 +78,11 @@ fun ImageSmall(
             .size(imageSize)
             .clip(RoundedCornerShape(8.dp)) // 🔥 모서리 둥글게 처리
             .background(if (!isMine) Color.Gray else Color.White)
-            .clickable(onClick = onClick)
+            .clickable(
+                onClick = onClick,
+                indication = null, // 클릭 효과 제거
+                interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
+                )
     ) {
         AsyncImage(
             model = imageUrl,

@@ -1,6 +1,7 @@
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,7 +43,11 @@ fun NewsSmall(
             .fillMaxWidth() // 가로 전체 너비 사용
 //            .clip(RoundedCornerShape(12.dp)) // 모서리 둥글게 처리
             .background(if (!isMine) Color.Gray else Color.White) // 저장 여부에 따른 배경색
-            .clickable(onClick = onClick)  // 클릭 가능하도록 설정
+            .clickable(
+                onClick = onClick,
+                indication = null, // 클릭 효과 제거
+                interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
+                )  // 클릭 가능하도록 설정
 //            .padding(12.dp) // 내부 여백 설정
 
 

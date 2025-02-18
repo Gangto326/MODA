@@ -2,6 +2,7 @@ package com.example.modapjt.components.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,7 +48,10 @@ fun BottomThumbnail(
     Column(
         modifier = Modifier
             .width(224.dp) // 썸네일 크기 조정
-            .clickable { onClick(cardId) }
+            .clickable(
+                indication = null, // 클릭 효과 제거
+                interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
+            ) { onClick(cardId) }
     ) {
         // 썸네일 이미지 + 북마크 아이콘
         Box(

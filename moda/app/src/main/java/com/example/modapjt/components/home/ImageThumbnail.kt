@@ -3,6 +3,7 @@ package com.example.modapjt.components.home
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -63,7 +65,10 @@ fun ImageThumbnail(image: ImageItem, navController: NavController) {
             .size(100.dp) // ✅ 크기 설정 (120x120)
 //            .background(Color.LightGray, shape = RoundedCornerShape(16.dp)) // ✅ 라운딩된 배경 추가
             .clip(RoundedCornerShape(8.dp)) // 🔥 외곽을 둥글게 만들기
-            .clickable { navController.navigate("cardDetail/${image.cardId}") } // 클릭 시 상세 페이지로 이동
+            .clickable (
+                indication = null, // 클릭 효과 제거
+                interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
+            ){ navController.navigate("cardDetail/${image.cardId}") } // 클릭 시 상세 페이지로 이동
     ) {
         // 🔹 네트워크에서 이미지를 불러와서 표시
         Image(

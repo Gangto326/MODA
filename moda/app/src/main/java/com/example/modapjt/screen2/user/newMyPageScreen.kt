@@ -13,6 +13,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -354,7 +355,10 @@ fun CustomToggleSwitch(isGestureMode: Boolean, onToggleChange: (Boolean) -> Unit
                 .weight(1f)
                 .fillMaxHeight()
                 .background(if (!isGestureMode) Color.White else Color.Transparent, shape = CircleShape)
-                .clickable { onToggleChange(false) },
+                .clickable (
+                    indication = null, // 클릭 효과 제거
+                    interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
+                ){ onToggleChange(false) },
             contentAlignment = Alignment.Center
         ) {
             Text(

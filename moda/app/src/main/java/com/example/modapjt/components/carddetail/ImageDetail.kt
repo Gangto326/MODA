@@ -57,6 +57,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -195,7 +196,10 @@ fun ImageDetailScreen(cardDetail: CardDetail, navController: NavController) {
                             color = Color.Transparent,
                             modifier = Modifier
                                 .padding(end = 8.dp, bottom = 16.dp)
-                                .clickable {
+                                .clickable(
+                                    indication = null, // 클릭 효과 제거
+                                    interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
+                                ) {
                                     if (keyword.isNotBlank()) {
                                         navController.navigate("newSearchCardListScreen/$keyword")
                                     }

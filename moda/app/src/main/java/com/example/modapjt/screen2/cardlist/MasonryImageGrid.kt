@@ -3,9 +3,11 @@ package com.example.modapjt.screen2
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -53,7 +55,10 @@ fun MasonryImageGrid(
                                     if (!isMine) Modifier.border(2.dp, Color.Red, MaterialTheme.shapes.medium)
                                     else Modifier // ✅ 내 콘텐츠가 아니면 빨간 테두리 적용
                                 )
-                                .clickable { onImageClick(cardId) } // ✅ 클릭 시 해당 `cardId` 전달
+                                .clickable (
+                                    indication = null, // 클릭 효과 제거
+                                    interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
+                                ) { onImageClick(cardId) } // ✅ 클릭 시 해당 `cardId` 전달
                         )
                     }
             }

@@ -3,6 +3,7 @@ package com.example.modapjt.components.home
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -48,7 +49,10 @@ fun TopThumbnail(
         modifier = Modifier
             .fillMaxWidth() // 화면 너비에 맞게
             .aspectRatio(16 / 9f) // 16:9 비율로 높이 자동 조정
-            .clickable { onClick() } // 클릭 이벤트 처리
+            .clickable(
+                indication = null, // 클릭 효과 제거
+                interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
+            ) { onClick() } // 클릭 이벤트 처리
     ) {
         Image(
             painter = rememberAsyncImagePainter(model = imageUrl),
