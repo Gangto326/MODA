@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -45,7 +46,7 @@ public class CardController {
 	@PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
 	public CompletableFuture<ResponseEntity<Boolean>> createCard(
 		@UserId String userId,
-		@RequestBody CardRequest cardRequest
+		@Validated @RequestBody CardRequest cardRequest
 	) {
 		return cardService.createCard(userId, cardRequest.getUrl())
 			.thenApply(ResponseEntity::ok)

@@ -20,6 +20,7 @@ import com.moda.moda_api.crawling.application.service.WebDriverService;
 import com.moda.moda_api.crawling.domain.model.CrawledContent;
 import com.moda.moda_api.crawling.domain.model.ExtractedContent;
 import com.moda.moda_api.crawling.domain.model.Url;
+import com.moda.moda_api.crawling.domain.model.UrlDomainType;
 import com.moda.moda_api.crawling.infrastructure.config.crawlerConfig.ExtractorConfig;
 import com.moda.moda_api.crawling.infrastructure.config.crawlerConfig.PlatformExtractorFactory;
 import com.moda.moda_api.summary.exception.ExtractorException;
@@ -43,9 +44,13 @@ public class AbstractExtractor {
 			driver = webDriverService.getDriver();
 
 			ExtractorConfig config = extractorFactory.getConfig(url);
+			log.info("URL: {}", url);  // URL 로깅
+			log.info("Selected Pattern: {}", config.getPattern());  // 매칭된 패턴 로깅
+			log.info("Content Selector: {}", config.getContentSelector());  // 선택자 로깅
+
 			driver.get(url);
 
-			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
 			wait.until(webDriver -> ((JavascriptExecutor)webDriver)
 				.executeScript("return document.readyState").equals("complete"));
 
@@ -93,8 +98,9 @@ public class AbstractExtractor {
 
 			driver.get(url);
 
-			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
 			wait.until(ExpectedConditions.jsReturnsValue("return document.readyState === 'complete'"));
+
 
 			// iframe 처리
 			if (config.isRequiresFrame()) {
@@ -124,18 +130,45 @@ public class AbstractExtractor {
 
 		try {
 			WebDriverWait contentWait = new WebDriverWait(driver, Duration.ofSeconds(20));
+
 			WebElement contentElement = contentWait.until(ExpectedConditions.presenceOfElementLocated(
 				By.cssSelector(config.getContentSelector())
 			));
 
+			log.info("Content element HTML: {}", contentElement.getAttribute("innerHTML"));
+
+			if (contentElement == null) {
+				log.error("Content element is null");
+			}
+
+			if (config.getUrlDomainType().equals(UrlDomainType.NAVER_NEWS)) {
+				String naverNewsContent = contentElement.getText();
+				// 이미지 URL 추출 및 저장
+				String[] imageUrls = contentElement.findElements(By.tagName("img"))
+					.stream()
+					.map(img -> img.getAttribute("src"))
+					.filter(src -> src != null && !src.isEmpty() && isValidImageUrl(src))
+					.map(src -> {
+						try {
+							return imageStorageService.uploadImageFromurl(src);
+						} catch (Exception e) {
+							log.error("Failed to upload image: {}", src, e);
+							return null;
+						}
+					})
+					.filter(Objects::nonNull)
+					.toArray(String[]::new);
+				return new ExtractedContent(naverNewsContent, imageUrls);
+			}
+
 			// 모든 콘텐츠 요소들이 로드될 때까지 대기
 			contentWait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(
-				By.xpath(".//h1|.//h2|.//h3|.//h4|.//h5|.//h6|.//p[not(ancestor::p)]|.//img|.//li|.//ul")
+				By.xpath(".//h1|.//h2|.//h3|.//h4|.//h5|.//h6|.//p[not(ancestor::p)]|.//img|.//li|.//ul|.//br")
 			));
 
 			// 텍스트와 이미지를 포함하는 모든 요소 선택
 			List<WebElement> elements = contentElement.findElements(
-				By.xpath(".//h1|.//h2|.//h3|.//h4|.//h5|.//h6|.//p[not(ancestor::p)]|.//img|.//li[not(li)]")
+				By.xpath(".//h1|.//h2|.//h3|.//h4|.//h5|.//h6|.//p[not(ancestor::p)]|.//img|.//li[not(li)]|.//br")
 			);
 
 			for (WebElement element : elements) {
@@ -156,6 +189,7 @@ public class AbstractExtractor {
 					} else {
 						// 텍스트 요소 처리
 						String text = element.getText().trim();
+						System.out.println(text);
 						if (!text.isEmpty()) {
 							// 이전 텍스트가 있으면 줄바꿈 추가
 							if (textBuilder.length() > 0) {

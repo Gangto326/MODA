@@ -24,14 +24,15 @@ import com.moda.moda_api.card.domain.CardFactory;
 import com.moda.moda_api.card.domain.CardId;
 import com.moda.moda_api.card.domain.CardRepository;
 import com.moda.moda_api.card.domain.CardViewCountRepository;
-import com.moda.moda_api.card.domain.EmbeddingVector;
 import com.moda.moda_api.card.domain.HotTopicRepository;
 import com.moda.moda_api.card.domain.UrlCache;
 import com.moda.moda_api.card.domain.UrlCacheRepository;
+import com.moda.moda_api.card.domain.UrlDuplicatedRepository;
 import com.moda.moda_api.card.domain.UserKeywordRepository;
 import com.moda.moda_api.card.domain.VideoCreatorRepository;
 import com.moda.moda_api.card.exception.CardNotFoundException;
 import com.moda.moda_api.card.exception.DuplicateCardException;
+import com.moda.moda_api.card.exception.DuplicateUrlException;
 import com.moda.moda_api.card.presentation.request.CardBookmarkRequest;
 import com.moda.moda_api.card.presentation.request.MoveCardRequest;
 import com.moda.moda_api.card.presentation.request.UpdateCardRequest;
@@ -73,6 +74,7 @@ public class CardService {
 	private final CardSearchRepository cardSearchRepository;
 	private final NotificationService notificationService;
 	private final UserRepository userRepository;
+	private final UrlDuplicatedRepository urlDuplicatedRepository;
 
 	/**
 	 * URL을 입력 받고 새로운 카드 생성 후 알맞은 보드로 이동합니다.
@@ -82,8 +84,17 @@ public class CardService {
 	 */
 	@Transactional
 	public CompletableFuture<Boolean> createCard(String userId, String url) {
+		System.out.println(url);
 		UserId userIdObj = new UserId(userId);
 		String urlHash = UrlCache.generateHash(url);
+
+		if(urlDuplicatedRepository.checkDuplicated(url)){
+			throw new DuplicateUrlException("같은 URL이 들어갔습니다.");
+		}
+		urlDuplicatedRepository.urlDuplicatedSave(url);
+
+
+
 
 		if (cardRepository.existsByUserIdAndUrlHashAndDeletedAtIsNull(userIdObj, urlHash))
 			throw new DuplicateCardException("같은 URL을 가진 카드가 이미 존재합니다.");
@@ -523,4 +534,5 @@ public class CardService {
 			.bookmarkCount(String.valueOf(bookmarkCount))
 			.build();
 	}
+
 }

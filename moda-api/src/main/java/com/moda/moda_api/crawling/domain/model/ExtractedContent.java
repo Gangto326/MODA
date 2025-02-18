@@ -1,10 +1,13 @@
 package com.moda.moda_api.crawling.domain.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @Builder
+@AllArgsConstructor
 public class ExtractedContent {
 	private final String text;
 	private final String[] images;

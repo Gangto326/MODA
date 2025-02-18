@@ -16,7 +16,8 @@ public enum UrlDomainType {
 	NAVER_NEWS(5),
 	DAUM_NEWS(6),
 	YOUTUBE(7),
-	GOOGLE_SEARCH(8);
+	GOOGLE_SEARCH(8),
+	NAMUWIKI(9);
 
 	private final Integer typeId;
 

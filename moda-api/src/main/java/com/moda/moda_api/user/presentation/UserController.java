@@ -95,30 +95,31 @@ public class UserController {
     @DeleteMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletRequest request) {
 
-        // HTTP Header의 Authorization (AccessToken) 추출.
-        String accessToken = HeaderUtil.getAccessToken(request);
-        String refreshToken = HeaderUtil.getRefreshToken(request);
+        return ResponseEntity.ok().build();
 
-        System.out.println("UserController.logout");
-        System.out.println("refreshToken = " + refreshToken);
-        System.out.println("accessToken = " + accessToken);
-
-        userService.logout(refreshToken , accessToken);
-
-
-        // maxAge(0)으로 RefreshToken 삭제.
-        HttpHeaders httpHeaders = new HttpHeaders();
-        ResponseCookie responseCookie = ResponseCookie
-                .from(HeaderUtil.getRefreshCookieName(), "")
-                .path("/")
-                .httpOnly(true)
-                .secure(true)
-                .maxAge(0)
-                .build();
-
-        return ResponseEntity.ok()
-                .headers(httpHeaders).header(HttpHeaders.SET_COOKIE, responseCookie.toString())
-                .body(null);
+        // String accessToken = HeaderUtil.getAccessToken(request);
+        // String refreshToken = HeaderUtil.getRefreshToken(request);
+        //
+        // System.out.println("UserController.logout");
+        // System.out.println("refreshToken = " + refreshToken);
+        // System.out.println("accessToken = " + accessToken);
+        //
+        // userService.logout(refreshToken , accessToken);
+        //
+        //
+        // // maxAge(0)으로 RefreshToken 삭제.
+        // HttpHeaders httpHeaders = new HttpHeaders();
+        // ResponseCookie responseCookie = ResponseCookie
+        //         .from(HeaderUtil.getRefreshCookieName(), "")
+        //         .path("/")
+        //         .httpOnly(true)
+        //         .secure(true)
+        //         .maxAge(0)
+        //         .build();
+        //
+        // return ResponseEntity.ok()
+        //         .headers(httpHeaders).header(HttpHeaders.SET_COOKIE, responseCookie.toString())
+        //         .body(null);
     }
 
 
@@ -137,4 +138,5 @@ public class UserController {
             return ResponseEntity.badRequest().body(Boolean.FALSE);
         }
     }
+
 }
