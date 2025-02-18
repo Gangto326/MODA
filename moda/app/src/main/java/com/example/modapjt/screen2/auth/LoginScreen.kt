@@ -100,6 +100,8 @@ fun LoginScreen(
         )
 
         OutlinedTextField(
+            singleLine = true,// 한줄 입력으로 제한
+            maxLines = 1,
             value = state.username,
             onValueChange = { viewModel.onLoginEvent(LoginEvent.UsernameChanged(it)) },
             label = { Text("아이디") },
@@ -118,6 +120,8 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedTextField(
+            singleLine = true,// 한줄 입력으로 제한
+            maxLines = 1,
             value = state.password,
             onValueChange = { viewModel.onLoginEvent(LoginEvent.PasswordChanged(it)) },
             label = { Text("비밀번호") },

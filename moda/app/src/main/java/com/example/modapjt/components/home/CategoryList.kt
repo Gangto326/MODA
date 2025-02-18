@@ -87,7 +87,5 @@ fun CategoryList(
 //    Spacer(modifier = Modifier.height(8.dp))
 
 
-    Divider(color = Color(0xFFF1F1F1), thickness = 6.dp, modifier = Modifier.padding(horizontal = 0.dp))
-    Spacer(modifier = Modifier.height(30.dp))
 
 }

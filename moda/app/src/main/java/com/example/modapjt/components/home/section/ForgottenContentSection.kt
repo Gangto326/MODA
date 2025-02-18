@@ -23,10 +23,12 @@ fun ForgottenContentSection(
     val searchData by searchViewModel.searchData.collectAsState()
     val forgottenContents = searchData?.forgotten.orEmpty() // 잊고 있던 컨텐츠 리스트 가져오기
 
-    Divider(color = Color(0xFFF1F1F1), thickness = 6.dp, modifier = Modifier.padding(horizontal = 0.dp))
-    Spacer(modifier = Modifier.height(20.dp))
+
 
     if (forgottenContents.isNotEmpty()) {
+
+        Divider(color = Color(0xFFF1F1F1), thickness = 6.dp, modifier = Modifier.padding(horizontal = 0.dp))
+        Spacer(modifier = Modifier.height(20.dp))
         HomeSmallTitle(
             title = "잊고있던 컨텐츠",
             description = "| 해당 컨텐츠들에 대한 설명"
