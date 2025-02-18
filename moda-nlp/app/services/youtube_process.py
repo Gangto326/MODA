@@ -1,4 +1,5 @@
 import json
+import random
 from typing import List
 
 import ollama
@@ -47,7 +48,10 @@ class YoutubeProcess:
         response = ollama.chat(
             model = model,
             messages = messages,
-            format = format
+            format = format,
+            options = {
+                'seed': random.randint(1, 1000000)
+            }
         )
         return response['message']['content']
 
@@ -81,60 +85,66 @@ class YoutubeProcess:
 
     #category를 선택하는 함수
     def choose_category(self, model: str):
-        messages = make_category_prompt(self.content)
-        format = {
-            'type': 'object',
-            'properties': {
-                'category': {
-                    'type': 'string'
-                }
-            },
-            'required': ['category']
-        }
+        try:
+            messages = make_category_prompt(self.content)
+            format = {
+                'type': 'object',
+                'properties': {
+                    'category': {
+                        'type': 'string'
+                    }
+                },
+                'required': ['category']
+            }
 
-        find_category = False
-        attempt_count = 0
-        while attempt_count < self.MAX_CATEGORY_TRIES:
-            response = self.chat(model = model, messages = messages, format = format)
+            find_category = False
+            attempt_count = 0
+            while attempt_count < self.MAX_CATEGORY_TRIES:
+                response = self.chat(model = model, messages = messages, format = format)
 
-            print(f" 카테고리 선택 시도 {attempt_count} - {response}")
+                print(f" 카테고리 선택 시도 {attempt_count} - {response}")
 
-            for idx, category in enumerate(categories_name()):
-                if category.lower() in response.lower():
-                    find_category = True
-                    self.category_id = idx + 1
-                    self.category = category
+                for idx, category in enumerate(categories_name()):
+                    if category.lower() in response.lower():
+                        find_category = True
+                        self.category_id = idx + 1
+                        self.category = category
+                        break
+
+                if find_category:
                     break
 
-            if find_category:
-                break
+                attempt_count += 1
 
-            attempt_count += 1
-
-        if attempt_count == self.MAX_CATEGORY_TRIES:
-            self.category_id = 1
-            self.category = 'ALL'
+            if attempt_count == self.MAX_CATEGORY_TRIES:
+                self.category_id = 1
+                self.category = 'ALL'
+        except Exception as e:
+            print(f"에러: {e}")
 
     #keywords를 생성하는 함수
     def make_keywords(self, model: str):
-        messages = make_keywords_content_prompt(self.content)
-        format = {
-            'type': 'object',
-            'properties': {
-                'keyword': {
-                    'type': 'array',
-                    'items': {
-                        'type': 'string'
+        try:
+            messages = make_keywords_content_prompt(self.content)
+            format = {
+                'type': 'object',
+                'properties': {
+                    'keyword': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'string'
+                        }
                     }
-                }
-            },
-            'required': ['keyword']
-        }
+                },
+                'required': ['keyword']
+            }
 
-        response = self.chat(model = model, messages = messages, format = format)
-        self.keywords = json.loads(response)['keyword'][:5]
-        self.keywords = [keyword for keyword in self.keywords if len(keyword) <=  10 and keyword in self.content]
-        print("키워드 생성")
+            response = self.chat(model = model, messages = messages, format = format)
+            self.keywords = json.loads(response)['keyword'][:5]
+            self.keywords = [keyword for keyword in self.keywords if len(keyword) <=  10 and keyword in self.content]
+            print("키워드 생성")
+        except Exception as e:
+            print(f"에러: {e}")
 
     #embeeding_vector를 생성하는 함수
     def make_embedding_vector(self):

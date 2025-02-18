@@ -1,5 +1,6 @@
 import base64
 import json
+import random
 from typing import List
 
 import googletrans
@@ -52,7 +53,10 @@ class ImageAnalyze:
         response = ollama.chat(
             model = model,
             messages = messages,
-            format = format
+            format = format,
+            options = {
+                'seed': random.randint(1, 1000000)
+            }
         )
         return response['message']['content']
 
@@ -62,73 +66,82 @@ class ImageAnalyze:
 
     #base64_image를 통해 이미지를 분석하는 함수
     async def analyze_image(self):
-        model = self.MODEL
-        messages = make_analyze_prompt(self.base64_image)
-        format = None
+        try:
+            model = self.MODEL
+            messages = make_analyze_prompt(self.base64_image)
+            format = None
 
-        response =  self.chat(model = model, messages = messages, format = format)
-        self.content = await self.translate_text(response)
-        print("이미지 분석")
+            response =  self.chat(model = model, messages = messages, format = format)
+            self.content = await self.translate_text(response)
+            print("이미지 분석")
+        except Exception as e:
+            print(f"에러: {e}")
 
     #category를 선택하는 함수
     def choose_category(self):
-        model = self.MODEL
-        messages = make_category_prompt(self.content, self.base64_image)
-        format = {
-            'type': 'object',
-            'properties': {
-                'category': {
-                    'type': 'string'
-                }
-            },
-            'required': ['category']
-        }
+        try:
+            model = self.MODEL
+            messages = make_category_prompt(self.content, self.base64_image)
+            format = {
+                'type': 'object',
+                'properties': {
+                    'category': {
+                        'type': 'string'
+                    }
+                },
+                'required': ['category']
+            }
 
-        find_category = False
-        attempt_count = 0
-        while attempt_count < self.MAX_CATEGORY_TRIES:
-            response = self.chat(model = model, messages = messages, format = format)
+            find_category = False
+            attempt_count = 0
+            while attempt_count < self.MAX_CATEGORY_TRIES:
+                response = self.chat(model = model, messages = messages, format = format)
 
-            print(f" 카테고리 선택 시도 {attempt_count} - {response}")
+                print(f" 카테고리 선택 시도 {attempt_count} - {response}")
 
-            for idx, category in enumerate(categories_name()):
-                if category.lower() in response.lower():
-                    find_category = True
-                    self.category_id = idx + 1
-                    self.category = category
+                for idx, category in enumerate(categories_name()):
+                    if category.lower() in response.lower():
+                        find_category = True
+                        self.category_id = idx + 1
+                        self.category = category
+                        break
+
+                if find_category:
                     break
 
-            if find_category:
-                break
+                attempt_count += 1
 
-            attempt_count += 1
-
-        if attempt_count == self.MAX_CATEGORY_TRIES:
-            self.category_id = 1
-            self.category = 'ALL'
+            if attempt_count == self.MAX_CATEGORY_TRIES:
+                self.category_id = 1
+                self.category = 'ALL'
+        except Exception as e:
+            print(f"에러: {e}")
 
     #keywords를 생성하는 함수
     async def make_keywords(self):
-        model = self.MODEL
-        messages = make_keywords_content_prompt(self.content, self.base64_image)
-        format = {
-            'type': 'object',
-            'properties': {
-                'keyword': {
-                    'type': 'array',
-                    'items': {
-                        'type': 'string'
+        try:
+            model = self.MODEL
+            messages = make_keywords_content_prompt(self.content, self.base64_image)
+            format = {
+                'type': 'object',
+                'properties': {
+                    'keyword': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'string'
+                        }
                     }
-                }
-            },
-            'required': ['keyword']
-        }
+                },
+                'required': ['keyword']
+            }
 
-        response = self.chat(model = model, messages = messages, format = format)
-        response = json.loads(response)['keyword']
-        response = await self.translate_list(response)
-        self.keywords = [keyword for keyword in response if len(keyword) <=  10 and keyword in response]
-        print("키워드 생성")
+            response = self.chat(model = model, messages = messages, format = format)
+            response = json.loads(response)['keyword']
+            response = await self.translate_list(response)
+            self.keywords = [keyword for keyword in response if len(keyword) <=  10 and keyword in response]
+            print("키워드 생성")
+        except Exception as e:
+            print(f"에러: {e}")
 
     #embeeding_vector를 생성하는 함수
     def make_embedding_vector(self):
