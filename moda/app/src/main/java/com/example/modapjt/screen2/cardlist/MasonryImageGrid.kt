@@ -39,28 +39,25 @@ fun MasonryImageGrid(
                     .fillMaxHeight(),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                imageUrls.filterIndexed { index, _ -> index % columnCount == columnIndex }
-                    .forEachIndexed { index, imageUrl ->
-                        val isMine = isMineList[index]
-                        val cardId = cardIdList[index]  // ✅ 올바른 `cardId` 가져오기
+                val filteredItems = imageUrls.zip(cardIdList) // ✅ 이미지와 카드 ID를 매칭
+                    .filterIndexed { index, _ -> index % columnCount == columnIndex } // ✅ 컬럼 필터링
 
-                        AsyncImage(
-                            model = imageUrl,
-                            contentDescription = null,
-                            contentScale = ContentScale.FillWidth, // ✅ 가로에 맞추고, 높이는 원본 비율 유지
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(MaterialTheme.shapes.medium) // ✅ 둥근 모서리 적용
-                                .then(
-                                    if (!isMine) Modifier.border(2.dp, Color.Red, MaterialTheme.shapes.medium)
-                                    else Modifier // ✅ 내 콘텐츠가 아니면 빨간 테두리 적용
-                                )
-                                .clickable (
-                                    indication = null, // 클릭 효과 제거
-                                    interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
-                                ) { onImageClick(cardId) } // ✅ 클릭 시 해당 `cardId` 전달
-                        )
-                    }
+                filteredItems.forEach { (imageUrl, cardId) -> // ✅ 원래 카드 ID와 매칭됨
+                    AsyncImage(
+                        model = imageUrl,
+                        contentDescription = null,
+                        contentScale = ContentScale.FillWidth, // ✅ 가로에 맞추고, 높이는 원본 비율 유지
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(MaterialTheme.shapes.medium) // ✅ 둥근 모서리 적용
+                            .clickable(
+                                indication = null, // 클릭 효과 제거
+                                interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
+                            ) {
+                                onImageClick(cardId) // ✅ 올바른 `cardId` 전달
+                            }
+                    )
+                }
             }
         }
     }
