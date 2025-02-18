@@ -5,7 +5,7 @@ import time
 import googletrans
 import ollama
 
-from app.constants.category import categories_name
+from app.constants.category import categories_name, categories
 from app.constants.post_prompt import make_summary_prompt, make_keywords_content_prompt, \
     make_thumbnail_content_prompt, make_category_prompt
 from app.schemas.post import PostResponse
@@ -28,15 +28,15 @@ class PostSummary:
 
     #PostSummary 객체가 실행되면 가장 먼저 실행되는 함수
     async def execute(self):
-        self.choose_category('kwangsuklee/Qwen2.5-14B-Gutenberg-1e-Delta.Q5_K_M')
+        self.choose_category('anpigon/qwen2.5-7b-instruct-kowiki')
         while True:
-            self.summary_content('kwangsuklee/Qwen2.5-14B-Gutenberg-1e-Delta.Q5_K_M')
+            self.summary_content('anpigon/qwen2.5-7b-instruct-kowiki')
 
             if not await self.detect_chinese(self.content):
                 break
-        self.make_keywords('kwangsuklee/Qwen2.5-14B-Gutenberg-1e-Delta.Q5_K_M')
+        self.make_keywords('anpigon/qwen2.5-7b-instruct-kowiki')
         while True:
-            self.make_thumbnail_content('kwangsuklee/Qwen2.5-14B-Gutenberg-1e-Delta.Q5_K_M')
+            self.make_thumbnail_content('anpigon/qwen2.5-7b-instruct-kowiki')
 
             if not await self.detect_chinese(self.thumbnail_content):
                 break
@@ -111,6 +111,17 @@ class PostSummary:
             if attempt_count == self.MAX_CATEGORY_TRIES:
                 self.category_id = 1
                 self.category = 'All'
+
+                embedding = self.embedder.embed_document(self.content)
+                similarity = 0
+
+                for idx in range(len(categories)):
+                    compare_result = self.vector_compare(embedding, categories[idx + 1][1])
+                    if compare_result > similarity:
+                        similarity = compare_result
+                        category_id = idx + 1
+                        category = categories[idx + 1][0]
+
         except Exception as e:
             print(f"에러: {e}")
             self.choose_category(model)
