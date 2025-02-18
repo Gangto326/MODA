@@ -115,7 +115,7 @@ class PostSummary:
                 embedding = self.embedder.embed_document(self.content)
                 similarity = 0
 
-                for idx in range(len(categories)):
+                for idx in range(1, len(categories)):
                     compare_result = vector_compare(embedding, categories[idx][1])
                     if compare_result > similarity:
                         similarity = compare_result
