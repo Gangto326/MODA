@@ -22,27 +22,30 @@ fun ImageSection(
     searchViewModel: SearchViewModel
 ) {
 
-    Divider( // 구분선
-        color = Color(0xFFF1F1F1),
-        thickness = 6.dp,
 
-        modifier = Modifier
-//            .padding(horizontal = 0.dp)
-//            .background(Color.Green) // ✅ Divider 배경색 (초록)
-    )
-
-    Spacer(
-        modifier = Modifier
-            .height(16.dp)
-            .fillMaxWidth() // ✅ 가로 전체 영역을 차지하도록 설정
-//            .background(Color.Blue) // ✅ 두 번째 Spacer 배경색 (파랑)
-    )
 
 
     val searchData by searchViewModel.searchData.collectAsState()
     val images = searchData?.images.orEmpty() // 이미지 리스트 가져오기
 
     if (images.isNotEmpty()) {
+        Divider( // 구분선
+            color = Color(0xFFF1F1F1),
+            thickness = 6.dp,
+
+            modifier = Modifier
+//            .padding(horizontal = 0.dp)
+//            .background(Color.Green) // ✅ Divider 배경색 (초록)
+        )
+
+        Spacer(
+            modifier = Modifier
+                .height(16.dp)
+                .fillMaxWidth() // ✅ 가로 전체 영역을 차지하도록 설정
+//            .background(Color.Blue) // ✅ 두 번째 Spacer 배경색 (파랑)
+        )
+
+
         HomeSmallTitle(
             title = "이미지 보고가세요",
             description = "| 해당 컨텐츠들에 대한 설명"

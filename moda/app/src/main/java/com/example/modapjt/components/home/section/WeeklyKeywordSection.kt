@@ -47,6 +47,10 @@ fun WeeklyKeywordSection(
     }
 
     if (keywordSearchData.isNotEmpty()) {
+
+        Divider(color = Color(0xFFF1F1F1), thickness = 6.dp, modifier = Modifier.padding(horizontal = 0.dp))
+        Spacer(modifier = Modifier.height(30.dp))
+
         FirstKeywordList(navController, searchViewModel)
         Spacer(
             modifier = Modifier
@@ -56,19 +60,5 @@ fun WeeklyKeywordSection(
         )
     }
 
-    Divider(
-        color = Color(0xFFF1F1F1),
-        thickness = 6.dp,
-        modifier = Modifier
-//            .padding(horizontal = 0.dp)
-//            .background(Color.Green) // ✅ Divider의 배경색 (위치를 시각적으로 확인)
-            .fillMaxWidth()  // ✅ 가로 전체를 차지하도록 설정
-    )
 
-    Spacer(
-        modifier = Modifier
-            .height(16.dp)
-//            .background(Color.Yellow) // ✅ 마지막 Spacer (Divider 아래)
-            .fillMaxWidth()  // ✅ 가로 전체를 차지하도록 설정
-    )
 }

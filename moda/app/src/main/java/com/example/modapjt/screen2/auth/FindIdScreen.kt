@@ -80,6 +80,8 @@ fun FindIdScreen(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 OutlinedTextField(
+                    singleLine = true,// 한줄 입력으로 제한
+                    maxLines = 1,
                     value = state.email,
                     onValueChange = { viewModel.onEmailChanged(it) },
                     label = { Text("이메일") },
@@ -133,6 +135,8 @@ fun FindIdScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 OutlinedTextField(
+                    singleLine = true,// 한줄 입력으로 제한
+                    maxLines = 1,
                     value = state.verificationCode,
                     onValueChange = { viewModel.onVerificationCodeChanged(it) },
                     label = { Text("인증번호") },

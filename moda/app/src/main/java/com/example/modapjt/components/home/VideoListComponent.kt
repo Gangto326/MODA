@@ -10,18 +10,28 @@ import com.example.modapjt.domain.viewmodel.SearchViewModel
 fun VideoListComponent(navController: NavController, viewModel: SearchViewModel) {
     val searchData by viewModel.searchData.collectAsState()
 
-    searchData?.videos?.let { videos ->
-        if (videos.isNotEmpty()) {
-            VideoList(
-                navController = navController,
-                videos = videos.map {
-                    VideoItemData(
-                        cardId = it.cardId,
-                        videoUrl = it.thumbnailUrl?:"", // ✅ YouTube URL
-                        title = it.title?:""
-                    )
-                }
+    val videosList = searchData?.videos?.map {
+        VideoItemData(
+            cardId = it.cardId,
+            videoUrl = it.thumbnailUrl ?: "",
+            title = it.title ?: ""
+        )
+    } ?: emptyList()
+
+    val finalVideos = if (videosList.isEmpty()) {
+        listOf(
+            VideoItemData(
+                cardId = "default",
+                videoUrl = "jWQx2f-CErU",
+                title = "Default Video"
             )
-        }
+        )
+    } else {
+        videosList
     }
+
+    VideoList(
+        navController = navController,
+        videos = finalVideos
+    )
 }

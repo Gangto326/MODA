@@ -115,6 +115,8 @@ fun FindPasswordScreen(
 
         // 아이디 입력
         OutlinedTextField(
+            singleLine = true,// 한줄 입력으로 제한
+            maxLines = 1,
             value = state.username,
             onValueChange = { viewModel.onFindPasswordEvent(FindPasswordEvent.UsernameChanged(it)) },
             label = { Text("아이디") },
@@ -138,6 +140,8 @@ fun FindPasswordScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             OutlinedTextField(
+                singleLine = true,// 한줄 입력으로 제한
+                maxLines = 1,
                 value = state.email,
                 onValueChange = { viewModel.onFindPasswordEvent(FindPasswordEvent.EmailChanged(it)) },
                 label = { Text("이메일") },
@@ -176,6 +180,8 @@ fun FindPasswordScreen(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     OutlinedTextField(
+                        singleLine = true,// 한줄 입력으로 제한
+                        maxLines = 1,
                         value = state.verificationCode,
                         onValueChange = { viewModel.onFindPasswordEvent(FindPasswordEvent.VerificationCodeChanged(it)) },
                         label = { Text("인증번호") },
@@ -216,6 +222,8 @@ fun FindPasswordScreen(
         // 새 비밀번호 입력 (이메일 인증 완료 후 표시)
         if (state.canChangePassword) {
             OutlinedTextField(
+                singleLine = true,// 한줄 입력으로 제한
+                maxLines = 1,
                 value = state.newPassword,
                 onValueChange = { viewModel.onFindPasswordEvent(FindPasswordEvent.NewPasswordChanged(it)) },
                 label = { Text("새 비밀번호") },
@@ -233,6 +241,8 @@ fun FindPasswordScreen(
             )
 
             OutlinedTextField(
+                singleLine = true,// 한줄 입력으로 제한
+                maxLines = 1,
                 value = state.confirmNewPassword,
                 onValueChange = { viewModel.onFindPasswordEvent(FindPasswordEvent.ConfirmNewPasswordChanged(it)) },
                 label = { Text("새 비밀번호 확인") },

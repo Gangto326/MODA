@@ -24,25 +24,20 @@ fun VideoSection(
     searchViewModel: SearchViewModel
 ) {
     val searchData by searchViewModel.searchData.collectAsState()
-    val videos = searchData?.videos.orEmpty() // 비디오 리스트 가져오기
+    val videos = searchData?.videos.orEmpty()
     val creator by homeKeywordViewModel.creator.collectAsState()
 
-    if (videos.isNotEmpty()) {
-        HomeSmallTitle(
-            title = if (creator.isNotEmpty()) "$creator 영상 어때요?" else "영상 어때요?",
-            description = ""
-        )
+    // videos가 비어있어도 항상 표시
+    HomeSmallTitle(
+        title = if (creator.isNotEmpty()) "$creator 영상 어때요?" else "영상 어때요?",
+        description = ""
+    )
 
-        VideoListComponent(navController, searchViewModel)
+    VideoListComponent(navController, searchViewModel)
 
-        Spacer(
-            modifier = Modifier
-                .height(20.dp)
-                .fillMaxWidth() // ✅ 가로 전체 영역을 차지하도록 설정
-//            .background(Color.Red) // ✅ 첫 번째 Spacer 배경색 (빨강)
-        )
-
-
-
-    }
+    Spacer(
+        modifier = Modifier
+            .height(20.dp)
+            .fillMaxWidth()
+    )
 }

@@ -3,6 +3,7 @@ package com.example.modapjt.presentation.auth.signup
 import android.util.Log
 import android.view.ViewTreeObserver
 import android.widget.Toast
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -42,10 +43,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.modapjt.R
 import com.example.modapjt.domain.model.SignUpEvent
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -110,6 +113,8 @@ fun SignUpScreen(
                 value = state.name,
                 onValueChange = { viewModel.onEvent(SignUpEvent.NameChanged(it)) },
                 label = { Text("닉네임") },
+                singleLine = true,// 한줄 입력으로 제한
+                maxLines = 1,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp),
@@ -131,6 +136,8 @@ fun SignUpScreen(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     OutlinedTextField(
+                        singleLine = true,// 한줄 입력으로 제한
+                        maxLines = 1,
                         value = state.username,
                         onValueChange = { viewModel.onEvent(SignUpEvent.UsernameChanged(it)) },
                         label = { Text("아이디") },
@@ -176,6 +183,8 @@ fun SignUpScreen(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     OutlinedTextField(
+                        singleLine = true,// 한줄 입력으로 제한
+                        maxLines = 1,
                         value = state.email,
                         onValueChange = { viewModel.onEvent(SignUpEvent.EmailChanged(it)) },
                         label = { Text("이메일") },
@@ -234,6 +243,8 @@ fun SignUpScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     OutlinedTextField(
+                        singleLine = true,// 한줄 입력으로 제한
+                        maxLines = 1,
                         value = state.emailVerificationCode,
                         onValueChange = {
                             viewModel.onEvent(
@@ -271,6 +282,8 @@ fun SignUpScreen(
 
             // 비밀번호 입력
             OutlinedTextField(
+                singleLine = true,// 한줄 입력으로 제한
+                maxLines = 1,
                 value = state.password,
                 onValueChange = { viewModel.onEvent(SignUpEvent.PasswordChanged(it)) },
                 label = { Text("비밀번호") },
@@ -292,6 +305,8 @@ fun SignUpScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 OutlinedTextField(
+                    singleLine = true,// 한줄 입력으로 제한
+                    maxLines = 1,
                     value = state.confirmPassword,
                     onValueChange = { viewModel.onEvent(SignUpEvent.ConfirmPasswordChanged(it)) },
                     label = { Text("비밀번호 확인") },
