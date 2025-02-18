@@ -76,6 +76,7 @@
         <!-- 공유하기 버튼 클릭 시 어플 뜨기 하는 방식-->
         <activity
             android:name=".ShareReceiverActivity"
+            android:theme="@style/Theme.Transparent"
             android:exported="true">
 
             <!-- 공유 인텐트 필터 -->
