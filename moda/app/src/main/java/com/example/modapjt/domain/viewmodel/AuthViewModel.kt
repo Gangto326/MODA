@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.modapjt.data.api.RetrofitInstance
+import com.example.modapjt.data.dto.request.FCMTokenRequest
 import com.example.modapjt.data.dto.request.LoginRequest
 import com.example.modapjt.data.storage.TokenManager
 import com.example.modapjt.domain.model.FindIdEvent
@@ -17,6 +18,7 @@ import com.example.modapjt.domain.model.LoginEvent
 import com.example.modapjt.domain.model.LoginState
 import com.example.modapjt.domain.model.SignUpEvent
 import com.example.modapjt.domain.model.SignUpState
+import com.example.modapjt.notification.FCMTokenManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -129,6 +131,24 @@ class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
                     if (!accessToken.isNullOrEmpty()) {
                         tokenManager.saveAccessToken(accessToken)
                         _isLoggedIn.value = true
+
+
+                        println("FCM발송하기 전") // 위치 변경
+                        FCMTokenManager.getToken()?.let { fcmToken ->
+                            try {
+                                // suspend 함수이므로 코루틴 스코프 내에서 직접 호출 가능
+                                RetrofitInstance.fcmTokenApi.postToken(
+                                    FCMTokenRequest(fcmToken)
+                                )
+                                println("FCM발송하기 후")
+                                Log.d("FCM", "Token sent successfully after login")
+                            } catch (e: Exception) {
+                                Log.e("FCM", "Failed to send token after login: ${e.message}")
+                            }
+                        }
+
+
+
                         _loginState.value = _loginState.value.copy(isLoading = false, error = null)
                         onLoginSuccess() // 여기에 콜백 실행 추가
                     } else {

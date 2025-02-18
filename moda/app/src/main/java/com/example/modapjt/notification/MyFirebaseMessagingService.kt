@@ -1,14 +1,21 @@
 package com.example.modapjt.notification
 
-import android.util.Log
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import android.os.Build
+import androidx.core.app.NotificationCompat
+import com.example.modapjt.MainActivity
+import com.example.modapjt.R
 import com.example.modapjt.data.api.RetrofitInstance
-import com.example.modapjt.data.dto.request.FCMTokenRequest
 import com.google.firebase.messaging.FirebaseMessagingService
+import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
 
 class MyFirebaseMessagingService : FirebaseMessagingService()  {
     private val api = RetrofitInstance.fcmTokenApi
