@@ -28,7 +28,7 @@ Explain everything clearly so anyone can follow along, while still pointing out 
         }
     ]
 
-def make_category_prompt(content: str, base64_image: List[str]):
+def make_category_prompt(content: str, base64_image: List[str], exclude:List[str]):
     return [
         {
             'role': 'system',
@@ -39,6 +39,7 @@ def make_category_prompt(content: str, base64_image: List[str]):
             'content': f'''Please choose one of the categories from the image and content given and tell me just the categories.
 Don't say anything else and just tell me the categories.
 ['Trends', 'Entertainment', 'Finance', 'Travel', 'Food', 'IT', 'Design', 'Society', 'Health']
+{"Do Not choose in {exclude}" if len(exclude) != 0 else ""}
 
 {content}''',
             'images': base64_image

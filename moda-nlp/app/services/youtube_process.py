@@ -121,6 +121,7 @@ class YoutubeProcess:
                 self.category = 'ALL'
         except Exception as e:
             print(f"에러: {e}")
+            self.choose_category(model)
 
     #keywords를 생성하는 함수
     def make_keywords(self, model: str):
@@ -145,6 +146,7 @@ class YoutubeProcess:
             print("키워드 생성")
         except Exception as e:
             print(f"에러: {e}")
+            self.make_keywords(model)
 
     #embeeding_vector를 생성하는 함수
     def make_embedding_vector(self):

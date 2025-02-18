@@ -1,5 +1,6 @@
 import json
 import random
+import time
 
 import googletrans
 import ollama
@@ -56,12 +57,14 @@ class PostSummary:
              messages,
              model: str,
              format = None):
+        current_seed = int(time.time() * 1000) + random.randint(1, 1000000)
+
         response = ollama.chat(
             model = model,
             messages = messages,
             format = format,
             options = {
-                'seed': random.randint(1, 1000000)
+                'seed': current_seed
             }
         )
         return response['message']['content']
@@ -69,7 +72,6 @@ class PostSummary:
     #category를 선택하는 함수
     def choose_category(self, model: str):
         try:
-            messages = make_category_prompt(self.origin_content)
             format = {
                 'type': 'object',
                 'properties': {
@@ -82,7 +84,9 @@ class PostSummary:
 
             find_category = False
             attempt_count = 0
+            exclude = []
             while attempt_count < self.MAX_CATEGORY_TRIES:
+                messages = make_category_prompt(self.origin_content, exclude)
                 response = self.chat(model = model, messages = messages, format = format)
 
                 print(f" 카테고리 선택 시도 {attempt_count} - {response}")
@@ -97,6 +101,7 @@ class PostSummary:
                 if find_category:
                     break
 
+                exclude.append(json.loads(response)['category'])
                 attempt_count += 1
 
             if attempt_count == self.MAX_CATEGORY_TRIES:
@@ -104,6 +109,7 @@ class PostSummary:
                 self.category = 'All'
         except Exception as e:
             print(f"에러: {e}")
+            self.choose_category(model)
 
     #origin_content를 요약하는 함수
     def summary_content(self, model: str):
@@ -160,6 +166,7 @@ class PostSummary:
             print("포스트 요약본 생성")
         except Exception as e:
             print(f"에러: {e}")
+            self.summary_content(model)
 
     #keywords를 생성하는 함수
     def make_keywords(self, model: str):
@@ -184,6 +191,7 @@ class PostSummary:
             print("키워드 생성")
         except Exception as e:
             print(f"에러: {e}")
+            self.make_keywords(model)
 
     # thumbnail_content를 생성하는 함수
     def make_thumbnail_content(self, model: str):
@@ -196,6 +204,7 @@ class PostSummary:
             print("썸네일 생성")
         except Exception as e:
             print(f"에러: {e}")
+            self.make_thumbnail_content(model)
 
     #embeeding_vector를 생성하는 함수
     def make_embedding_vector(self):

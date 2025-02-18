@@ -76,12 +76,12 @@ class ImageAnalyze:
             print("이미지 분석")
         except Exception as e:
             print(f"에러: {e}")
+            await self.analyze_image()
 
     #category를 선택하는 함수
     def choose_category(self):
         try:
             model = self.MODEL
-            messages = make_category_prompt(self.content, self.base64_image)
             format = {
                 'type': 'object',
                 'properties': {
@@ -94,7 +94,9 @@ class ImageAnalyze:
 
             find_category = False
             attempt_count = 0
+            exclude = []
             while attempt_count < self.MAX_CATEGORY_TRIES:
+                messages = make_category_prompt(self.content, self.base64_image, exclude)
                 response = self.chat(model = model, messages = messages, format = format)
 
                 print(f" 카테고리 선택 시도 {attempt_count} - {response}")
@@ -109,6 +111,7 @@ class ImageAnalyze:
                 if find_category:
                     break
 
+                exclude.append(json.loads(response)['category'])
                 attempt_count += 1
 
             if attempt_count == self.MAX_CATEGORY_TRIES:
@@ -116,6 +119,7 @@ class ImageAnalyze:
                 self.category = 'ALL'
         except Exception as e:
             print(f"에러: {e}")
+            self.choose_category()
 
     #keywords를 생성하는 함수
     async def make_keywords(self):
@@ -142,6 +146,7 @@ class ImageAnalyze:
             print("키워드 생성")
         except Exception as e:
             print(f"에러: {e}")
+            await self.make_keywords()
 
     #embeeding_vector를 생성하는 함수
     def make_embedding_vector(self):
