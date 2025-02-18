@@ -34,11 +34,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -221,7 +218,18 @@ fun MyPageScreen(
 
                                 CustomToggleSwitch(
                                     isGestureMode = isGestureMode,
-                                    onToggleChange = { isGestureMode = it }
+                                    onToggleChange = {
+                                        if (isOverlayActive || isGestureActive) {
+                                            Toast.makeText(
+                                                context,
+                                                "먼저 ${if (isOverlayActive) "오버레이" else "제스처"} 서비스를 종료해주세요.",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                            return@CustomToggleSwitch
+                                        }
+
+                                        isGestureMode = it
+                                    }
                                 )
                             }
 
@@ -341,7 +349,10 @@ fun LogoutDialog(viewModel: AuthViewModel, navController: NavController, onDismi
 
 
 @Composable
-fun CustomToggleSwitch(isGestureMode: Boolean, onToggleChange: (Boolean) -> Unit) {
+fun CustomToggleSwitch(
+    isGestureMode: Boolean,
+    onToggleChange: (Boolean) -> Unit
+) {
     Row(
         modifier = Modifier
             .width(130.dp) // 버튼 전체 너비
@@ -355,10 +366,10 @@ fun CustomToggleSwitch(isGestureMode: Boolean, onToggleChange: (Boolean) -> Unit
                 .weight(1f)
                 .fillMaxHeight()
                 .background(if (!isGestureMode) Color.White else Color.Transparent, shape = CircleShape)
-                .clickable (
+                .clickable(
                     indication = null, // 클릭 효과 제거
                     interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
-                ){ onToggleChange(false) },
+                ) { onToggleChange(false) },
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -374,7 +385,10 @@ fun CustomToggleSwitch(isGestureMode: Boolean, onToggleChange: (Boolean) -> Unit
                 .weight(1f)
                 .fillMaxHeight()
                 .background(if (isGestureMode) Color.White else Color.Transparent, shape = CircleShape)
-                .clickable { onToggleChange(true) },
+                .clickable(
+                    indication = null, // 클릭 효과 제거
+                    interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
+                ) { onToggleChange(true) },
             contentAlignment = Alignment.Center
         ) {
             Text(

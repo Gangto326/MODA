@@ -13,7 +13,6 @@ import androidx.annotation.RequiresApi
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.modapjt.data.storage.TokenManager
 import com.example.modapjt.domain.viewmodel.AuthViewModel
@@ -37,8 +36,6 @@ class MainActivity : ComponentActivity() {
         checkOverlayPermission()
 
         setContent {
-
-
             ModapjtTheme {
                 // TokenManager 초기화 (Compose에서 remember로 관리)
                 val context = LocalContext.current

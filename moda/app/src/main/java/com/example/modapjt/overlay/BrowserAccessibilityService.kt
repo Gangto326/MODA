@@ -84,25 +84,6 @@ class BrowserAccessibilityService : AccessibilityService() {
         }
 
         //더블 탭 감지
-//        if (event.source?.actions?.and(AccessibilityNodeInfo.ACTION_CLICK) != 0 &&
-//            event.packageName == "com.android.chrome") {
-//            Log.d("BrowserAccessibilityService", "one click")
-//            val currentTime = System.currentTimeMillis()
-//            val timeDiff = currentTime - lastClickTime
-//
-//            if (timeDiff <= DOUBLE_TAP_TIMEOUT) {
-//                lastClickTime = 0
-//                Log.d("BrowserAccessibilityService", "Double tab detected!")
-//
-//                val intent = Intent()
-//                intent.action = "com.example.modapjt.DOUBLE_TAP_ACTION"
-//                sendBroadcast(intent)
-//            } else {
-//                lastClickTime = currentTime
-//            }
-//
-//            event.source?.recycle()
-//        }
         if (
             event.packageName == "com.android.chrome" &&
             event.eventType == AccessibilityEvent.TYPE_VIEW_CLICKED &&
