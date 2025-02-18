@@ -16,8 +16,19 @@ data class SignUpState(
     val emailVerificationMessage: String? = null,
     val passwordMatchMessage: String? = null,
     val remainingTime: Int = 600,
+    val passwordValidationMessage: String? = null, //비밀번호 검증
     val isTimerRunning: Boolean = false
 ) {
+    // 비밀번호 유효성 검사 함수 추가
+    fun isPasswordValid(): Boolean {
+        return password.length >= 8
+    }
+
+    fun isPasswordsMatch(): Boolean {
+        return password == confirmPassword && password.isNotEmpty() && confirmPassword.isNotEmpty()
+    }
+
+
     fun isValid(): Boolean {
         return name.isNotEmpty() &&
                 username.isNotEmpty() &&

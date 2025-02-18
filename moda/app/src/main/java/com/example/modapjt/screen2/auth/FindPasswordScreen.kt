@@ -121,7 +121,7 @@ fun FindPasswordScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 4.dp),
-            shape = RoundedCornerShape(8.dp),
+            shape = RoundedCornerShape(16.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 unfocusedBorderColor = Color(0xFFBBAEA4),
                 focusedBorderColor = Color(0xFFBBAEA4),
@@ -142,7 +142,7 @@ fun FindPasswordScreen(
                 onValueChange = { viewModel.onFindPasswordEvent(FindPasswordEvent.EmailChanged(it)) },
                 label = { Text("이메일") },
                 modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     unfocusedBorderColor = Color(0xFFBBAEA4),
                     focusedBorderColor = Color(0xFFBBAEA4),
@@ -154,9 +154,10 @@ fun FindPasswordScreen(
             Button(
                 onClick = { viewModel.onFindPasswordEvent(FindPasswordEvent.SendVerification) },
                 modifier = Modifier
-                    .height(56.dp)
-                    .width(100.dp),
-                shape = RoundedCornerShape(8.dp),
+                    .height(64.dp)
+                    .width(100.dp)
+                    .padding(top = 8.dp),
+                shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFFBBAEA4)
                 )
@@ -179,7 +180,7 @@ fun FindPasswordScreen(
                         onValueChange = { viewModel.onFindPasswordEvent(FindPasswordEvent.VerificationCodeChanged(it)) },
                         label = { Text("인증번호") },
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp),
+                        shape = RoundedCornerShape(16.dp),
                         colors = OutlinedTextFieldDefaults.colors(
                             unfocusedBorderColor = Color(0xFFBBAEA4),
                             focusedBorderColor = Color(0xFFBBAEA4),
@@ -199,9 +200,10 @@ fun FindPasswordScreen(
                 Button(
                     onClick = { viewModel.onFindPasswordEvent(FindPasswordEvent.VerifyCode) },
                     modifier = Modifier
-                        .height(56.dp)
+                        .height(64.dp)
+                        .padding(top = 8.dp)
                         .width(100.dp),
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFFBBAEA4)
                     )
@@ -221,7 +223,7 @@ fun FindPasswordScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp),
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     unfocusedBorderColor = Color(0xFFBBAEA4),
                     focusedBorderColor = Color(0xFFBBAEA4),
@@ -238,7 +240,7 @@ fun FindPasswordScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp),
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     unfocusedBorderColor = Color(0xFFBBAEA4),
                     focusedBorderColor = Color(0xFFBBAEA4),
@@ -253,7 +255,7 @@ fun FindPasswordScreen(
                     .fillMaxWidth()
                     .padding(vertical = 16.dp),
                 enabled = state.newPassword.isNotEmpty() && state.newPassword == state.confirmNewPassword,
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFFBBAEA4)
                 )

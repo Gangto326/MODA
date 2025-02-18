@@ -27,6 +27,11 @@ fun FindIdScreen(
     var isKeyboardVisible by remember { mutableStateOf(false) }
     var keyboardHeight by remember { mutableStateOf(0) }
 
+    // 화면이 처음 표시될 때 상태 초기화
+    LaunchedEffect(Unit) {
+        viewModel.resetState()
+    }
+
     // 키보드 가시성 감지
     val view = LocalView.current
     DisposableEffect(view) {
@@ -51,7 +56,7 @@ fun FindIdScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(20.dp)
             .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -66,33 +71,50 @@ fun FindIdScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // 이메일 입력
+        // 이메일 입력 및 인증 부분
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 4.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            OutlinedTextField(
-                value = state.email,
-                onValueChange = { viewModel.onEmailChanged(it) },
-                label = { Text("이메일") },
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(8.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedBorderColor = Color(0xFFBBAEA4),
-                    focusedBorderColor = Color(0xFFBBAEA4),
-                    unfocusedLabelColor = Color.Gray,
-                    focusedLabelColor = Color(0xFFBBAEA4),
+            Column(modifier = Modifier.weight(1f)) {
+                OutlinedTextField(
+                    value = state.email,
+                    onValueChange = { viewModel.onEmailChanged(it) },
+                    label = { Text("이메일") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        unfocusedBorderColor = Color(0xFFBBAEA4),
+                        focusedBorderColor = Color(0xFFBBAEA4),
+                        unfocusedLabelColor = Color.Gray,
+                        focusedLabelColor = Color(0xFFBBAEA4),
+                    )
                 )
-            )
+                if (state.isEmailVerificationSent && state.remainingTime > 0) {
+                    Text(
+                        text = "남은 시간: ${state.remainingTime / 60}:${String.format("%02d", state.remainingTime % 60)}",
+                        color = Color.Red,
+                        modifier = Modifier.padding(start = 8.dp, top = 4.dp)
+                    )
+                }
+                state.emailVerificationMessage?.let { message ->
+                    Text(
+                        text = message,
+                        color = if (message == "인증되었습니다.") Color.Blue else Color.Red,
+                        modifier = Modifier.padding(start = 8.dp, top = 4.dp)
+                    )
+                }
+            }
 
             Button(
                 onClick = { viewModel.sendVerification() },
                 modifier = Modifier
-                    .height(56.dp)
+                    .height(64.dp)
+                    .padding(top = 8.dp)
                     .width(100.dp),
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFFBBAEA4)
                 ),
@@ -102,7 +124,7 @@ fun FindIdScreen(
             }
         }
 
-        // 인증번호 입력 필드
+// 인증번호 입력 필드
         if (state.isEmailVerificationSent) {
             Row(
                 modifier = Modifier
@@ -115,7 +137,7 @@ fun FindIdScreen(
                     onValueChange = { viewModel.onVerificationCodeChanged(it) },
                     label = { Text("인증번호") },
                     modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         unfocusedBorderColor = Color(0xFFBBAEA4),
                         focusedBorderColor = Color(0xFFBBAEA4),
@@ -127,9 +149,10 @@ fun FindIdScreen(
                 Button(
                     onClick = { viewModel.verifyAndFindId() },
                     modifier = Modifier
-                        .height(56.dp)
+                        .height(64.dp)
+                        .padding(top = 8.dp)
                         .width(100.dp),
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFFBBAEA4)
                     ),

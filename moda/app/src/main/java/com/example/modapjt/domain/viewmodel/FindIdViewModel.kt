@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.modapjt.data.repository.FindIdRepository
+import com.example.modapjt.domain.model.SignUpState
 import com.example.modapjt.utils.Resource
 import kotlinx.coroutines.launch
 
@@ -14,6 +15,7 @@ class FindIdViewModel : ViewModel() {
 
     private val _state = mutableStateOf(FindIdState())
     val state: State<FindIdState> = _state
+
 
     fun onEmailChanged(email: String) {
         _state.value = state.value.copy(
@@ -56,6 +58,16 @@ class FindIdViewModel : ViewModel() {
         }
     }
 
+    fun resetState() {
+        _state.value = _state.value.copy(
+            email = "",
+            verificationCode = "",
+            isEmailVerificationSent = false,
+            error = null,
+            isLoading = false,
+        )
+    }
+
     fun verifyAndFindId() {
         viewModelScope.launch {
             _state.value = state.value.copy(isLoading = true)
@@ -91,11 +103,16 @@ class FindIdViewModel : ViewModel() {
     }
 }
 
+
+
 data class FindIdState(
     val email: String = "",
     val verificationCode: String = "",
     val isEmailVerificationSent: Boolean = false,
     val foundId: String? = null,
     val error: String? = null,
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val isTimerRunning: Boolean = false,
+    val remainingTime: Int = 600,
+    val emailVerificationMessage: String? = null,
 )

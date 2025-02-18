@@ -84,7 +84,7 @@ fun LoginScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = if (isKeyboardVisible) Arrangement.Top else Arrangement.Center
     ) {
@@ -106,7 +106,7 @@ fun LoginScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 4.dp),
-            shape = RoundedCornerShape(8.dp),
+            shape = RoundedCornerShape(16.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 unfocusedBorderColor = Color(0xFFBBAEA4),
                 focusedBorderColor = Color(0xFFBBAEA4),
@@ -125,7 +125,7 @@ fun LoginScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 4.dp),
-            shape = RoundedCornerShape(8.dp),
+            shape = RoundedCornerShape(16.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 unfocusedBorderColor = Color(0xFFBBAEA4),
                 focusedBorderColor = Color(0xFFBBAEA4),
@@ -146,9 +146,10 @@ fun LoginScreen(
             onClick = { viewModel.onLoginEvent(LoginEvent.Submit) },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 16.dp),
+                .padding(vertical = 16.dp)
+                .height(56.dp),
             enabled = !state.isLoading,
-            shape = RoundedCornerShape(8.dp),
+            shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFFBBAEA4)
             )

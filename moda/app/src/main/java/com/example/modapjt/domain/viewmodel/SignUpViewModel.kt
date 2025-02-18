@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.modapjt.data.api.RetrofitInstance
 import com.example.modapjt.data.repository.SignUpRepository
+import com.example.modapjt.domain.model.FindPasswordState
 import com.example.modapjt.domain.model.SignUpEvent
 import com.example.modapjt.domain.model.SignUpState
 import com.example.modapjt.utils.Resource
@@ -30,6 +31,28 @@ class SignUpViewModel : ViewModel() {
 
     private val _uiEvent = Channel<UiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
+
+    private val _state = mutableStateOf(SignUpState())
+
+    fun resetState() {
+        _state.value = _state.value.copy(
+            username = "",
+            email = "",
+            emailVerificationCode = "",
+            password = "",
+            confirmPassword = "",
+            isEmailVerificationSent = false,
+            isLoading = false,
+            error = null,
+            isUsernameVerified = false,
+            isEmailVerified = false,
+            usernameVerificationMessage = null,
+            passwordMatchMessage = null,
+            remainingTime = 0,
+            passwordValidationMessage = null, //비밀번호 검증
+            isTimerRunning = false
+        )
+    }
 
     fun onEvent(event: SignUpEvent) {
         when (event) {
@@ -65,10 +88,22 @@ class SignUpViewModel : ViewModel() {
                 )
             }
 
+            // SignUpViewModel.kt의 PasswordChanged 이벤트 처리 수정
             is SignUpEvent.PasswordChanged -> {
+                val passwordValidation = if (event.password.length < 8) {
+                    "비밀번호는 8자리 이상이어야 합니다."
+                } else {
+                    null
+                }
+
                 _signUpState.value = _signUpState.value.copy(
                     password = event.password,
-                    passwordMatchMessage = checkPasswordMatch(event.password, _signUpState.value.confirmPassword),
+                    passwordValidationMessage = passwordValidation,
+                    passwordMatchMessage = if (event.password.length >= 8) {
+                        checkPasswordMatch(event.password, _signUpState.value.confirmPassword)
+                    } else {
+                        null
+                    },
                     error = null
                 )
             }
@@ -76,7 +111,11 @@ class SignUpViewModel : ViewModel() {
             is SignUpEvent.ConfirmPasswordChanged -> {
                 _signUpState.value = _signUpState.value.copy(
                     confirmPassword = event.confirmPassword,
-                    passwordMatchMessage = checkPasswordMatch(_signUpState.value.password, event.confirmPassword),
+                    passwordMatchMessage = if (_signUpState.value.password.length >= 8) {
+                        checkPasswordMatch(_signUpState.value.password, event.confirmPassword)
+                    } else {
+                        null
+                    },
                     error = null
                 )
             }
@@ -89,10 +128,11 @@ class SignUpViewModel : ViewModel() {
     }
 
     private fun checkPasswordMatch(password: String, confirmPassword: String): String? {
-        return if (password.isNotEmpty() && confirmPassword.isNotEmpty() && password != confirmPassword) {
-            "비밀번호가 일치하지 않습니다."
-        } else {
-            null
+        return when {
+            password.length < 8 -> "비밀번호는 8자리 이상이어야 합니다."
+            confirmPassword.isEmpty() -> null  // 비밀번호 확인이 비어있으면 메시지 표시하지 않음
+            password != confirmPassword -> "비밀번호가 일치하지 않습니다."
+            else -> null
         }
     }
 
@@ -134,6 +174,9 @@ class SignUpViewModel : ViewModel() {
             }
         }
     }
+
+
+
 
     private fun startEmailVerificationTimer() {
         timerJob?.cancel()
@@ -295,6 +338,13 @@ class SignUpViewModel : ViewModel() {
                 _signUpState.value = state.copy(error = "비밀번호가 일치하지 않습니다.")
                 viewModelScope.launch {
                     _uiEvent.send(UiEvent.ShowError("비밀번호가 일치하지 않습니다."))
+                }
+                return
+            }
+            state.password.length < 8 -> {
+                _signUpState.value = state.copy(error = "비밀번호는 8자리 이상이어야 합니다.")
+                viewModelScope.launch {
+                    _uiEvent.send(UiEvent.ShowError("비밀번호는 8자리 이상이어야 합니다."))
                 }
                 return
             }
