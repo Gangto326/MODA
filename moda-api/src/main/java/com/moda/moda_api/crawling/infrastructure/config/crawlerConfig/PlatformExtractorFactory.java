@@ -36,12 +36,13 @@ public class PlatformExtractorFactory {
 	private static ExtractorConfig createMobileNaverBlogConfig() {
 		return ExtractorConfig.builder()
 			.pattern("m.blog.naver.com")
-			.contentSelector(".se-main-container")
+			.contentSelector(".dsadsadasd") //.se_component_wrap.__se_component_area, .se-main-container
 			.imageSelector(".se_mediaImage")
 			.requiresFrame(false)
 			.urlDomainType(UrlDomainType.NAVER_BLOG)
 			.build();
 	}
+
 
 	private static ExtractorConfig createMobileTistoryConfig() {
 		return ExtractorConfig.builder()
@@ -59,7 +60,7 @@ public class PlatformExtractorFactory {
 	private static ExtractorConfig createDesktopNaverBlogConfig() {
 		return ExtractorConfig.builder()
 			.pattern("blog.naver.com")
-			.contentSelector(".se-main-container")
+			.contentSelector(".se-main-container, se_component_wrap.sect_dsc __se_component_area")
 			.imageSelector(".se-image img, .se-module-image img")
 			.requiresFrame(true)
 			.frameId("mainFrame")

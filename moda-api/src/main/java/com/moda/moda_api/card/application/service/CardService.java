@@ -37,6 +37,7 @@ import com.moda.moda_api.card.presentation.request.CardBookmarkRequest;
 import com.moda.moda_api.card.presentation.request.MoveCardRequest;
 import com.moda.moda_api.card.presentation.request.UpdateCardRequest;
 import com.moda.moda_api.category.domain.CategoryId;
+import com.moda.moda_api.common.exception.ContentExtractionException;
 import com.moda.moda_api.common.infrastructure.ImageStorageService;
 import com.moda.moda_api.common.pagination.SliceRequestDto;
 import com.moda.moda_api.common.pagination.SliceResponseDto;
@@ -89,15 +90,14 @@ public class CardService {
 		String urlHash = UrlCache.generateHash(url);
 
 		if(urlDuplicatedRepository.checkDuplicated(url)){
-			throw new DuplicateUrlException("같은 URL이 들어갔습니다.");
+			throw new DuplicateUrlException("같은 정보의 카드가 생성중입니다."
+			,userIdObj.getValue());
 		}
 		urlDuplicatedRepository.urlDuplicatedSave(url);
-
-
-
-
 		if (cardRepository.existsByUserIdAndUrlHashAndDeletedAtIsNull(userIdObj, urlHash))
-			throw new DuplicateCardException("같은 URL을 가진 카드가 이미 존재합니다.");
+			throw new DuplicateCardException(
+				"같은 정보의 카드가 이미 존재합니다.",
+				userIdObj.getValue());
 
 		return urlCacheRepository.findByUrlHash(urlHash)
 			.map(cache -> createCardFromCache(userIdObj, urlHash))
@@ -106,7 +106,8 @@ public class CardService {
 					return createNewCard(userIdObj, url, urlHash);
 				} catch (Exception e) {
 					e.printStackTrace();
-					return CompletableFuture.completedFuture(false); // 실패 시 false 반환
+					log.error("Card creation failed", e);
+					throw new ContentExtractionException("컨텐츠를 추출할 수 없는 사이트입니다.", userId, e);
 				}
 			});
 	}
@@ -155,7 +156,7 @@ public class CardService {
 
 		// 여기서 2가지 경우로 다시 나눠야한다.
 		// summary에서 2가지 경우로 나눠보자.
-		return summaryService.getSummary(url)
+		return summaryService.getSummary(url, userIdObj.getValue())
 			.thenApply(SummaryResultDto -> {
 				String thumbnailUrl = SummaryResultDto.getThumbnailUrl() !=
 					null ? SummaryResultDto.getThumbnailUrl() :
@@ -209,7 +210,7 @@ public class CardService {
 
 	@Transactional
 	public Boolean createImages(String userId, List<MultipartFile> multipartFiles) {
-		UserId userIdObj = new UserId("user");
+		UserId userIdObj = new UserId(userId);
 
 		List<Card> cards = multipartFiles.stream()
 			.map(file -> {

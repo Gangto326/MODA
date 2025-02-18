@@ -41,31 +41,71 @@ public class NotificationService {
 		System.out.println("userId : " + userId);
 		System.out.println("NotificationType : " +type);
 		System.out.println();
+		System.out.println(imageUrl);
 		tokens.forEach(System.out::println);
+
+		System.out.println(imageUrl);
+		tokens.forEach(token -> {
+			Message message = Message.builder()
+				.setToken(token)
+				.putData("cardId", String.valueOf(card.getCardId().getValue()))  // cardId를 문자열로 명확히 전달
+				.putData("imageUrl", imageUrl)
+				.putData("title", card.getTitle())
+				.setNotification(com.google.firebase.messaging.Notification.builder()
+					.setTitle("카드가 생성이 되었습니다. 모다모다~")
+					.setBody(card.getTitle())
+					.build())
+				.setAndroidConfig(AndroidConfig.builder()
+					.setTtl(3600 * 1000)
+					.setNotification(AndroidNotification.builder()
+						.setColor("#FFFFFF")
+						.setIcon("icon_round")
+						.setImage(imageUrl)  // **이미지 URL 추가**
+						.setClickAction("OPEN_ACTIVITY")
+						.setDefaultVibrateTimings(true)
+						.setDefaultSound(true)
+						.setNotificationCount(1)
+						.build())
+					.build())
+				.build();
+			try {
+				System.out.println("메시지 전송 시도: " + token);
+				String response = firebaseMessaging.send(message);
+				System.out.println("전송 성공. Response: " + response);
+			} catch (FirebaseMessagingException e) {
+				System.out.println("전송 실패. 에러: " + e.getMessage());
+				e.printStackTrace();
+				handleFCMException(e, token);
+			}
+		});
+	}
+
+
+	@Transactional
+	public void sendErrorNotification(String userId, String errorMessage) {
+		// 유저 토큰 가져오기
+		Set<String> tokens = fcmTokenService.getUserTokens(userId);
 
 		tokens.forEach(token -> {
 			Message message = Message.builder()
 				.setToken(token)
 				.setNotification(com.google.firebase.messaging.Notification.builder()
-					.setTitle( "카드가 생성이 되었습니다. 모다모다~")
-					.setBody(card.getTitle() + "")
+					.setTitle(errorMessage)
 					.build())
-				.putData("cardId", card.getCardId().getValue())  // data 필드로 전달
 				.setAndroidConfig(AndroidConfig.builder()
 					.setTtl(3600 * 1000)
 					.setNotification(AndroidNotification.builder()
 						.setColor("#FFFFFF")
-						.setIcon("icon_round.webp")
-						.setImage(imageUrl)
+						.setIcon("icon_round")
 						.setClickAction("OPEN_ACTIVITY")
 						.setDefaultVibrateTimings(true)
 						.setDefaultSound(true)
 						.setNotificationCount(1)
+						.build())
 					.build())
-				.build())
 				.build();
 			try {
-				System.out.println("메시지 전송 시도: " + token);
+				System.out.println("크롤링 실패 알림 전송 시도: " + token);
 				String response = firebaseMessaging.send(message);
 				System.out.println("전송 성공. Response: " + response);
 			} catch (FirebaseMessagingException e) {
