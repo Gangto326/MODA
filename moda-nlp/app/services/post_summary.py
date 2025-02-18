@@ -117,6 +117,7 @@ class PostSummary:
 
                 for idx in range(1, len(categories)):
                     compare_result = vector_compare(embedding, categories[idx][1])
+                    print(f"비교 결과 {compare_result} {categories[idx][0]}")
                     if compare_result > similarity:
                         similarity = compare_result
                         category_id = idx + 1
