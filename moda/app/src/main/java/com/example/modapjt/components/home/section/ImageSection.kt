@@ -1,6 +1,7 @@
 package com.example.modapjt.components.home.section
 
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Divider
@@ -20,6 +21,24 @@ fun ImageSection(
     navController: NavController,
     searchViewModel: SearchViewModel
 ) {
+
+    Divider( // 구분선
+        color = Color(0xFFF1F1F1),
+        thickness = 6.dp,
+
+        modifier = Modifier
+//            .padding(horizontal = 0.dp)
+//            .background(Color.Green) // ✅ Divider 배경색 (초록)
+    )
+
+    Spacer(
+        modifier = Modifier
+            .height(16.dp)
+            .fillMaxWidth() // ✅ 가로 전체 영역을 차지하도록 설정
+//            .background(Color.Blue) // ✅ 두 번째 Spacer 배경색 (파랑)
+    )
+
+
     val searchData by searchViewModel.searchData.collectAsState()
     val images = searchData?.images.orEmpty() // 이미지 리스트 가져오기
 
@@ -34,7 +53,6 @@ fun ImageSection(
         ImageListComponent(navController, searchViewModel)
         Spacer(modifier = Modifier.height(30.dp))
 
-        Divider(color = Color(0xFFF1F1F1), thickness = 6.dp, modifier = Modifier.padding(horizontal = 0.dp))
-        Spacer(modifier = Modifier.height(20.dp))
+
     }
 }

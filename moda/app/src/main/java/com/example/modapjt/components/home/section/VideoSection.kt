@@ -42,21 +42,7 @@ fun VideoSection(
 //            .background(Color.Red) // ✅ 첫 번째 Spacer 배경색 (빨강)
         )
 
-        Divider( // 구분선
-            color = Color(0xFFF1F1F1),
-            thickness = 6.dp,
 
-            modifier = Modifier
-//            .padding(horizontal = 0.dp)
-//            .background(Color.Green) // ✅ Divider 배경색 (초록)
-        )
-
-        Spacer(
-            modifier = Modifier
-                .height(16.dp)
-                .fillMaxWidth() // ✅ 가로 전체 영역을 차지하도록 설정
-//            .background(Color.Blue) // ✅ 두 번째 Spacer 배경색 (파랑)
-        )
 
     }
 }
