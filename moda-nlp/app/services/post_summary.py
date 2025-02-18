@@ -122,6 +122,7 @@ class PostSummary:
                         category_id = idx + 1
                         category = categories[idx + 1][0]
 
+                print(f"임베딩 카테고리 {self.category_id} {self.category}")
         except Exception as e:
             print(f"에러: {e}")
             self.choose_category(model)
