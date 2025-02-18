@@ -58,6 +58,8 @@ import com.example.modapjt.components.setting.SettingItem
 import com.example.modapjt.components.user.MyPageHeader
 import com.example.modapjt.domain.viewmodel.AuthViewModel
 import com.example.modapjt.domain.viewmodel.UserViewModel
+import com.example.modapjt.overlay.GestureService
+import com.example.modapjt.overlay.GestureStateManager
 import com.example.modapjt.overlay.OverlayService
 import com.example.modapjt.overlay.OverlayStateManager
 
@@ -71,12 +73,12 @@ fun MyPageScreen(
     val viewModel: UserViewModel = viewModel()
     val context = LocalContext.current
 
-    val isOverlayActive by OverlayStateManager.isOverlayActive.collectAsState()
     var showLogoutDialog by remember { mutableStateOf(false) }
 
-    // 🌟 제스처 모드 상태 관리
-    var isGestureMode by remember { mutableStateOf(true) }
-    var isGestureActive by remember { mutableStateOf(false) }
+    // 🌟 저장 방법 상태 관리
+    var saveMode by remember { mutableStateOf(SaveMethod.GESTURE) }
+    val isGestureActive by GestureStateManager.isGestureActive.collectAsState()
+    val isOverlayActive by OverlayStateManager.isOverlayActive.collectAsState()
 
 
     val userStatus by viewModel.userStatus.collectAsState()
@@ -217,7 +219,7 @@ fun MyPageScreen(
                                 )
 
                                 CustomToggleSwitch(
-                                    isGestureMode = isGestureMode,
+                                    saveMode = saveMode,
                                     onToggleChange = {
                                         if (isOverlayActive || isGestureActive) {
                                             Toast.makeText(
@@ -228,7 +230,7 @@ fun MyPageScreen(
                                             return@CustomToggleSwitch
                                         }
 
-                                        isGestureMode = it
+                                        saveMode = it
                                     }
                                 )
                             }
@@ -238,9 +240,27 @@ fun MyPageScreen(
 
                             Button(
                                 onClick = {
-                                    if (isGestureMode) {
-                                        isGestureActive = !isGestureActive
-                                    } else {
+                                    if (saveMode == SaveMethod.GESTURE) {
+                                        if (!isGestureActive) {
+                                            val serviceIntent = Intent(context, GestureService::class.java)
+                                            context.startService(serviceIntent)
+                                            GestureStateManager.setOverlayActive(true)
+
+                                            // 크롬 브라우저 실행
+                                            Toast.makeText(context, "크롬 브라우저가 실행됩니다.", Toast.LENGTH_SHORT).show()
+                                            val chromeIntent = Intent(Intent.ACTION_MAIN)
+                                            chromeIntent.setPackage("com.android.chrome")
+                                            chromeIntent.addCategory(Intent.CATEGORY_APP_BROWSER)
+                                            chromeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                            context.startActivity(chromeIntent)
+                                            Log.d("OverlayService", "크롬 브라우저 실행")
+                                        } else {
+                                            val serviceIntent = Intent(context, GestureService::class.java)
+                                            context.stopService(serviceIntent)
+                                            GestureStateManager.setOverlayActive(false)
+                                        }
+                                    }
+                                    else if (saveMode == SaveMethod.OVERLAY){
                                         if (!isOverlayActive) {
                                             try {
                                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -265,8 +285,9 @@ fun MyPageScreen(
                             ) {
                                 Text(
                                     text = when {
-                                        isGestureMode -> if (isGestureActive) "제스처 종료" else "제스처 시작"
-                                        else -> if (isOverlayActive) "오버레이 종료" else "오버레이 시작"
+                                        saveMode == SaveMethod.GESTURE -> if (isGestureActive) "제스처 종료" else "제스처 시작"
+                                        saveMode == SaveMethod.OVERLAY -> if (isOverlayActive) "오버레이 종료" else "오버레이 시작"
+                                        else -> ""
                                     },
                                     color = Color.Black
                                 )
@@ -350,8 +371,8 @@ fun LogoutDialog(viewModel: AuthViewModel, navController: NavController, onDismi
 
 @Composable
 fun CustomToggleSwitch(
-    isGestureMode: Boolean,
-    onToggleChange: (Boolean) -> Unit
+    saveMode: SaveMethod,
+    onToggleChange: (SaveMethod) -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -365,18 +386,18 @@ fun CustomToggleSwitch(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
-                .background(if (!isGestureMode) Color.White else Color.Transparent, shape = CircleShape)
+                .background(if (saveMode == SaveMethod.OVERLAY) Color.White else Color.Transparent, shape = CircleShape)
                 .clickable(
                     indication = null, // 클릭 효과 제거
                     interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
-                ) { onToggleChange(false) },
+                ) { onToggleChange(SaveMethod.OVERLAY) },
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = "오버레이",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
-                color = if (!isGestureMode) Color.Black else Color.White
+                color = if (saveMode == SaveMethod.OVERLAY) Color.Black else Color.White
             )
         }
 
@@ -384,21 +405,25 @@ fun CustomToggleSwitch(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
-                .background(if (isGestureMode) Color.White else Color.Transparent, shape = CircleShape)
+                .background(if (saveMode == SaveMethod.GESTURE) Color.White else Color.Transparent, shape = CircleShape)
                 .clickable(
                     indication = null, // 클릭 효과 제거
                     interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
-                ) { onToggleChange(true) },
+                ) { onToggleChange(SaveMethod.GESTURE) },
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = "제스처",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
-                color = if (isGestureMode) Color.Black else Color.White
+                color = if (saveMode == SaveMethod.GESTURE) Color.Black else Color.White
             )
         }
     }
+}
+
+enum class SaveMethod {
+    OVERLAY, GESTURE
 }
 
 
