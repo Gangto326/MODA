@@ -270,6 +270,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.modapjt.components.bar.BottomBarComponent
 import com.example.modapjt.components.bar.CategoryHeaderBar
+import com.example.modapjt.components.bar.TitleHeaderBar
 import com.example.modapjt.components.cardlist.BlogSelectionItem
 import com.example.modapjt.components.cardlist.NewsSelectionItem
 import com.example.modapjt.components.cardlist.ScrollToTopButton
@@ -332,7 +333,7 @@ fun newBookMarkCardListScreen(
     }
 
     Scaffold(
-        topBar = { CategoryHeaderBar(categoryName = "즐겨찾기", navController = navController) },
+        topBar = { TitleHeaderBar(titleName = "즐겨찾기") },
         bottomBar = { BottomBarComponent(navController, currentRoute) }
     ) { paddingValues ->
         Box(
