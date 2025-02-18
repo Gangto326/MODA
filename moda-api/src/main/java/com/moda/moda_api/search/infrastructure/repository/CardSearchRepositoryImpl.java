@@ -35,7 +35,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Slf4j
 public class CardSearchRepositoryImpl implements CardSearchRepository {
-    private static final float MIN_SCORE = 1.4f;
+    private static final float MIN_SCORE = 6.85f;
 
     private final ElasticsearchOperations elasticsearchOperations;
     private final CardSearchJpaRepository cardSearchJpaRepository;
@@ -245,7 +245,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                 // userId에 대한 must 조건 매칭
                 .must(Query.of(query -> query
                             .term(term -> term
-                                    .field("userId.keyword")
+                                    .field("userId")
                                     .value(userId.getValue())
                             )
                 ));
@@ -285,6 +285,8 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
     public Slice<CardDocument> searchComplex(Integer typeId, UserId userId, String searchText, Pageable pageable) {
         BoolQuery.Builder boolQuery = new BoolQuery.Builder();
 
+        System.out.println(userId.getValue());
+
         // typeId에 대한 must 쿼리 매칭
         boolQuery.must(Query.of(query -> query
                 .term(term -> term
@@ -301,24 +303,31 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                                 .term(term -> term
                                         .field("userId")
                                         .value(userId.getValue())
-                                        .boost(1.8f)
+                                        .boost(1.7f)
                                 )
                         ))
                         .should(Query.of(q -> q
                                 // 검색어는 키워드, 제목, 콘텐츠 순으로 가중치 차등 지급
                                 .multiMatch(multiMatch -> multiMatch
                                         .query(searchText)
+//                                                .fields(
+//                                                        "keywords^0.2",
+//                                                        "keywords.ngram^0.25",
+//                                                        "title^0.7",
+//                                                        "title.ngram^0.3",
+//                                                        "content^0.3",
+//                                                        "content.ngram^0.003"
+//                                                )
                                                 .fields(
-                                                        "keywords^0.25",
-                                                        "keywords.ngram^0.55",
-                                                        "title^0.4",
-                                                        "title.ngram^0.4",
-                                                        "content^0.35",
-                                                        "content.ngram^0.3"
+                                                        "title^3",
+                                                        "title.ngram^1.5",
+                                                        "keywords^2.5",
+                                                        "keywords.ngram^1.25",
+                                                        "content^1.5",
+                                                        "content.ngram^0.5"
                                                 )
                                                 .type(TextQueryType.BestFields)
                                                 .operator(Operator.Or)
-//                                        .fields("keywords.ngram^0.7", "title.ngram^0.5", "content.ngram^0.3")
                                 )
                         ))
                         .minimumShouldMatch("1")
@@ -410,7 +419,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
         NativeQuery query = NativeQuery.builder()
                 .withQuery(boolQuery.build()._toQuery())
                 .withPageable(pageable)
-//                .withMinScore(MIN_SCORE)
+                .withMinScore(MIN_SCORE)
                 .withTrackScores(true)  // 점수 추적 활성화
                 .withSort(Sort.by(
                         Sort.Order.desc("_score")
