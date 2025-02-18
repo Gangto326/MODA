@@ -134,6 +134,7 @@ class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
 
 
                         println("FCM발송하기 전") // 위치 변경
+                        println(FCMTokenManager.getToken());
                         FCMTokenManager.getToken()?.let { fcmToken ->
                             try {
                                 // suspend 함수이므로 코루틴 스코프 내에서 직접 호출 가능
