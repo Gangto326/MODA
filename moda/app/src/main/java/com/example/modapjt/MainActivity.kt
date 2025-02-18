@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         // 권한 요청
-        checkAccessibilityPermission()
+//        checkAccessibilityPermission()
         checkOverlayPermission()
 
         setContent {
