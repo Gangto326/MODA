@@ -151,4 +151,6 @@ dependencies {
 //    implementation("org.commonmark:commonmark:0.21.0")
 //    implementation("com.github.jeziellago:compose-markdown:0.5.6")
 
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+
 }
