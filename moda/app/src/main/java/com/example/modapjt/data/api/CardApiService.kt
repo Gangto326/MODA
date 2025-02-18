@@ -5,11 +5,14 @@ import com.example.modapjt.data.dto.request.CardRequest
 import com.example.modapjt.data.dto.response.AllTabCardApiResponse
 import com.example.modapjt.data.dto.response.CardDetailDTO
 import com.example.modapjt.data.dto.response.TabCardApiResponse
+import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -83,4 +86,11 @@ interface CardApiService {
     suspend fun toggleBookmark(
         @Body bookmarkRequest: BookmarkRequest
     ): Response<Boolean>  // ApiResponse<Unit> 대신 Boolean으로 변경
+
+    // 이미지 저장을 위한 새로운 API
+    @Multipart
+    @POST("api/card")
+    suspend fun createCardWithImage(
+        @Part files: List<MultipartBody.Part>
+    ): Response<Boolean>
 }
