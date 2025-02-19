@@ -52,7 +52,6 @@ public class LilysSummaryService {
 				);
 			})
 			.thenCompose(lilysSummary -> {
-				// 서버 전용
 				// getSummaryResults 완료 후 병렬로 실행 가능한 작업들
 				CompletableFuture<AIAnalysisResponseDTO> aiAnalysisFuture =
 					CompletableFuture.supplyAsync(() -> {

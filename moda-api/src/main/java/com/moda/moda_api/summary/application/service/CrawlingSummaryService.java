@@ -7,12 +7,9 @@ import java.util.concurrent.Executor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import com.moda.moda_api.card.domain.EmbeddingVector;
-import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.common.exception.ContentExtractionException;
 import com.moda.moda_api.common.exception.UnprocessableContentException;
 import com.moda.moda_api.crawling.application.service.CrawlingService;
-import com.moda.moda_api.crawling.domain.model.CrawledContent;
 import com.moda.moda_api.summary.application.dto.SummaryResultDto;
 import com.moda.moda_api.summary.infrastructure.dto.AIAnalysisResponseDTO;
 
@@ -31,6 +28,7 @@ public class CrawlingSummaryService {
 		return CompletableFuture.supplyAsync(() -> {
 				try {
 					System.out.println("크롤링하기 직전");
+					System.out.println(url);
 					return crawlingService.crawlByUrl(url);
 				} catch (Exception e) {
 					throw new ContentExtractionException(userId, "요약 할 수 없는 사이트입니다." + url, e);
