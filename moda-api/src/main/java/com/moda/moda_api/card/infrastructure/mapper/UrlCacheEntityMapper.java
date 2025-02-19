@@ -22,7 +22,7 @@ public class UrlCacheEntityMapper {
 			.cachedThumbnailUrl(entity.getCachedThumbnailUrl())
 			.cachedEmbedding(new EmbeddingVector(entity.getCachedEmbedding()))
 			.cachedKeywords(entity.getCachedKeywords())
-			.cachedSubContents(entity.getCachedKeywords())
+			.cachedSubContents(entity.getCachedSubContents())
 			.createdAt(entity.getCreatedAt())
 			.build();
 	}
@@ -37,9 +37,7 @@ public class UrlCacheEntityMapper {
 			.cachedContent(domain.getCachedContent())
 			.cachedThumbnailUrl(domain.getCachedThumbnailUrl())
 			.cachedThumbnailContent(domain.getCachedThumbnailContent())
-
 			.cachedEmbedding(domain.getCachedEmbedding().getValues())
-
 			.cachedKeywords(domain.getCachedKeywords())
 			.cachedSubContents(domain.getCachedSubContents())
 			.createdAt(domain.getCreatedAt())

@@ -2,6 +2,7 @@ package com.moda.moda_api.common.config;
 
 import java.util.Arrays;
 
+import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -25,6 +26,14 @@ public class WebDriverConfig {
 		options.addArguments("--remote-allow-origins=*");
 		options.addArguments("--disable-extensions");
 		options.addArguments("--headless");
+		options.setPageLoadStrategy(PageLoadStrategy.EAGER);
+		options.addArguments("--memory-pressure-off");
+		options.addArguments("--js-flags=--max-old-space-size=4096");
+
+		options.addArguments("--disk-cache-size=1000000000");
+		options.addArguments("--ignore-certificate-errors");
+		options.addArguments("--disable-web-security");
+		options.addArguments("--disable-popup-blocking");
 		return options;
 	}
 

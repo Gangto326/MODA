@@ -1,14 +1,15 @@
 package com.moda.moda_api.crawling.infrastructure.crawl;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletionException;
 import java.util.stream.Collectors;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -35,7 +36,106 @@ public class AbstractExtractor {
 	private final ImageStorageService imageStorageService;
 	private final WebDriverService webDriverService;
 
-	// URL을 추출하는 Method
+	// 추출하는 매서드
+	public CrawledContent extract(String url) throws TimeoutException , NoSuchElementException  {
+		WebDriver driver = null;
+
+		try {
+			driver = webDriverService.getDriver();
+
+			ExtractorConfig config = extractorFactory.getConfig(url);
+			System.out.println(config.getPattern());
+
+			driver.get(url);
+
+			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
+			wait.until(ExpectedConditions.jsReturnsValue("return document.readyState === 'complete'"));
+
+			// iframe 처리
+			if (config.isRequiresFrame()) {
+				wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(config.getFrameId()));
+			}
+
+			return CrawledContent.builder()
+				.url(new Url(url))
+				.urlDomainType(config.getUrlDomainType())
+				.title(extractTitle(driver))  // driver 전달
+				.extractedContent(extractContent(config, driver))  // driver 전달
+				.build();
+
+		}catch (TimeoutException | NoSuchElementException e) {
+			log.error("Failed to find element while crawling: {}", e.getMessage());
+			throw e;  // 이 예외들도 상위로 전파
+		} catch (Exception e) {
+			log.error("Failed to extract content", e);
+			throw e;  // 상위 메서드로 예외를 그대로 전달
+		}
+	}
+
+	//Body본문과 이미지 추출하기
+	public ExtractedContent extractContent(ExtractorConfig config, WebDriver driver) {
+		try {
+			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
+
+			// 컨텐츠 요소 찾기
+			WebElement contentElement;
+			try {
+				contentElement = wait.until(ExpectedConditions.presenceOfElementLocated(
+					By.cssSelector(config.getContentSelector())
+				));
+				log.info("Found content element: {}", contentElement.getAttribute("class"));
+			} catch (TimeoutException | NoSuchElementException e) {
+				log.warn("Failed to find specific content element, falling back to body: {}", e.getMessage());
+				contentElement = driver.findElement(By.tagName("body"));
+				log.info("Using body as fallback content element");
+			}
+
+			log.info("Trying to find content with selector: {}",
+				contentElement.getTagName().equals("body") ? "body" : config.getContentSelector());
+
+
+			// 텍스트 추출 - 전체 텍스트를 한 번에 가져옴
+			String text = contentElement.getText().trim();
+
+			// 이미지 URL 추출 및 저장
+			String[] images = contentElement.findElements(By.tagName("img"))
+				.stream()
+				.map(img -> img.getAttribute("src"))
+				.filter(src -> src != null && !src.isEmpty() && isValidImageUrl(src))
+				.map(src -> {
+					try {
+						return imageStorageService.uploadImageFromurl(src);
+					} catch (Exception e) {
+						log.error("Failed to upload image: {}", src, e);
+						return null;
+					}
+				})
+				.filter(Objects::nonNull)
+				.toArray(String[]::new);
+
+			return ExtractedContent.builder()
+				.text(text)
+				.images(images)
+				.build();
+
+		} catch (TimeoutException | NoSuchElementException | CompletionException e) {
+			log.error("Failed to find element while crawling: {}", e.getMessage());
+			throw e;  // 이 예외들도 상위로 전파
+		} catch (Exception e) {
+			log.error("Failed to extract content", e);
+			throw e;  // 상위 메서드로 예외를 그대로 전달
+		}
+	}
+
+	private String extractTitle(WebDriver driver) {
+		return driver.getTitle();
+	}
+	private boolean isValidImageUrl(String url) {
+		return url.matches(".*\\.(jpg|jpeg|png|gif|webp)($|\\?.*)") &&
+			!url.contains("favicon") &&
+			!url.contains("logo") &&
+			url.length() > 10;
+	}
 	public List<Url> extractUrl(String url) {
 		WebDriver driver = null;
 
@@ -43,9 +143,14 @@ public class AbstractExtractor {
 			driver = webDriverService.getDriver();
 
 			ExtractorConfig config = extractorFactory.getConfig(url);
+
+			log.info("URL: {}", url);  // URL 로깅
+			log.info("Selected Pattern: {}", config.getPattern());  // 매칭된 패턴 로깅
+			log.info("Content Selector: {}", config.getContentSelector());  // 선택자 로깅
+
 			driver.get(url);
 
-			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
 			wait.until(webDriver -> ((JavascriptExecutor)webDriver)
 				.executeScript("return document.readyState").equals("complete"));
 
@@ -79,122 +184,6 @@ public class AbstractExtractor {
 			log.error("URL 추출 중 오류 발생: {}", url, e);
 			throw new ExtractorException("URL 추출 실패", e);
 		}
-	}
-
-	// 추출하는 매서드
-	public CrawledContent extract(String url) throws Exception {
-		WebDriver driver = null;
-
-		try {
-			driver = webDriverService.getDriver();
-
-			ExtractorConfig config = extractorFactory.getConfig(url);
-			System.out.println(config.getPattern());
-
-			driver.get(url);
-
-			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-			wait.until(ExpectedConditions.jsReturnsValue("return document.readyState === 'complete'"));
-
-			// iframe 처리
-			if (config.isRequiresFrame()) {
-				wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(config.getFrameId()));
-			}
-
-			return CrawledContent.builder()
-				.url(new Url(url))
-				.urlDomainType(config.getUrlDomainType())
-				.title(extractTitle(driver))  // driver 전달
-				.extractedContent(extractContent(config, driver))  // driver 전달
-				.build();
-
-		} catch (Exception e) {
-			throw new Exception("Failed to crawl content: " + e.getMessage());
-		} finally {
-			if (driver != null && driver.switchTo() != null) {  // driver null 체크 추가
-				driver.switchTo().defaultContent();
-			}
-		}
-	}
-
-	//Body본문과 이미지 추출하기
-	public ExtractedContent extractContent(ExtractorConfig config,WebDriver driver) {
-		StringBuilder textBuilder = new StringBuilder();
-		List<String> imagesList = new ArrayList<>();  // 임시로 List 사용
-
-		try {
-			WebDriverWait contentWait = new WebDriverWait(driver, Duration.ofSeconds(20));
-			WebElement contentElement = contentWait.until(ExpectedConditions.presenceOfElementLocated(
-				By.cssSelector(config.getContentSelector())
-			));
-
-			// 모든 콘텐츠 요소들이 로드될 때까지 대기
-			contentWait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(
-				By.xpath(".//h1|.//h2|.//h3|.//h4|.//h5|.//h6|.//p[not(ancestor::p)]|.//img|.//li|.//ul")
-			));
-
-			// 텍스트와 이미지를 포함하는 모든 요소 선택
-			List<WebElement> elements = contentElement.findElements(
-				By.xpath(".//h1|.//h2|.//h3|.//h4|.//h5|.//h6|.//p[not(ancestor::p)]|.//img|.//li[not(li)]")
-			);
-
-			for (WebElement element : elements) {
-				try {
-					String tagName = element.getTagName().toLowerCase();
-
-					if (tagName.equals("img")) {
-						// 이미지 처리
-						String src = element.getAttribute("src");
-						if (src != null && !src.isEmpty() && isValidImageUrl(src)) {
-							try {
-								String savedImageUrl = imageStorageService.uploadImageFromurl(src);
-								imagesList.add(savedImageUrl);
-							} catch (Exception e) {
-								log.error("Failed to process image: {}", src, e);
-							}
-						}
-					} else {
-						// 텍스트 요소 처리
-						String text = element.getText().trim();
-						if (!text.isEmpty()) {
-							// 이전 텍스트가 있으면 줄바꿈 추가
-							if (textBuilder.length() > 0) {
-								textBuilder.append("\n");
-							}
-
-							// 헤딩 태그인 경우 태그 정보 포함
-							if (tagName.matches("h[1-6]")) {
-								textBuilder.append(String.format("<%s>%s</%s>", tagName, text, tagName));
-							} else {
-								textBuilder.append(text);
-							}
-						}
-					}
-				} catch (StaleElementReferenceException e) {
-					log.warn("Encountered stale element", e);
-					continue;
-				}
-			}
-
-			return ExtractedContent.builder()
-				.text(textBuilder.toString().trim())
-				.images(imagesList.toArray(new String[0]))  // List를 배열로 변환
-				.build();
-
-		} catch (Exception e) {
-			log.error("Failed to extract content", e);
-			return ExtractedContent.empty();
-		}
-	}
-
-	private String extractTitle(WebDriver driver) {
-		return driver.getTitle();
-	}
-	private boolean isValidImageUrl(String url) {
-		return url.matches(".*\\.(jpg|jpeg|png|gif|webp)($|\\?.*)") &&
-			!url.contains("favicon") &&
-			!url.contains("logo") &&
-			url.length() > 10;
 	}
 
 }

@@ -29,7 +29,7 @@ public class TokenService {
     private final JwtUtil jwtUtil;
 
     private static final String ACCESS_TOKEN_PREFIX = "access_token:";
-    private static final long ACCESS_TOKEN_EXPIRE_TIME = 30 * 60; // 30분
+    private static final long ACCESS_TOKEN_EXPIRE_TIME = 30 * 60; // 30분 * 60
 
 	//AccessToken저장하기
     public void saveAccessToken(UserId userId, String accessToken) {
@@ -104,4 +104,5 @@ public class TokenService {
             .filter(rt -> rt.getExpiresAt().isAfter(LocalDateTime.now()))
             .orElseThrow(() -> new UnauthorizedException("Refresh Token이 만료되었거나 유효하지 않습니다.", "REFRESH_TOKEN_EXPIRED"));
     }
+
 }

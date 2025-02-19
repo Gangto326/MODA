@@ -68,6 +68,7 @@ public class UserController {
      */
      @PostMapping("/login")
      public ResponseEntity<Boolean> login(@RequestBody LoginRequest request) {
+         // return ResponseEntity.ok(Boolean.TRUE);
 
          AuthResponse authResponse = userService.login(request);
 
@@ -94,7 +95,6 @@ public class UserController {
     @DeleteMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletRequest request) {
 
-        // HTTP Header의 Authorization (AccessToken) 추출.
         String accessToken = HeaderUtil.getAccessToken(request);
         String refreshToken = HeaderUtil.getRefreshToken(request);
 
@@ -136,4 +136,5 @@ public class UserController {
             return ResponseEntity.badRequest().body(Boolean.FALSE);
         }
     }
+
 }

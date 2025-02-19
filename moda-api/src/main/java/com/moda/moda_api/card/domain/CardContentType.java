@@ -27,13 +27,4 @@ public enum CardContentType {
         throw new InvalidContentTypeException("유효하지 않은 컨텐츠 타입입니다.");
     }
 
-    public static String getContentTypeString(Integer typeId) {
-        try {
-            return CardContentType.from(typeId).name();
-        } catch (InvalidContentTypeException e) {
-            return "UNKNOWN";
-            // 또는 예외를 그대로 던지고 싶다면:
-            // throw e;
-        }
-    }
 }

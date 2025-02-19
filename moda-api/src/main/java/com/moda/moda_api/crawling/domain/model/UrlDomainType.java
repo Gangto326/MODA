@@ -6,17 +6,24 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 import lombok.Getter;
 
+
+//
+//
 @Getter
 @JsonFormat(shape = JsonFormat.Shape.NUMBER)
 public enum UrlDomainType {
 	UNCLASSIFIED(1),
 	TISTORY(2),
-	NAVER_BLOG(3),
-	VELOG(4),
-	NAVER_NEWS(5),
-	DAUM_NEWS(6),
-	YOUTUBE(7),
-	GOOGLE_SEARCH(8);
+	NAVER_BLOG(2),
+	VELOG(2),
+	NAVER_NEWS(3),
+	DAUM_NEWS(3),
+	YOUTUBE(1),
+	GOOGLE_SEARCH(6),
+	NAMUWIKI(2),
+	BRUNCH(2),
+	MOBILESPORTS(1),
+	NAVER_SPORTS(3);
 
 	private final Integer typeId;
 

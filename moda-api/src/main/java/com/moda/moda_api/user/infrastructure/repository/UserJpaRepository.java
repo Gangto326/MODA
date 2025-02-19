@@ -18,6 +18,8 @@ public interface UserJpaRepository extends JpaRepository<UserEntity, String> {
 
     UserEntity findByEmail(String email);
 
+    UserEntity findByUserId(String userId);
+
     /**
      * 주어진 닉네임으로 사용자 엔티티를 찾습니다.
      * 메서드 이름 규칙에 따라 자동으로 쿼리가 생성됩니다.

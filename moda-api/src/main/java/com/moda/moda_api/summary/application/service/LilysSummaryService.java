@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 public class LilysSummaryService {
 	private final LilysAiClient lilysWebClient;
 	private final PythonAnalysisService pythonAnalysisService;
-	private static final int MAX_ATTEMPTS = 50;
+	private static final int MAX_ATTEMPTS = 100;
 	private static final Duration POLLING_INTERVAL = Duration.ofSeconds(200);
 	private final YoutubeApiClient youtubeApiClient;
 
@@ -49,23 +49,22 @@ public class LilysSummaryService {
 
 				// 서버 전용
 				// getSummaryResults 완료 후 병렬로 실행 가능한 작업들
-				// CompletableFuture<AIAnalysisResponseDTO> aiAnalysisFuture =
-				// 	CompletableFuture.supplyAsync(() ->
-				// 		pythonAnalysisService.youtubeAnalyze(lilysSummary.getContents())
-				// 	);
+				CompletableFuture<AIAnalysisResponseDTO> aiAnalysisFuture =
+					CompletableFuture.supplyAsync(() ->
+						pythonAnalysisService.youtubeAnalyze(lilysSummary.getContents())
+					);
 
-				CompletableFuture<AIAnalysisResponseDTO> aiAnalysisFuture = CompletableFuture.completedFuture(
-					AIAnalysisResponseDTO.builder()
-						.categoryId(new CategoryId(2L))  // null 허용
-						.keywords(new String[] {"박종원_02_16~02_17_Test"})
-						.thumbnailContent("박종원_02_16~02_17_Test")
-						.content(lilysSummary.getContents().stream()
-							.map(content -> content.getTitle() + ": " + content.getContent())
-							.collect(Collectors.joining("\n")))
-						.embeddingVector(null)
-						.build()
-				);
-
+				// CompletableFuture<AIAnalysisResponseDTO> aiAnalysisFuture = CompletableFuture.completedFuture(
+				// 	AIAnalysisResponseDTO.builder()
+				// 		.categoryId(new CategoryId(2L))  // null 허용
+				// 		.keywords(new String[] {"박종원_02_16~02_17_Test"})
+				// 		.thumbnailContent("박종원_02_16~02_17_Test")
+				// 		.content(lilysSummary.getContents().stream()
+				// 			.map(content -> content.getTitle() + ": " + content.getContent())
+				// 			.collect(Collectors.joining("\n")))
+				// 		.embeddingVector(null)
+				// 		.build()
+				// );
 
 				CompletableFuture<YoutubeAPIResponseDTO> youtubeApiFuture =
 					CompletableFuture.supplyAsync(() ->
@@ -134,10 +133,10 @@ public class LilysSummaryService {
 					return CompletableFuture.completedFuture(status);
 				}
 				if ("pending".equals(status)) {
-					log.info("Summary is still pending. Will retry in 60 seconds. Attempt: {}", attempt + 1);
+					log.info("Summary is still pending. Will retry in 15 seconds. Attempt: {}", attempt + 1);
 					return CompletableFuture.supplyAsync(
 						() -> checkStatusWithRetry(requestId, attempt + 1),
-						CompletableFuture.delayedExecutor(60, TimeUnit.SECONDS)
+						CompletableFuture.delayedExecutor(15, TimeUnit.SECONDS)
 					).thenCompose(future -> future);
 				}
 				return CompletableFuture.failedFuture(
