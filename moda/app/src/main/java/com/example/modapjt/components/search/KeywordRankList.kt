@@ -61,6 +61,7 @@ fun KeywordRankList(viewModel: SearchViewModel, navController: NavController) {
             Text(
                 text = "인기 검색어",
                 style = MaterialTheme.typography.titleLarge.copy(fontSize = 16.sp),
+                color = MaterialTheme.colorScheme.onPrimary,
                 fontWeight = FontWeight.Bold
             )
 
@@ -68,6 +69,7 @@ fun KeywordRankList(viewModel: SearchViewModel, navController: NavController) {
             Text(
                 text = "$todayDate 기준",
                 style = MaterialTheme.typography.bodyMedium.copy(fontSize = 12.sp, color = Color.Gray),
+                color = MaterialTheme.colorScheme.onSecondary,
                 fontWeight = FontWeight.Normal
             )
         }
