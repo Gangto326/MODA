@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.modapjt.components.bar.BottomBarComponent
+import com.example.modapjt.components.bar.TitleHeaderBar
 import com.example.modapjt.components.setting.SettingItem
 import com.example.modapjt.components.user.MyPageHeader
 import com.example.modapjt.domain.viewmodel.AuthViewModel
@@ -141,7 +142,7 @@ fun MyPageScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            MyPageHeader()
+            TitleHeaderBar(titleName = "마이 페이지")
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
@@ -172,7 +173,11 @@ fun MyPageScreen(
                                     .padding(16.dp),
                                 horizontalArrangement = Arrangement.SpaceEvenly
                             ) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier.clickable {
+                                        navController.navigate("cardlistScreen?categoryId=1") // 내 정보 클릭 시 이동
+                                    }) {
                                     Text(
                                         text = userStatus?.allCount ?: "0",
                                         fontSize = 20.sp,
@@ -180,7 +185,11 @@ fun MyPageScreen(
                                     )
                                     Text(text = "내 정보", fontSize = 14.sp, color = Color.Gray)
                                 }
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier.clickable {
+                                        navController.navigate("bookmarkScreen") // 즐겨찾기 페이지로 이동
+                                    }) {
                                     Text(
                                         text = userStatus?.bookmarkCount ?: "0",
                                         fontSize = 20.sp,
