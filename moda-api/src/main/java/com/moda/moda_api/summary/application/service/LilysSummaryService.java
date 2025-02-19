@@ -66,7 +66,6 @@ public class LilysSummaryService {
 				// 		.build()
 				// );
 
-
 				CompletableFuture<YoutubeAPIResponseDTO> youtubeApiFuture =
 					CompletableFuture.supplyAsync(() ->
 						youtubeApiClient.getVideoData(lilysSummary.getThumbnailUrl())

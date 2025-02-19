@@ -87,17 +87,19 @@ public class CardService {
 	public CompletableFuture<Boolean> createCard(String userId, String url) {
 		System.out.println(url);
 		UserId userIdObj = new UserId(userId);
-		String urlHash = UrlCache.generateHash(url);
 
-		if(urlDuplicatedRepository.checkDuplicated(url)){
-			throw new DuplicateUrlException("같은 정보의 카드가 생성중입니다."
-			,userIdObj.getValue());
+		String convertUrl = getVideoId(url);
+		String urlHash = UrlCache.generateHash(convertUrl);
+
+		if (urlDuplicatedRepository.checkDuplicated(urlHash)) {
+			throw new DuplicateUrlException("같은 정보의 카드가 생성중입니다.", userIdObj.getValue());
 		}
-		urlDuplicatedRepository.urlDuplicatedSave(url);
+		urlDuplicatedRepository.urlDuplicatedSave(urlHash);
 		if (cardRepository.existsByUserIdAndUrlHashAndDeletedAtIsNull(userIdObj, urlHash))
 			throw new DuplicateCardException(
 				"같은 정보의 카드가 이미 존재합니다.",
 				userIdObj.getValue());
+
 
 		return urlCacheRepository.findByUrlHash(urlHash)
 			.map(cache -> createCardFromCache(userIdObj, urlHash))
@@ -139,7 +141,7 @@ public class CardService {
 
 		cardRepository.save(card);
 		cardSearchRepository.save(card);
-		notificationService.sendFCMNotification(userIdObj.getValue(), NotificationType.card,card);
+		notificationService.sendFCMNotification(userIdObj.getValue(), NotificationType.card, card);
 
 		return CompletableFuture.completedFuture(true);
 	}
@@ -195,15 +197,11 @@ public class CardService {
 
 				// 유저별 핵심 키워드 저장 (Redis)
 				userKeywordRepository.saveKeywords(userIdObj, card.getKeywords());
-
 				// 핫 토픽 키워드 저장 (Redis)
 				hotTopicRepository.incrementKeywordScore(card.getKeywords());
-
 				cardRepository.save(card);
 				cardSearchRepository.save(card);
-
-				notificationService.sendFCMNotification(userIdObj.getValue(), NotificationType.card,card);
-
+				notificationService.sendFCMNotification(userIdObj.getValue(), NotificationType.card, card);
 				return true;
 			});
 	}
@@ -219,7 +217,8 @@ public class CardService {
 					String urlHash = UrlCache.generateHash(s3Url);
 
 					// 실제 AI 분석
-					AIAnalysisResponseDTO aiAnalysisResponseDTO = pythonAiClient.imageAnalysis(new AiImageRequestDTO(s3Url));
+					AIAnalysisResponseDTO aiAnalysisResponseDTO = pythonAiClient.imageAnalysis(
+						new AiImageRequestDTO(s3Url));
 
 					// AI Test생성
 					// AIAnalysisResponseDTO aiAnalysisResponseDTO = AIAnalysisResponseDTO.builder()
@@ -245,7 +244,6 @@ public class CardService {
 						.subContents(null)
 						.build();
 
-
 				} catch (Exception e) {
 					throw new RuntimeException("Failed to process image", e);
 				}
@@ -256,7 +254,7 @@ public class CardService {
 		cardRepository.saveAll(cards);
 		cardSearchRepository.save(cards.get(0));
 
-		notificationService.sendFCMNotification(userIdObj.getValue(), NotificationType.card,cards.get(0));
+		notificationService.sendFCMNotification(userIdObj.getValue(), NotificationType.card, cards.get(0));
 
 		return true;
 	}
@@ -419,7 +417,7 @@ public class CardService {
 
 	private Card findCardDetail(CardId cardId) {
 		return cardRepository.findByCardId(cardId)
-				.orElseThrow(() -> new CardNotFoundException("카드를 찾을 수 없습니다."));
+			.orElseThrow(() -> new CardNotFoundException("카드를 찾을 수 없습니다."));
 	}
 
 	/**
@@ -479,17 +477,16 @@ public class CardService {
 
 		// 기본적으로 모든 categoryId(2~10) 값에 대해 false로 초기화
 		Map<Long, Boolean> categories = LongStream.rangeClosed(2, 10)
-				.boxed()
-				.collect(Collectors.toMap(category -> category, category -> false));
-
+			.boxed()
+			.collect(Collectors.toMap(category -> category, category -> false));
 
 		// 전체 콘텐츠(1번) 값 초기화
 		boolean hasAnyContent = false;
 
 		// 쿼리 결과를 기반으로 존재하는 categoryId를 true로 설정
 		for (Object[] result : results) {
-			Long categoryId = (Long) result[0];
-			Long count = (Long) result[1];
+			Long categoryId = (Long)result[0];
+			Long count = (Long)result[1];
 
 			boolean exists = count > 0;
 			categories.put(categoryId, count > 0);
@@ -505,7 +502,7 @@ public class CardService {
 		return CardMainResponse.builder()
 			.topKeywords(userKeywordRepository.getTopKeywords(userIdObj, 5))
 			.creator(videoCreatorRepository.getCreatorByUserId(userIdObj))
-				.categories(categories)
+			.categories(categories)
 			.build();
 	}
 
@@ -534,6 +531,56 @@ public class CardService {
 			.allCount(String.valueOf(allCount))
 			.bookmarkCount(String.valueOf(bookmarkCount))
 			.build();
+	}
+
+	private String getVideoId(String url) {
+		try {
+			if (url == null || url.trim().isEmpty()) {
+				return url;
+			}
+
+			String videoId = null;
+			String trimmedUrl = url.trim();
+
+			// 1. youtube.com/watch?v= 형식
+			if (trimmedUrl.contains("youtube.com/watch?v=")) {
+				videoId = trimmedUrl.split("v=")[1];
+				if (videoId.contains("&")) {
+					videoId = videoId.split("&")[0];
+				}
+			}
+			// 2. youtu.be/ 형식 (단축 URL)
+			else if (trimmedUrl.contains("youtu.be/")) {
+				videoId = trimmedUrl.split("youtu.be/")[1];
+				if (videoId.contains("?")) {
+					videoId = videoId.split("\\?")[0];
+				}
+			}
+			// 3. youtube.com/embed/ 형식 (임베드 URL)
+			else if (trimmedUrl.contains("youtube.com/embed/")) {
+				videoId = trimmedUrl.split("embed/")[1];
+				if (videoId.contains("?")) {
+					videoId = videoId.split("\\?")[0];
+				}
+			}
+			// 4. youtube.com/v/ 형식 (구버전)
+			else if (trimmedUrl.contains("youtube.com/v/")) {
+				videoId = trimmedUrl.split("v/")[1];
+				if (videoId.contains("?")) {
+					videoId = videoId.split("\\?")[0];
+				}
+			}
+
+			// videoId를 찾지 못했거나 빈 문자열인 경우 원본 URL 반환
+			if (videoId == null || videoId.trim().isEmpty()) {
+				return url;
+			}
+
+			return videoId.trim();
+		} catch (Exception e) {
+			// 예외가 발생한 경우에도 원본 URL 반환
+			return url;
+		}
 	}
 
 }

@@ -20,14 +20,15 @@ public class PlatformExtractorFactory {
 		configs.add(createNaverNewsConfig());
 		configs.add(createMobileSportsNaverConfig());
 
-
 		// Desktop configurations
+		configs.add(createDesktopBrunchConfig());
 		configs.add(createDesktopNaverBlogConfig());
 		configs.add(createDesktopTistoryConfig());
 		configs.add(createNaverNewsConfig());
 		configs.add(createVelogConfig());
 		configs.add(createDaumNewsConfig());
 		configs.add(createGoogleSearchConfig());
+		configs.add(createNamuwikiConfig());
 
 		// configs.add(createNamuwikiConfig()); // Added Namuwiki configuration
 
@@ -47,8 +48,6 @@ public class PlatformExtractorFactory {
 			.build();
 	}
 
-
-
 	private static ExtractorConfig createMobileTistoryConfig() {
 		return ExtractorConfig.builder()
 			.pattern(".tistory.com/m")
@@ -59,19 +58,29 @@ public class PlatformExtractorFactory {
 			.build();
 	}
 
-	private static ExtractorConfig createMobileSportsNaverConfig(){
+	private static ExtractorConfig createMobileSportsNaverConfig() {
 		return ExtractorConfig.builder()
 			.pattern(".m.sports.naver.com")
 			.contentSelector("._article_content")
 			.imageSelector("img")
 			.requiresFrame(false)
-			.urlDomainType(UrlDomainType.TISTORY)
+			.urlDomainType(UrlDomainType.NAVER_SPORTS)
 			.build();
 	}
 
 	//////////////////////////////////////////////////////////////
 	////////////여기 위로는 모바일 밑으로는 pc////////////////////////
 	/////////////////////////////////////////////////////////////
+	private static ExtractorConfig createDesktopBrunchConfig() {
+		return ExtractorConfig.builder()
+			.pattern(".brunch")
+			.contentSelector(".wrap_body_frame")
+			.imageSelector(".contents_style img")
+			.requiresFrame(false)
+			.urlDomainType(UrlDomainType.BRUNCH)
+			.build();
+	}
+
 	private static ExtractorConfig createDesktopNaverBlogConfig() {
 		return ExtractorConfig.builder()
 			.pattern("blog.naver.com")
@@ -143,17 +152,17 @@ public class PlatformExtractorFactory {
 			.build();
 	}
 
-	// private static ExtractorConfig createNamuwikiConfig() {
-	// 	return ExtractorConfig.builder()
-	// 		.pattern("namu.wiki")
-	// 		.contentSelector("div.wiki-content")
-	// 		.imageSelector("div.wiki-content img")
-	// 		.requiresFrame(false)
-	// 		.urlDomainType(UrlDomainType.NAMUWIKI)
-	// 		.build();
-	// }
-	//
-	//
+	private static ExtractorConfig createNamuwikiConfig() {
+		return ExtractorConfig.builder()
+			.pattern("namu.wiki")
+			.contentSelector(".KT5SIFMZ")
+			.imageSelector("div.wiki-content img")
+			.requiresFrame(false)
+			.urlDomainType(UrlDomainType.NAMUWIKI)
+			.build();
+	}
+
+
 
 	// 하나씩 꺼내보면서 맞는 사이트가 있는지 찾아보는 과정
 	public ExtractorConfig getConfig(String url) {

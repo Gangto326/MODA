@@ -4,10 +4,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import com.moda.moda_api.card.domain.EmbeddingVector;
 import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.common.exception.ContentExtractionException;
+import com.moda.moda_api.common.exception.UnprocessableContentException;
 import com.moda.moda_api.crawling.application.service.CrawlingService;
 import com.moda.moda_api.crawling.domain.model.CrawledContent;
 import com.moda.moda_api.summary.application.dto.SummaryResultDto;
@@ -33,11 +35,12 @@ public class CrawlingSummaryService {
 				}
 			}).exceptionally(throwable -> {
 				if (throwable.getCause() instanceof ContentExtractionException) {
-					throw (ContentExtractionException) throwable.getCause();
+					throw (ContentExtractionException)throwable.getCause();
 				}
 				throw new ContentExtractionException(userId, "요약 중 오류가 발생했습니다: " + url, throwable);
 			})  // 여기서 닫는 괄호가 잘못 배치되어 있었습니다
 			.thenCompose(crawledContent -> {
+
 				log.info(crawledContent.getExtractedContent().getText());
 
 				// 2단계: Python 분석과 이미지 URL 가져오기를 병렬로 실행
@@ -47,7 +50,13 @@ public class CrawlingSummaryService {
 							return pythonAnalysisService.articleAnalyze(
 								crawledContent.getExtractedContent().getText()
 							);
+						} catch (WebClientResponseException.InternalServerError e) {
+							throw new UnprocessableContentException(
+								userId,
+								"요약할 수 없는 사이트입니다."
+							);
 						} catch (Exception e) {
+
 							throw new CompletionException("Python analysis failed", e);
 						}
 					});
