@@ -101,7 +101,7 @@ fun ImageDetailScreen(cardDetail: CardDetail, navController: NavController) {
             }
 
             Spacer(modifier = Modifier.height(8.dp))
-            Divider(color = Color(0xFFF1F1F1), thickness = 6.dp, modifier = Modifier.padding(horizontal = 0.dp))
+            Divider(color = MaterialTheme.colorScheme.onSecondary, thickness = 6.dp, modifier = Modifier.padding(horizontal = 0.dp))
 
 
             // 카테고리 & 날짜 추가
@@ -126,12 +126,12 @@ fun ImageDetailScreen(cardDetail: CardDetail, navController: NavController) {
                         else -> "기타"
                     },
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSecondary
                 )
                 Text(
                     text = formattedDate,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
             }
 
@@ -147,30 +147,30 @@ fun ImageDetailScreen(cardDetail: CardDetail, navController: NavController) {
                     horizontalArrangement = Arrangement.Start,
                     maxItemsInEachRow = 3
                 ) {
-                    cardDetail.keywords.take(3).forEach { keyword ->
-                        Surface(
-                            shape = RoundedCornerShape(20.dp),
-                            border = BorderStroke(1.dp, Color.Gray.copy(alpha = 0.3f)),
-                            color = Color.Transparent,
-                            modifier = Modifier
-                                .padding(end = 8.dp, bottom = 16.dp)
-                                .clickable(
-                                    indication = null, // 클릭 효과 제거
-                                    interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
-                                ) {
-                                    if (keyword.isNotBlank()) {
-                                        navController.navigate("newSearchCardListScreen/$keyword")
-                                    }
-                                }
-                        ) {
-                            Text(
-                                text = keyword,
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.Gray
-                            )
-                        }
-                    }
+//                    cardDetail.keywords.take(3).forEach { keyword ->
+//                        Surface(
+//                            shape = RoundedCornerShape(20.dp),
+//                            border = BorderStroke(1.dp, Color.Gray.copy(alpha = 0.3f)),
+//                            color = Color.Transparent,
+//                            modifier = Modifier
+//                                .padding(end = 8.dp, bottom = 16.dp)
+//                                .clickable(
+//                                    indication = null, // 클릭 효과 제거
+//                                    interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
+//                                ) {
+//                                    if (keyword.isNotBlank()) {
+//                                        navController.navigate("newSearchCardListScreen/$keyword")
+//                                    }
+//                                }
+//                        ) {
+//                            Text(
+//                                text = keyword,
+//                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+//                                style = MaterialTheme.typography.bodyMedium,
+//                                color = Color.Gray
+//                            )
+//                        }
+//                    }
                 }
 
                 // ✅ 4️⃣ 아이콘 버튼을 이용한 이미지 저장 버튼
@@ -190,7 +190,8 @@ fun ImageDetailScreen(cardDetail: CardDetail, navController: NavController) {
                         imageVector = Icons.Default.AddCircle,
                         contentDescription = "이미지 저장",
                         modifier = Modifier.padding(bottom = 16.dp),
-                        tint = Color.Gray                    )
+                        tint = MaterialTheme.colorScheme.onSecondary
+                    )
                 }
             }
         }
