@@ -32,12 +32,12 @@ class UrlUploadWorker(
                         Result.success()
                     },
                     onFailure = { e ->
-                        showNotification("URL 저장 실패: ${e.message}")
+//                        showNotification("URL 저장 실패: ${e.message}")
                         Result.failure()
                     }
                 )
         } catch (e: Exception) {
-            showNotification("URL 저장 실패: ${e.message}")
+//            showNotification("URL 저장 실패: ${e.message}")
             Result.failure()
         }
     }
