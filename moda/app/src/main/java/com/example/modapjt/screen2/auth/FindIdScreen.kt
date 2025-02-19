@@ -1,6 +1,7 @@
 package com.example.modapjt.screen2.auth
 
 import android.view.ViewTreeObserver
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,6 +11,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -26,6 +30,10 @@ fun FindIdScreen(
     val scrollState = rememberScrollState()
     var isKeyboardVisible by remember { mutableStateOf(false) }
     var keyboardHeight by remember { mutableStateOf(0) }
+    val focusManager = LocalFocusManager.current  // 여기에 FocusManager 추가
+
+    val keyboardController = LocalSoftwareKeyboardController.current
+
 
     // 화면이 처음 표시될 때 상태 초기화
     LaunchedEffect(Unit) {
@@ -53,6 +61,19 @@ fun FindIdScreen(
         }
     }
 
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = {
+                        focusManager.clearFocus()
+                        keyboardController?.hide()
+                    }
+                )
+            }
+    ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -205,5 +226,5 @@ fun FindIdScreen(
                 .fillMaxSize()
                 .wrapContentSize(Alignment.Center)
         )
-    }
+    }}
 }

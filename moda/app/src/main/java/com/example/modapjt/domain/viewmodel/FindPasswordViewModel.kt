@@ -153,6 +153,13 @@ class FindPasswordViewModel : ViewModel() {
     }
 
     private fun submitNewPassword() {
+        // 비밀번호 길이 검증
+        if (_state.value.newPassword.length < 8) {
+            _state.value = _state.value.copy(error = "비밀번호는 8글자 이상이어야 합니다.")
+            return
+        }
+
+        // 비밀번호 일치 검증
         if (_state.value.newPassword != _state.value.confirmNewPassword) {
             _state.value = _state.value.copy(error = "비밀번호가 일치하지 않습니다.")
             return
@@ -192,7 +199,6 @@ class FindPasswordViewModel : ViewModel() {
             }
             .launchIn(viewModelScope)
     }
-
 
     private fun startVerificationTimer() {
         timerJob?.cancel()

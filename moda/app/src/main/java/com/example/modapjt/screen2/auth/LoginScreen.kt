@@ -1,7 +1,11 @@
 package com.example.modapjt.screen2.auth
 
 import android.view.ViewTreeObserver
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -30,13 +35,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.modapjt.R
 import com.example.modapjt.domain.model.LoginEvent
+import com.example.modapjt.domain.model.LoginState
 import com.example.modapjt.domain.viewmodel.AuthViewModel
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,6 +62,16 @@ fun LoginScreen(
 ) {
     val state = viewModel.loginState.value
     var isKeyboardVisible by remember { mutableStateOf(false) }
+
+
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    val focusManager = LocalFocusManager.current  // 추가
+
+    // 화면이 처음 표시될 때 상태 초기화
+    LaunchedEffect(Unit) {
+        viewModel.resetLoginState()
+    }
 
     // 키보드 가시성 감지
     val view = LocalView.current
@@ -81,10 +104,26 @@ fun LoginScreen(
         }
     }
 
+
+
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = {
+                        focusManager.clearFocus()
+                        keyboardController?.hide()
+                    }
+                )
+            }
+    ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(20.dp),
+
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = if (isKeyboardVisible) Arrangement.Top else Arrangement.Center
     ) {
@@ -169,7 +208,7 @@ fun LoginScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            TextButton(onClick = onNavigateToFindId ) {
+            TextButton(onClick = onNavigateToFindId) {
                 Text("아이디 찾기", color = Color.Gray)
             }
             Text(
@@ -189,5 +228,6 @@ fun LoginScreen(
                 Text("회원가입", color = Color.Gray)
             }
         }
-    }
+
+    }}
 }
