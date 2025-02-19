@@ -30,8 +30,11 @@ class ImageAnalyze:
     #ImageAnalyze 객체가 실행되면 가장 먼저 실행되는 함수
     async def execute(self):
         self.encode_base64()
+        print("이미지 분석 시작")
         await self.analyze_image()
+        print("카테고리 선택 시작")
         self.choose_category()
+        print("키워드 생성 시작")
         await self.make_keywords()
         self.make_embedding_vector()
 

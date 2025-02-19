@@ -33,8 +33,10 @@ class YoutubeProcess:
     #YoutubeProcess 객체가 실행되면 가장 먼저 실행되는 함수
     async def execute(self):
         self.process_paragraph()
-        self.choose_category(0),
-        self.make_keywords(0),
+        print("카테고리 선택 시작")
+        self.choose_category(0)
+        print("키워드 생성 시작")
+        self.make_keywords(0)
         self.make_embedding_vector()
 
     #Response 형태로 만들어주는 함수

@@ -38,8 +38,11 @@ class PostSummary:
 
             if not await self.detect_chinese(self.content):
                 break
+        print("카테고리 선택 시작")
         self.choose_category(0)
+        print("키워드 생성 시작")
         self.make_keywords(0)
+        print("썸네일 시작")
         while True:
             self.make_thumbnail_content(0)
 
