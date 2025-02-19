@@ -50,6 +50,7 @@ fun SearchKeywordList(context: Context, navController: NavController) {
             Text(
                 text = "최근 검색어",
                 style = MaterialTheme.typography.titleLarge.copy(fontSize = 16.sp),
+                color = MaterialTheme.colorScheme.onPrimary,
                 fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
             )
 
@@ -58,6 +59,7 @@ fun SearchKeywordList(context: Context, navController: NavController) {
             Text(
                 text = "전체 삭제",
                 style = MaterialTheme.typography.bodySmall.copy(color = Color.Gray, fontSize = 12.sp),
+                color = MaterialTheme.colorScheme.onSecondary,
                 modifier = Modifier
                     .clickable(
                         indication = null, // 클릭 효과 제거

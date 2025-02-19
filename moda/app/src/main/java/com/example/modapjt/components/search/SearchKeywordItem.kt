@@ -32,14 +32,14 @@ fun SearchKeywordItem(
     var isPressed by remember { mutableStateOf(false) }
 
     // ✨ 회색 색상 정의
-    val grayColor = Color.Gray
+    val grayColor = MaterialTheme.colorScheme.secondary
 
     Row(
         modifier = Modifier
             // ✨ 배경색 제거하고 회색 테두리 추가
             .border(
                 width = 1.dp,
-                color = if (isPressed) grayColor.copy(alpha = 0.7f) else grayColor,
+                color = if (isPressed) MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSecondary,
                 shape = RoundedCornerShape(16.dp)
             )
             .padding(horizontal = 12.dp, vertical = 6.dp),

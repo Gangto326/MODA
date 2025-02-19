@@ -41,7 +41,8 @@ fun KeywordRankItem(rank: Int, keyword: String, change: Int, navController: NavC
             text = "$rank.",
             style = MaterialTheme.typography.bodyMedium.copy(
                 fontSize = 13.sp,  // ✨ 글씨 크기 축소
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.secondary
             ),
             modifier = Modifier.width(28.dp)
         )
@@ -51,7 +52,8 @@ fun KeywordRankItem(rank: Int, keyword: String, change: Int, navController: NavC
             text = keyword,
             style = MaterialTheme.typography.bodyMedium.copy(
                 fontSize = 13.sp,  // ✨ 글씨 크기 축소
-                fontWeight = FontWeight.Normal
+                fontWeight = FontWeight.Normal,
+                color = MaterialTheme.colorScheme.secondary
             ),
             modifier = Modifier
                 .weight(1f)
@@ -88,10 +90,10 @@ fun KeywordRankItem(rank: Int, keyword: String, change: Int, navController: NavC
             modifier = Modifier.width(40.dp),  // ✨ 고정 너비 설정
             textAlign = TextAlign.End,  // ✨ 오른쪽 정렬
             color = when {
-                change == 100 ->Color(0xFFFFCC80)
-                change > 0 -> Color.Red
-                change < 0 -> Color.Blue
-                else -> Color.Gray
+                change == 100 -> MaterialTheme.colorScheme.primary // new 표시
+                change > 0 -> Color.Red // 업 표시
+                change < 0 -> Color.Blue // 다운 표시
+                else -> MaterialTheme.colorScheme.onSecondary // - 표시
             }
         )
     }
