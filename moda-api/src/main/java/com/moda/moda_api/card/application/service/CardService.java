@@ -101,7 +101,6 @@ public class CardService {
 				"같은 정보의 카드가 이미 존재합니다.",
 				userIdObj.getValue());
 
-
 		return urlCacheRepository.findByUrlHash(urlHash)
 			.map(cache -> createCardFromCache(userIdObj, urlHash))
 			.orElseGet(() -> {

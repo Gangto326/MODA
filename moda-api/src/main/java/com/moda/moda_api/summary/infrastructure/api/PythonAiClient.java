@@ -1,5 +1,8 @@
 package com.moda.moda_api.summary.infrastructure.api;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -16,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class PythonAiClient {
 	private final WebClient pythonWebClient;
+
 
 	public AIAnalysisResponseDTO articleAnalysis(AiArticleRequestDTO aiArticleRequestDTO) {
 		return pythonWebClient.post()

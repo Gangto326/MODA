@@ -2,6 +2,7 @@ package com.moda.moda_api.summary.application.service;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.Executor;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -24,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 public class CrawlingSummaryService {
 	private final PythonAnalysisService pythonAnalysisService;
 	private final CrawlingService crawlingService;
+	private final Executor pythonExecutor;
 
 	public CompletableFuture<SummaryResultDto> summarize(String url, String userId) {
 		return CompletableFuture.supplyAsync(() -> {
@@ -58,7 +60,7 @@ public class CrawlingSummaryService {
 						} catch (Exception e) {
 							throw new CompletionException("Python analysis failed", e);
 						}
-					});
+					},pythonExecutor);
 
 				// CompletableFuture<AIAnalysisResponseDTO> pythonAnalysisFuture = CompletableFuture.completedFuture(
 				// 	AIAnalysisResponseDTO.builder()

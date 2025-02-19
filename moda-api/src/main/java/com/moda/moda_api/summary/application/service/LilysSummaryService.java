@@ -3,6 +3,7 @@ package com.moda.moda_api.summary.application.service;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -33,6 +34,8 @@ public class LilysSummaryService {
 	private static final int MAX_ATTEMPTS = 100;
 	private static final Duration POLLING_INTERVAL = Duration.ofSeconds(200);
 	private final YoutubeApiClient youtubeApiClient;
+	private final Executor pythonExecutor;
+
 
 	@Transactional
 	public CompletableFuture<SummaryResultDto> summarize(String url, String userId) {
@@ -49,7 +52,6 @@ public class LilysSummaryService {
 				);
 			})
 			.thenCompose(lilysSummary -> {
-
 				// 서버 전용
 				// getSummaryResults 완료 후 병렬로 실행 가능한 작업들
 				CompletableFuture<AIAnalysisResponseDTO> aiAnalysisFuture =
@@ -66,7 +68,7 @@ public class LilysSummaryService {
 						} catch (Exception e) {
 							throw new CompletionException("Python analysis failed", e);
 						}
-					});
+					},pythonExecutor);
 
 				// CompletableFuture<AIAnalysisResponseDTO> aiAnalysisFuture = CompletableFuture.completedFuture(
 				// 	AIAnalysisResponseDTO.builder()
