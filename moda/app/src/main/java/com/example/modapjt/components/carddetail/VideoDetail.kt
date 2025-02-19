@@ -434,13 +434,13 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
                                     else -> "기타"
                                 },
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = Color.Gray
+                                color = MaterialTheme.colorScheme.onSecondary
                             )
                             Text(
                                 text = LocalDateTime.parse(cardDetail.createdAt)
                                     .format(DateTimeFormatter.ofPattern("yyyy.MM.dd")),
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = Color.Gray
+                                color = MaterialTheme.colorScheme.onSecondary
                             )
                         }
 
@@ -448,6 +448,7 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
                         Text(
                             text = cardDetail.title,
                             style = MaterialTheme.typography.headlineMedium,
+                            color = MaterialTheme.colorScheme.onPrimary,
                             modifier = Modifier.padding(vertical = 8.dp)
                         )
 
@@ -475,7 +476,7 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
                             Text(
                                 text = cardDetail.keywords.firstOrNull() ?: "-",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = Color.Gray,
+                                color = MaterialTheme.colorScheme.secondary,
                                 modifier = Modifier.padding(start = 8.dp)
                             )
                         }
@@ -494,7 +495,7 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
                                 cardDetail.keywords.take(3).forEach { keyword ->
                                     Surface(
                                         shape = RoundedCornerShape(20.dp),
-                                        border = BorderStroke(1.dp, Color.Gray.copy(alpha = 0.3f)),
+                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.3f)),
                                         color = Color.Transparent,
                                         modifier = Modifier
                                             .padding(end = 8.dp, bottom = 8.dp)
@@ -511,7 +512,7 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
                                             text = keyword,
                                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                                             style = MaterialTheme.typography.bodyMedium,
-                                            color = Color.Gray
+                                            color = MaterialTheme.colorScheme.onSecondary
                                         )
                                     }
 
@@ -524,7 +525,7 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
                                     Icon(
                                         imageVector = Icons.Default.List,
                                         contentDescription = "Timeline",
-                                        tint = if (showTimeline) MaterialTheme.colorScheme.primary else Color.Gray
+                                        tint = if (showTimeline) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSecondary
                                     )
                                 }
                             }
@@ -533,14 +534,14 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
                                 Icon(
                                     imageVector = Icons.Default.Share,
                                     contentDescription = "Share",
-                                    tint = Color.Gray
+                                    tint = MaterialTheme.colorScheme.onSecondary
                                 )
                             }
                         }
 
                         Divider(
                             modifier = Modifier.fillMaxWidth(),
-                            color = Color.Gray.copy(alpha = 0.3f),
+                            color = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.3f),
                             thickness = 1.dp
                         )
 
@@ -564,24 +565,25 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .width(250.dp)
-                    .padding(end = 16.dp)
+                    .padding(end = 8.dp)
                     .clickable(
                         enabled = false,
                         indication = null, // 클릭 효과 제거
                         interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
                     ) {},
-                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+                color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.9f),
                 shape = RoundedCornerShape(8.dp),
-                border = BorderStroke(1.dp, Color.Gray.copy(alpha = 0.3f))
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.3f))
             ) {
                 Column(
-                    modifier = Modifier.padding(8.dp),
+                    modifier = Modifier.padding(12.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(
                         text = "목차",
                         style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(bottom = 8.dp)
+                        modifier = Modifier.padding(bottom = 8.dp),
+                        color = MaterialTheme.colorScheme.secondary
                     )
 
                     timelineHeaders.forEach { header ->
@@ -606,13 +608,14 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
                             Text(
                                 text = formatTimeStamp(header.timeStamp),
                                 fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.primary,
+                                color = MaterialTheme.colorScheme.secondary,
                                 modifier = Modifier.width(48.dp)
                             )
                             Text(
                                 text = header.text,
                                 fontSize = 14.sp,
                                 maxLines = 1,
+                                color = MaterialTheme.colorScheme.onSecondary,
                                 overflow = TextOverflow.Ellipsis,
                                 modifier = Modifier.weight(1f)
                             )
