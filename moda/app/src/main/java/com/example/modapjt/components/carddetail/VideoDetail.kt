@@ -346,6 +346,11 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
             .mapNotNull { it.toFloatOrNull() }
             .filter { it > 0 }
 
+        // timeStamps가 비어있으면 빈 리스트 반환
+        if (timeStamps.isEmpty()) {
+            return@remember emptyList()
+        }
+
         val contentLines = cardDetail.content.split("\n")
         var currentOffset = 0
 
