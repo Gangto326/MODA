@@ -37,12 +37,10 @@ public class CrawlingSummaryService {
 				if (throwable.getCause() instanceof ContentExtractionException) {
 					throw (ContentExtractionException)throwable.getCause();
 				}
-				throw new ContentExtractionException(userId, "요약 중 오류가 발생했습니다: " + url, throwable);
-			})  // 여기서 닫는 괄호가 잘못 배치되어 있었습니다
+				throw new ContentExtractionException(userId, "요약 할 수 없는 사이트입니다." + url, throwable);
+			})
 			.thenCompose(crawledContent -> {
-
 				log.info(crawledContent.getExtractedContent().getText());
-
 				// 2단계: Python 분석과 이미지 URL 가져오기를 병렬로 실행
 				CompletableFuture<AIAnalysisResponseDTO> pythonAnalysisFuture =
 					CompletableFuture.supplyAsync(() -> {
@@ -53,7 +51,7 @@ public class CrawlingSummaryService {
 						} catch (Exception e) {
 							throw new UnprocessableContentException(
 								userId,
-								"해당 영상은 요약 할 수 없는 컨텐츠입니다. 다른 영상을 시도해 주세요"
+								"해당 게시물은 요약 할 수 없는 컨텐츠입니다. 다른 영상을 시도해 주세요"
 							);
 						}
 					},pythonExecutor);
