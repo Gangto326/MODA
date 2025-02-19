@@ -132,7 +132,7 @@ fun UserProfileCard(nickname: String, itemCount: Int) {
                     fontSize = 14.sp, // ✅ 닉네임과 동일한 크기로 설정
                     fontWeight = FontWeight.Normal
                 ),
-                color = Color.Gray
+                color = MaterialTheme.colorScheme.onSecondary
             )
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(
@@ -140,7 +140,8 @@ fun UserProfileCard(nickname: String, itemCount: Int) {
                     style = MaterialTheme.typography.bodyLarge.copy(
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
-                    )
+                    ),
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
@@ -149,7 +150,7 @@ fun UserProfileCard(nickname: String, itemCount: Int) {
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Normal
                     ),
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.secondary
                 )
             }
         }

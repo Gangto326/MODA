@@ -165,7 +165,8 @@ fun MyPageScreen(
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp),
                             shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
+                            colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.onSecondary) // 테두리
                         ) {
                             Row(
                                 modifier = Modifier
@@ -181,10 +182,11 @@ fun MyPageScreen(
                                     Text(
                                         text = userStatus?.allCount ?: "0",
                                         fontSize = 20.sp,
-                                        color = Color(0xFF4285F4)
+                                        color = Color.Blue
                                     )
-                                    Text(text = "내 정보", fontSize = 14.sp, color = Color.Gray)
+                                    Text(text = "내 정보", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSecondary)
                                 }
+                                Text(text = "|", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSecondary)
                                 Column(
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     modifier = Modifier.clickable {
@@ -193,9 +195,9 @@ fun MyPageScreen(
                                     Text(
                                         text = userStatus?.bookmarkCount ?: "0",
                                         fontSize = 20.sp,
-                                        color = Color(0xFF4285F4)
+                                        color = Color.Blue
                                     )
-                                    Text(text = "즐겨찾기", fontSize = 14.sp, color = Color.Gray)
+                                    Text(text = "즐겨찾기", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSecondary)
                                 }
                             }
                         }
@@ -210,7 +212,7 @@ fun MyPageScreen(
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 8.dp),
                         shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiary)
                     ) {
                         Column(
                             modifier = Modifier.padding(16.dp)
@@ -224,7 +226,8 @@ fun MyPageScreen(
                                 Text(
                                     text = "저장 방법",
                                     style = MaterialTheme.typography.titleMedium,
-                                    fontSize = 16.sp
+                                    fontSize = 16.sp,
+                                    color = MaterialTheme.colorScheme.onPrimary
                                 )
 
                                 CustomToggleSwitch(
@@ -290,7 +293,7 @@ fun MyPageScreen(
                                     }
                                 },
                                 modifier = Modifier.fillMaxWidth(),
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFCC80))
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                             ) {
                                 Text(
                                     text = when {
@@ -298,7 +301,7 @@ fun MyPageScreen(
                                         saveMode == SaveMethod.OVERLAY -> if (isOverlayActive) "오버레이 종료" else "오버레이 시작"
                                         else -> ""
                                     },
-                                    color = Color.Black
+                                    color = MaterialTheme.colorScheme.onPrimary
                                 )
                             }
                         }
@@ -330,9 +333,9 @@ fun MyPageScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(16.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray)
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onTertiary)
                         ) {
-                            Text("로그아웃", color = Color.Black)
+                            Text("로그아웃", color = MaterialTheme.colorScheme.onPrimary)
                         }
                     }
 
@@ -417,7 +420,7 @@ fun CustomToggleSwitch(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
-                .background(if (saveMode == SaveMethod.OVERLAY) Color.White else Color.Transparent, shape = CircleShape)
+                .background(if (saveMode == SaveMethod.OVERLAY) MaterialTheme.colorScheme.tertiary else Color.Transparent, shape = CircleShape)
                 .clickable(
                     indication = null, // 클릭 효과 제거
                     interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
@@ -428,7 +431,7 @@ fun CustomToggleSwitch(
                 text = "오버레이",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
-                color = if (saveMode == SaveMethod.OVERLAY) Color.Black else Color.White
+                color = if (saveMode == SaveMethod.OVERLAY) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.tertiary
             )
         }
 
@@ -436,7 +439,7 @@ fun CustomToggleSwitch(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
-                .background(if (saveMode == SaveMethod.GESTURE) Color.White else Color.Transparent, shape = CircleShape)
+                .background(if (saveMode == SaveMethod.GESTURE) MaterialTheme.colorScheme.tertiary else Color.Transparent, shape = CircleShape)
                 .clickable(
                     indication = null, // 클릭 효과 제거
                     interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
@@ -447,7 +450,7 @@ fun CustomToggleSwitch(
                 text = "제스처",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
-                color = if (saveMode == SaveMethod.GESTURE) Color.Black else Color.White
+                color = if (saveMode == SaveMethod.GESTURE) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.tertiary
             )
         }
     }
