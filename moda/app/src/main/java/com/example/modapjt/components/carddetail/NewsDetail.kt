@@ -308,6 +308,7 @@ fun NewsDetailScreen(cardDetail: CardDetail, navController: NavController) {
                                 isActive = index == activeIndex,
                                 isFirst = index == 0,
                                 isExpanded = isExpanded,
+                                keywords = limitedKeywords,
                                 modifier = Modifier
                                     .padding(horizontal = 6.dp)
                                     .padding(bottom = 14.dp)
