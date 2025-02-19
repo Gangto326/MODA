@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
 import com.example.modapjt.data.api.RetrofitInstance
 import com.example.modapjt.data.dto.request.FCMTokenRequest
 import com.example.modapjt.data.dto.request.LoginRequest
@@ -54,20 +55,43 @@ class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
     }
 
     // 추가 : 로그아웃
-    fun logout(onLogoutSuccess: () -> Unit) {
+//    fun logout(onLogoutSuccess: () -> Unit) {
+//        viewModelScope.launch {
+//            try {
+//                val response = RetrofitInstance.userApi.logout()
+//
+//                if (response.isSuccessful) {
+//                    tokenManager.clearTokens() // 토큰 삭제
+//                    _isLoggedIn.value = false
+//                    onLogoutSuccess() // 로그아웃 성공 시 실행할 콜백
+//                } else {
+//                    Log.e("AuthViewModel", "로그아웃 실패: ${response.code()}")
+//                }
+//            } catch (e: Exception) {
+//                Log.e("AuthViewModel", "로그아웃 중 오류 발생", e)
+//            }
+//        }
+//    }
+    // -> 테스트 진행
+    fun logout(navController: NavController) {
         viewModelScope.launch {
             try {
                 val response = RetrofitInstance.userApi.logout()
 
                 if (response.isSuccessful) {
-                    tokenManager.clearTokens() // 토큰 삭제
-                    _isLoggedIn.value = false
-                    onLogoutSuccess() // 로그아웃 성공 시 실행할 콜백
+                    Log.d("AuthViewModel", "로그아웃 성공")
                 } else {
                     Log.e("AuthViewModel", "로그아웃 실패: ${response.code()}")
                 }
             } catch (e: Exception) {
                 Log.e("AuthViewModel", "로그아웃 중 오류 발생", e)
+            } finally {
+                // 로그아웃 성공 여부와 상관없이 로그인 화면으로 이동
+                tokenManager.clearTokens() // 토큰 삭제
+                _isLoggedIn.value = false
+                navController.navigate("login") {
+                    popUpTo("login") { inclusive = true }
+                }
             }
         }
     }
