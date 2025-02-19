@@ -303,7 +303,7 @@ fun newCardListScreen(
 
                                             // 각 비디오 사이에 구분선 추가
                                             Divider(
-                                                color = Color(0xFFF1F1F1),
+                                                color = MaterialTheme.colorScheme.onTertiary,
                                                 thickness = 1.dp,
                                                 modifier = Modifier.padding(
                                                     start = 16.dp,
@@ -402,7 +402,7 @@ fun newCardListScreen(
 
                                             // 각 블로그 사이에 구분선 추가
                                             Divider(
-                                                color = Color(0xFFF1F1F1),
+                                                color = MaterialTheme.colorScheme.onTertiary,
                                                 thickness = 1.dp,
                                                 modifier = Modifier.padding(
                                                     start = 16.dp,
@@ -484,7 +484,7 @@ fun newCardListScreen(
 
                                             // 각 블로그 사이에 구분선 추가
                                             Divider(
-                                                color = Color(0xFFF1F1F1),
+                                                color = MaterialTheme.colorScheme.onTertiary,
                                                 thickness = 1.dp,
                                                 modifier = Modifier.padding(
                                                     start = 16.dp,
