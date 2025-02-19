@@ -1,12 +1,17 @@
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.repeatable
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -78,6 +83,8 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -166,26 +173,6 @@ fun BlogDetailScreen(cardDetail: CardDetail, navController: NavController) {
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
-
-            // 🔘 이미지 토글 버튼
-            // 🖼️ 이미지 토글 아이콘
-            IconButton(
-                onClick = { showImage = !showImage },
-                modifier = Modifier.padding(8.dp)
-            ) {
-                Icon(
-                    painter = painterResource(
-                        id = if (showImage) R.drawable.ic_not_image else R.drawable.ic_a_image
-                    ),
-                    contentDescription = if (showImage) "이미지 숨기기" else "이미지 보기",
-                    modifier = Modifier.size(
-                        if (showImage) 32.dp else 24.dp  // ic_not_image일 때 더 크게 표시
-                    ),
-                    tint = Color.Unspecified
-
-                )
-            }
-
 
             // 🖼 이미지 슬라이더 (토글에 따라 표시)
             if (showImage && cardDetail.subContents.isNotEmpty()) {
@@ -300,7 +287,24 @@ fun BlogDetailScreen(cardDetail: CardDetail, navController: NavController) {
 
                                 }
                             }
+                            // 🔘 이미지 토글 버튼
+                            // 🖼️ 이미지 토글 아이콘
+                            IconButton(
+                                onClick = { showImage = !showImage },
+//                                modifier = Modifier.padding(8.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(
+                                        id = if (showImage) R.drawable.ic_not_image else R.drawable.ic_a_image
+                                    ),
+                                    contentDescription = if (showImage) "이미지 숨기기" else "이미지 보기",
+                                    modifier = Modifier.padding(bottom = 17.dp).size(
+                                        if (showImage) 40.dp else 24.dp  // ic_not_image일 때 더 크게 표시
+                                    ),
+                                    tint = Color.Unspecified
 
+                                )
+                            }
                             IconButton(onClick = { uriHandler.openUri(cardDetail.originalUrl) }) {
                                 Icon(
                                     painter = painterResource(R.drawable.ic_s_origin_link),
@@ -333,6 +337,7 @@ fun BlogDetailScreen(cardDetail: CardDetail, navController: NavController) {
                                 isActive = index == activeIndex,
                                 isFirst = index == 0,
                                 isExpanded = isExpanded,
+                                keywords = limitedKeywords,
                                 modifier = Modifier
                                     .padding(horizontal = 6.dp)
                                     .padding(bottom = 14.dp)
@@ -349,7 +354,7 @@ fun BlogDetailScreen(cardDetail: CardDetail, navController: NavController) {
                         }
                     }
                     item {
-                        Spacer(modifier = Modifier.height(40.dp))
+                        Spacer(modifier = Modifier.height(44.dp))
                     }
                 }
 
@@ -369,6 +374,16 @@ fun BlogDetailScreen(cardDetail: CardDetail, navController: NavController) {
                     var sliderPosition by remember { mutableStateOf(selectedIndex.toFloat()) }
                     // sliderPosition이 변경될 때마다 타이머를 재설정하는 로직 추가
                     var lastInteractionTime by remember { mutableStateOf(0L) }
+
+                    // isExpanded 상태가 변경될 때 호출되는 함수
+                    fun onExpandStateChanged(expanded: Boolean) {
+                        isExpanded = expanded
+                        if (expanded) {
+                            // 슬라이더가 나타날 때 activeIndex 위치로 설정
+                            sliderPosition = activeIndex.toFloat()
+                            selectedIndex = activeIndex
+                        }
+                    }
 
                     // 1.5초 후 자동으로 닫히는 effect
                     LaunchedEffect(sliderPosition) {
@@ -506,6 +521,19 @@ private fun calculateActiveIndex(
     val visibleItems = listState.layoutInfo.visibleItemsInfo
     if (visibleItems.isEmpty()) return 0
 
+
+    // 스크롤이 끝에 도달했는지 확인
+    val lastVisibleItem = visibleItems.lastOrNull()
+
+    if (lastVisibleItem != null &&
+        lastVisibleItem.index == listState.layoutInfo.totalItemsCount - 1 &&
+        !listState.canScrollForward) {
+
+        // header의 마지막 인덱스 반환
+        return (headerItemCount - 1)
+    }
+
+
     val viewportHeight = listState.layoutInfo.viewportEndOffset.toFloat() - listState.layoutInfo.viewportStartOffset.toFloat()
     val viewportTop = listState.layoutInfo.viewportStartOffset.toFloat()
 
@@ -536,6 +564,7 @@ fun ShakingTitle(
     isActive: Boolean,
     isFirst: Boolean,
     isExpanded: Boolean,
+    keywords: List<String>,
     modifier: Modifier = Modifier
 ) {
 
@@ -549,11 +578,39 @@ fun ShakingTitle(
 
     val offset = if (isActive && isExpanded) (sin(shake * PI) * 8).toFloat().dp else 0.dp
 
+    // 하이라이팅된 텍스트 생성
+    val highlightedText = buildAnnotatedString {
+        var lastIndex = 0
+        val titleText = text
+
+        keywords.forEachIndexed { index, keyword ->
+            val pattern = keyword.toRegex(RegexOption.IGNORE_CASE)
+            val highlightColor = highlightColors[index % highlightColors.size]
+
+            pattern.findAll(titleText).forEach { result ->
+                if (result.range.first >= lastIndex && result.range.first < result.range.last + 1) {
+                    append(titleText.substring(lastIndex, result.range.first))
+
+                    // MarkdownText와 동일한 스타일 적용
+                    pushStyle(SpanStyle(background = highlightColor))
+                    append(titleText.substring(result.range.first, result.range.last + 1))
+                    pop()
+
+                    lastIndex = result.range.last + 1
+                }
+            }
+        }
+
+        if (lastIndex < titleText.length) {
+            append(titleText.substring(lastIndex))
+        }
+    }
+
     Text(
-        text = text,
+        text = highlightedText,
         modifier = modifier
             .offset(x = offset)
-            .padding(top = if (isFirst) 22.dp else 48.dp),
+            .padding(top = if (isFirst) 24.dp else 58.dp),
         style = MaterialTheme.typography.titleMedium.copy(
             color = MaterialTheme.colorScheme.onPrimary,
             fontWeight = FontWeight.Bold,
