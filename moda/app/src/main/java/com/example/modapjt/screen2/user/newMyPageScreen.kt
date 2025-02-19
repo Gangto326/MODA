@@ -114,17 +114,17 @@ fun MyPageScreen(
         }
     }
 
-    val permissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        val allGranted = permissions.entries.all { it.value }
-        if (allGranted) {
-            // 권한이 모두 승인되면 미디어 프로젝션 권한 요청
-            screenCaptureContract.launch(mediaProjectionManager.createScreenCaptureIntent())
-        } else {
-            Toast.makeText(context, "필요한 권한이 승인되지 않았습니다.", Toast.LENGTH_SHORT).show()
-        }
-    }
+//    val permissionLauncher = rememberLauncherForActivityResult(
+//        ActivityResultContracts.RequestMultiplePermissions()
+//    ) { permissions ->
+//        val allGranted = permissions.entries.all { it.value }
+//        if (allGranted) {
+//            // 권한이 모두 승인되면 미디어 프로젝션 권한 요청
+//            screenCaptureContract.launch(mediaProjectionManager.createScreenCaptureIntent())
+//        } else {
+//            Toast.makeText(context, "필요한 권한이 승인되지 않았습니다.", Toast.LENGTH_SHORT).show()
+//        }
+//    }
 
 
 //    val keywords by viewModel.interestKeywords.collectAsState(initial = emptyList())
@@ -263,13 +263,7 @@ fun MyPageScreen(
                                     else if (saveMode == SaveMethod.OVERLAY){
                                         if (!isOverlayActive) {
                                             try {
-                                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                                    permissionLauncher.launch(arrayOf(
-                                                        android.Manifest.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION
-                                                    ))
-                                                } else {
-                                                    screenCaptureContract.launch(mediaProjectionManager.createScreenCaptureIntent())
-                                                }
+                                                screenCaptureContract.launch(mediaProjectionManager.createScreenCaptureIntent())
                                             } catch (e: Exception) {
                                                 Toast.makeText(context, "크롬 브라우저를 사용할 수 없습니다.", Toast.LENGTH_SHORT).show()
                                             }
