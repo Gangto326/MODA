@@ -33,21 +33,27 @@ class PostSummary:
 
     #PostSummary 객체가 실행되면 가장 먼저 실행되는 함수
     async def execute(self):
+        summary_content_idx = 0
         while True:
-            self.summary_content(0)
+            self.summary_content(summary_content_idx)
 
             if not await self.detect_chinese(self.content):
                 break
+
+            summary_content_idx += 1
         print("카테고리 선택 시작")
         self.choose_category(0)
         print("키워드 생성 시작")
         self.make_keywords(0)
         print("썸네일 시작")
+        thumbnail_content_idx = 0
         while True:
-            self.make_thumbnail_content(0)
+            self.make_thumbnail_content(thumbnail_content_idx)
 
             if not await self.detect_chinese(self.thumbnail_content):
                 break
+
+            thumbnail_content_idx += 1
         self.make_embedding_vector()
 
     #Response 형태로 만들어주는 함수

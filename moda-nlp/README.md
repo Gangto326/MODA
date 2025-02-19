@@ -19,5 +19,5 @@
    - ubu: source .venv/bin/activate
 3. 프로젝트 실행
    - 개발: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-   - 배포: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4
-   - ubu: nohup uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4 &
+   - 배포: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 8
+   - ubu: nohup uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 6 &
