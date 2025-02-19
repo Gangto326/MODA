@@ -1,5 +1,6 @@
 package com.example.modapjt.components.cardlist
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -31,12 +32,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import com.example.app.ui.theme.customTypography
+import com.example.modapjt.R
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -51,10 +56,16 @@ fun VideoSelectionItem(
     thumbnailContent: String,
     onClick: () -> Unit = {}
 ) {
+
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+    // 화면 크기에 따른 텍스트 크기 계산
+    val iconSize = (screenWidth * 0.03f).coerceIn(20.dp, 28.dp)
+
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+//            .padding(horizontal = 16.dp, vertical = 8.dp)
             .clickable(
                 onClick = onClick,
                 indication = null, // 클릭 효과 제거
@@ -62,7 +73,7 @@ fun VideoSelectionItem(
             ),
         shape = RoundedCornerShape(8.dp),
         color = when {
-            isSelected -> Color.LightGray.copy(alpha = 0.3f)  // 선택됐을 때 색상
+//            isSelected -> Color.DarkGray.copy(alpha = 0.3f)  // 선택됐을 때 색상
             !isMine -> Color.Gray
             else -> Color.White
         }
@@ -129,25 +140,6 @@ fun VideoSelectionItem(
                             modifier = Modifier.alignByBaseline()
                         )
                     }
-                }
-            }
-            if (isSelected) {
-                Surface(
-                    shape = CircleShape,
-                    color = Color(0xFF2167F3),
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(top = 16.dp, end = 17.dp, bottom = 16.dp)
-                        .size(18.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Check,
-                        contentDescription = "Selected",
-                        tint = Color.White,
-                        modifier = Modifier
-                            .padding(2.dp)
-                            .fillMaxSize()
-                    )
                 }
             }
         }
