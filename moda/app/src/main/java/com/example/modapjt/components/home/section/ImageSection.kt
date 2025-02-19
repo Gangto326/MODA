@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,7 +31,7 @@ fun ImageSection(
 
     if (images.isNotEmpty()) {
         Divider( // 구분선
-            color = Color(0xFFF1F1F1),
+            color = MaterialTheme.colorScheme.onTertiary,
             thickness = 6.dp,
 
             modifier = Modifier

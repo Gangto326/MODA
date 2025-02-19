@@ -2,6 +2,7 @@ package com.example.modapjt.components.home
 
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.* // fillMaxWidth(), width() 등 포함
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
@@ -27,13 +28,13 @@ fun HomeSmallTitle(
             text = title,
             fontSize = 16.sp,
             fontWeight = FontWeight.Black,
-            color = Color(0xFF2B2826)
+            color = MaterialTheme.colorScheme.onPrimary
         )
         Spacer(modifier = Modifier.width(6.dp)) // width 오류 해결됨
         Text(
             text = description,
             fontSize = 10.sp,
-            color = Color(0xFFBAADA4)
+            color = MaterialTheme.colorScheme.onSecondary
         )
     }
 //    Spacer(modifier = Modifier.height(8.dp))
