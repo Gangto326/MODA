@@ -534,7 +534,7 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
                 e.printStackTrace()
                 Log.e("OverlayService", "URL 저장 중 오류 발생: ${e.message}")
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(applicationContext, "링크 저장 실패", Toast.LENGTH_SHORT).show()
+//                    Toast.makeText(applicationContext, "링크 저장 실패", Toast.LENGTH_SHORT).show()
                 }
             }
         }

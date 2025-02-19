@@ -304,14 +304,14 @@ private suspend fun saveImageToGallery(context: Context, imageUrl: String) {
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(context, "이미지 저장 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+//                    Toast.makeText(context, "이미지 저장 실패: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             } finally {
                 fos?.close()
             }
         } catch (e: Exception) {
             withContext(Dispatchers.Main) {
-                Toast.makeText(context, "이미지 다운로드 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+//                Toast.makeText(context, "이미지 다운로드 실패: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }

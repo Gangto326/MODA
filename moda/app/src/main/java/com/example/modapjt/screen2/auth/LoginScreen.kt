@@ -195,7 +195,7 @@ fun LoginScreen(
             enabled = !state.isLoading,
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.onSecondary // 버튼 배경색
+                containerColor = MaterialTheme.colorScheme.primary // 버튼 배경색
             )
         ) {
             if (state.isLoading) {
