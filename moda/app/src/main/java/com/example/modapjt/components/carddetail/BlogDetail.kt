@@ -41,6 +41,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Share
@@ -69,10 +70,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -81,6 +85,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.modapjt.R
 import com.example.modapjt.components.carddetail.ImageSlider
 import com.example.modapjt.domain.model.CardDetail
 import com.example.modapjt.domain.viewmodel.SearchViewModel
@@ -163,12 +168,23 @@ fun BlogDetailScreen(cardDetail: CardDetail, navController: NavController) {
         Column(modifier = Modifier.fillMaxSize()) {
 
             // 🔘 이미지 토글 버튼
-                    Button(
-                        onClick = { showImage = !showImage },
-                        modifier = Modifier.padding(8.dp)
-                    ) {
-                        Text(if (showImage) "이미지 숨기기" else "이미지 보기")
-                    }
+            // 🖼️ 이미지 토글 아이콘
+            IconButton(
+                onClick = { showImage = !showImage },
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Icon(
+                    painter = painterResource(
+                        id = if (showImage) R.drawable.ic_not_image else R.drawable.ic_a_image
+                    ),
+                    contentDescription = if (showImage) "이미지 숨기기" else "이미지 보기",
+                    modifier = Modifier.size(
+                        if (showImage) 32.dp else 24.dp  // ic_not_image일 때 더 크게 표시
+                    ),
+                    tint = Color.Unspecified
+
+                )
+            }
 
 
             // 🖼 이미지 슬라이더 (토글에 따라 표시)
@@ -287,7 +303,7 @@ fun BlogDetailScreen(cardDetail: CardDetail, navController: NavController) {
 
                             IconButton(onClick = { uriHandler.openUri(cardDetail.originalUrl) }) {
                                 Icon(
-                                    imageVector = Icons.Default.Share,
+                                    painter = painterResource(R.drawable.ic_s_origin_link),
                                     contentDescription = "Share",
                                     modifier = Modifier.padding(bottom = 16.dp),
                                     tint = MaterialTheme.colorScheme.onSecondary

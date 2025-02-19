@@ -531,9 +531,9 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
 
                             IconButton(onClick = { uriHandler.openUri(cardDetail.originalUrl) }) {
                                 Icon(
-                                    imageVector = Icons.Default.Share,
+                                   painter = painterResource(R.drawable.ic_s_origin_link),
                                     contentDescription = "Share",
-                                    tint = Color.Gray
+                                    tint = MaterialTheme.colorScheme.onSecondary
                                 )
                             }
                         }
