@@ -1,6 +1,7 @@
 package com.example.modapjt.screen2.auth
 
 import android.view.ViewTreeObserver
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -111,6 +112,7 @@ fun LoginScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.tertiary)
             .pointerInput(Unit) {
                 detectTapGestures(
                     onTap = {
@@ -123,6 +125,7 @@ fun LoginScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.tertiary)
             .padding(20.dp),
 
         horizontalAlignment = Alignment.CenterHorizontally,

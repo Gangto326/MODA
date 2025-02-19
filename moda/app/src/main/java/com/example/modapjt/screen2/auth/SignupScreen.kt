@@ -3,6 +3,7 @@ package com.example.modapjt.presentation.auth.signup
 import android.util.Log
 import android.view.ViewTreeObserver
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -94,7 +95,9 @@ fun SignUpScreen(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize().clickable(
+    Box(modifier = Modifier.fillMaxSize()
+        .background(MaterialTheme.colorScheme.tertiary)
+        .clickable(
         interactionSource = remember { MutableInteractionSource() },
         indication = null // 클릭 효과 제거
     ){
@@ -104,6 +107,7 @@ fun SignUpScreen(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.tertiary)
                 .padding(20.dp)
                 .verticalScroll(scrollState),
             horizontalAlignment = Alignment.CenterHorizontally
