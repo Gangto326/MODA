@@ -110,7 +110,8 @@ fun NewSearchScreen(
                 onBackPressed = {
                     navController.navigateUp()
                 },
-                context = context
+                context = context,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
             )
         }
     ) { paddingValues ->
@@ -125,7 +126,9 @@ fun NewSearchScreen(
                 }
         ) {
             LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
+
             ) {
                 if (currentSearchQuery.isEmpty()) {
                     item { SearchKeywordList(context, navController = navController) }

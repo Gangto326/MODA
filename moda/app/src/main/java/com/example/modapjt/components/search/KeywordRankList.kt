@@ -60,7 +60,7 @@ fun KeywordRankList(viewModel: SearchViewModel, navController: NavController) {
             // 왼쪽: "인기 검색어"
             Text(
                 text = "인기 검색어",
-                style = MaterialTheme.typography.titleLarge.copy(fontSize = 16.sp),
+                style = MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp),
                 color = MaterialTheme.colorScheme.onPrimary,
                 fontWeight = FontWeight.Bold
             )
@@ -75,35 +75,18 @@ fun KeywordRankList(viewModel: SearchViewModel, navController: NavController) {
         }
 
         // ✅ 제목과 리스트 사이 간격 추가
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // ✅ 검색어 리스트 UI
-        Row(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.weight(1f)) {
-                leftTopics.forEach { topic ->
-                    KeywordRankItem(
-                        rank = topic.rank,
-                        keyword = topic.topic,
-                        change = topic.change,
-                        navController = navController // ✅ 추가
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-            }
-
-            // ✅ 여백 추가
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                rightTopics.forEach { topic ->
-                    KeywordRankItem(
-                        rank = topic.rank,
-                        keyword = topic.topic,
-                        change = topic.change,
-                        navController = navController // ✅ 추가
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
+        // ✅ 검색어 리스트 UI (1열로 변경)
+        Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+            hotTopics.forEach { topic ->
+                KeywordRankItem(
+                    rank = topic.rank,
+                    keyword = topic.topic,
+                    change = topic.change,
+                    navController = navController
+                )
+                Spacer(modifier = Modifier.height(8.dp))
             }
         }
 

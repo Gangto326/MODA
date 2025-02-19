@@ -5,6 +5,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,8 +32,9 @@ import androidx.navigation.NavController
 import com.example.modapjt.datastore.SearchKeywordDataStore
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.layout.FlowRow
 
-
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SearchKeywordList(context: Context, navController: NavController) {
     val scope = rememberCoroutineScope()
@@ -49,7 +52,7 @@ fun SearchKeywordList(context: Context, navController: NavController) {
         ) {
             Text(
                 text = "최근 검색어",
-                style = MaterialTheme.typography.titleLarge.copy(fontSize = 16.sp),
+                style = MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp),
                 color = MaterialTheme.colorScheme.onPrimary,
                 fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
             )
@@ -76,27 +79,30 @@ fun SearchKeywordList(context: Context, navController: NavController) {
 
         Spacer(modifier = Modifier.height(8.dp)) // 🔹 최근 검색어와 리스트 사이 간격 추가
 
-        LazyRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        // 공식 Jetpack Compose FlowRow 사용
+        FlowRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            maxItemsInEachRow = Int.MAX_VALUE // 자동으로 줄바꿈
         ) {
-            items(keywords) { keyword ->
+            keywords.forEach { keyword ->
                 SearchKeywordItem(
                     keyword = keyword,
-                    onSearchSubmit = { query -> // ✅ 검색 버튼 클릭 시 동작
+                    onSearchSubmit = { query ->
                         if (query.isNotBlank()) {
-                            navController.navigate("newSearchCardListScreen/$query") // ✅ 검색어와 함께 이동
+                            navController.navigate("newSearchCardListScreen/$query")
                         }
                     },
                     onDelete = {
                         scope.launch {
                             val updatedKeywords = keywords.filter { it != keyword }
                             SearchKeywordDataStore.saveKeywords(context, updatedKeywords)
-                            keywords = updatedKeywords // 🔹 UI 업데이트
+                            keywords = updatedKeywords
                         }
-
                     }
-
                 )
             }
         }
