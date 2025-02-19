@@ -52,7 +52,7 @@ fun CategoryHeaderBar(modifier: Modifier = Modifier, categoryName: String, navCo
             text = categoryName, // 선택한 카테고리 반영
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.tertiary
+            color = MaterialTheme.colorScheme.onPrimary
         )
     }
 }
