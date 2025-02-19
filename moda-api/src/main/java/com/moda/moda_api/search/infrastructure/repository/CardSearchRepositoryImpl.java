@@ -35,7 +35,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Slf4j
 public class CardSearchRepositoryImpl implements CardSearchRepository {
-    private static final float MIN_SCORE = 6.85f;
+    private static final float MIN_SCORE = 3.5f;
 
     private final ElasticsearchOperations elasticsearchOperations;
     private final CardSearchJpaRepository cardSearchJpaRepository;
