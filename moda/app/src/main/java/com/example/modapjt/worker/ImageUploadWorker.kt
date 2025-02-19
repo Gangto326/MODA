@@ -37,13 +37,13 @@ class ImageUploadWorker(
                     Result.success()
                 },
                 onFailure = { e ->
-                    showNotification("이미지 저장 실패: ${e.message}")
+//                    showNotification("이미지 저장 실패: ${e.message}")
                     Log.e("ImageUploadWorker", "이미지 업로드 실패", e)
                     Result.failure()
                 }
             )
         } catch (e: Exception) {
-            showNotification("이미지 저장 실패: ${e.message}")
+//            showNotification("이미지 저장 실패: ${e.message}")
             Log.e("ImageUploadWorker", "이미지 업로드 실패", e)
             Result.failure()
         }

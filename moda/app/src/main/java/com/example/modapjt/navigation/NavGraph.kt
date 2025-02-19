@@ -282,6 +282,13 @@ fun NavGraph(
             newBookMarkCardListScreen(navController = navController, currentRoute = "bookmarkScreen")
         }
 
+        // 카드 리스트 페이지
+        composable("cardlistScreen?categoryId={categoryId}") { backStackEntry ->
+            val categoryId = backStackEntry.arguments?.getString("categoryId")?.toIntOrNull() ?: 1
+            newCardListScreen(navController = navController, currentRoute = "cardlistScreen", categoryId = categoryId)
+        }
+
+
 //        composable("favorite_card_list") {
 //            newFavoriteCardListScreen(
 //                navController = navController,
