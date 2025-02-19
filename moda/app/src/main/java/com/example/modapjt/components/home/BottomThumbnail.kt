@@ -73,7 +73,7 @@ fun BottomThumbnail(
                     if (bookmark==true) R.drawable.ic_bookmark_filled else R.drawable.ic_bookmark_outline
                 ),
                 contentDescription = "Bookmark Icon",
-                tint = if (bookmark) Color(0xFFFFA500) else Color.White,
+                tint = if (bookmark==true) Color.Unspecified else Color.Transparent,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(6.dp)

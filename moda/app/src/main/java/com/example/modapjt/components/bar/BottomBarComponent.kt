@@ -1,6 +1,7 @@
 // components/home/HomeTopBar.kt
 package com.example.modapjt.components.bar
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -42,11 +43,11 @@ fun BottomBarComponent(navController: NavController, currentRoute: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp)
+            .background(MaterialTheme.colorScheme.tertiary)
     ) {
         NavigationBar(
-            containerColor = Color.White,
-            contentColor = Color(0xFF665F5B),
+            containerColor = MaterialTheme.colorScheme.tertiary,
+//            contentColor = Color(0xFF665F5B),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(barHeight)
@@ -57,7 +58,7 @@ fun BottomBarComponent(navController: NavController, currentRoute: String) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_n_home),
                         contentDescription = "Home",
-                        modifier = Modifier.size(iconSize),
+                        modifier = Modifier.size(26.dp),
                         tint = if (currentRoute == "home") selectedColor else unselectedColor
                     )
                 },
@@ -89,7 +90,7 @@ fun BottomBarComponent(navController: NavController, currentRoute: String) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_n_bookmark_outline),
                         contentDescription = "즐겨찾기",
-                        modifier = Modifier.size(iconSize),
+                        modifier = Modifier.size(26.dp),
                         tint = if (currentRoute == "bookmarkScreen") selectedColor else unselectedColor
                     )
                 },
@@ -119,7 +120,7 @@ fun BottomBarComponent(navController: NavController, currentRoute: String) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_n_link),
                         contentDescription = "링크 추가",
-                        modifier = Modifier.size(iconSize),
+                        modifier = Modifier.size(26.dp),
                         tint = if (currentRoute == "file_upload_test") selectedColor else unselectedColor
                     )
                 },
@@ -151,7 +152,7 @@ fun BottomBarComponent(navController: NavController, currentRoute: String) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_n_search),
                         contentDescription = "검색",
-                        modifier = Modifier.size(iconSize),
+                        modifier = Modifier.size(26.dp),
                         tint = if (currentRoute == "afterSearch") selectedColor else unselectedColor
                     )
                 },
@@ -183,7 +184,7 @@ fun BottomBarComponent(navController: NavController, currentRoute: String) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_n_mypage),
                         contentDescription = "My Page",
-                        modifier = Modifier.size(iconSize),
+                        modifier = Modifier.size(26.dp),
                         tint = if (currentRoute == "mypage") selectedColor else unselectedColor
                     )
                 },

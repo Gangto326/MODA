@@ -30,6 +30,10 @@ fun WeeklyKeywordSection(
     val shouldShowTitle = topKeywords.isNotEmpty() || keywordSearchData.isNotEmpty()
 
     if (shouldShowTitle) {
+
+        Divider(color = Color(0xFFF1F1F1), thickness = 6.dp, modifier = Modifier.padding(horizontal = 0.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+
         HomeSmallTitle(
             title = "이번주 주요 키워드",
             description = "| 이번주 많이 저장한 키워드"
@@ -37,6 +41,7 @@ fun WeeklyKeywordSection(
     }
 
     if (topKeywords.isNotEmpty()) {
+
         WeeklyKeywordList(homeKeywordViewModel)
         Spacer(
             modifier = Modifier
@@ -48,8 +53,7 @@ fun WeeklyKeywordSection(
 
     if (keywordSearchData.isNotEmpty()) {
 
-        Divider(color = Color(0xFFF1F1F1), thickness = 6.dp, modifier = Modifier.padding(horizontal = 0.dp))
-        Spacer(modifier = Modifier.height(30.dp))
+
 
         FirstKeywordList(navController, searchViewModel)
         Spacer(
