@@ -185,5 +185,4 @@ public class AbstractExtractor {
 			throw new ExtractorException("URL 추출 실패", e);
 		}
 	}
-
 }

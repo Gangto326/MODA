@@ -24,7 +24,6 @@ public class PythonAnalysisService {
 	private final PythonAiClient pythonAiClient;
 
 	public AIAnalysisResponseDTO youtubeAnalyze(List<TitleAndContent> titleAndContents) {
-		// AI 분석 키워드를 받고.
 		log.info("파이썬 분석하기직전");
 		return pythonAiClient.youtubeAnalysis(AiYoutubeRequestDTO.builder()
 			.paragraph(titleAndContents)
