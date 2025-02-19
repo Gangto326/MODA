@@ -31,12 +31,13 @@ fun SettingItem(title: String, onClick: () -> Unit) {
         Text(
             text = title,
             fontSize = 16.sp,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            color = MaterialTheme.colorScheme.onPrimary
         )
         Icon(
             imageVector = Icons.Filled.KeyboardArrowRight, // 오른쪽 이동 아이콘 추가
             contentDescription = "이동",
-            tint = Color.Gray
+            tint = MaterialTheme.colorScheme.onPrimary
         )
     }
 }
