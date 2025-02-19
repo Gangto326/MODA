@@ -19,7 +19,7 @@ router = APIRouter(
 @router.post("/post")
 async def summary_document(post_request: PostRequest):
     try:
-        print("포스트 요약 시작\n" + post_request.content)
+        print("포스트 요약 시작\n" + post_request.content.split('\n')[0])
         start_time = time.time()
 
         summarizer = PostSummary(post_request.content)
