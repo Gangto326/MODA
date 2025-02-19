@@ -49,6 +49,7 @@ import androidx.navigation.NavController
 import com.example.modapjt.R
 import com.example.modapjt.domain.model.SignUpEvent
 import androidx.compose.foundation.clickable
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 
@@ -130,10 +131,10 @@ fun SignUpScreen(
                     .padding(vertical = 4.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedBorderColor = Color(0xFFBBAEA4),
-                    focusedBorderColor = Color(0xFFBBAEA4),
-                    unfocusedLabelColor = Color.Gray,
-                    focusedLabelColor = Color(0xFFBBAEA4),
+                    unfocusedBorderColor = MaterialTheme.colorScheme.onSecondary, // 포커스 해제 테두리
+                    focusedBorderColor = MaterialTheme.colorScheme.onSecondary, // 포커스 테두리
+                    unfocusedLabelColor = MaterialTheme.colorScheme.onSecondary, // 포커스 해제 라벨
+                    focusedLabelColor = MaterialTheme.colorScheme.onSecondary, // 포커스 라벨
                 ),
             )
 
@@ -154,16 +155,16 @@ fun SignUpScreen(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            unfocusedBorderColor = Color(0xFFBBAEA4),
-                            focusedBorderColor = Color(0xFFBBAEA4),
-                            unfocusedLabelColor = Color.Gray,
-                            focusedLabelColor = Color(0xFFBBAEA4),
+                            unfocusedBorderColor = MaterialTheme.colorScheme.onSecondary, // 포커스 해제 테두리
+                            focusedBorderColor = MaterialTheme.colorScheme.onSecondary, // 포커스 테두리
+                            unfocusedLabelColor = MaterialTheme.colorScheme.onSecondary, // 포커스 해제 라벨
+                            focusedLabelColor = MaterialTheme.colorScheme.onSecondary, // 포커스 라벨
                         )
                     )
                     state.usernameVerificationMessage?.let { message ->
                         Text(
                             text = message,
-                            color = if (state.isUsernameVerified) Color.Green else Color.Red,
+                            color = if (state.isUsernameVerified) Color.Blue else Color.Red,
                             modifier = Modifier.padding(start = 8.dp, top = 4.dp)
                         )
                     }
@@ -177,10 +178,10 @@ fun SignUpScreen(
                         .padding(top = 8.dp),
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFBBAEA4)
+                        containerColor = MaterialTheme.colorScheme.onPrimary
                     )
                 ) {
-                    Text("중복확인")
+                    Text("중복확인", color = MaterialTheme.colorScheme.tertiary)
                 }
             }
 
@@ -201,10 +202,10 @@ fun SignUpScreen(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            unfocusedBorderColor = Color(0xFFBBAEA4),
-                            focusedBorderColor = Color(0xFFBBAEA4),
-                            unfocusedLabelColor = Color.Gray,
-                            focusedLabelColor = Color(0xFFBBAEA4),
+                            unfocusedBorderColor = MaterialTheme.colorScheme.onSecondary, // 포커스 해제 테두리
+                            focusedBorderColor = MaterialTheme.colorScheme.onSecondary, // 포커스 테두리
+                            unfocusedLabelColor = MaterialTheme.colorScheme.onSecondary, // 포커스 해제 라벨
+                            focusedLabelColor = MaterialTheme.colorScheme.onSecondary, // 포커스 라벨
                         )
                     )
                     if (state.isTimerRunning) {
@@ -215,7 +216,7 @@ fun SignUpScreen(
                                     state.remainingTime % 60
                                 )
                             }",
-                            color = Color.Gray,
+                            color = MaterialTheme.colorScheme.secondary,
                             modifier = Modifier.padding(start = 8.dp, top = 4.dp)
                         )
                     }
@@ -237,7 +238,8 @@ fun SignUpScreen(
                         .padding(top = 8.dp),
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFBBAEA4)
+                        containerColor = if (state.isEmailFieldValid() && !state.isEmailVerified) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondary, // 활성화: 검정색, 비활성화: 연회색
+                        contentColor = if (state.isEmailFieldValid() && !state.isEmailVerified) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onPrimary // 활성화: 흰색, 비활성화: 검정색
                     ),
                 ) {
                     Text("인증요청")
@@ -267,10 +269,10 @@ fun SignUpScreen(
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(16.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            unfocusedBorderColor = Color(0xFFBBAEA4),
-                            focusedBorderColor = Color(0xFFBBAEA4),
-                            unfocusedLabelColor = Color.Gray,
-                            focusedLabelColor = Color(0xFFBBAEA4),
+                            unfocusedBorderColor = MaterialTheme.colorScheme.onSecondary, // 포커스 해제 테두리
+                            focusedBorderColor = MaterialTheme.colorScheme.onSecondary, // 포커스 테두리
+                            unfocusedLabelColor = MaterialTheme.colorScheme.onSecondary, // 포커스 해제 라벨
+                            focusedLabelColor = MaterialTheme.colorScheme.onSecondary, // 포커스 라벨
                         )
                     )
 
@@ -282,8 +284,9 @@ fun SignUpScreen(
                             .padding(top = 8.dp),
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFBBAEA4)
-                        )
+                            containerColor = if (state.isEmailFieldValid() && !state.isEmailVerified) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondary, // 활성화: 검정색, 비활성화: 연회색
+                            contentColor = if (state.isEmailFieldValid() && !state.isEmailVerified) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onPrimary // 활성화: 흰색, 비활성화: 검정색
+                        ),
                     ) {
                         Text("확인")
                     }
@@ -303,10 +306,10 @@ fun SignUpScreen(
                     .padding(vertical = 4.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedBorderColor = Color(0xFFBBAEA4),
-                    focusedBorderColor = Color(0xFFBBAEA4),
-                    unfocusedLabelColor = Color.Gray,
-                    focusedLabelColor = Color(0xFFBBAEA4),
+                    unfocusedBorderColor = MaterialTheme.colorScheme.onSecondary, // 포커스 해제 테두리
+                    focusedBorderColor = MaterialTheme.colorScheme.onSecondary, // 포커스 테두리
+                    unfocusedLabelColor = MaterialTheme.colorScheme.onSecondary, // 포커스 해제 라벨
+                    focusedLabelColor = MaterialTheme.colorScheme.onSecondary, // 포커스 라벨
                 )
             )
 
@@ -326,10 +329,10 @@ fun SignUpScreen(
                         .padding(vertical = 4.dp),
                     shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedBorderColor = Color(0xFFBBAEA4),
-                        focusedBorderColor = Color(0xFFBBAEA4),
-                        unfocusedLabelColor = Color.Gray,
-                        focusedLabelColor = Color(0xFFBBAEA4),
+                        unfocusedBorderColor = MaterialTheme.colorScheme.onSecondary, // 포커스 해제 테두리
+                        focusedBorderColor = MaterialTheme.colorScheme.onSecondary, // 포커스 테두리
+                        unfocusedLabelColor = MaterialTheme.colorScheme.onSecondary, // 포커스 해제 라벨
+                        focusedLabelColor = MaterialTheme.colorScheme.onSecondary, // 포커스 라벨
                     )
                 )
                 // 비밀번호 유효성 검사 메시지 추가
@@ -364,12 +367,13 @@ fun SignUpScreen(
                 enabled = !state.isLoading && state.isValid(),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFBBAEA4)
-                )
+                    containerColor = if (state.isEmailFieldValid() && !state.isEmailVerified) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSecondary, // 활성화: 노란색, 비활성화: 연회색
+                    contentColor = if (state.isEmailFieldValid() && !state.isEmailVerified) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onPrimary // 활성화: 흰색, 비활성화: 검정색
+                ),
             ) {
                 if (state.isLoading) {
                     CircularProgressIndicator(
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier.size(24.dp)
                     )
                 } else {
