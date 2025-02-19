@@ -16,7 +16,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -47,7 +51,7 @@ fun VideoSelectionItem(
     thumbnailContent: String,
     onClick: () -> Unit = {}
 ) {
-    Surface (
+    Surface(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -55,56 +59,35 @@ fun VideoSelectionItem(
                 onClick = onClick,
                 indication = null, // 클릭 효과 제거
                 interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
-                ),
-        shape = RoundedCornerShape(12.dp),
-        shadowElevation = 2.dp,
+            ),
+        shape = RoundedCornerShape(8.dp),
         color = when {
-            isSelected -> MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-            !isMine -> Color.Gray.copy(alpha = 0.1f)
+            isSelected -> Color.LightGray.copy(alpha = 0.3f)  // 선택됐을 때 색상
+            !isMine -> Color.Gray
             else -> Color.White
         }
     ) {
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
         ) {
-            Row(
-                modifier = modifier
+            Column(
+                modifier = Modifier
                     .fillMaxWidth()
+                    .padding(16.dp)
             ) {
-                // 🔹 썸네일 영역 (왼쪽)
-                Box(
-                    modifier = Modifier
-                        .size(width = 135.dp, height = (140 * 9 / 16).dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(if (!isMine) Color.White.copy(alpha = 0.8f) else Color.Black)
+                Row(
+                    verticalAlignment = Alignment.Top
                 ) {
-                    AsyncImage(
-                        model = "https://img.youtube.com/vi/$videoId/0.jpg",
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(14.dp))
-
-                // 🔹 제목 + 채널명 상단 정렬, 키워드 하단 정렬
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(), // 🔥 키워드가 항상 하단 정렬되도록 Column을 전체 크기로 확장
-                ) {
-                    // ✅ 제목과 채널명을 상단 고정
                     Column(
-                        modifier = Modifier.fillMaxWidth(), // ✅ 제목+채널명이 전체 가로를 차지하도록 설정
-                        verticalArrangement = Arrangement.Top // ✅ 제목과 채널명을 상단 정렬
+                        modifier = Modifier.weight(1f)
                     ) {
                         Text(
                             text = title,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
+                            style = customTypography.headlineMedium,
+                            color = Color(0xFF2B2826),
                             lineHeight = 20.sp,
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis
@@ -112,30 +95,59 @@ fun VideoSelectionItem(
 
                         Text(
                             text = thumbnailContent,
+                            style = customTypography.headlineMedium,
+                            color = Color(0xFF2B2826),
                             fontSize = 12.sp,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
                     }
+                    Spacer(modifier = Modifier.width(10.dp))
 
-                    // 🔹 키워드가 항상 하단에 위치하도록 설정
-                    Spacer(modifier = Modifier.weight(1f)) // ✅ 키워드를 밀어내는 역할
-
-                    FlowRow(
+                    AsyncImage(
+                        model = "https://img.youtube.com/vi/$videoId/0.jpg",
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.Start), // ✅ 키워드를 왼쪽 정렬
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        keywords.forEach { keyword ->
-                            Text(
-                                text = "# $keyword",
-                                color = Color(0xFFBAADA4),
-                                style = customTypography.bodySmall
-                            )
-                        }
+                            .size(80.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                    )
+                }
+
+                FlowRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    keywords.take(3).forEach { keyword ->
+                        Text(
+                            text = "# $keyword",
+                            style = customTypography.bodySmall,
+                            color = Color(0xFFBAADA4),
+                            modifier = Modifier.alignByBaseline()
+                        )
                     }
+                }
+            }
+            if (isSelected) {
+                Surface(
+                    shape = CircleShape,
+                    color = Color(0xFF2167F3),
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(top = 16.dp, end = 17.dp, bottom = 16.dp)
+                        .size(18.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Check,
+                        contentDescription = "Selected",
+                        tint = Color.White,
+                        modifier = Modifier
+                            .padding(2.dp)
+                            .fillMaxSize()
+                    )
                 }
             }
         }

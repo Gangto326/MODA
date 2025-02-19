@@ -1,7 +1,5 @@
 package com.example.modapjt.screen2
 
-//import androidx.compose.foundation.lazy.foundation.lazy.LazyListState
-//import androidx.compose.foundation.lazy.foundationndation.LazyListState
 import AllTabCard
 import BlogBig
 import NewsBig
@@ -35,6 +33,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -200,9 +199,6 @@ fun newCardListScreen(
                                 TypeSelectBar(
                                     selectedCategory = selectedCategory,
                                     selectedSort = selectedSort,
-//                                onCategorySelected = { category ->
-//                                    viewModel.updateSelectedCategory(category)
-//                                },
                                     onCategorySelected = { category ->
                                         selectionViewModel.resetSelection() // 선택 상태 초기화
                                         viewModel.updateSelectedCategory(category)
@@ -241,52 +237,68 @@ fun newCardListScreen(
                                                 lazyListState.firstVisibleItemIndex == state.videos.indexOf(
                                                     card
                                                 )
-                                            if (!isSelectionMode) {  // 일반 모드일 때
-                                                SwipableCardList(
-                                                    cards = listOf(card),
-                                                    onDelete = { selectedCards ->
-                                                        viewModel.deleteCard(selectedCards.map { it.cardId })
-                                                    },
-                                                    onCardDetail = { selectedCard ->
-                                                        navController.navigate("cardDetail/${selectedCard.cardId}")
-                                                    },
-                                                    selectionViewModel = selectionViewModel,
-                                                    modifier = Modifier
-                                                        .fillMaxWidth()
-                                                        .heightIn(max = Dp.Unspecified)
-                                                ) { currentCard, isSelected ->
-                                                    // 비디오 표시
-                                                    VideoBig(
-                                                        videoId = currentCard.thumbnailUrl ?: "",
-                                                        title = currentCard.title,
-                                                        isMine = currentCard.isMine,
-                                                        thumbnailContent = currentCard.thumbnailContent
-                                                            ?: "",
-                                                        isSelected = isSelected,
-                                                        keywords = currentCard.keywords.take(3),
-                                                        //                                                onClick = { navController.navigate("cardDetail/${card.cardId}") },
-                                                        isTopVideo = isTopVideo
+                                            Box(
+                                                modifier = Modifier
+                                                    .animateContentSize(
+                                                        animationSpec = spring(
+                                                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                                                            stiffness = if (isSelectionMode) Spring.StiffnessLow else Spring.StiffnessMediumLow
+                                                        )
+                                                    )
+                                                    .animateItemPlacement(
+                                                        animationSpec = spring(
+                                                            dampingRatio = Spring.DampingRatioNoBouncy,
+                                                            stiffness = if (isSelectionMode) Spring.StiffnessLow else Spring.StiffnessMediumLow
+                                                        )
+                                                    )
+                                            ) {
+                                                if (!isSelectionMode) {  // 일반 모드일 때
+                                                    SwipableCardList(
+                                                        cards = listOf(card),
+                                                        onDelete = { selectedCards ->
+                                                            viewModel.deleteCard(selectedCards.map { it.cardId })
+                                                        },
+                                                        onCardDetail = { selectedCard ->
+                                                            navController.navigate("cardDetail/${selectedCard.cardId}")
+                                                        },
+                                                        selectionViewModel = selectionViewModel,
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .heightIn(max = Dp.Unspecified)
+                                                    ) { currentCard, isSelected ->
+                                                        // 비디오 표시
+                                                        VideoBig(
+                                                            videoId = currentCard.thumbnailUrl ?: "",
+                                                            title = currentCard.title,
+                                                            isMine = currentCard.isMine,
+                                                            thumbnailContent = currentCard.thumbnailContent
+                                                                ?: "",
+                                                            isSelected = isSelected,
+                                                            keywords = currentCard.keywords.take(3),
+                                                            //                                                onClick = { navController.navigate("cardDetail/${card.cardId}") },
+                                                            isTopVideo = isTopVideo
+                                                        )
+                                                    }
+                                                } else {
+                                                    VideoSelectionItem(
+                                                        videoId = card.thumbnailUrl ?: "",
+                                                        title = card.title,
+                                                        isMine = card.isMine,
+                                                        bookMark = card.bookMark,
+                                                        keywords = card.keywords,
+                                                        isSelected = selectedCardIds.contains(card.cardId),
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .heightIn(max = Dp.Unspecified),
+                                                        thumbnailContent = card.thumbnailContent ?: "",
+                                                        onClick = {
+                                                            haptics.performHapticFeedback(
+                                                                HapticFeedbackType.TextHandleMove
+                                                            )
+                                                            selectionViewModel.toggleCardSelection(card)
+                                                        }
                                                     )
                                                 }
-                                            } else {
-                                                VideoSelectionItem(
-                                                    videoId = card.thumbnailUrl ?: "",
-                                                    title = card.title,
-                                                    isMine = card.isMine,
-                                                    bookMark = card.bookMark,
-                                                    keywords = card.keywords,
-                                                    isSelected = selectedCardIds.contains(card.cardId),
-                                                    modifier = Modifier
-                                                        .fillMaxWidth()
-                                                        .heightIn(max = Dp.Unspecified),
-                                                    thumbnailContent = card.thumbnailContent ?: "",
-                                                    onClick = {
-                                                        haptics.performHapticFeedback(
-                                                            HapticFeedbackType.TextHandleMove
-                                                        )
-                                                        selectionViewModel.toggleCardSelection(card)
-                                                    }
-                                                )
                                             }
 
                                             // 각 비디오 사이에 구분선 추가
@@ -510,85 +522,77 @@ fun newCardListScreen(
             }
         }
 
-        AnimatedVisibility(
-            visible = isSelectionMode,
-            enter = slideInVertically(initialOffsetY = { it }),
-            exit = slideOutVertically(targetOffsetY = { it }),
-            modifier = Modifier.align(Alignment.BottomCenter)
+        Box(
+            modifier = Modifier.fillMaxSize()
         ) {
-            Box(
+            AnimatedVisibility(
+                visible = isSelectionMode,
                 modifier = Modifier
+                    .align(Alignment.BottomCenter)
                     .fillMaxWidth()
-                    .height(100.dp)
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                Color.Transparent,
-                                Color.Black.copy(alpha = 0.8f)
-                            ),
-                            startY = 0f,
-                            endY = 80f
-                        )
-                    )
             ) {
-                Box(
-                    modifier = Modifier.fillMaxSize()
-                )
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 24.dp)
-                        .padding(bottom = 28.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Bottom
+                Surface(
+                    color = Color(0xFF1B1B1B),
+                    shadowElevation = 0.dp,
+                    tonalElevation = 0.dp
                 ) {
-                    Text(
-                        text = "${displayCount.value}개 선택됨",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = Color.White,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .padding(top = 6.dp)
+                            .padding(bottom = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        TextButton(
-                            onClick = {
-                                selectionViewModel.clearSelection()
-                                selectionViewModel.toggleSelectionMode(false)
-                            },
-                            colors = ButtonDefaults.textButtonColors(
-                                contentColor = Color.White.copy(alpha = 0.8f)
-                            )
-                        ) {
-                            Text(
-                                "취소",
-                                style = MaterialTheme.typography.labelLarge
-                            )
-                        }
+                        Text(
+                            text = "${displayCount.value}개 선택됨",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = Color.White,
+                            modifier = Modifier.padding(bottom = 8.dp).padding(top = 2.dp)
+                        )
 
-                        Button(
-                            onClick = {
-                                viewModel.deleteCard(viewModel.selectedCardsToDelete.value.map { it.cardId })
-                                selectionViewModel.clearSelection()
-                                selectionViewModel.toggleSelectionMode(false)
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFFFF3B30)
-                            ),
-                            shape = RoundedCornerShape(10.dp),
-                            contentPadding = PaddingValues(horizontal = 16.dp)
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                            TextButton(
+                                onClick = {
+                                    selectionViewModel.clearSelection()
+                                    selectionViewModel.toggleSelectionMode(false)
+                                },
+                                colors = ButtonDefaults.textButtonColors(
+                                    contentColor = Color.White.copy(alpha = 0.8f)
+                                )
                             ) {
                                 Text(
-                                    "삭제",
+                                    "취소",
                                     style = MaterialTheme.typography.labelLarge
                                 )
+                            }
+
+                            Button(
+                                onClick = {
+                                    viewModel.deleteCard(selectedCardIds.toList())
+                                    selectionViewModel.clearSelection()
+                                    selectionViewModel.toggleSelectionMode(false)
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFFFF5C50)
+                                ),
+                                shape = RoundedCornerShape(16.dp),
+                                contentPadding = PaddingValues(horizontal = 16.dp),
+                                modifier = Modifier.height(30.dp).width(72.dp)
+                            ) {
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        "삭제",
+                                        style = MaterialTheme.typography.labelLarge
+                                    )
+                                }
                             }
                         }
                     }
