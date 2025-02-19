@@ -35,7 +35,8 @@ class SignUpViewModel : ViewModel() {
     private val _state = mutableStateOf(SignUpState())
 
     fun resetState() {
-        _state.value = _state.value.copy(
+        _signUpState.value = SignUpState(
+            name = "",
             username = "",
             email = "",
             emailVerificationCode = "",

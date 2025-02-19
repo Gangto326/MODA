@@ -1,7 +1,9 @@
 package com.example.modapjt.screen2.auth
 
 import android.view.ViewTreeObserver
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -32,7 +34,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -52,6 +57,9 @@ fun FindPasswordScreen(
     var isKeyboardVisible by remember { mutableStateOf(false) }
     var keyboardHeight by remember { mutableStateOf(0) }
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current  // 여기에 FocusManager 추가
+
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     // 비밀번호 재설정 성공 시 처리
     LaunchedEffect(state.isPasswordResetSuccessful) {
@@ -95,6 +103,18 @@ fun FindPasswordScreen(
         }
     }
 
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = {
+                        focusManager.clearFocus()
+                        keyboardController?.hide()
+                    }
+                )
+            }
+    ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -293,5 +313,5 @@ fun FindPasswordScreen(
         if (isKeyboardVisible) {
             Spacer(modifier = Modifier.height(keyboardHeight.dp))
         }
-    }
+    }}
 }

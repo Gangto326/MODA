@@ -48,6 +48,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.modapjt.R
 import com.example.modapjt.domain.model.SignUpEvent
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.platform.LocalFocusManager
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,6 +65,7 @@ fun SignUpScreen(
     var isKeyboardVisible by remember { mutableStateOf(false) }
     var keyboardHeight by remember { mutableStateOf(0) }
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current  // 여기에 FocusManager 추가
 
     // 화면이 처음 표시될 때 상태 초기화
     LaunchedEffect(Unit) {
@@ -89,7 +93,13 @@ fun SignUpScreen(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize().clickable(
+        interactionSource = remember { MutableInteractionSource() },
+        indication = null // 클릭 효과 제거
+    ){
+        // 화면 클릭 시 키보드 숨기기
+        focusManager.clearFocus()
+    }) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
