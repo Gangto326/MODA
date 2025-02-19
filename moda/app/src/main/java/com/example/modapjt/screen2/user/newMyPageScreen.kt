@@ -34,6 +34,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -159,6 +160,18 @@ fun MyPageScreen(
                         )
 
                         Spacer(modifier = Modifier.height(8.dp))
+                        Divider(color = MaterialTheme.colorScheme.onTertiary, thickness = 4.dp, modifier = Modifier.padding(horizontal = 0.dp))
+
+                        // "정보 통계" 제목 추가
+                        Text(
+                            text = "정보 통계",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontSize = 16.sp,
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 16.dp) // 좌우 패딩 + 상하 여백 추가
+                        )
 
                         Card(
                             modifier = Modifier
@@ -202,7 +215,9 @@ fun MyPageScreen(
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
+//                    Divider(color = MaterialTheme.colorScheme.onTertiary, thickness = 6.dp, modifier = Modifier.padding(horizontal = 0.dp))
+
                 }
 
                 // 제스처/오버레이 토글 카드
@@ -215,7 +230,7 @@ fun MyPageScreen(
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiary)
                     ) {
                         Column(
-                            modifier = Modifier.padding(16.dp)
+//                            modifier = Modifier.padding(16.dp)
                         ) {
                             // 기존 Switch -> 커스텀 토글 버튼 변경
                             Row(
@@ -224,7 +239,7 @@ fun MyPageScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "저장 방법",
+                                    text = "링크 저장 방법",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontSize = 16.sp,
                                     color = MaterialTheme.colorScheme.onPrimary
@@ -300,6 +315,9 @@ fun MyPageScreen(
                             }
                         }
                     }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Divider(color = MaterialTheme.colorScheme.onTertiary, thickness = 4.dp, modifier = Modifier.padding(horizontal = 0.dp))
+
                 }
 
                 // 기타 메뉴 : 공지사항, 휴지통, ..
@@ -311,7 +329,7 @@ fun MyPageScreen(
                     ) {
                         SettingItem(title = "MODA 200% 활용하기") { }
                         SettingItem(title = "공지사항") { }
-                        SettingItem(title = "휴지통") { }
+//                        SettingItem(title = "휴지통") { }
                     }
                 }
 
@@ -406,7 +424,7 @@ fun CustomToggleSwitch(
         modifier = Modifier
             .width(130.dp) // 버튼 전체 너비
             .height(35.dp) // 버튼 높이
-            .background(Color.LightGray, shape = CircleShape) // 전체 배경색 (회색 계열)
+            .background(MaterialTheme.colorScheme.onTertiary, shape = CircleShape) // 전체 배경색 (회색 계열)
             .padding(4.dp), // 안쪽 패딩 추가
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -425,7 +443,7 @@ fun CustomToggleSwitch(
                 text = "오버레이",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
-                color = if (saveMode == SaveMethod.OVERLAY) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.tertiary
+                color = if (saveMode == SaveMethod.OVERLAY) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onPrimary
             )
         }
 
@@ -444,7 +462,7 @@ fun CustomToggleSwitch(
                 text = "제스처",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
-                color = if (saveMode == SaveMethod.GESTURE) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.tertiary
+                color = if (saveMode == SaveMethod.GESTURE) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onPrimary
             )
         }
     }
