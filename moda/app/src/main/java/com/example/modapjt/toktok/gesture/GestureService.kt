@@ -1,4 +1,4 @@
-package com.example.modapjt.overlay
+package com.example.modapjt.toktok.gesture
 
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
@@ -11,6 +11,7 @@ import android.os.IBinder
 import android.util.Log
 import android.view.Gravity
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -119,7 +120,17 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
                             color = backgroundColor,
                             shape = RectangleShape
                         )
-                )
+                ) {
+                    GestureDrawingCanvas(
+                        onGestureRecognized = { result ->
+//                            recognizedGesture = result
+
+                            Toast.makeText(context, result.toString(), Toast.LENGTH_SHORT)
+                                .show()
+                            Log.d("GestureService", result.toString())
+                        }
+                    )
+                }
             }
         }
     }
@@ -133,5 +144,6 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
         super.onDestroy()
         // BroadcastReceiver 해제
         unregisterReceiver(receiver)
+        Log.d("GestureService", "제스처 서비스 종료됨")
     }
 }

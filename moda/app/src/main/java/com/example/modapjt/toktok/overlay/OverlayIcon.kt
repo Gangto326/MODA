@@ -1,4 +1,4 @@
-package com.example.modapjt.overlay
+package com.example.modapjt.toktok.overlay
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectDragGestures

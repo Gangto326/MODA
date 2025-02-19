@@ -18,8 +18,9 @@ import com.example.modapjt.data.storage.TokenManager
 import com.example.modapjt.domain.viewmodel.AuthViewModel
 import com.example.modapjt.domain.viewmodel.AuthViewModelFactory
 import com.example.modapjt.navigation.NavGraph
-import com.example.modapjt.overlay.BrowserAccessibilityService
-import com.example.modapjt.overlay.OverlayService
+import com.example.modapjt.toktok.BrowserAccessibilityService
+import com.example.modapjt.toktok.gesture.GestureService
+import com.example.modapjt.toktok.overlay.OverlayService
 import com.example.modapjt.ui.theme.ModapjtTheme
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 
@@ -100,5 +101,6 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         stopService(Intent(this, OverlayService::class.java))
+        stopService(Intent(this, GestureService::class.java))
     }
 }

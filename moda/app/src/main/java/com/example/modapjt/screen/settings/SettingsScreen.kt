@@ -27,7 +27,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.modapjt.overlay.OverlayService
+import com.example.modapjt.toktok.overlay.OverlayService
 import com.example.modapjt.components.bar.BottomBarComponent
 import com.example.modapjt.components.setting.SettingHeader
 import com.example.modapjt.components.setting.SettingItem

@@ -58,10 +58,10 @@ import com.example.modapjt.components.setting.SettingItem
 import com.example.modapjt.components.user.MyPageHeader
 import com.example.modapjt.domain.viewmodel.AuthViewModel
 import com.example.modapjt.domain.viewmodel.UserViewModel
-import com.example.modapjt.overlay.GestureService
-import com.example.modapjt.overlay.GestureStateManager
-import com.example.modapjt.overlay.OverlayService
-import com.example.modapjt.overlay.OverlayStateManager
+import com.example.modapjt.toktok.gesture.GestureService
+import com.example.modapjt.toktok.gesture.GestureStateManager
+import com.example.modapjt.toktok.overlay.OverlayService
+import com.example.modapjt.toktok.overlay.OverlayStateManager
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
