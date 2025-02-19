@@ -34,6 +34,9 @@ fun FindIdScreen(
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
+    // 버튼 클릭 여부 상태 변수 추가
+    var isRequestClicked by remember { mutableStateOf(false) }
+    var isVerifyClicked by remember { mutableStateOf(false) }
 
     // 화면이 처음 표시될 때 상태 초기화
     LaunchedEffect(Unit) {
@@ -109,11 +112,11 @@ fun FindIdScreen(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedBorderColor = Color(0xFFBBAEA4),
-                        focusedBorderColor = Color(0xFFBBAEA4),
-                        unfocusedLabelColor = Color.Gray,
-                        focusedLabelColor = Color(0xFFBBAEA4),
-                    )
+                        unfocusedBorderColor = MaterialTheme.colorScheme.onSecondary, // 포커스 해제 테두리
+                        focusedBorderColor = MaterialTheme.colorScheme.onSecondary, // 포커스 테두리
+                        unfocusedLabelColor = MaterialTheme.colorScheme.onSecondary, // 포커스 해제 라벨
+                        focusedLabelColor = MaterialTheme.colorScheme.onSecondary, // 포커스 라벨
+                    ),
                 )
                 if (state.isEmailVerificationSent && state.remainingTime > 0) {
                     Text(
@@ -132,14 +135,17 @@ fun FindIdScreen(
             }
 
             Button(
-                onClick = { viewModel.sendVerification() },
+                onClick = { viewModel.sendVerification()
+                    isRequestClicked = true // 버튼 클릭 후 상태 변경
+                },
                 modifier = Modifier
                     .height(64.dp)
                     .padding(top = 8.dp)
                     .width(100.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFBBAEA4)
+                    containerColor = if (isRequestClicked) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondary, // 클릭 전: 연회색, 클릭 후: 검정
+                    contentColor = if (isRequestClicked) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onPrimary // 클릭 전: 검정, 클릭 후: 흰색
                 ),
                 enabled = !state.isLoading
             ) {
@@ -164,22 +170,25 @@ fun FindIdScreen(
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedBorderColor = Color(0xFFBBAEA4),
-                        focusedBorderColor = Color(0xFFBBAEA4),
-                        unfocusedLabelColor = Color.Gray,
-                        focusedLabelColor = Color(0xFFBBAEA4),
+                        unfocusedBorderColor = MaterialTheme.colorScheme.onSecondary, // 포커스 해제 테두리
+                        focusedBorderColor = MaterialTheme.colorScheme.onSecondary, // 포커스 테두리
+                        unfocusedLabelColor = MaterialTheme.colorScheme.onSecondary, // 포커스 해제 라벨
+                        focusedLabelColor = MaterialTheme.colorScheme.onSecondary, // 포커스 라벨
                     )
                 )
 
                 Button(
-                    onClick = { viewModel.verifyAndFindId() },
+                    onClick = { viewModel.verifyAndFindId()
+                        isVerifyClicked = true // 버튼 클릭 후 상태 변경
+                        },
                     modifier = Modifier
                         .height(64.dp)
                         .padding(top = 8.dp)
                         .width(100.dp),
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFBBAEA4)
+                        containerColor = if (isVerifyClicked) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondary, // 클릭 전: 연회색, 클릭 후: 검정
+                        contentColor = if (isVerifyClicked) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onPrimary // 클릭 전: 검정, 클릭 후: 흰색
                     ),
                     enabled = !state.isLoading
                 ) {
@@ -193,7 +202,7 @@ fun FindIdScreen(
             Text(
                 text = "아이디 : " +state.foundId,
                 modifier = Modifier.padding(vertical = 16.dp),
-                color = Color(0xFF4A4A4A)
+                color = MaterialTheme.colorScheme.secondary
             )
         }
 
@@ -210,7 +219,7 @@ fun FindIdScreen(
 
         // 로그인으로 돌아가기
         TextButton(onClick = onNavigateBack) {
-            Text("로그인으로 돌아가기", color = Color.Gray)
+            Text("로그인으로 돌아가기", color = MaterialTheme.colorScheme.onSecondary)
         }
 
         // 키보드가 보일 때 추가 공간 확보
