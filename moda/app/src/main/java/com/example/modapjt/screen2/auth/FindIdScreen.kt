@@ -1,6 +1,7 @@
 package com.example.modapjt.screen2.auth
 
 import android.view.ViewTreeObserver
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -68,6 +69,7 @@ fun FindIdScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.tertiary)
             .pointerInput(Unit) {
                 detectTapGestures(
                     onTap = {
@@ -81,6 +83,7 @@ fun FindIdScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(20.dp)
+            .background(MaterialTheme.colorScheme.tertiary)
             .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
