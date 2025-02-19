@@ -92,17 +92,5 @@ fun ImageSmall(
             modifier = Modifier.fillMaxSize()
         )
 
-        // ✅ 즐겨찾기 아이콘 (내 이미지이고 즐겨찾기된 경우에만 표시)
-        if (bookMark && isMine) {
-            Icon(
-                imageVector = Icons.Filled.Star, // 별 모양 아이콘
-                contentDescription = "즐겨찾기됨",
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .size(30.dp) // 아이콘 크기
-                    .align(Alignment.TopEnd) // 우측 하단에 배치
-                    .padding(6.dp) // 여백 추가
-            )
-        }
     }
 }

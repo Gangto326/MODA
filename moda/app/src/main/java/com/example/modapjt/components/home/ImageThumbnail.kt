@@ -86,11 +86,11 @@ fun ImageThumbnail(image: ImageItem, navController: NavController) {
                 if (image.bookmark) R.drawable.ic_bookmark_filled else R.drawable.ic_bookmark_outline
             ),
             contentDescription = "Bookmark Icon", // 접근성을 위한 설명
-            tint = if (image.bookmark) Color(0xFFFFCB48) else Color.White, // ✅ 북마크된 경우 오렌지 색상 적용
+            tint = if (image.bookmark) Color.Unspecified else Color.Transparent, // ✅ 북마크된 경우 오렌지 색상 적용
             modifier = Modifier
                 .align(Alignment.TopEnd) // 🔥 오른쪽 상단에 위치
-                .padding(4.dp) // 아이콘과 모서리 사이 여백 추가
-                .size(24.dp) // 아이콘 크기 지정
+                .padding(5.dp) // 아이콘과 모서리 사이 여백 추가
+                .size(20.dp) // 아이콘 크기 지정
         )
     }
 }

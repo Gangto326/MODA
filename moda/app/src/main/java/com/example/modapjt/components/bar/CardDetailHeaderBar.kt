@@ -68,7 +68,7 @@ fun CardDetailHeaderBar(
                         if (isBookmarked) R.drawable.ic_bookmark_filled else R.drawable.ic_bookmark_outline
                     ),
                     contentDescription = if (isBookmarked) "즐겨찾기 해제" else "즐겨찾기",
-                    tint = if (isBookmarked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onPrimary, // 노란색 vs 검정색 테두리
+                    tint = Color.Unspecified,  // 노란색 vs 검정색 테두리
                     modifier = Modifier
                         .padding(8.dp)
                         .size(24.dp)

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
@@ -43,6 +44,7 @@ fun CategoryHeaderBar(modifier: Modifier = Modifier, categoryName: String, navCo
             IconButton(onClick = { navController.popBackStack() }) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_back),
+                    modifier = Modifier.size(15.dp),
                     contentDescription = "뒤로가기",
                     tint = MaterialTheme.colorScheme.secondary
                 )
