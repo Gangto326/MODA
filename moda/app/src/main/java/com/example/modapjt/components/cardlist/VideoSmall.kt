@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -58,7 +59,8 @@ fun VideoSmall(
         // 🔹 썸네일 영역 (왼쪽)
         Box(
             modifier = Modifier
-                .size(width = 135.dp, height = (140 * 9 / 16).dp)
+                .width (135.dp)
+                .aspectRatio(16f/9f)
                 .clip(RoundedCornerShape(8.dp))
                 .background(if (!isMine) MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.2f) else MaterialTheme.colorScheme.tertiary)
         ) {
