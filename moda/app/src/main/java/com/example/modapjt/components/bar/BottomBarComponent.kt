@@ -6,13 +6,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -21,9 +16,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.modapjt.R
 
 
 @Composable
@@ -38,28 +35,39 @@ fun BottomBarComponent(navController: NavController, currentRoute: String) {
     // 화면 크기에 따른 텍스트 크기 계산
     val iconSize = (screenWidth * 0.05f).coerceIn(20.dp, 28.dp)
 
-    Row( // ✅ NavigationBar를 감싸는 Row 추가 (좌우 패딩 조절용)
-        modifier = androidx.compose.ui.Modifier
+    // 선택된 아이템과 선택되지 않은 아이템의 색상
+    val selectedColor = MaterialTheme.colorScheme.onPrimary // 검은색
+    val unselectedColor = MaterialTheme.colorScheme.onSecondary // 회색
+
+    Row(
+        modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp) // ✅ 양쪽 패딩 추가
+            .padding(horizontal = 12.dp)
     ) {
         NavigationBar(
             containerColor = Color.White,
             contentColor = Color(0xFF665F5B),
-            modifier = androidx.compose.ui.Modifier
+            modifier = Modifier
                 .fillMaxWidth()
-                .height(barHeight) // ✅ 높이 줄이기 (기본 56.dp → 48.dp)
+                .height(barHeight)
         ) {
+            // 홈 아이콘
             NavigationBarItem(
                 icon = {
                     Icon(
-                        Icons.Default.Home,
+                        painter = painterResource(id = R.drawable.ic_n_home),
                         contentDescription = "Home",
                         modifier = Modifier.size(iconSize),
-                        tint = Color(0xFF000000)
+                        tint = if (currentRoute == "home") selectedColor else unselectedColor
                     )
-                       },
-                label = { Text("홈", fontSize = 10.sp, color = Color(0xFF665F5B)) },
+                },
+                label = {
+                    Text(
+                        "홈",
+                        fontSize = 10.sp,
+                        color = if (currentRoute == "home") selectedColor else unselectedColor
+                    )
+                },
                 selected = currentRoute == "home",
                 onClick = {
                     if (currentRoute != "home") {
@@ -69,13 +77,29 @@ fun BottomBarComponent(navController: NavController, currentRoute: String) {
                     }
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    indicatorColor = if (currentRoute == "home") Color(0xFFFFF9C4) else Color.Transparent
+                    indicatorColor = Color.Transparent,
+                    selectedIconColor = Color.Unspecified,
+                    unselectedIconColor = Color.Unspecified
                 )
             )
 
+            // 즐겨찾기 아이콘
             NavigationBarItem(
-                icon = { Icon(Icons.Filled.Star, contentDescription = "즐겨찾기", tint = Color(0xFF000000)) },
-                label = { Text("즐겨찾기", fontSize = 10.sp, color = Color(0xFF665F5B)) },
+                icon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_n_bookmark_outline),
+                        contentDescription = "즐겨찾기",
+                        modifier = Modifier.size(iconSize),
+                        tint = if (currentRoute == "bookmarkScreen") selectedColor else unselectedColor
+                    )
+                },
+                label = {
+                    Text(
+                        "즐겨찾기",
+                        fontSize = 10.sp,
+                        color = if (currentRoute == "bookmarkScreen") selectedColor else unselectedColor
+                    )
+                },
                 selected = currentRoute == "bookmarkScreen",
                 onClick = {
                     navController.navigate("bookmarkScreen") {
@@ -83,13 +107,29 @@ fun BottomBarComponent(navController: NavController, currentRoute: String) {
                     }
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    indicatorColor = if (currentRoute == "bookmarkScreen") Color(0xFFFFF9C4) else Color.Transparent
+                    indicatorColor = Color.Transparent,
+                    selectedIconColor = Color.Unspecified,
+                    unselectedIconColor = Color.Unspecified
                 )
             )
 
+            // 링크 추가 아이콘
             NavigationBarItem(
-                icon = { Icon(Icons.Default.Share, contentDescription = "링크 추가", tint = Color(0xFF000000)) },
-                label = { Text("링크 추가", fontSize = 10.sp, color = Color(0xFF665F5B)) },
+                icon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_n_link),
+                        contentDescription = "링크 추가",
+                        modifier = Modifier.size(iconSize),
+                        tint = if (currentRoute == "file_upload_test") selectedColor else unselectedColor
+                    )
+                },
+                label = {
+                    Text(
+                        "링크 추가",
+                        fontSize = 10.sp,
+                        color = if (currentRoute == "file_upload_test") selectedColor else unselectedColor
+                    )
+                },
                 selected = currentRoute == "file_upload_test",
                 onClick = {
                     if (currentRoute != "file_upload_test") {
@@ -99,13 +139,29 @@ fun BottomBarComponent(navController: NavController, currentRoute: String) {
                     }
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    indicatorColor = if (currentRoute == "file_upload_test") Color(0xFFFFF9C4) else Color.Transparent
+                    indicatorColor = Color.Transparent,
+                    selectedIconColor = Color.Unspecified,
+                    unselectedIconColor = Color.Unspecified
                 )
             )
 
+            // 검색 아이콘
             NavigationBarItem(
-                icon = { Icon(Icons.Default.Search, contentDescription = "검색", tint = Color(0xFF000000)) },
-                label = { Text("검색", fontSize = 10.sp, color = Color(0xFF665F5B)) },
+                icon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_n_search),
+                        contentDescription = "검색",
+                        modifier = Modifier.size(iconSize),
+                        tint = if (currentRoute == "afterSearch") selectedColor else unselectedColor
+                    )
+                },
+                label = {
+                    Text(
+                        "검색",
+                        fontSize = 10.sp,
+                        color = if (currentRoute == "afterSearch") selectedColor else unselectedColor
+                    )
+                },
                 selected = currentRoute == "afterSearch",
                 onClick = {
                     if (currentRoute != "afterSearch") {
@@ -115,13 +171,29 @@ fun BottomBarComponent(navController: NavController, currentRoute: String) {
                     }
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    indicatorColor = if (currentRoute == "afterSearch") Color(0xFFFFF9C4) else Color.Transparent
+                    indicatorColor = Color.Transparent,
+                    selectedIconColor = Color.Unspecified,
+                    unselectedIconColor = Color.Unspecified
                 )
             )
 
+            // MY 아이콘
             NavigationBarItem(
-                icon = { Icon(Icons.Default.AccountCircle, contentDescription = "My Page", tint = Color(0xFF000000)) },
-                label = { Text("MY", fontSize = 10.sp, color = Color(0xFF665F5B)) },
+                icon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_n_mypage),
+                        contentDescription = "My Page",
+                        modifier = Modifier.size(iconSize),
+                        tint = if (currentRoute == "mypage") selectedColor else unselectedColor
+                    )
+                },
+                label = {
+                    Text(
+                        "MY",
+                        fontSize = 10.sp,
+                        color = if (currentRoute == "mypage") selectedColor else unselectedColor
+                    )
+                },
                 selected = currentRoute == "mypage",
                 onClick = {
                     if (currentRoute != "mypage") {
@@ -131,66 +203,11 @@ fun BottomBarComponent(navController: NavController, currentRoute: String) {
                     }
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    indicatorColor = if (currentRoute == "mypage") Color(0xFFFFF9C4) else Color.Transparent
+                    indicatorColor = Color.Transparent,
+                    selectedIconColor = Color.Unspecified,
+                    unselectedIconColor = Color.Unspecified
                 )
             )
         }
     }
 }
-
-
-
-
-//        NavigationBarItem(
-//            icon = { Icon(Icons.Default.Favorite, "Link Upload") },
-//            label = { Text("디테일테스트") },
-//            selected = currentRoute == "card_detail_test", // 변경: screen3 -> link_upload
-//            onClick = {
-//                if (currentRoute != "card_detail_test") {
-//                    navController.navigate("card_detail_test") {
-//                        popUpTo("home")
-//                    }
-//                }
-//            }
-//        )
-
-        // 여기 아래는 나중에 삭제할 것!
-//        NavigationBarItem(
-//            icon = { Icon(Icons.Default.Settings, "Settings") },
-//            label = { Text("설정") },
-//            selected = currentRoute == "settings", // 변경: screen4 -> settings
-//            onClick = {
-//                if (currentRoute != "settings") {
-//                    navController.navigate("settings") {
-//                        popUpTo("home")
-//                    }
-//                }
-//            }
-//        )
-
-//        // screen2/cardlist/newCardListScreen.kt 화면 테스트
-//        NavigationBarItem(
-//            icon = { Icon(Icons.Default.Settings, "Card List Test") },
-//            label = { Text("검색바테스트") },
-//            selected = currentRoute == "card_list_test",
-//            onClick = {
-//                if (currentRoute != "card_list_test") {
-//                    navController.navigate("card_list_test") {
-//                        popUpTo("home")
-//                    }
-//                }
-//            }
-//        )
-
-//        NavigationBarItem(
-//            icon = { Icon(Icons.Default.Favorite, "Favorite Card List") }, // 아이콘도 적절한 것으로 변경
-//            label = { Text("즐겨찾기") }, // "검색바테스트" → "즐겨찾기"
-//            selected = currentRoute == "favorite_card_list",
-//            onClick = {
-//                if (currentRoute != "favorite_card_list") {
-//                    navController.navigate("favorite_card_list") {
-//                        popUpTo("home")
-//                    }
-//                }
-//            }
-//        )

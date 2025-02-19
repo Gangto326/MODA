@@ -45,8 +45,9 @@ fun CardDetailHeaderBar(
         navigationIcon = {
             IconButton(onClick = onBackClick) {
                 Icon(
-                    imageVector = Icons.Default.ArrowBack,
+                    painter = painterResource(id = R.drawable.ic_back),
                     contentDescription = "뒤로가기",
+                    modifier = Modifier.size(15.dp),
                     tint = MaterialTheme.colorScheme.secondary
                 )
             }
