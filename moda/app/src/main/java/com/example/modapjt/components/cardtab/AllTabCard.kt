@@ -256,7 +256,7 @@ fun SectionBlock(title: String, items: List<Card>, isImage: Boolean, onMoreClick
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(top = 20.dp), // ✅ 구분선 위에 8dp 패딩 추가
-                                    color = Color(0xFFF1F1F1),
+                                    color = MaterialTheme.colorScheme.onTertiary,
                                     thickness = 1.dp
                                 )
                             }
@@ -278,7 +278,7 @@ fun SectionDivider() {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 10.dp), // 패딩 추가
-        color = Color(0xFFF1F1F1),
+        color = MaterialTheme.colorScheme.onTertiary,
         thickness = 6.dp // 구분선 두께 설정
     )
 }
@@ -334,7 +334,7 @@ private fun SectionAdd(
         modifier = Modifier
             .fillMaxWidth()
             .height(44.dp)
-            .border(1.dp, MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(16.dp)), // 테두리 추가
+            .border(1.dp, MaterialTheme.colorScheme.onPrimary, shape = RoundedCornerShape(16.dp)), // 테두리 추가
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {

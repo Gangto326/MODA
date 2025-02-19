@@ -24,7 +24,7 @@ fun LinkAddButton(
             .fillMaxWidth() // 버튼이 화면의 가로 너비를 꽉 채우도록 설정
             .height(56.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.primary // 버튼 컬러
+            containerColor = MaterialTheme.colorScheme.onPrimary // 버튼 컬러
             ,disabledContainerColor = MaterialTheme.colorScheme.onSecondary // 버튼 비활성화시 ( 일단 : 회색 )
         ),
         shape = RoundedCornerShape(16.dp) // 모서리 둥글게
