@@ -1,6 +1,4 @@
 import json
-import random
-import time
 
 import googletrans
 import ollama
@@ -16,6 +14,13 @@ class PostSummary:
     MAX_CATEGORY_TRIES = 10
 
     def __init__(self, origin_content: str):
+        self.models = [
+            'anpigon/qwen2.5-7b-instruct-kowiki',
+            'kwangsuklee/Qwen2.5-14B-Gutenberg-1e-Delta.Q5_K_M',
+            'qwen2.5',
+            'hf.co/Bllossom/llama-3.2-Korean-Bllossom-3B-gguf-Q4_K_M'
+        ]
+
         self.origin_content = origin_content
         self.embedder = Embedding()
         self.category = ''
@@ -28,15 +33,15 @@ class PostSummary:
 
     #PostSummary 객체가 실행되면 가장 먼저 실행되는 함수
     async def execute(self):
-        self.choose_category('anpigon/qwen2.5-7b-instruct-kowiki')
         while True:
-            self.summary_content('anpigon/qwen2.5-7b-instruct-kowiki')
+            self.summary_content(0)
 
             if not await self.detect_chinese(self.content):
                 break
-        self.make_keywords('anpigon/qwen2.5-7b-instruct-kowiki')
+        self.choose_category(0)
+        self.make_keywords(0)
         while True:
-            self.make_thumbnail_content('anpigon/qwen2.5-7b-instruct-kowiki')
+            self.make_thumbnail_content(0)
 
             if not await self.detect_chinese(self.thumbnail_content):
                 break
@@ -57,25 +62,17 @@ class PostSummary:
              messages,
              model: str,
              format = None):
-        current_seed = int(time.time() * 1000) + random.randint(1, 1000000)
-
-        print(f"올라마 챗: {messages}")
-
         response = ollama.chat(
             model = model,
             messages = messages,
-            format = format,
-            options = {
-                'seed': current_seed,
-                'temperature': random.uniform(0.7, 0.9),  # 랜덤 temperature 값
-                'top_p': random.uniform(0.8, 0.95)       # 랜덤 top_p 값
-            }
+            format = format
         )
         return response['message']['content']
 
     #category를 선택하는 함수
-    def choose_category(self, model: str):
+    def choose_category(self, idxModel: int):
         try:
+            messages = make_category_prompt(self.content)
             format = {
                 'type': 'object',
                 'properties': {
@@ -86,32 +83,21 @@ class PostSummary:
                 'required': ['category']
             }
 
-            find_category = False
-            attempt_count = 0
-            exclude = []
-            while attempt_count < self.MAX_CATEGORY_TRIES:
-                messages = make_category_prompt(self.origin_content, exclude)
-                response = self.chat(model = model, messages = messages, format = format)
+            response = self.chat(model = self.models[idxModel], messages = messages, format = format)
 
-                print(f" 카테고리 선택 시도 {attempt_count} - {response}")
+            print(f" 카테고리 선택 시도 {response}")
 
-                for idx, category in enumerate(categories_name()):
-                    if category.lower() in response.lower():
-                        find_category = True
-                        self.category_id = idx + 1
-                        self.category = category
-                        break
-
-                if find_category:
+            for idx, category in enumerate(categories_name()):
+                if category.lower() in response.lower():
+                    find_category = True
+                    self.category_id = idx + 1
+                    self.category = category
                     break
 
-                exclude.append(json.loads(response)['category'])
-                attempt_count += 1
+            if self.category_id == 0 and idxModel + 1 < len(self.models):
+                self.choose_category(idxModel + 1)
 
-            if attempt_count == self.MAX_CATEGORY_TRIES:
-                self.category_id = 1
-                self.category = 'All'
-
+            if self.category_id == 0:
                 embedding = self.embedder.embed_document(self.content)
                 similarity = 0
 
@@ -125,15 +111,15 @@ class PostSummary:
                 print(f"임베딩 카테고리 {self.category_id} {self.category}")
         except Exception as e:
             print(f"에러: {e}")
-            self.choose_category(model)
+            self.choose_category((idxModel + 1) % len(self.models))
 
     #origin_content를 요약하는 함수
-    def summary_content(self, model: str):
+    def summary_content(self, idxModel: int):
         try:
             # has_html_tag = any(tag in self.origin_content for tag in ['<h1>', '<h2>', '<h3>'])
             has_html_tag = False
 
-            messages = make_summary_prompt(self.category, self.origin_content, has_html_tag)
+            messages = make_summary_prompt(self.origin_content, has_html_tag)
             format = {
                 'type': 'array',
                 'items': {
@@ -148,18 +134,19 @@ class PostSummary:
                                 'type': 'string'
                             }
                         }
-                    }
-                },
-                'required': ['title', 'content']
+                    },
+                    'required': ['title', 'content']
+                }
             }
 
-            response = self.chat(model = model, messages = messages, format = format)
+            response = self.chat(model = self.models[idxModel], messages = messages, format = format)
             data = json.loads(response)
-
-            print(data)
 
             contents = []
             for paragraph in data:
+                if 'title' not in paragraph or 'content' not in paragraph:
+                    return Exception(data)
+
                 # 제목 저장
                 contents.append('# ' + paragraph['title'])
 
@@ -182,10 +169,10 @@ class PostSummary:
             print("포스트 요약본 생성")
         except Exception as e:
             print(f"에러: {e}")
-            self.summary_content(model)
+            self.summary_content((idxModel + 1) % len(self.models))
 
     #keywords를 생성하는 함수
-    def make_keywords(self, model: str):
+    def make_keywords(self, idxModel: int):
         try:
             messages = make_keywords_content_prompt(self.content)
             format = {
@@ -201,26 +188,31 @@ class PostSummary:
                 'required': ['keyword']
             }
 
-            response = self.chat(model = model, messages = messages, format = format)
-            self.keywords = json.loads(response)['keyword'][:5]
-            self.keywords = [keyword for keyword in self.keywords if len(keyword) <=  10 and keyword in self.content]
+            response = self.chat(model = self.models[idxModel], messages = messages, format = format)
+            data = json.loads(response)
+
+            if 'keyword' not in data:
+                return Exception(data)
+
+            self.keywords = data['keyword']
+            self.keywords = [keyword for keyword in self.keywords if len(keyword) <=  10 and keyword in self.content][:5]
             print("키워드 생성")
         except Exception as e:
             print(f"에러: {e}")
-            self.make_keywords(model)
+            self.make_keywords((idxModel + 1) % len(self.models))
 
     # thumbnail_content를 생성하는 함수
-    def make_thumbnail_content(self, model: str):
+    def make_thumbnail_content(self, idxModel: int):
         try:
             messages = make_thumbnail_content_prompt(self.content)
             format = None
 
-            response = self.chat(model = model, messages = messages, format = format)
+            response = self.chat(model = self.models[idxModel], messages = messages, format = format)
             self.thumbnail_content = response
             print("썸네일 생성")
         except Exception as e:
             print(f"에러: {e}")
-            self.make_thumbnail_content(model)
+            self.make_thumbnail_content((idxModel + 1) % len(self.models))
 
     #embeeding_vector를 생성하는 함수
     def make_embedding_vector(self):

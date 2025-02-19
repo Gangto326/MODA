@@ -1,7 +1,5 @@
 import base64
 import json
-import random
-import time
 from typing import List
 
 import googletrans
@@ -34,7 +32,7 @@ class ImageAnalyze:
         self.encode_base64()
         await self.analyze_image()
         self.choose_category()
-        self.make_keywords()
+        await self.make_keywords()
         self.make_embedding_vector()
 
     #Response 형태로 만들어주는 함수
@@ -51,17 +49,10 @@ class ImageAnalyze:
              messages,
              model: str = MODEL,
              format = None):
-        current_seed = int(time.time() * 1000) + random.randint(1, 1000000)
-
         response = ollama.chat(
             model = model,
             messages = messages,
-            format = format,
-            options = {
-                'seed': current_seed,
-                'temperature': random.uniform(0.7, 0.9),  # 랜덤 temperature 값
-                'top_p': random.uniform(0.8, 0.95)       # 랜덤 top_p 값
-            }
+            format = format
         )
         return response['message']['content']
 
@@ -116,7 +107,6 @@ class ImageAnalyze:
                 if find_category:
                     break
 
-                exclude.append(json.loads(response)['category'])
                 attempt_count += 1
 
             if attempt_count == self.MAX_CATEGORY_TRIES:
@@ -157,13 +147,17 @@ class ImageAnalyze:
             }
 
             response = self.chat(model = model, messages = messages, format = format)
-            response = json.loads(response)['keyword']
+            data = json.loads(response)
+
+            if 'keyword' not in data:
+                return Exception(data)
+
+            response = data['keyword']
             response = await self.translate_list(response)
-            self.keywords = [keyword for keyword in response if len(keyword) <=  10 and keyword in response]
+            self.keywords = [keyword for keyword in response if len(keyword) <=  10]
             print("키워드 생성")
         except Exception as e:
             print(f"에러: {e}")
-            await self.make_keywords()
 
     #embeeding_vector를 생성하는 함수
     def make_embedding_vector(self):

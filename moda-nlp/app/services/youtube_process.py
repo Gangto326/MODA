@@ -1,5 +1,4 @@
 import json
-import random
 from typing import List
 
 import ollama
@@ -14,6 +13,13 @@ class YoutubeProcess:
     MAX_CATEGORY_TRIES = 10
 
     def __init__(self, origin_paragraph: List[TitleAndContent]):
+        self.models = [
+            'anpigon/qwen2.5-7b-instruct-kowiki',
+            'kwangsuklee/Qwen2.5-14B-Gutenberg-1e-Delta.Q5_K_M',
+            'qwen2.5',
+            'hf.co/Bllossom/llama-3.2-Korean-Bllossom-3B-gguf-Q4_K_M'
+        ]
+
         # self.origin_content = json.dumps([p.model_dump() for p in origin_paragraph], ensure_ascii=False)
         self.origin_paragraph = origin_paragraph
         self.embedder = Embedding()
@@ -26,9 +32,9 @@ class YoutubeProcess:
 
     #YoutubeProcess 객체가 실행되면 가장 먼저 실행되는 함수
     async def execute(self):
-        self.process_paragraph('anpigon/qwen2.5-7b-instruct-kowiki')
-        self.choose_category('anpigon/qwen2.5-7b-instruct-kowiki'),
-        self.make_keywords('anpigon/qwen2.5-7b-instruct-kowiki'),
+        self.process_paragraph()
+        self.choose_category(0),
+        self.make_keywords(0),
         self.make_embedding_vector()
 
     #Response 형태로 만들어주는 함수
@@ -45,24 +51,15 @@ class YoutubeProcess:
              messages,
              model: str,
              format = None):
-        current_seed = int(time.time() * 1000) + random.randint(1, 1000000)
-
-        print(f"올라마 챗: {messages}")
-
         response = ollama.chat(
             model = model,
             messages = messages,
-            format = format,
-            options = {
-                'seed': current_seed,
-                'temperature': random.uniform(0.7, 0.9),  # 랜덤 temperature 값
-                'top_p': random.uniform(0.8, 0.95)       # 랜덤 top_p 값
-            }
+            format = format
         )
         return response['message']['content']
 
     #origin_paragraph의 데이터를 처리하는 함수
-    def process_paragraph(self, model: str):
+    def process_paragraph(self):
         contents = []
 
         for paragraph in self.origin_paragraph:
@@ -90,7 +87,7 @@ class YoutubeProcess:
         self.content = '\n'.join(contents)
 
     #category를 선택하는 함수
-    def choose_category(self, model: str):
+    def choose_category(self, idxModel: int):
         try:
             messages = make_category_prompt(self.content)
             format = {
@@ -103,29 +100,20 @@ class YoutubeProcess:
                 'required': ['category']
             }
 
-            find_category = False
-            attempt_count = 0
-            while attempt_count < self.MAX_CATEGORY_TRIES:
-                response = self.chat(model = model, messages = messages, format = format)
+            response = self.chat(model = self.models[idxModel], messages = messages, format = format)
 
-                print(f" 카테고리 선택 시도 {attempt_count} - {response}")
+            print(f" 카테고리 선택 시도 {response}")
 
-                for idx, category in enumerate(categories_name()):
-                    if category.lower() in response.lower():
-                        find_category = True
-                        self.category_id = idx + 1
-                        self.category = category
-                        break
-
-                if find_category:
+            for idx, category in enumerate(categories_name()):
+                if category.lower() in response.lower():
+                    self.category_id = idx + 1
+                    self.category = category
                     break
 
-                attempt_count += 1
+            if self.category_id == 0 and idxModel + 1 < len(self.models):
+                self.choose_category(idxModel + 1)
 
-            if attempt_count == self.MAX_CATEGORY_TRIES:
-                self.category_id = 1
-                self.category = 'ALL'
-
+            if self.category_id == 0:
                 embedding = self.embedder.embed_document(self.content)
                 similarity = 0
 
@@ -139,10 +127,10 @@ class YoutubeProcess:
                 print(f"임베딩 카테고리 {self.category_id} {self.category}")
         except Exception as e:
             print(f"에러: {e}")
-            self.choose_category(model)
+            self.choose_category((idxModel + 1) % len(self.models))
 
     #keywords를 생성하는 함수
-    def make_keywords(self, model: str):
+    def make_keywords(self, idxModel: int):
         try:
             messages = make_keywords_content_prompt(self.content)
             format = {
@@ -158,13 +146,18 @@ class YoutubeProcess:
                 'required': ['keyword']
             }
 
-            response = self.chat(model = model, messages = messages, format = format)
-            self.keywords = json.loads(response)['keyword'][:5]
-            self.keywords = [keyword for keyword in self.keywords if len(keyword) <=  10 and keyword in self.content]
+            response = self.chat(model = self.models[idxModel], messages = messages, format = format)
+            data = json.loads(response)
+
+            if 'keyword' not in data:
+                return Exception(data)
+
+            self.keywords = data['keyword']
+            self.keywords = [keyword for keyword in self.keywords if len(keyword) <=  10 and keyword in self.content][:5]
             print("키워드 생성")
         except Exception as e:
             print(f"에러: {e}")
-            self.make_keywords(model)
+            self.make_keywords((idxModel + 1) % len(self.models))
 
     #embeeding_vector를 생성하는 함수
     def make_embedding_vector(self):
