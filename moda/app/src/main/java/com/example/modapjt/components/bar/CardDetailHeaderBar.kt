@@ -1,33 +1,34 @@
 package com.example.modapjt.components.bar
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.modapjt.R
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CardDetailHeaderBar(
     title: String,
@@ -40,38 +41,53 @@ fun CardDetailHeaderBar(
 ) {
     var showMenu by remember { mutableStateOf(false) }
 
-    CenterAlignedTopAppBar(
-        modifier = modifier,
-        navigationIcon = {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(56.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        // 왼쪽 뒤로가기 버튼
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             IconButton(onClick = onBackClick) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_back),
-                    contentDescription = "뒤로가기",
                     modifier = Modifier.size(15.dp),
+                    contentDescription = "뒤로가기",
                     tint = MaterialTheme.colorScheme.secondary
                 )
             }
-        },
-        title = {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.Medium
-                ),
-                color = MaterialTheme.colorScheme.onPrimary
-            )
-        },
-        actions = {
+        }
+
+        // 중앙 타이틀
+        Text(
+            text = title,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onPrimary
+        )
+
+        // 오른쪽 액션 버튼들
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(end = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.End
+        ) {
             IconButton(onClick = onBookmarkClick) {
                 Icon(
                     painter = painterResource(
                         if (isBookmarked) R.drawable.ic_bookmark_filled else R.drawable.ic_bookmark_outline
                     ),
                     contentDescription = if (isBookmarked) "즐겨찾기 해제" else "즐겨찾기",
-                    tint = Color.Unspecified,  // 노란색 vs 검정색 테두리
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .size(24.dp)
+                    tint = Color.Unspecified,
+                    modifier = Modifier.size(24.dp)
                 )
             }
 
@@ -104,9 +120,6 @@ fun CardDetailHeaderBar(
                     )
                 }
             }
-        },
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-//            containerColor = Color.White
-        )
-    )
+        }
+    }
 }
