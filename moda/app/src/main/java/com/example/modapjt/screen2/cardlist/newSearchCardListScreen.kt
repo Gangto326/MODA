@@ -115,7 +115,8 @@ fun newSearchCardListScreen(
                         viewModel.loadSearchCards(searchQuery, selectedCategory, sortDirection)
                     }
                 },
-                navController = navController
+                navController = navController,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
             )
         },
         bottomBar = { BottomBarComponent(navController, currentRoute) }
