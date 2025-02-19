@@ -65,7 +65,7 @@ public class NotificationService {
 						.setDefaultVibrateTimings(true)
 						.setDefaultSound(true)
 						.setNotificationCount(1)
-						.setChannelId("modamoda_card_Create")
+						.setVisibility(AndroidNotification.Visibility.PUBLIC)
 						.build())
 					.build())
 				.build();
@@ -102,7 +102,7 @@ public class NotificationService {
 						.setDefaultVibrateTimings(true)
 						.setDefaultSound(true)
 						.setNotificationCount(1)
-						.setChannelId("modamoda_card_Create")
+						.setVisibility(AndroidNotification.Visibility.PUBLIC)
 						.build())
 					.build())
 				.build();
