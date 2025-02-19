@@ -15,6 +15,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -76,7 +77,7 @@ fun ImageSlider(imageUrls: List<String>) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_arrow_left), // 좌측 화살표 아이콘
                     contentDescription = "이전 이미지",
-                    tint = Color.Black,
+                    tint = MaterialTheme.colorScheme.tertiary,
                     modifier = Modifier.size(32.dp).alpha(0.5f) // 아이콘 크기 설정
                 )
             }
@@ -103,7 +104,7 @@ fun ImageSlider(imageUrls: List<String>) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_arrow_right), // 우측 화살표 아이콘
                     contentDescription = "다음 이미지",
-                    tint = Color.Black,
+                    tint = MaterialTheme.colorScheme.tertiary,
                     modifier = Modifier
                         .size(32.dp) // 아이콘 크기 설정
                         .alpha(0.5f)
@@ -117,14 +118,14 @@ fun ImageSlider(imageUrls: List<String>) {
                 .align(Alignment.BottomEnd)
                 .padding(5.dp)
                 .background(
-                    color = Color.Black.copy(alpha = 0.4f),
+                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.4f),
                     shape = RoundedCornerShape(14.dp)
                 )
-                .padding(horizontal = 10.dp, vertical = 6.dp)
+                .padding(horizontal = 12.dp, vertical = 8.dp)
         ) {
             Text(
                 text = "${pagerState.currentPage + 1} / ${imageUrls.size}",
-                color = Color.White,
+                color = MaterialTheme.colorScheme.tertiary,
                 fontSize = 12.sp,
                 textAlign = TextAlign.Center
             )

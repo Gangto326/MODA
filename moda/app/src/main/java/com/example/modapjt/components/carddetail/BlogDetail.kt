@@ -211,13 +211,13 @@ fun BlogDetailScreen(cardDetail: CardDetail, navController: NavController) {
                                     else -> "기타"
                                 },
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = Color.Gray
+                                color = MaterialTheme.colorScheme.onSecondary
                             )
                             Text(
                                 text = LocalDateTime.parse(cardDetail.createdAt)
                                     .format(DateTimeFormatter.ofPattern("yyyy.MM.dd")),
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = Color.Gray
+                                color = MaterialTheme.colorScheme.onSecondary
                             )
                         }
                     }
@@ -230,6 +230,7 @@ fun BlogDetailScreen(cardDetail: CardDetail, navController: NavController) {
                                 fontWeight = FontWeight.Bold,
                                 lineHeight = 30.sp
                             ),
+                            color = MaterialTheme.colorScheme.onPrimary,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = horizontalPadding)
@@ -257,7 +258,7 @@ fun BlogDetailScreen(cardDetail: CardDetail, navController: NavController) {
                                 cardDetail.keywords.take(3).forEach { keyword ->
                                     Surface(
                                         shape = RoundedCornerShape(20.dp),
-                                        border = BorderStroke(1.dp, Color.Gray.copy(alpha = 0.3f)),
+                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.3f)),
                                         color = Color.Transparent,
                                         modifier = Modifier
                                             .padding(end = 8.dp, bottom = 16.dp)
@@ -277,7 +278,7 @@ fun BlogDetailScreen(cardDetail: CardDetail, navController: NavController) {
                                                 vertical = 6.dp
                                             ),
                                             style = MaterialTheme.typography.bodyMedium,
-                                            color = Color.Gray
+                                            color = MaterialTheme.colorScheme.onSecondary
                                         )
                                     }
 
@@ -289,7 +290,7 @@ fun BlogDetailScreen(cardDetail: CardDetail, navController: NavController) {
                                     imageVector = Icons.Default.Share,
                                     contentDescription = "Share",
                                     modifier = Modifier.padding(bottom = 16.dp),
-                                    tint = Color.Gray
+                                    tint = MaterialTheme.colorScheme.onSecondary
                                 )
                             }
                         }
@@ -297,7 +298,7 @@ fun BlogDetailScreen(cardDetail: CardDetail, navController: NavController) {
 
                     item {
                         Divider(
-                            color = Color(0xFFF1F1F1),
+                            color = MaterialTheme.colorScheme.onSecondary,
                             thickness = 6.dp,
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -538,7 +539,7 @@ fun ShakingTitle(
             .offset(x = offset)
             .padding(top = if (isFirst) 22.dp else 48.dp),
         style = MaterialTheme.typography.titleMedium.copy(
-            color = Color.Black,
+            color = MaterialTheme.colorScheme.onPrimary,
             fontWeight = FontWeight.Bold,
             fontSize = 19.sp
         )
