@@ -6,8 +6,25 @@ import com.moda.moda_api.card.domain.CardContentType;
 
 public class CardContentTypeResolver {
 
-	private static final List<String> BLOG_SITES = List.of("tistory.com", "velog.io" ,"medium.com", "brunch.co.kr");
-	private static final List<String> NEWS_SITES = List.of("naver.com", "daum.net", "bbc.com", "cnn.com");
+	private static final List<String> BLOG_SITES
+		= List.of(
+		"tistory.com",
+		"velog.io",
+		"medium.com",
+		"brunch.co.kr",
+		"m.blog.naver.com",
+		"namu.wiki"
+
+	);
+	private static final List<String> NEWS_SITES = List.of(
+		"news.naver.com",
+		"daum.net",
+		"bbc.com",
+		"cnn.com",
+		"news.daum.net",
+		"m.sports.naver.com",
+		"sports.naver.com"
+		);
 
 	public static CardContentType resolve(String url) {
 		if (url.contains("youtube.com")) {

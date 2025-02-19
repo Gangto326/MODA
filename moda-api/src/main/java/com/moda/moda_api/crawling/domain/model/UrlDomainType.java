@@ -12,7 +12,7 @@ import lombok.Getter;
 @Getter
 @JsonFormat(shape = JsonFormat.Shape.NUMBER)
 public enum UrlDomainType {
-	UNCLASSIFIED(1),
+	UNCLASSIFIED(6),
 	TISTORY(2),
 	NAVER_BLOG(2),
 	VELOG(2),

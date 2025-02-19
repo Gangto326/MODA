@@ -44,6 +44,7 @@ import com.moda.moda_api.common.pagination.SliceResponseDto;
 import com.moda.moda_api.notification.application.NotificationService;
 import com.moda.moda_api.notification.domain.NotificationType;
 import com.moda.moda_api.search.domain.CardSearchRepository;
+import com.moda.moda_api.summary.application.dto.SummaryResultDto;
 import com.moda.moda_api.summary.application.service.SummaryService;
 import com.moda.moda_api.summary.infrastructure.api.PythonAiClient;
 import com.moda.moda_api.summary.infrastructure.dto.AIAnalysisResponseDTO;
@@ -160,9 +161,24 @@ public class CardService {
 		// summary에서 2가지 경우로 나눠보자.
 		return summaryService.getSummary(url, userIdObj.getValue())
 			.thenApply(SummaryResultDto -> {
-				String thumbnailUrl = SummaryResultDto.getThumbnailUrl() !=
-					null ? SummaryResultDto.getThumbnailUrl() :
-					"https://a805bucket.s3.ap-northeast-2.amazonaws.com/images/logo/download.jpg";
+
+				String thumbnailUrl;
+				if (SummaryResultDto.getThumbnailUrl() != null) {
+					thumbnailUrl = SummaryResultDto.getThumbnailUrl();
+				} else {
+					// S3 기본 경로
+					String baseS3Path = "https://a805bucket.s3.ap-northeast-2.amazonaws.com/images/logo/";
+
+					// typeId에 따라 다른 기본 이미지 설정
+					if (SummaryResultDto.getTypeId().equals(2)) {
+						thumbnailUrl = baseS3Path + "Blog.jpg";
+					} else if (SummaryResultDto.getTypeId().equals(3)) {
+						thumbnailUrl = baseS3Path + "News.jpg";
+					} else {
+						thumbnailUrl = baseS3Path + "Defalut.jpg";
+					}
+				}
+
 				Card card = cardFactory.create(
 					userIdObj,
 					SummaryResultDto.getCategoryId(),

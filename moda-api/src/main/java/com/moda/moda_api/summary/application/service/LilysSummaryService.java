@@ -2,14 +2,17 @@ package com.moda.moda_api.summary.application.service;
 
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import com.moda.moda_api.category.domain.CategoryId;
+import com.moda.moda_api.common.exception.UnprocessableContentException;
 import com.moda.moda_api.summary.application.dto.SummaryResultDto;
 import com.moda.moda_api.summary.exception.SummaryProcessingException;
 import com.moda.moda_api.summary.infrastructure.api.LilysAiClient;
@@ -32,7 +35,7 @@ public class LilysSummaryService {
 	private final YoutubeApiClient youtubeApiClient;
 
 	@Transactional
-	public CompletableFuture<SummaryResultDto> summarize(String url) {
+	public CompletableFuture<SummaryResultDto> summarize(String url, String userId) {
 		return CompletableFuture.supplyAsync(() -> lilysWebClient.getRequestId(url))
 			.thenCompose(requestId -> {
 				// RequestId를 받은 후 waitForCompletion 실행하고 완료될 때까지 대기
@@ -50,9 +53,20 @@ public class LilysSummaryService {
 				// 서버 전용
 				// getSummaryResults 완료 후 병렬로 실행 가능한 작업들
 				CompletableFuture<AIAnalysisResponseDTO> aiAnalysisFuture =
-					CompletableFuture.supplyAsync(() ->
-						pythonAnalysisService.youtubeAnalyze(lilysSummary.getContents())
-					);
+					CompletableFuture.supplyAsync(() -> {
+						try {
+							return pythonAnalysisService.youtubeAnalyze(
+								lilysSummary.getContents()
+							);
+						} catch (WebClientResponseException.InternalServerError e) {
+							throw new UnprocessableContentException(
+								userId,
+								"해당 영상은 요약 할 수 없는 컨텐츠입니다."
+							);
+						} catch (Exception e) {
+							throw new CompletionException("Python analysis failed", e);
+						}
+					});
 
 				// CompletableFuture<AIAnalysisResponseDTO> aiAnalysisFuture = CompletableFuture.completedFuture(
 				// 	AIAnalysisResponseDTO.builder()

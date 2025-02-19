@@ -53,10 +53,9 @@ public class CrawlingSummaryService {
 						} catch (WebClientResponseException.InternalServerError e) {
 							throw new UnprocessableContentException(
 								userId,
-								"요약할 수 없는 사이트입니다."
+								"해당 사이트는 요약 할 수 없는 사이트입니다."
 							);
 						} catch (Exception e) {
-
 							throw new CompletionException("Python analysis failed", e);
 						}
 					});
@@ -81,7 +80,6 @@ public class CrawlingSummaryService {
 					.thenApply(ignored -> {
 						AIAnalysisResponseDTO pythonAnalysisDto = pythonAnalysisFuture.join();
 						String thumbnailUrl = thumbnailUrlFuture.join();
-
 						return SummaryResultDto.builder()
 							.typeId(crawledContent.getUrl().getCardContentType().getTypeId())
 							.title(crawledContent.getTitle())

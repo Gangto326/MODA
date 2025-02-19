@@ -30,11 +30,11 @@ public class UserIdArgumentResolver implements HandlerMethodArgumentResolver {
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
         NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
 
-        // HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
-        // String token = HeaderUtil.getAccessToken(request);
+        HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
+        String token = HeaderUtil.getAccessToken(request);
 
         // 필터에서 이미 검증했으므로, 여기서는 단순히 userId만 추출
-        // return jwtUtil.getUserId(token, "AccessToken");
-        return "1ef4bd1b-a842-4046-bc75-ba7b45cda1f2";
+        return jwtUtil.getUserId(token, "AccessToken");
+        // return "1ef4bd1b-a842-4046-bc75-ba7b45cda1f2";
     }
 }
