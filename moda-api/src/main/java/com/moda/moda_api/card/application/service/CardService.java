@@ -219,7 +219,6 @@ public class CardService {
 						.cachedSubContents(card.getSubContents())
 						.build()
 				);
-
 				// 유저별 핵심 키워드 저장 (Redis)
 				userKeywordRepository.saveKeywords(userIdObj, card.getKeywords());
 				// 핫 토픽 키워드 저장 (Redis)

@@ -80,7 +80,6 @@ public class NotificationService {
 		});
 	}
 
-
 	@Transactional
 	public void sendErrorNotification(String userId, String errorMessage) {
 		// 유저 토큰 가져오기

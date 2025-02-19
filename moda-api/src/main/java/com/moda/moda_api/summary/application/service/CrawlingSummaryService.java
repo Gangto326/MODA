@@ -53,9 +53,15 @@ public class CrawlingSummaryService {
 						} catch (WebClientResponseException.InternalServerError e) {
 							throw new UnprocessableContentException(
 								userId,
-								"해당 사이트는 요약 할 수 없는 사이트입니다."
+								"해당 사이트는 요약할 수 없는 사이트입니다."
 							);
-						} catch (Exception e) {
+						} catch (WebClientResponseException e){
+							throw new UnprocessableContentException(
+								userId,
+								"해당 사이트는 AI 요약 할 수 없는 사이트입니다. 잠시후에 사용해주세요. "
+							);
+						}
+						catch (Exception e) {
 							throw new CompletionException("Python analysis failed", e);
 						}
 					},pythonExecutor);
