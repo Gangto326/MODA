@@ -49,6 +49,7 @@ fun <T : Any> SwipableCardList(
     onDelete: (List<T>) -> Unit,  // 여러 카드 삭제 가능하도록 수정
     onCardDetail: (T) -> Unit,
     selectionViewModel: CardSelectionViewModel<T>,
+    enableLongPress: Boolean = true,
     modifier: Modifier = Modifier,
     content: @Composable (T, Boolean) -> Unit  // 선택 상태를 표시하기 위해 Boolean 추가
 ) {
@@ -105,7 +106,7 @@ fun <T : Any> SwipableCardList(
                                     }
                                 },
                                 onLongPress = {
-                                    if (!isSelectionMode) {
+                                    if (!isSelectionMode && enableLongPress) {
                                         // 진동 효과 추가
                                         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                                         selectionViewModel.toggleSelectionMode(true)

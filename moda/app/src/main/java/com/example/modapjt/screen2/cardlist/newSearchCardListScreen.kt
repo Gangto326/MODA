@@ -24,6 +24,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -142,7 +143,11 @@ fun newSearchCardListScreen(
                             TypeSelectBar(
                                 selectedCategory = selectedCategory,
                                 selectedSort = selectedSort,
-                                onCategorySelected = { category -> viewModel.updateSelectedCategory(category) },
+                                onCategorySelected = { category ->
+                                    viewModel.updateSelectedCategory(
+                                        category
+                                    )
+                                },
                                 onSortSelected = { selectedSort = it }
                             )
                         }
@@ -198,6 +203,7 @@ fun newSearchCardListScreen(
                                                     navController.navigate("cardDetail/${selectedCard.cardId}")
                                                 },
                                                 selectionViewModel = selectionViewModel,
+                                                enableLongPress = false,
                                                 modifier = Modifier
                                                     .fillMaxWidth()
                                                     .heightIn(max = Dp.Unspecified)
@@ -231,7 +237,10 @@ fun newSearchCardListScreen(
                                         Divider(
                                             color = Color(0xFFF1F1F1),
                                             thickness = 1.dp,
-                                            modifier = Modifier.padding(start = 16.dp, end = 16.dp) // 양쪽에 패딩 추가
+                                            modifier = Modifier.padding(
+                                                start = 16.dp,
+                                                end = 16.dp
+                                            ) // 양쪽에 패딩 추가
                                         )
                                     }
                                 }
@@ -240,13 +249,16 @@ fun newSearchCardListScreen(
                             "동영상" -> {
                                 if (state.videos.isEmpty() && !loadingMore) {
                                     item { EmptyMessage2("검색된 동영상이 없습니다") }
-                                }  else {
+                                } else {
                                     items(
                                         items = state.videos,
                                         key = { it.cardId }
                                     ) { card ->
                                         // Check if this video is the first one in the viewport
-                                        val isTopVideo = lazyListState.firstVisibleItemIndex == state.videos.indexOf(card)
+                                        val isTopVideo =
+                                            lazyListState.firstVisibleItemIndex == state.videos.indexOf(
+                                                card
+                                            )
                                         if (!isSelectionMode) {  // 일반 모드일 때
                                             SwipableCardList(
                                                 cards = listOf(card),
@@ -257,6 +269,7 @@ fun newSearchCardListScreen(
                                                     navController.navigate("cardDetail/${selectedCard.cardId}")
                                                 },
                                                 selectionViewModel = selectionViewModel,
+                                                enableLongPress = false,
                                                 modifier = Modifier
                                                     .fillMaxWidth()
                                                     .heightIn(max = Dp.Unspecified)
@@ -300,7 +313,10 @@ fun newSearchCardListScreen(
                                         Divider(
                                             color = Color(0xFFF1F1F1),
                                             thickness = 1.dp,
-                                            modifier = Modifier.padding(start = 16.dp, end = 16.dp) // 양쪽에 패딩 추가
+                                            modifier = Modifier.padding(
+                                                start = 16.dp,
+                                                end = 16.dp
+                                            ) // 양쪽에 패딩 추가
                                         )
                                     }
                                 }
@@ -324,6 +340,7 @@ fun newSearchCardListScreen(
                                                     navController.navigate("cardDetail/${selectedCard.cardId}")
                                                 },
                                                 selectionViewModel = selectionViewModel,
+                                                enableLongPress = false,
                                                 modifier = Modifier
                                                     .fillMaxWidth()
                                                     .heightIn(max = Dp.Unspecified)
@@ -334,7 +351,7 @@ fun newSearchCardListScreen(
                                                     imageUrl = currentCard.thumbnailUrl ?: "",
                                                     isMine = currentCard.isMine,
                                                     isSelected = isSelected,
-                                                    description = currentCard.thumbnailContent?: ""
+                                                    description = currentCard.thumbnailContent ?: ""
                                                 )
                                             }
                                         } else {
@@ -355,7 +372,10 @@ fun newSearchCardListScreen(
                                         Divider(
                                             color = Color(0xFFF1F1F1),
                                             thickness = 1.dp,
-                                            modifier = Modifier.padding(start = 16.dp, end = 16.dp) // 양쪽에 패딩 추가
+                                            modifier = Modifier.padding(
+                                                start = 16.dp,
+                                                end = 16.dp
+                                            ) // 양쪽에 패딩 추가
                                         )
                                     }
                                 }
@@ -375,51 +395,58 @@ fun newSearchCardListScreen(
                             }
                         }
                     }
-                    // 하단 고정 버튼을 Box의 자식으로 이동
-                    AnimatedVisibility (
-                        visible = isSelectionMode,
+
+                    Surface(
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
-                            .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.surface)
-                            .padding(16.dp)
+                            .fillMaxWidth(),
+                        color = Color(0xFF1B1B1B),
+                        shadowElevation = 0.dp,  // 그림자 제거
+                        tonalElevation = 0.dp    // 톤 변화 제거
                     ) {
-                        Row (
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                        AnimatedVisibility(
+                            visible = isSelectionMode,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
                         ) {
-                            Text(
-                                "${selectedCardIds.size}개 선택됨",
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                TextButton (
-                                    onClick = {
-                                        selectionViewModel.clearSelection()
-                                        selectionViewModel.toggleSelectionMode(false)
-                                    }
-                                ) {
-                                    Text("취소")
-                                }
-                                Button(
-                                    onClick = {
-                                        val cardsToDelete = when(selectedCategory) {
-                                            "블로그" -> state.blogs
-                                            "동영상" -> state.videos
-                                            "뉴스" -> state.news
-                                            else -> emptyList()
-                                        }.filter { card ->
-                                            selectedCardIds.contains(card.cardId)
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    "${selectedCardIds.size}개 선택됨",
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    TextButton(
+                                        onClick = {
+                                            selectionViewModel.clearSelection()
+                                            selectionViewModel.toggleSelectionMode(false)
                                         }
-                                        viewModel.deleteCard(cardsToDelete.map { it.cardId })
-                                        selectionViewModel.toggleSelectionMode(false)
-                                    },
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.error
-                                    )
-                                ) {
-                                    Text("삭제")
+                                    ) {
+                                        Text("취소")
+                                    }
+                                    Button(
+                                        onClick = {
+                                            val cardsToDelete = when (selectedCategory) {
+                                                "블로그" -> state.blogs
+                                                "동영상" -> state.videos
+                                                "뉴스" -> state.news
+                                                else -> emptyList()
+                                            }.filter { card ->
+                                                selectedCardIds.contains(card.cardId)
+                                            }
+                                            viewModel.deleteCard(cardsToDelete.map { it.cardId })
+                                            selectionViewModel.toggleSelectionMode(false)
+                                        },
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = MaterialTheme.colorScheme.error
+                                        )
+                                    ) {
+                                        Text("삭제")
+                                    }
                                 }
                             }
                         }
