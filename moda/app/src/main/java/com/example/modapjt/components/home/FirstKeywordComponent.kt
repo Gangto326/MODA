@@ -1,5 +1,6 @@
 package com.example.modapjt.components.home
 
+import android.util.Log
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,6 +28,9 @@ data class FirstKeywordItem(
 @Composable
 fun FirstKeywordList(navController: NavController, viewModel: SearchViewModel) {
     val keywordSearchData by viewModel.keywordSearchData.collectAsState() // ✅ 변경된 StateFlow 사용
+
+    // 디버깅용 로그 추가
+    Log.d("FirstKeywordList", "keywordSearchData size: ${keywordSearchData.size}")
 
     keywordSearchData.let { items ->
         Column(
@@ -56,4 +60,5 @@ fun FirstKeywordList(navController: NavController, viewModel: SearchViewModel) {
             }
         }
     }
+
 }
