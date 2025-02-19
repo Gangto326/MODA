@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -27,7 +28,7 @@ fun ForgottenContentSection(
 
     if (forgottenContents.isNotEmpty()) {
 
-        Divider(color = Color(0xFFF1F1F1), thickness = 6.dp, modifier = Modifier.padding(horizontal = 0.dp))
+        Divider(color = MaterialTheme.colorScheme.onTertiary, thickness = 6.dp, modifier = Modifier.padding(horizontal = 0.dp))
         Spacer(modifier = Modifier.height(20.dp))
         HomeSmallTitle(
             title = "잊고있던 컨텐츠",

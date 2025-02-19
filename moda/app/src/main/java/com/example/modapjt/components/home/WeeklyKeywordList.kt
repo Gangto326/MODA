@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -58,10 +59,10 @@ fun WeeklyKeywordList(
                         .let {
                             // 선택된 키워드에 배경색 추가
                             if (isSelected) {
-                                it.background(Color(0xFFFFCD69), shape = RoundedCornerShape(50))
+                                it.background(MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(50))
                             } else {
                                 // 선택되지 않은 키워드는 테두리만 추가
-                                it.border(1.dp, Color(0xFFB8ACA5), shape = RoundedCornerShape(50))
+                                it.border(1.dp, MaterialTheme.colorScheme.onSecondary, shape = RoundedCornerShape(50))
                             }
                         }
                         .padding(horizontal = 14.dp, vertical = 2.dp)
@@ -76,7 +77,7 @@ fun WeeklyKeywordList(
                     Text(
                         text = keyword,
                         fontSize = 12.sp,
-                        color = if (isSelected) Color.White else Color(0xFF665F5B) // 선택된 키워드 색상은 흰색, 나머지는 검은색
+                        color = if (isSelected) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onPrimary // 선택된 키워드 색상은 흰색, 나머지는 검은색
                     )
                 }
             }

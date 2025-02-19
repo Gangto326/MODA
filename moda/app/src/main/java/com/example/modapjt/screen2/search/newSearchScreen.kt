@@ -201,7 +201,7 @@ fun SearchSuggestions(
                 Text(
                     text = "자동완성 적용중...",
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 8.dp, vertical = 4.dp),

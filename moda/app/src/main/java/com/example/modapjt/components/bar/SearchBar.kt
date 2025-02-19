@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -58,7 +59,7 @@ fun SearchBar(
                 .fillMaxSize()
                 .border(
                     width = 2.dp,
-                    color = Color(0xFFFFCC80),
+                    color = MaterialTheme.colorScheme.onPrimary,
                     shape = RoundedCornerShape(16.dp)
                 )
                 .padding(4.dp),
@@ -78,13 +79,13 @@ fun SearchBar(
                     value = searchText,
                     onValueChange = { /* Disabled in home screen */ },
                     enabled = false,
-                    textStyle = TextStyle(fontSize = 14.sp, color = Color.Black),
+                    textStyle = TextStyle(fontSize = 14.sp, color = MaterialTheme.colorScheme.onPrimary),
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 Text(
                     text = "찾고 싶은 정보의 키워드를 입력하세요",
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.secondary,
                     fontSize = 14.sp
                 )
             }

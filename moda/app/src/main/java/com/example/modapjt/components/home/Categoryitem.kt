@@ -10,6 +10,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -78,7 +79,7 @@ fun CategoryItem(
     }
 
     val categoryName = categoryNameMap[category.category] ?: category.category
-    val color = if (isVisible) Color(0xFF665F5B) else Color(0xFFC1C1C1)
+    val color = if (isVisible) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondary // 검정색 <-> 연회색
     val context = LocalContext.current
 
     Column(

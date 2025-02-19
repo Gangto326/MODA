@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -25,7 +26,7 @@ fun TodayContentSection(
 
     if (todays.isNotEmpty()) {
         Divider(
-            color = Color(0xFFF1F1F1),
+            color = MaterialTheme.colorScheme.onTertiary,
             thickness = 6.dp,
             modifier = Modifier
 //            .padding(horizontal = 0.dp)
