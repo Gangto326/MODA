@@ -409,48 +409,68 @@ fun newCardListScreen(
                                             items = state.news,
                                             key = { it.cardId }
                                         ) { card ->
-                                            if (!isSelectionMode) {
-                                                SwipableCardList(
-                                                    cards = listOf(card),
-                                                    onDelete = { selectedCards ->
-                                                        viewModel.deleteCard(selectedCards.map { it.cardId })
-                                                    },
-                                                    onCardDetail = { selectedCard ->
-                                                        navController.navigate("cardDetail/${selectedCard.cardId}")
-                                                    },
-                                                    selectionViewModel = selectionViewModel,
-                                                    modifier = Modifier
-                                                        .fillMaxWidth()
-                                                        .heightIn(max = Dp.Unspecified)
-                                                ) { currentCard, isSelected ->
-                                                    NewsBig(
-                                                        title = currentCard.title,
-                                                        keywords = currentCard.keywords,
-                                                        imageUrl = currentCard.thumbnailUrl ?: "",
-                                                        isMine = currentCard.isMine,
-                                                        isSelected = isSelected,
-                                                        description = currentCard.thumbnailContent
-                                                            ?: ""
+                                            Box(
+                                                modifier = Modifier
+                                                    .animateContentSize(
+                                                        animationSpec = spring(
+                                                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                                                            stiffness = if (isSelectionMode) Spring.StiffnessLow else Spring.StiffnessMediumLow
+                                                        )
+                                                    )
+                                                    .animateItemPlacement(
+                                                        animationSpec = spring(
+                                                            dampingRatio = Spring.DampingRatioNoBouncy,
+                                                            stiffness = if (isSelectionMode) Spring.StiffnessLow else Spring.StiffnessMediumLow
+                                                        )
+                                                    )
+                                            ) {
+                                                if (!isSelectionMode) {  // 일반 모드일 때
+                                                    SwipableCardList(
+                                                        cards = listOf(card),
+                                                        onDelete = { selectedCards ->
+                                                            viewModel.deleteCard(selectedCards.map { it.cardId })
+                                                        },
+                                                        onCardDetail = { selectedCard ->
+                                                            navController.navigate("cardDetail/${selectedCard.cardId}")
+                                                        },
+                                                        selectionViewModel = selectionViewModel,
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .heightIn(max = Dp.Unspecified)
+                                                    ) { currentCard, isSelected ->
+                                                        BlogBig(
+                                                            title = currentCard.title,
+                                                            description = currentCard.thumbnailContent
+                                                                ?: "",
+                                                            imageUrl = currentCard.thumbnailUrl
+                                                                ?: "",
+                                                            isMine = currentCard.isMine,
+                                                            isSelected = isSelected,
+                                                            keywords = currentCard.keywords
+                                                            //                                                onClick = { navController.navigate("cardDetail/${card.cardId}") }
+                                                        )
+                                                    }
+                                                } else { // 선택 모드일 때
+                                                    BlogSelectionItem(
+                                                        title = card.title,
+                                                        description = card.thumbnailContent ?: "",
+                                                        imageUrl = card.thumbnailUrl ?: "",
+                                                        isMine = card.isMine,
+                                                        keywords = card.keywords,
+                                                        isSelected = selectedCardIds.contains(card.cardId),
+                                                        onClick = {
+                                                            haptics.performHapticFeedback(
+                                                                HapticFeedbackType.TextHandleMove
+                                                            )
+                                                            selectionViewModel.toggleCardSelection(
+                                                                card
+                                                            )
+                                                        }
                                                     )
                                                 }
-                                            } else {
-                                                NewsSelectionItem(
-                                                    title = card.title,
-                                                    description = card.thumbnailContent ?: "",
-                                                    imageUrl = card.thumbnailUrl ?: "",
-                                                    isMine = card.isMine,
-                                                    keywords = card.keywords,
-                                                    isSelected = selectedCardIds.contains(card.cardId),
-                                                    onClick = {
-                                                        haptics.performHapticFeedback(
-                                                            HapticFeedbackType.TextHandleMove
-                                                        )
-                                                        selectionViewModel.toggleCardSelection(card)
-                                                    }
-                                                )
                                             }
 
-                                            // 각 뉴스 사이에 구분선 추가
+                                            // 각 블로그 사이에 구분선 추가
                                             Divider(
                                                 color = Color(0xFFF1F1F1),
                                                 thickness = 1.dp,

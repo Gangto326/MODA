@@ -6,16 +6,22 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -51,80 +57,94 @@ fun NewsSelectionItem(
                 onClick = onClick,
                 indication = null, // 클릭 효과 제거
                 interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
-                ),
-        shape = RoundedCornerShape(12.dp),
-        shadowElevation = 2.dp,
+            ),
+        shape = RoundedCornerShape(8.dp),
         color = when {
-            isSelected -> MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-            !isMine -> Color.Gray.copy(alpha = 0.1f)
+            isSelected -> Color.LightGray.copy(alpha = 0.3f)  // 선택됐을 때 색상
+            !isMine -> Color.Gray
             else -> Color.White
         }
     ) {
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
         ) {
-            // 상단 영역: 제목과 이미지를 가로로 배치
-            Row(
-                verticalAlignment = Alignment.Top, // 상단 맞춤
-                horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
             ) {
-                // 🔥 제목 + 키워드를 감싸는 Column
-                Column(
-                    modifier = Modifier.weight(1f) // 🔥 남은 공간 모두 차지해서 왼쪽 정렬
+                Row(
+                    verticalAlignment = Alignment.Top
                 ) {
-                    // 뉴스 제목 텍스트
-                    Text(
-                        text = title,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-//                    style = customTypography.titleMedium ,
-                        maxLines = 2, // 최대 2줄까지 표시
-                        overflow = TextOverflow.Ellipsis, // 넘치는 텍스트는 ...으로 표시
-                    )
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = title,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            style = customTypography.headlineMedium,
+                            color = Color(0xFF2B2826),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = description,
+                            style = customTypography.bodyMedium,
+                            color = Color(0xFF797069),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(top = 6.dp)
+                        )
+                    }
 
-                    Text(
-                        text = description,
-                        style = customTypography.bodyMedium,
-                        color = Color(0xFF797069),
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(top = 6.dp)
+                    Spacer(modifier = Modifier.width(10.dp))
+
+                    AsyncImage(
+                        model = imageUrl,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(80.dp)
+                            .clip(RoundedCornerShape(8.dp))
                     )
                 }
 
-                // 썸네일 이미지
-                AsyncImage(
-                    model = imageUrl,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop, // 이미지 비율 유지하며 채우기
+                FlowRow(
                     modifier = Modifier
-                        .size(80.dp) // 70dp x 70dp 크기
-                        .clip(RoundedCornerShape(8.dp))// 이미지 모서리 둥글게
-                )
-            }
-
-            // 하단 영역: 키워드와 즐겨찾기 아이콘을 가로로 배치 (🔥 키워드가 제목 아래로 이동했으므로 삭제 가능)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 6.dp), // 상단 여백 추가
-                horizontalArrangement = Arrangement.SpaceBetween, // 요소들을 양끝으로 정렬
-                verticalAlignment = Alignment.CenterVertically // 세로 방향 중앙 정렬
-            ) {
-                // 키워드 목록 (최대 3개)
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp) // 키워드 간 간격
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     keywords.take(3).forEach { keyword ->
                         Text(
                             text = "# $keyword",
-//                        fontSize = 12.sp,
                             style = customTypography.bodySmall,
-                            color = Color(0xFFBAADA4), // 키워드는 파란색으로 표시( 고민 )
+                            color = Color(0xFFBAADA4),
+                            modifier = Modifier.alignByBaseline()
                         )
                     }
+                }
+            }
+            if (isSelected) {
+                Surface(
+                    shape = CircleShape,
+                    color = Color(0xFF2167F3),
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(top = 16.dp, end = 17.dp, bottom = 16.dp)
+                        .size(18.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Check,
+                        contentDescription = "Selected",
+                        tint = Color.White,
+                        modifier = Modifier
+                            .padding(2.dp)
+                            .fillMaxSize()
+                    )
                 }
             }
         }
