@@ -88,13 +88,12 @@ class MyFirebaseMessagingService : FirebaseMessagingService()  {
         )
 
         val notificationBuilder = NotificationCompat.Builder(this, channelId)
-            .setSmallIcon(R.drawable.profile_placeholder)
+            .setSmallIcon(R.drawable.icon_round) // 나중에 바뀌어야 할 부분.
             .setContentTitle(title)
             .setContentText(body)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(pendingIntent)
-
 
         if (!imageUrl.isNullOrEmpty()) {
             try {
