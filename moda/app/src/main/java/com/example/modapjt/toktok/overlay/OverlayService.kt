@@ -1,4 +1,4 @@
-package com.example.modapjt.overlay
+package com.example.modapjt.toktok.overlay
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -54,7 +54,8 @@ import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.example.modapjt.data.repository.CardRepository
-import com.example.modapjt.overlay.ScreenCaptureManager.capturedBitmap
+import com.example.modapjt.toktok.BrowserAccessibilityService
+import com.example.modapjt.toktok.overlay.ScreenCaptureManager.capturedBitmap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay

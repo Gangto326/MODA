@@ -15,15 +15,15 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.modapjt.data.storage.TokenManager
 import com.example.modapjt.domain.viewmodel.AuthViewModel
 import com.example.modapjt.domain.viewmodel.AuthViewModelFactory
 import com.example.modapjt.navigation.NavGraph
-import com.example.modapjt.overlay.BrowserAccessibilityService
-import com.example.modapjt.overlay.OverlayService
+import com.example.modapjt.toktok.BrowserAccessibilityService
+import com.example.modapjt.toktok.gesture.GestureService
+import com.example.modapjt.toktok.overlay.OverlayService
 import com.example.modapjt.ui.theme.ModapjtTheme
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 
@@ -51,8 +51,6 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-
-
             ModapjtTheme {
                 // TokenManager 초기화 (Compose에서 remember로 관리)
                 val context = LocalContext.current
@@ -160,5 +158,6 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         stopService(Intent(this, OverlayService::class.java))
+        stopService(Intent(this, GestureService::class.java))
     }
 }
