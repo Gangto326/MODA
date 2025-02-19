@@ -59,20 +59,12 @@ public class LilysSummaryService {
 							return pythonAnalysisService.youtubeAnalyze(
 								lilysSummary.getContents()
 							);
-						} catch (WebClientResponseException.InternalServerError e) {
-							throw new UnprocessableContentException(
-								userId,
-								"해당 영상은 요약 할 수 없는 컨텐츠입니다."
-							);
-						} catch (WebClientResponseException e){
+						}
+						catch (Exception e) {
 							throw new UnprocessableContentException(
 								userId,
 								"해당 영상은 요약 할 수 없는 컨텐츠입니다. 다른 영상을 시도해 주세요"
 							);
-						}
-
-						catch (Exception e) {
-							throw new CompletionException("Python analysis failed", e);
 						}
 					},pythonExecutor);
 

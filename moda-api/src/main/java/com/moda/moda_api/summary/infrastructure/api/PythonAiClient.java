@@ -28,6 +28,7 @@ public class PythonAiClient {
 			.retrieve()
 			.bodyToMono(AIAnalysisResponseDTO.class)
 			.block();
+
 	}
 
 	public AIAnalysisResponseDTO youtubeAnalysis(AiYoutubeRequestDTO aiYoutubeRequestDTO) {
