@@ -47,6 +47,7 @@ import com.example.modapjt.domain.model.LoginState
 import com.example.modapjt.domain.viewmodel.AuthViewModel
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 
@@ -135,7 +136,7 @@ fun LoginScreen(
             painter = painterResource(id = R.drawable.ic_logo),
             contentDescription = "Logo",
             modifier = Modifier.size(80.dp),
-            tint = Color.Unspecified
+            tint = Color.Unspecified // 원본 이미지 색상 유지
         )
 
         OutlinedTextField(
@@ -149,10 +150,10 @@ fun LoginScreen(
                 .padding(vertical = 4.dp),
             shape = RoundedCornerShape(16.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                unfocusedBorderColor = Color(0xFFBBAEA4),
-                focusedBorderColor = Color(0xFFBBAEA4),
-                unfocusedLabelColor = Color.Gray,
-                focusedLabelColor = Color(0xFFBBAEA4),
+                unfocusedBorderColor = MaterialTheme.colorScheme.onSecondary, // 포커스 해제 테두리
+                focusedBorderColor = MaterialTheme.colorScheme.onSecondary, // 포커스 테두리
+                unfocusedLabelColor = MaterialTheme.colorScheme.onSecondary, // 포커스 해제 라벨
+                focusedLabelColor = MaterialTheme.colorScheme.onSecondary, // 포커스 라벨
             )
         )
 
@@ -170,10 +171,10 @@ fun LoginScreen(
                 .padding(vertical = 4.dp),
             shape = RoundedCornerShape(16.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                unfocusedBorderColor = Color(0xFFBBAEA4),
-                focusedBorderColor = Color(0xFFBBAEA4),
-                unfocusedLabelColor = Color.Gray,
-                focusedLabelColor = Color(0xFFBBAEA4),
+                unfocusedBorderColor = MaterialTheme.colorScheme.onSecondary, // 포커스 해제 테두리
+                focusedBorderColor = MaterialTheme.colorScheme.onSecondary, // 포커스 테두리
+                unfocusedLabelColor = MaterialTheme.colorScheme.onSecondary, // 포커스 해제 라벨
+                focusedLabelColor = MaterialTheme.colorScheme.onSecondary, // 포커스 라벨
             )
         )
 
@@ -194,13 +195,13 @@ fun LoginScreen(
             enabled = !state.isLoading,
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFFBBAEA4)
+                containerColor = MaterialTheme.colorScheme.onSecondary // 버튼 배경색
             )
         ) {
             if (state.isLoading) {
-                CircularProgressIndicator(color = Color.White)
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.tertiary) // 로딩 아이콘
             } else {
-                Text("로그인")
+                Text("로그인", color = MaterialTheme.colorScheme.onPrimary)
             }
         }
 
@@ -209,23 +210,23 @@ fun LoginScreen(
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             TextButton(onClick = onNavigateToFindId) {
-                Text("아이디 찾기", color = Color.Gray)
+                Text("아이디 찾기", color = MaterialTheme.colorScheme.onSecondary)
             }
             Text(
                 text = "|",
-                color = Color.Gray,
+                color = MaterialTheme.colorScheme.onSecondary,
                 modifier = Modifier.padding(vertical = 12.dp)
             )
             TextButton(onClick = onNavigateToFindPassword) {
-                Text("비밀번호 찾기", color = Color.Gray)
+                Text("비밀번호 찾기", color = MaterialTheme.colorScheme.onSecondary)
             }
             Text(
                 text = "|",
-                color = Color.Gray,
+                color = MaterialTheme.colorScheme.onSecondary,
                 modifier = Modifier.padding(vertical = 12.dp)
             )
             TextButton(onClick = onNavigateToSignUp) {
-                Text("회원가입", color = Color.Gray)
+                Text("회원가입", color = MaterialTheme.colorScheme.onSecondary)
             }
         }
 

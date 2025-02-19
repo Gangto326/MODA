@@ -342,6 +342,32 @@ fun MyPageScreen(
 }
 
 
+//@Composable
+//fun LogoutDialog(viewModel: AuthViewModel, navController: NavController, onDismiss: () -> Unit) {
+//    AlertDialog(
+//        onDismissRequest = onDismiss,
+//        title = { Text("로그아웃") },
+//        text = { Text("로그아웃 하시겠습니까?") },
+//        confirmButton = {
+//            Button(onClick = {
+//                viewModel.logout {
+//                    navController.navigate("home") {
+//                        popUpTo("home") { inclusive = true }
+//                    }
+//                }
+//                onDismiss()
+//            }) {
+//                Text("확인")
+//            }
+//        },
+//        dismissButton = {
+//            Button(onClick = onDismiss) {
+//                Text("취소")
+//            }
+//        }
+//    )
+//}
+// -> 테스트 진행
 @Composable
 fun LogoutDialog(viewModel: AuthViewModel, navController: NavController, onDismiss: () -> Unit) {
     AlertDialog(
@@ -350,11 +376,7 @@ fun LogoutDialog(viewModel: AuthViewModel, navController: NavController, onDismi
         text = { Text("로그아웃 하시겠습니까?") },
         confirmButton = {
             Button(onClick = {
-                viewModel.logout {
-                    navController.navigate("home") {
-                        popUpTo("home") { inclusive = true }
-                    }
-                }
+                viewModel.logout(navController) // ✅ 수정된 로그아웃 함수 호출
                 onDismiss()
             }) {
                 Text("확인")
