@@ -26,5 +26,4 @@ public enum CardContentType {
         }
         throw new InvalidContentTypeException("유효하지 않은 컨텐츠 타입입니다.");
     }
-
 }

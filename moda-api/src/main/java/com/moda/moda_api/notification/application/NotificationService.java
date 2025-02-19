@@ -29,7 +29,6 @@ public class NotificationService {
 	private final FirebaseMessaging firebaseMessaging;
 	private final NotificationRepository notificationRepository;
 
-
 	// FCM 발송
 	@Transactional
 	public void sendFCMNotification(String userId, NotificationType type, Card card) {
@@ -39,7 +38,7 @@ public class NotificationService {
 			String.format("https://img.youtube.com/vi/%s/default.jpg", card.getThumbnailUrl()) : card.getThumbnailUrl();
 
 		System.out.println("userId : " + userId);
-		System.out.println("NotificationType : " +type);
+		System.out.println("NotificationType : " + type);
 		System.out.println();
 		System.out.println(imageUrl);
 		tokens.forEach(System.out::println);
@@ -66,6 +65,7 @@ public class NotificationService {
 						.setDefaultVibrateTimings(true)
 						.setDefaultSound(true)
 						.setNotificationCount(1)
+						.setChannelId("modamoda_card_Create")
 						.build())
 					.build())
 				.build();
@@ -98,11 +98,11 @@ public class NotificationService {
 					.setNotification(AndroidNotification.builder()
 						.setColor("#FFFFFF")
 						.setIcon("icon_round")
-						.setImage("https://a805bucket.s3.ap-northeast-2.amazonaws.com/images/logo/naverLogo.jpg")
 						.setClickAction("OPEN_ACTIVITY")
 						.setDefaultVibrateTimings(true)
 						.setDefaultSound(true)
 						.setNotificationCount(1)
+						.setChannelId("modamoda_card_Create")
 						.build())
 					.build())
 				.build();
@@ -124,7 +124,6 @@ public class NotificationService {
 		}
 		log.error("FCM 발송 실패", e);
 	}
-
 
 	// 알림 조회
 	public List<Notification> getNotifications(String userId, boolean unreadOnly) {
