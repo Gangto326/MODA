@@ -1,5 +1,6 @@
 package com.example.modapjt.components.cardlist
 
+import android.view.animation.PathInterpolator
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -17,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
@@ -24,7 +26,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.example.modapjt.R
 import kotlinx.coroutines.launch
 
 @Composable
@@ -59,9 +63,9 @@ fun ScrollToTopButton(scrollState: LazyListState) {
                 contentAlignment = Alignment.Center // 아이콘 중앙 정렬
             ) {
                 Icon(
-                    imageVector = Icons.Default.KeyboardArrowUp,
+                    painter = painterResource(id = R.drawable.ic_upscroll),
                     contentDescription = "맨 위로 가기",
-                    tint = Color.Black // 아이콘 색상을 검정으로
+                    tint = MaterialTheme.colorScheme.onPrimary// 아이콘 색상을 검정으로
                 )
             }
         }

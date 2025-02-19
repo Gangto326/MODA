@@ -66,7 +66,7 @@ fun SearchBar(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Image(
-                painter = painterResource(id = R.drawable.ic_search),
+                painter = painterResource(id = R.drawable.ic_a_search),
                 contentDescription = "Search Icon",
                 modifier = Modifier
                     .size(30.dp)

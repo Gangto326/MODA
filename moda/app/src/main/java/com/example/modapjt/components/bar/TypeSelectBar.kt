@@ -100,10 +100,10 @@ private fun CategoryTab(
     onClick: () -> Unit
 ) {
     val iconResId = when (title) {
-        "이미지" -> R.drawable.ic_image
-        "동영상" -> R.drawable.ic_video
-        "블로그" -> R.drawable.ic_blog
-        "뉴스" -> R.drawable.ic_news
+        "이미지" -> R.drawable.ic_s_image
+        "동영상" -> R.drawable.ic_s_youtube
+        "블로그" -> R.drawable.ic_s_blog
+        "뉴스" -> R.drawable.ic_s_news
         else -> null
     }
 

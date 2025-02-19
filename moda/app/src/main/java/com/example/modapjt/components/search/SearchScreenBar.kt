@@ -116,10 +116,10 @@ fun SearchScreenBar(
                     interactionSource = remember { NoRippleInteractionSource }
                 ) {
                     Icon(
-                        imageVector = Icons.Default.ArrowBack,
+                        painter = painterResource(id = R.drawable.ic_back),
                         contentDescription = "Back",
                         tint = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(15.dp)
                     )
                 }
                 Row(
@@ -216,7 +216,7 @@ fun SearchScreenBar(
                         interactionSource = remember { NoRippleInteractionSource }
                     ) {
                         Image(
-                            painter = painterResource(id = R.drawable.ic_search),
+                            painter = painterResource(id = R.drawable.ic_a_search),
                             contentDescription = "Search Icon",
                             modifier = Modifier.size(20.dp)
                         )
@@ -270,10 +270,10 @@ fun SearchListBar(
                     interactionSource = remember { NoRippleInteractionSource }
                 ) {
                     Icon(
-                        imageVector = Icons.Default.ArrowBack,
+                        painter = painterResource(id = R.drawable.ic_back),
                         contentDescription = "Back",
                         tint = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(15.dp)
                     )
                 }
                 Row(
@@ -368,7 +368,7 @@ fun SearchListBar(
                         interactionSource = remember { NoRippleInteractionSource }
                     ) {
                         Image(
-                            painter = painterResource(id = R.drawable.ic_search),
+                            painter = painterResource(id = R.drawable.ic_a_search),
                             contentDescription = "Search Icon",
                             modifier = Modifier.size(20.dp)
                         )

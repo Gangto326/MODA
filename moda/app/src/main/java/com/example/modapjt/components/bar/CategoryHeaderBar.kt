@@ -17,10 +17,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavController
+import com.example.modapjt.R
 
 @Composable
 fun CategoryHeaderBar(modifier: Modifier = Modifier, categoryName: String, navController: NavController) {
@@ -40,7 +42,7 @@ fun CategoryHeaderBar(modifier: Modifier = Modifier, categoryName: String, navCo
         ) {
             IconButton(onClick = { navController.popBackStack() }) {
                 Icon(
-                    imageVector = Icons.Default.ArrowBack, // ← 아이콘
+                    painter = painterResource(id = R.drawable.ic_back),
                     contentDescription = "뒤로가기",
                     tint = MaterialTheme.colorScheme.secondary
                 )

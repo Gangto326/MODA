@@ -105,9 +105,9 @@ fun BottomThumbnail(
         ) {
             val icon: Painter = painterResource(
                 when (type) {
-                    "NEWS" -> R.drawable.ic_news
-                    "VIDEO" -> R.drawable.ic_youtube
-                    "BLOG" -> R.drawable.ic_blog
+                    "NEWS" -> R.drawable.ic_a_news
+                    "VIDEO" -> R.drawable.ic_a_youtube
+                    "BLOG" -> R.drawable.ic_a_blog
                     else -> R.drawable.ic_default
                 }
             )

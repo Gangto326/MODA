@@ -296,10 +296,10 @@ private fun SectionHeader(title: String) {
     ) {
         // 섹션별 아이콘 추가
         val iconResId = when (title) {
-            "이미지" -> R.drawable.ic_image // 이미지 섹션 아이콘
-            "동영상" -> R.drawable.ic_video // 동영상 섹션 아이콘
-            "블로그" -> R.drawable.ic_blog // 블로그 섹션 아이콘
-            "뉴스" -> R.drawable.ic_news // 뉴스 섹션 아이콘
+            "이미지" -> R.drawable.ic_a_image // 이미지 섹션 아이콘
+            "동영상" -> R.drawable.ic_a_youtube // 동영상 섹션 아이콘
+            "블로그" -> R.drawable.ic_a_blog // 블로그 섹션 아이콘
+            "뉴스" -> R.drawable.ic_a_news // 뉴스 섹션 아이콘
             else -> null
         }
 

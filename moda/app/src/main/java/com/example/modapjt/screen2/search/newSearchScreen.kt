@@ -181,7 +181,7 @@ fun SearchSuggestions(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.ic_search),
+                        painter = painterResource(id = R.drawable.ic_a_search),
                         contentDescription = "Search Icon",
                         modifier = Modifier
                             .size(16.dp)
