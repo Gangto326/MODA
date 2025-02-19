@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -58,7 +59,7 @@ fun newLinkUploadScreen(navController: NavController, currentRoute: String, repo
         Column(
             modifier = Modifier
                 .fillMaxSize()  // 화면 전체 크기 사용
-                .background(Color(0xFFFAFAFA))  // 배경색을 연한 회색으로 설정
+//                .background(Color(0xFFFAFAFA))  // 배경색을 연한 회색으로 설정
                 .padding(paddingValues) // Scaffold에서 전달한 paddingValues 적용
                 .padding(16.dp),  // 본문 패딩 적용
             verticalArrangement = Arrangement.Center // Column 내부 요소들을 세로로 중앙 정렬
@@ -108,7 +109,7 @@ fun newLinkUploadScreen(navController: NavController, currentRoute: String, repo
             if (showWaitingMessage) {
                 Text(
                     text = "⏳ 카드 생성 중입니다...",
-                    color = Color.Black,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     fontSize = 14.sp
                 )
                 Spacer(modifier = Modifier.height(8.dp))

@@ -47,7 +47,7 @@ fun CardDetailHeaderBar(
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = "뒤로가기",
-                    tint = Color(0xFF2B2826)
+                    tint = MaterialTheme.colorScheme.secondary
                 )
             }
         },
@@ -57,7 +57,7 @@ fun CardDetailHeaderBar(
                 style = MaterialTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.Medium
                 ),
-                color = Color(0xFF2B2826)
+                color = MaterialTheme.colorScheme.onPrimary
             )
         },
         actions = {
@@ -67,7 +67,7 @@ fun CardDetailHeaderBar(
                         if (isBookmarked) R.drawable.ic_bookmark_filled else R.drawable.ic_bookmark_outline
                     ),
                     contentDescription = if (isBookmarked) "즐겨찾기 해제" else "즐겨찾기",
-                    tint = if (isBookmarked) Color(0xFFFFC107) else Color.Black, // 노란색 vs 검정색 테두리
+                    tint = if (isBookmarked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onPrimary, // 노란색 vs 검정색 테두리
                     modifier = Modifier
                         .padding(8.dp)
                         .size(24.dp)
@@ -79,7 +79,7 @@ fun CardDetailHeaderBar(
                     Icon(
                         imageVector = Icons.Default.MoreVert,
                         contentDescription = "더보기",
-                        tint = Color(0xFF2B2826)
+                        tint = MaterialTheme.colorScheme.secondary
                     )
                 }
 
@@ -105,7 +105,7 @@ fun CardDetailHeaderBar(
             }
         },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-            containerColor = Color.White
+//            containerColor = Color.White
         )
     )
 }
