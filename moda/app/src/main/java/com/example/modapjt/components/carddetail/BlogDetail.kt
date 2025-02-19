@@ -44,6 +44,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -162,12 +163,12 @@ fun BlogDetailScreen(cardDetail: CardDetail, navController: NavController) {
         Column(modifier = Modifier.fillMaxSize()) {
 
             // 🔘 이미지 토글 버튼
-            //        Button(
-            //            onClick = { showImage = !showImage },
-            //            modifier = Modifier.padding(8.dp)
-            //        ) {
-            //            Text(if (showImage) "이미지 숨기기" else "이미지 보기")
-            //        }
+                    Button(
+                        onClick = { showImage = !showImage },
+                        modifier = Modifier.padding(8.dp)
+                    ) {
+                        Text(if (showImage) "이미지 숨기기" else "이미지 보기")
+                    }
 
 
             // 🖼 이미지 슬라이더 (토글에 따라 표시)
@@ -302,19 +303,6 @@ fun BlogDetailScreen(cardDetail: CardDetail, navController: NavController) {
                         )
                     }
 
-//                    items(sections) { section ->
-//                        MarkdownText(
-//                            markdown = section,
-//                            modifier = Modifier
-//                                .padding(horizontal = horizontalPadding)
-//                                .padding(vertical = 8.dp)
-//                                .padding(end = 4.dp),
-//                            keywords = limitedKeywords,
-//                            onKeywordClick = { keyword ->
-//                                searchViewModel.onKeywordClick(keyword)
-//                            }
-//                        )
-//                    }
                     items(sections.withIndex().toList()) { (index, section) ->
                         Column(modifier = Modifier
                             .padding(horizontal = horizontalPadding)
@@ -344,7 +332,7 @@ fun BlogDetailScreen(cardDetail: CardDetail, navController: NavController) {
                         }
                     }
                     item {
-                        Spacer(modifier = Modifier.height(20.dp))
+                        Spacer(modifier = Modifier.height(40.dp))
                     }
                 }
 
@@ -456,7 +444,7 @@ fun BlogDetailScreen(cardDetail: CardDetail, navController: NavController) {
                                             drawCircle(
 //                                                color = Color(0xFF000000).copy(alpha = 0.3f),
                                                 color = Color(0xFFFDEEB0),
-                                                radius = 6f,  // tick 크기 조절
+                                                radius = 10f,  // tick 크기 조절
                                                 center = Offset(x, yCenter)
                                             )
                                         }
