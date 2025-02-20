@@ -395,9 +395,20 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
     }
 
     private fun captureImage() {
+        if (!isCapturingAtomic.compareAndSet(false, true)) {
+            Log.d("OverlayService", "캡처가 불가능합니다.")
+            Toast.makeText(applicationContext, "잠시 후 시도해 주십시오.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         lifecycleScope.launch {  // 또는 lifecycleScope, 상황에 맞는 스코프 사용
-            val file = ScreenCaptureManager.bitmapToFile(context)
-            repository.createCardWithImage(file)
+            try {
+                Toast.makeText(applicationContext, "이미지 캡처가 성공하였습니다.", Toast.LENGTH_SHORT).show()
+                val file = ScreenCaptureManager.bitmapToFile(context)
+                repository.createCardWithImage(file)
+            } finally {
+                isCapturingAtomic.set(false)
+            }
         }
     }
 
