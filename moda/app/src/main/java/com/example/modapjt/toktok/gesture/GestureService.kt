@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
@@ -54,8 +55,8 @@ import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.example.modapjt.data.repository.CardRepository
 import com.example.modapjt.toktok.BrowserAccessibilityService
-import com.example.modapjt.toktok.overlay.ScreenCaptureManager
-import com.example.modapjt.toktok.overlay.ScreenCaptureManager.capturedBitmap
+import com.example.modapjt.toktok.ScreenCaptureManager
+import com.example.modapjt.toktok.ScreenCaptureManager.capturedBitmap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -372,25 +373,35 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
 
             //제스처 이름이 circle이 포함하는 경우, 전체 url 저장
             if (gesture.first.contains("circle")) {
-                if (gesture.second < 9) {
+                if (gesture.second < 6) {
                     Toast.makeText(context, "원을 더 정확하게 그려주세요.", Toast.LENGTH_SHORT)
                         .show()
                     return
                 }
 
-                captureUrl()
-                Log.d("GestureService", "URL 캡처")
+                captureImage()
+                Log.d("GestureService", "이미지 캡처")
             }
 
             //제스처 이름이 check를 포함하는 경우, 해당 이미지 저장
             if (gesture.first.contains("check")) {
 
-                Log.d("GestureService", "이미지 캡처")
+                captureUrl()
+                Log.d("GestureService", "URL 캡처")
             }
         } finally {
             closeDoubleTap()
         }
-    }    /**
+    }
+
+    private fun captureImage() {
+        lifecycleScope.launch {  // 또는 lifecycleScope, 상황에 맞는 스코프 사용
+            val file = ScreenCaptureManager.bitmapToFile(context)
+            repository.createCardWithImage(file)
+        }
+    }
+
+    /**
      * 현재 URL 캡처 및 저장
      * 화면 캡처 후 애니메이션을 통해 시각적 피드백 제공
      */
@@ -479,6 +490,11 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
         virtualDisplay?.release()
         mediaProjection?.stop()
         ScreenCaptureManager.clearCapturedBitmap()
+
+        if (captureView?.isAttachedToWindow == true) {
+            windowManager?.removeView(captureView)
+            Log.d("GestureService", "캡처 뷰 제거")
+        }
 
         if (gestureView?.isAttachedToWindow == true) {
             windowManager?.removeView(gestureView)

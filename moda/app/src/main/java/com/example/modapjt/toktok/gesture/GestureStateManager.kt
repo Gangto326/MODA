@@ -11,7 +11,7 @@ object GestureStateManager {
     private val _isGestureActive = MutableStateFlow(false)
     val isGestureActive = _isGestureActive.asStateFlow()
 
-    fun setOverlayActive(active: Boolean) {
+    fun setGestureActive(active: Boolean) {
         _isGestureActive.value = active
     }
 

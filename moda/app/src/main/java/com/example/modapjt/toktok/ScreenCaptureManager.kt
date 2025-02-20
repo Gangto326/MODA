@@ -1,10 +1,14 @@
-package com.example.modapjt.toktok.overlay
+package com.example.modapjt.toktok
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.media.Image
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 
 object ScreenCaptureManager {
     // 실시간으로 갱신되는 bitmap
@@ -57,5 +61,21 @@ object ScreenCaptureManager {
         _currentBitmap = null
         _capturedBitmap?.recycle()
         _capturedBitmap = null
+    }
+
+    fun bitmapToFile(context: Context): File {
+        // 임시 파일 생성
+        val file = File(context.cacheDir, "image_${System.currentTimeMillis()}.jpg")
+
+        // Bitmap을 파일로 저장
+        try {
+            FileOutputStream(file).use { out ->
+                currentBitmap?.compress(Bitmap.CompressFormat.JPEG, 100, out)
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+
+        return file
     }
 }
