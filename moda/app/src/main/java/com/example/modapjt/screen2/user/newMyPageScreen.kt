@@ -112,7 +112,7 @@ fun MyPageScreen(
                             putExtra(GestureService.EXTRA_RESULT_CODE, result.resultCode)
                             putExtra(GestureService.EXTRA_DATA, data)
                         }
-                        OverlayStateManager.setOverlayActive(true)
+                        GestureStateManager.setGestureActive(true)
                     }
                     else -> { }
                 }
@@ -292,7 +292,7 @@ fun MyPageScreen(
                                         } else {
                                             val serviceIntent = Intent(context, GestureService::class.java)
                                             context.stopService(serviceIntent)
-                                            GestureStateManager.setOverlayActive(false)
+                                            GestureStateManager.setGestureActive(false)
                                         }
                                     }
                                     else if (saveMode == SaveMethod.OVERLAY){

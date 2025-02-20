@@ -37,7 +37,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
@@ -56,7 +55,8 @@ import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.example.modapjt.data.repository.CardRepository
 import com.example.modapjt.toktok.BrowserAccessibilityService
-import com.example.modapjt.toktok.overlay.ScreenCaptureManager.capturedBitmap
+import com.example.modapjt.toktok.ScreenCaptureManager
+import com.example.modapjt.toktok.ScreenCaptureManager.capturedBitmap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
