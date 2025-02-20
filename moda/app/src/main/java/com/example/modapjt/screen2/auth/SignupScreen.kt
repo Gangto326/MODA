@@ -168,7 +168,7 @@ fun SignUpScreen(
                     state.usernameVerificationMessage?.let { message ->
                         Text(
                             text = message,
-                            color = if (state.isUsernameVerified) Color.Blue else Color.Red,
+                            color = if (state.isUsernameVerified) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onError,
                             modifier = Modifier.padding(start = 8.dp, top = 4.dp)
                         )
                     }
@@ -227,7 +227,7 @@ fun SignUpScreen(
                     state.emailVerificationMessage?.let { message ->
                         Text(
                             text = message,
-                            color = if (message == "인증되었습니다.") Color.Blue else Color.Red,
+                            color = if (message == "인증되었습니다.") MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onError,
                             modifier = Modifier.padding(start = 8.dp, top = 4.dp)
                         )
                     }
@@ -343,7 +343,7 @@ fun SignUpScreen(
                 state.passwordValidationMessage?.let { message ->
                     Text(
                         text = message,
-                        color = Color.Red,
+                        color = MaterialTheme.colorScheme.onError,
                         modifier = Modifier.padding(start = 8.dp, top = 4.dp)
                     )
                 }
@@ -352,7 +352,7 @@ fun SignUpScreen(
             if (state.error != null) {
                 Text(
                     text = state.error,
-                    color = Color.Red,
+                    color = MaterialTheme.colorScheme.onError,
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
             }

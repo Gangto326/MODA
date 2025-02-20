@@ -184,7 +184,7 @@ fun LoginScreen(
         if (state.error != null) {
             Text(
                 text = state.error,
-                color = Color.Red,
+                color = MaterialTheme.colorScheme.onError,
                 modifier = Modifier.padding(vertical = 16.dp)
             )
         }

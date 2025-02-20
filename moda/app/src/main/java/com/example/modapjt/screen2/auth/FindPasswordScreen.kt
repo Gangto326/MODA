@@ -228,7 +228,7 @@ fun FindPasswordScreen(
                     if (state.remainingTime > 0) {
                         Text(
                             text = "남은 시간: ${state.remainingTime / 60}:${String.format("%02d", state.remainingTime % 60)}",
-                            color = Color.Red,
+                            color = MaterialTheme.colorScheme.onError,
                             modifier = Modifier.padding(start = 8.dp, top = 4.dp)
                         )
                     }
@@ -311,7 +311,7 @@ fun FindPasswordScreen(
         if (state.error != null) {
             Text(
                 text = state.error,
-                color = Color.Red,
+                color = MaterialTheme.colorScheme.onError,
                 modifier = Modifier.padding(vertical = 16.dp)
             )
         }

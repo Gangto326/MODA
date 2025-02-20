@@ -119,7 +119,7 @@ fun newLinkUploadScreen(navController: NavController, currentRoute: String, repo
             message?.let {
                 Text(
                     text = it,
-                    color = if (it.contains("성공")) Color.Green else Color.Red, // 성공이면 초록, 실패면 빨간색
+                    color = if (it.contains("성공")) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onError, // 성공이면 초록, 실패면 빨간색
                     fontSize = 14.sp
                 )
             }
