@@ -25,36 +25,34 @@ data class ThumbnailItem(
 )
 
 @Composable
-fun BottomThumbnailList(navController: NavController, viewModel: SearchViewModel) {
-    val searchData by viewModel.searchData.collectAsState()
+fun BottomThumbnailList(thumbnails: List<ThumbnailItem>,
+                        onItemClick: (String) -> Unit) {
+//    val searchData by viewModel.searchData.collectAsState()
 
-    searchData?.todays?.let { todays ->
-        Column(
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+    ) {
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                for (item in todays) {
-                    BottomThumbnail(
-                        cardId = item.cardId,
-                        thumbnailUrl = item.thumbnailUrl?: "",
-                        title = item.title?: "",
-                        type = item.type?: "",
-                        keywords = item.keywords?: emptyList(),
-                        bookmark = item.bookmark?: false,
-                        onClick = { cardId ->
-                            navController.navigate("cardDetail/${item.cardId}")
-                        }
-                    )
-                }
+            for (item in thumbnails) {
+                BottomThumbnail(
+                    cardId = item.cardId,
+                    thumbnailUrl = item.thumbnailUrl,
+                    title = item.title,
+                    type = item.type,
+                    keywords = item.keywords,
+                    bookmark = item.bookmark,
+                    onClick = { onItemClick(item.cardId) }
+                )
             }
         }
     }
 }
+
 

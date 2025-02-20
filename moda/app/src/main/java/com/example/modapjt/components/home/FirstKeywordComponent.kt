@@ -14,6 +14,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.modapjt.data.dto.response.KeywordSearchResponse
+import com.example.modapjt.data.dto.response.SearchItem
 import com.example.modapjt.domain.viewmodel.SearchViewModel
 
 data class FirstKeywordItem(
@@ -26,13 +28,16 @@ data class FirstKeywordItem(
 )
 
 @Composable
-fun FirstKeywordList(navController: NavController, viewModel: SearchViewModel) {
-    val keywordSearchData by viewModel.keywordSearchData.collectAsState() // ✅ 변경된 StateFlow 사용
+fun FirstKeywordList(
+    keywords: List<KeywordSearchResponse>,
+    navController: NavController
+) {
+//    val keywordSearchData by viewModel.keywordSearchData.collectAsState() // ✅ 변경된 StateFlow 사용
 
     // 디버깅용 로그 추가
-    Log.d("FirstKeywordList", "keywordSearchData size: ${keywordSearchData.size}")
+    Log.d("FirstKeywordList", "keywordSearchData size: ${keywords.size}")
 
-    keywordSearchData.let { items ->
+    keywords.let { items ->
         Column(
             modifier = Modifier
                 .fillMaxWidth()

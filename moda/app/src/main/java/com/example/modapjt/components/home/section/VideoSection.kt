@@ -14,26 +14,49 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.modapjt.components.home.HomeSmallTitle
+import com.example.modapjt.components.home.VideoItemData
+import com.example.modapjt.components.home.VideoList
 import com.example.modapjt.components.home.VideoListComponent
+import com.example.modapjt.data.dto.response.SearchItem
 import com.example.modapjt.domain.viewmodel.SearchViewModel
 
 @Composable
 fun VideoSection(
-    navController: NavController,
-    homeKeywordViewModel: SearchViewModel,
-    searchViewModel: SearchViewModel
+    videos: List<SearchItem>,
+    creator: String,
+    navController: NavController
 ) {
-    val searchData by searchViewModel.searchData.collectAsState()
-    val videos = searchData?.videos.orEmpty()
-    val creator by homeKeywordViewModel.creator.collectAsState()
-
-    // videos가 비어있어도 항상 표시
+    // 상태를 직접 받아서 사용
     HomeSmallTitle(
         title = if (creator.isNotEmpty()) "$creator 영상 어때요?" else "영상 어때요?",
         description = ""
     )
 
-    VideoListComponent(navController, searchViewModel)
+    // VideoListComponent 대신 VideoList를 직접 사용
+    val videosList = videos.map {
+        VideoItemData(
+            cardId = it.cardId,
+            videoUrl = it.thumbnailUrl ?: "",
+            title = it.title ?: ""
+        )
+    }
+
+    val finalVideos = if (videosList.isEmpty()) {
+        listOf(
+            VideoItemData(
+                cardId = "default",
+                videoUrl = "jWQx2f-CErU",
+                title = "Default Video"
+            )
+        )
+    } else {
+        videosList
+    }
+
+    VideoList(
+        navController = navController,
+        videos = finalVideos
+    )
 
     Spacer(
         modifier = Modifier

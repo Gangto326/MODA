@@ -88,8 +88,20 @@ fun newHomeScreen(
     // 🔹 API에서 받아올 creator 값 저장
     val creator by homeKeywordViewModel.creator.collectAsState()
 
+    val searchData by searchViewModel.searchData.collectAsState()
+
+    val topKeywords by homeKeywordViewModel.topKeywords.collectAsState()
+    val selectedKeyword by homeKeywordViewModel.selectedKeyword.collectAsState()
+    val keywordSearchData by searchViewModel.keywordSearchData.collectAsState()
+    var sliderIndex by remember { mutableStateOf(0) }
+
+    val thumbnails = remember(searchData?.thumbnails) {
+        searchData?.thumbnails ?: emptyList()
+    }
+
     LaunchedEffect(Unit) {
         homeKeywordViewModel.fetchHomeKeywords() // userId 전달
+        searchViewModel.loadSearchData()
     }
 
 
@@ -128,18 +140,6 @@ fun newHomeScreen(
                 .background(MaterialTheme.colorScheme.tertiary) // 배경
                 .padding(paddingValues)
         ) {
-//            item {
-//                Box(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .height(50.dp)
-//                        .offset(y = headerOffsetY)
-//                        .alpha(headerAlpha)
-//                ) {
-//                    HeaderBar(modifier = Modifier)
-//                }
-//            }
-            // -> 기존 헤더바
 
             // 검색바 상단에 로고 배치
             item {
@@ -180,7 +180,13 @@ fun newHomeScreen(
             }
 
             item {
-                ThumbnailSlider(viewModel = searchViewModel, navController = navController)
+                ThumbnailSlider(
+                    thumbnails = searchData?.thumbnails,
+                    navController = navController,
+                    onLoadData = { searchViewModel.loadSearchData() }
+//                    viewModel = searchViewModel,
+//                    navController = navController
+                )
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
@@ -192,9 +198,13 @@ fun newHomeScreen(
 
             item {
                 WeeklyKeywordSection(
-                    homeKeywordViewModel = homeKeywordViewModel,
-                    navController = navController,
-                    searchViewModel = searchViewModel
+                    topKeywords = topKeywords,
+                    selectedKeyword = selectedKeyword,
+                    keywordSearchData = keywordSearchData,
+                    onKeywordSelected = { keyword ->
+                        homeKeywordViewModel.updateKeywordAndFetchData(keyword)
+                    },
+                    navController = navController
                 )
             }
 
@@ -202,13 +212,13 @@ fun newHomeScreen(
             item {
                 TodayContentSection(
                     navController = navController,
-                    searchViewModel = searchViewModel
+                    todayContent = searchData?.todays.orEmpty()
                 )
             }
 
             item {
                 Image(
-                    painter = painterResource(id = R.drawable.overlayad),
+                    painter = painterResource(id = R.drawable.newoverlay),
                     contentDescription = "광고 이미지",
                     contentScale = ContentScale.FillWidth,
                     modifier = Modifier
@@ -221,25 +231,25 @@ fun newHomeScreen(
 
             item {
                 VideoSection(
-                    navController = navController,
-                    homeKeywordViewModel = homeKeywordViewModel,
-                    searchViewModel = searchViewModel
+                    videos = searchData?.videos.orEmpty(),
+                    creator = creator,
+                    navController = navController
                 )
             }
 
 
             item {
                 ImageSection(
-                    navController = navController,
-                    searchViewModel = searchViewModel
+                    images = searchData?.images.orEmpty(),
+                    navController = navController
                 )
             }
 
 
             item {
                 ForgottenContentSection(
-                    navController = navController,
-                    searchViewModel = searchViewModel
+                    forgottenContents = searchData?.forgotten.orEmpty(),
+                    navController = navController
                 )
             }
         }

@@ -17,15 +17,19 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.modapjt.data.dto.response.SearchItem
 import com.example.modapjt.domain.viewmodel.SearchViewModel
 import kotlinx.coroutines.delay
 
 @Composable
 fun ThumbnailSlider(
-    viewModel: SearchViewModel = viewModel(),
+//    viewModel: SearchViewModel = viewModel(),
+//    navController: NavController,
+    thumbnails: List<SearchItem>?,  // viewModel 대신 데이터만 받도록 수정
     navController: NavController,
+    onLoadData: () -> Unit = {}
 ) {
-    val searchData by viewModel.searchData.collectAsState()
+//    val searchData by viewModel.searchData.collectAsState()
     var currentIndex by remember { mutableStateOf(0) }
     var dragOffset by remember { mutableStateOf(0f) }
 //    val dragThreshold = 100f
@@ -46,18 +50,18 @@ fun ThumbnailSlider(
     )
 
     // 홈 화면에서 API 자동 호출
-    LaunchedEffect(Unit) {
-        viewModel.loadSearchData()
-    }
+//    LaunchedEffect(Unit) {
+//        viewModel.loadSearchData()
+//    }
 
     // 4초마다 자동 슬라이드 추가
     LaunchedEffect(currentIndex) {
         while (true) {
             delay(4000)
-            val totalItems = if (searchData?.thumbnails?.isEmpty() == true) {
+            val totalItems = if (thumbnails?.isEmpty() == true) {
                 defaultOnboardingImages.size
             } else {
-                searchData?.thumbnails?.size ?: defaultOnboardingImages.size
+                thumbnails?.size ?: defaultOnboardingImages.size
             }
             targetIndex = (currentIndex + 1) % totalItems
             currentIndex = targetIndex
@@ -74,10 +78,10 @@ fun ThumbnailSlider(
                     detectHorizontalDragGestures(
                         onDragStart = { dragOffset = 0f },
                         onDragEnd = {
-                            val totalItems = if (searchData?.thumbnails?.isEmpty() == true) {
+                            val totalItems = if (thumbnails?.isEmpty() == true) {
                                 defaultOnboardingImages.size
                             } else {
-                                searchData?.thumbnails?.size ?: defaultOnboardingImages.size
+                                thumbnails?.size ?: defaultOnboardingImages.size
                             }
                             when {
                                 dragOffset > dragThreshold -> {
@@ -112,7 +116,7 @@ fun ThumbnailSlider(
                 },
                 label = "thumbnail_slider"
             ) { index ->
-                if (searchData?.thumbnails?.isEmpty() == true) {
+                if (thumbnails?.isEmpty() == true) {
                     TopThumbnail(
                         imageUrl = defaultOnboardingImages[index],
                         title = "온보딩 이미지 ${index + 1}",
@@ -122,7 +126,7 @@ fun ThumbnailSlider(
                         onClick = { /* 온보딩 이미지는 클릭 동작 없음 */ }
                     )
                 } else {
-                    searchData?.thumbnails?.let { thumbnails ->
+                    thumbnails?.let { thumbnails ->
                         if (thumbnails.isNotEmpty()) {
                             val currentItem = thumbnails[index]
                             TopThumbnail(
@@ -142,10 +146,10 @@ fun ThumbnailSlider(
         }
 
         // ThumbnailIndicator 표시
-        val totalItems = if (searchData?.thumbnails?.isEmpty() == true) {
+        val totalItems = if (thumbnails?.isEmpty() == true) {
             defaultOnboardingImages.size
         } else {
-            searchData?.thumbnails?.size ?: defaultOnboardingImages.size
+            thumbnails?.size ?: defaultOnboardingImages.size
         }
         ThumbnailIndicator(
             currentIndex = currentIndex,

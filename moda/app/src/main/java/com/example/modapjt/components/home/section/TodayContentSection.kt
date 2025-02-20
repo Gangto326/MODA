@@ -14,17 +14,19 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.modapjt.components.home.BottomThumbnailList
 import com.example.modapjt.components.home.HomeSmallTitle
+import com.example.modapjt.components.home.ThumbnailItem
+import com.example.modapjt.data.dto.response.SearchItem
 import com.example.modapjt.domain.viewmodel.SearchViewModel
 
 @Composable
 fun TodayContentSection(
     navController: NavController,
-    searchViewModel: SearchViewModel
+    todayContent: List<SearchItem>
 ) {
-    val searchData by searchViewModel.searchData.collectAsState()
-    val todays = searchData?.todays.orEmpty() // 오늘의 컨텐츠 리스트 가져오기
+//    val searchData by searchViewModel.searchData.collectAsState()
+//    val todays = searchData?.todays.orEmpty() // 오늘의 컨텐츠 리스트 가져오기
 
-    if (todays.isNotEmpty()) {
+    if (todayContent.isNotEmpty()) {
         Divider(
             color = MaterialTheme.colorScheme.onTertiary,
             thickness = 6.dp,
@@ -46,7 +48,22 @@ fun TodayContentSection(
             description = " | 해당 컨텐츠에 대한 설명"
         )
 
-        BottomThumbnailList(navController, searchViewModel)
+        // SearchItem을 ThumbnailItem으로 변환
+        val thumbnailItems = todayContent.map { item ->
+            ThumbnailItem(
+                cardId = item.cardId,
+                thumbnailUrl = item.thumbnailUrl ?: "",
+                title = item.title ?: "",
+                type = item.type ?: "",
+                keywords = item.keywords ?: emptyList(),
+                bookmark = item.bookmark ?: false
+            )
+        }
+
+        BottomThumbnailList(thumbnails = thumbnailItems,
+            onItemClick = { cardId ->
+                navController.navigate("cardDetail/$cardId")
+            })
         Spacer(modifier = Modifier.height(30.dp))
     }
 }
