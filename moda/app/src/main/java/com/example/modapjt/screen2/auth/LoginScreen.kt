@@ -198,13 +198,13 @@ fun LoginScreen(
             enabled = !state.isLoading,
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary // 버튼 배경색
+                containerColor = MaterialTheme.colorScheme.onPrimary // 버튼 배경색
             )
         ) {
             if (state.isLoading) {
                 CircularProgressIndicator(color = MaterialTheme.colorScheme.tertiary) // 로딩 아이콘
             } else {
-                Text("로그인", color = MaterialTheme.colorScheme.onPrimary)
+                Text("로그인", color = MaterialTheme.colorScheme.tertiary)
             }
         }
 
