@@ -103,10 +103,10 @@ import com.example.modapjt.R
 fun UserProfileCard(nickname: String, itemCount: Int) {
     // 저장 개수에 따라 PNG 이미지 및 상태 텍스트 설정
     val (imageRes, statusText) = when {
-        itemCount < 10 -> Pair(R.drawable.moda_logo, "수집가1")
-        itemCount in 10..49 -> Pair(R.drawable.moda_logo, "수집가2")
-        itemCount in 50..99 -> Pair(R.drawable.moda_logo, "프로 수집러")
-        else -> Pair(R.drawable.moda_logo, "마스터 수집러")
+        itemCount < 10 -> Pair(R.drawable.ic_level1, "초보 수집러")
+        itemCount in 10..49 -> Pair(R.drawable.ic_level2, "중급 수집가")
+        itemCount in 50..99 -> Pair(R.drawable.ic_level3, "프로 수집러")
+        else -> Pair(R.drawable.ic_level4, "마스터 수집러")
     }
 
     Row(

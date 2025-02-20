@@ -21,6 +21,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.remember
 import androidx.compose.ui.draw.clip
 
@@ -46,7 +47,7 @@ fun ImageBig(
                 interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
             )
             .then(
-                if (!isMine) Modifier.border(2.dp, Color.Red, RoundedCornerShape(12.dp)) else Modifier // isMine이 false면 빨간 테두리
+                if (!isMine) Modifier.border(2.dp, MaterialTheme.colorScheme.onError, RoundedCornerShape(12.dp)) else Modifier // isMine이 false면 빨간 테두리
             )
     )
 }

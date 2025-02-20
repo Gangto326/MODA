@@ -91,8 +91,8 @@ fun KeywordRankItem(rank: Int, keyword: String, change: Int, navController: NavC
             textAlign = TextAlign.End,  // ✨ 오른쪽 정렬
             color = when {
                 change == 100 -> MaterialTheme.colorScheme.primary // new 표시
-                change > 0 -> Color.Red // 업 표시
-                change < 0 -> Color.Blue // 다운 표시
+                change > 0 -> MaterialTheme.colorScheme.onError // 업 표시
+                change < 0 -> MaterialTheme.colorScheme.onSurface // 다운 표시
                 else -> MaterialTheme.colorScheme.onSecondary // - 표시
             }
         )

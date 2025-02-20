@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -251,7 +252,7 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
                     modifier = Modifier
                         .fillMaxSize()
                         .alpha(0.5f),
-                    tint = if (isCollapsed) Color.Red else Color.Gray
+                    tint = if (isCollapsed) MaterialTheme.colorScheme.onError else MaterialTheme.colorScheme.secondary
                 )
             }
         }
@@ -443,7 +444,7 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
                     modifier = Modifier
                         .fillMaxSize()
                         .alpha(0.5f),
-                    tint = if (isCollapsed) Color.Red else Color.Gray
+                    tint = if (isCollapsed) MaterialTheme.colorScheme.onError else MaterialTheme.colorScheme.secondary
                 )
             }
         }
