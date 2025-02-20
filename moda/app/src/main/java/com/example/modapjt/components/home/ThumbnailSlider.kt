@@ -123,8 +123,8 @@ fun ThumbnailSlider(
                     thumbnails == null || thumbnails.isEmpty() -> {
                         TopThumbnail(
                             imageUrl = defaultOnboardingImages[index],
-                            title = "온보딩 이미지 ${index + 1}",
-                            content = "환영합니다!",
+                            title = "",
+                            content = "",
                             currentIndex = index,
                             totalItems = defaultOnboardingImages.size,
                             onClick = { /* 온보딩 이미지는 클릭 동작 없음 */ },

@@ -68,19 +68,21 @@ fun TopThumbnail(
         )
 
         // 그라데이션 배경
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Transparent, // 위쪽은 투명
-                            Color.Black.copy(alpha = 0.3f), // 중간 부분은 살짝 어두운 색
-                            Color.Black.copy(alpha = 0.8f) // 아래쪽은 더 어두운 색
+        if (type != "ONBOARD") {  // ONBOARD가 아닐 때만 그라데이션 표시
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Transparent, // 위쪽은 투명
+                                Color.Black.copy(alpha = 0.3f), // 중간 부분은 살짝 어두운 색
+                                Color.Black.copy(alpha = 0.8f) // 아래쪽은 더 어두운 색
+                            )
                         )
                     )
-                )
-        )
+            )
+        }
 
 
         // 제목과 내용이 포함된 Column
