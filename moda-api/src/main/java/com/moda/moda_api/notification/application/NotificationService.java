@@ -59,7 +59,7 @@ public class NotificationService {
 					.setPriority(AndroidConfig.Priority.HIGH)
 					.setNotification(AndroidNotification.builder()
 						.setColor("#FFFFFF")
-						.setIcon("icon_round")
+						.setIcon("ic_logo")
 						.setImage(imageUrl)  // **이미지 URL 추가**
 						.setClickAction("OPEN_ACTIVITY")
 						.setDefaultVibrateTimings(true)
@@ -97,7 +97,7 @@ public class NotificationService {
 					.setPriority(AndroidConfig.Priority.HIGH)
 					.setNotification(AndroidNotification.builder()
 						.setColor("#FFFFFF")
-						.setIcon("icon_round")
+						.setIcon("ic_logo")
 						.setClickAction("OPEN_ACTIVITY")
 						.setDefaultVibrateTimings(true)
 						.setDefaultSound(true)
