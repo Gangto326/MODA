@@ -175,6 +175,7 @@ public class CardService {
 				if (SummaryResultDto.getThumbnailUrl() != null) {
 					thumbnailUrl = SummaryResultDto.getThumbnailUrl();
 				} else {
+
 					// S3 기본 경로
 					String baseS3Path = "https://a805bucket.s3.ap-northeast-2.amazonaws.com/images/logo/";
 
@@ -187,7 +188,6 @@ public class CardService {
 						thumbnailUrl = baseS3Path + "Defalut.jpg";
 					}
 				}
-
 				Card card = cardFactory.create(
 					userIdObj,
 					SummaryResultDto.getCategoryId(),
@@ -201,8 +201,6 @@ public class CardService {
 					SummaryResultDto.getKeywords(),
 					SummaryResultDto.getSubContent()
 				);
-
-
 
 
 				System.out.println(card.toString());
