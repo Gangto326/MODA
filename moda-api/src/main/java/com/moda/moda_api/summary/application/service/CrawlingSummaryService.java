@@ -24,8 +24,6 @@ public class CrawlingSummaryService {
 	private final CrawlingService crawlingService;
 	private final Executor pythonExecutor;
 
-	// https://m.sports.naver.com/wfootball/article/477/0000535493
-
 	public CompletableFuture<SummaryResultDto> summarize(String url, String userId) {
 		return CompletableFuture.supplyAsync(() -> {
 				try {

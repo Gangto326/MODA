@@ -54,8 +54,7 @@ public class ImageStorageService {
 				.contentType("image/jpeg")
 				.build();
 
-			// s3Client.putObject(request,
-			// 	RequestBody.fromBytes(imageData));
+			s3Client.putObject(request, RequestBody.fromBytes(imageData));
 
 			// URL 생성 (key에 파일명 포함)
 			return String.format("https://%s.s3.ap-northeast-2.amazonaws.com/%s",
@@ -78,7 +77,6 @@ public class ImageStorageService {
 			}
 
 			URL url = new URL(modifiedUrl);
-
 
 			System.out.println(modifiedUrl);
 			HttpURLConnection connection = (HttpURLConnection)url.openConnection();
