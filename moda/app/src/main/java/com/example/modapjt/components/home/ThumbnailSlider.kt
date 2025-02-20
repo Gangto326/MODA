@@ -54,7 +54,7 @@ fun ThumbnailSlider(
     val totalItems by remember(thumbnails) {
         mutableStateOf(thumbnails?.size ?: defaultOnboardingImages.size)
     }
-    val video123 = "VIDEO"
+    val video123 = "ONBOARD"
     // 홈 화면에서 API 자동 호출
 //    LaunchedEffect(Unit) {
 //        viewModel.loadSearchData()
