@@ -18,7 +18,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.StateFactoryMarker
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -35,7 +34,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.modapjt.R
 import com.example.modapjt.domain.model.Category
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
@@ -50,7 +48,6 @@ fun CategoryItem(
     val rippleAnimatable = remember { Animatable(0f) }
     val scope = rememberCoroutineScope()
 
-// CategoryItem.kt 파일에서 categoryNameMap을 categoryIdMap으로 변경
     val categoryIdMap = mapOf(
         1 to "전체",
         2 to "건강",
@@ -64,30 +61,48 @@ fun CategoryItem(
         10 to "예술"
     )
 
-// 그리고 이 부분을 수정
     val categoryName = categoryIdMap[category.categoryId] ?: category.category
 
-
-    val iconVector = when (category.categoryId) {
-        1 -> R.drawable.cg_all
-        2 -> R.drawable.cg_health
-        3 -> R.drawable.cg_travel
-        4 -> R.drawable.cg_food
-        5 -> R.drawable.cg_it
-        6 -> R.drawable.cg_finance
-        7 -> R.drawable.cg_society
-        8 -> R.drawable.cg_science
-        9 -> R.drawable.cg_hobby
-        10 -> R.drawable.cg_art
-        else -> R.drawable.category_default
+    // 활성화 상태에 따라 다른 아이콘 사용
+    val iconVector = if (isVisible) {
+        // 활성화된 경우 cg_c_ 접두사 아이콘 사용
+        when (category.categoryId) {
+            1 -> R.drawable.cg_c_all
+            2 -> R.drawable.cg_c_health
+            3 -> R.drawable.cg_c_travel
+            4 -> R.drawable.cg_c_food
+            5 -> R.drawable.cg_c_it
+            6 -> R.drawable.cg_c_finance
+            7 -> R.drawable.cg_c_society
+            8 -> R.drawable.cg_c_science
+            9 -> R.drawable.cg_c_hobby
+            10 -> R.drawable.cg_c_art
+            else -> R.drawable.category_default
+        }
+    } else {
+        // 비활성화된 경우 cg_ 접두사 아이콘 사용
+        when (category.categoryId) {
+            1 -> R.drawable.cg_all
+            2 -> R.drawable.cg_health
+            3 -> R.drawable.cg_travel
+            4 -> R.drawable.cg_food
+            5 -> R.drawable.cg_it
+            6 -> R.drawable.cg_finance
+            7 -> R.drawable.cg_society
+            8 -> R.drawable.cg_science
+            9 -> R.drawable.cg_hobby
+            10 -> R.drawable.cg_art
+            else -> R.drawable.category_default
+        }
     }
 
-    val color = if (isVisible) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondary // 검정색 <-> 연회색
+    // 비활성화 때 사용할 색상 정의
+    val inactiveColor = MaterialTheme.colorScheme.onSecondary
     val context = LocalContext.current
 
     Column(
         modifier = Modifier
-            .padding(4.dp)  // 패딩 값 축소
+            .padding(4.dp)
             .graphicsLayer { alpha = 0.99f }
             .drawBehind {
                 drawCircle(
@@ -114,11 +129,10 @@ fun CategoryItem(
                             navController.navigate("categoryDetail/${category.categoryId}")
                         }
                     }
-//                    Modifier.clickable { navController.navigate("categoryDetail/${category.categoryId}") }
                 } else {
                     Modifier.clickable (
-                        indication = null, // 클릭 효과 제거
-                        interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
                     ){
                         Toast.makeText(
                             context,
@@ -133,19 +147,17 @@ fun CategoryItem(
         Image(
             painter = painterResource(id = iconVector),
             contentDescription = categoryName,
-            colorFilter = ColorFilter.tint(color),
+            // 활성화 상태에 따라 아이콘이 이미 다르므로 colorFilter는 필요 없음
             modifier = Modifier
-                .size(36.dp)  // 아이콘 크기 약간 축소
+                .size(36.dp)
                 .padding(bottom = 2.dp)
         )
         Text(
             text = categoryName,
-            fontSize = 12.sp,  // 폰트 크기 약간 축소
-            color = color,
-            maxLines = 1,  // 한 줄로 제한
-            overflow = TextOverflow.Ellipsis  // 길이가 길면 ...으로 표시
+            fontSize = 12.sp,
+            color = if (!isVisible) inactiveColor else Color.Black,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
-
-
