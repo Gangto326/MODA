@@ -71,8 +71,6 @@ public class CrawlingSummaryService {
 						getFirstImageUrl(crawledContent.getExtractedContent().getImages())
 					);
 
-
-
 				// 3단계: 두 작업이 모두 완료되면 최종 결과 생성
 				return CompletableFuture.allOf(pythonAnalysisFuture, thumbnailUrlFuture)
 					.thenApply(ignored -> {

@@ -22,5 +22,4 @@ public class SummaryService {
 		// 일반 웹사이트일 경우
 		return crawlingSummaryService.summarize(url, userId);
 	}
-
 }

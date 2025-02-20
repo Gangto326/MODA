@@ -27,10 +27,10 @@ public class WebDriverConfig {
 		options.addArguments("--disable-extensions");
 		options.addArguments("--headless");
 		options.setPageLoadStrategy(PageLoadStrategy.EAGER);
-		options.addArguments("--memory-pressure-off");
-		options.addArguments("--js-flags=--max-old-space-size=4096");
 
-		options.addArguments("--disk-cache-size=1000000000");
+
+
+		options.addArguments("--disk-cache-size=100000000");
 		options.addArguments("--ignore-certificate-errors");
 		options.addArguments("--disable-web-security");
 		options.addArguments("--disable-popup-blocking");
