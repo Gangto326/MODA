@@ -247,15 +247,15 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
                             Text(
                                 text = when (cardDetail.categoryId) {
                                     1 -> "전체"
-                                    2 -> "트렌드"
-                                    3 -> "오락"
-                                    4 -> "금융"
-                                    5 -> "여행"
-                                    6 -> "음식"
-                                    7 -> "IT"
-                                    8 -> "디자인"
-                                    9 -> "사회"
-                                    10 -> "건강"
+                                    2 -> "건강"
+                                    3 -> "여행"
+                                    4 -> "음식"
+                                    5 -> "IT"
+                                    6 -> "경제"
+                                    7 -> "문화"
+                                    8 -> "과학"
+                                    9 -> "취미"
+                                    10 -> "예술"
                                     else -> "기타"
                                 },
                                 style = MaterialTheme.typography.bodyMedium,
