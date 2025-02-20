@@ -60,6 +60,7 @@ fun WeeklyKeywordSection(
         Spacer(
             modifier = Modifier
                 .height(30.dp)
+                .background(MaterialTheme.colorScheme.tertiary)
 //                .background(Color.Blue) // ✅ 두 번째 Spacer (FirstKeywordList 아래)
                 .fillMaxWidth()  // ✅ 가로 전체를 차지하도록 설정
         )

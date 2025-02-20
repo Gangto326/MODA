@@ -14,7 +14,7 @@ import com.example.modapjt.R
 fun HeaderBar(modifier: Modifier = Modifier) {
     Surface(
         modifier = Modifier.fillMaxWidth(), //반응형
-        color = MaterialTheme.colorScheme.surface
+        color = MaterialTheme.colorScheme.tertiary
     ) {
         Row( //내부 Row 배치
             modifier = Modifier

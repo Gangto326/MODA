@@ -27,6 +27,7 @@ fun TitleHeaderBar(modifier: Modifier = Modifier, titleName: String) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.tertiary)
             .height(56.dp),  // 높이 설정
 //            .background(Color.White),  // 배경색 설정
         contentAlignment = Alignment.Center

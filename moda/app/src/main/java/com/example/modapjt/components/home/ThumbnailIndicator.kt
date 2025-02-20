@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,7 +35,7 @@ fun ThumbnailIndicator(currentIndex: Int, totalItems: Int) {
                 modifier = Modifier
                     .size(if (index == currentIndex) selectedSize else defaultSize) // 크기 조정
                     .background(
-                        if (index == currentIndex) Color(0xFFFFCD69) else Color(0xFFD9D9D9),
+                        if (index == currentIndex) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
                         CircleShape
                     )
             )
