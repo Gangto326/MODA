@@ -15,6 +15,14 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.credentials.CredentialManager
+import androidx.credentials.CustomCredential
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.GetCredentialResponse
+import androidx.credentials.PasswordCredential
+import androidx.credentials.PublicKeyCredential
+import androidx.credentials.exceptions.GetCredentialException
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.modapjt.data.storage.TokenManager
@@ -26,15 +34,37 @@ import com.example.modapjt.toktok.gesture.GestureService
 import com.example.modapjt.toktok.overlay.OverlayService
 import com.example.modapjt.ui.theme.ModapjtTheme
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
-
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalAnimationApi::class)
 class MainActivity : ComponentActivity() {
     private lateinit var navController: NavHostController
+    private lateinit var credentialManager: CredentialManager
+    private lateinit var googleIdOption: GetGoogleIdOption
+
+
+    companion object {
+        private const val WEB_CLIENT_ID = "your_web_client_id_here"
+        private const val TAG = "MainActivity"
+    }
+
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        credentialManager = CredentialManager.create(this)
+
+        googleIdOption = GetGoogleIdOption.Builder()
+            .setFilterByAuthorizedAccounts(true)
+            .setServerClientId(WEB_CLIENT_ID)
+            .setAutoSelectEnabled(true)
+            .setNonce("your_nonce_here") // 실제 nonce 값으로 교체
+            .build()
+
 
         // 권한 요청
         checkAccessibilityPermission()
@@ -80,6 +110,68 @@ class MainActivity : ComponentActivity() {
             }
 
         }
+    }
+
+    private fun startSignIn() {
+        val request = GetCredentialRequest.Builder()
+            .addCredentialOption(googleIdOption)
+            .build()
+
+        lifecycleScope.launch {
+            try {
+                val result = credentialManager.getCredential(
+                    request = request,
+                    context = this@MainActivity
+                )
+                handleSignIn(result)
+            } catch (e: GetCredentialException) {
+                handleFailure(e)
+            }
+        }
+    }
+    private fun handleSignIn(result: GetCredentialResponse) {
+        val credential = result.credential
+
+        when (credential) {
+            is PublicKeyCredential -> {
+                val responseJson = credential.authenticationResponseJson
+                // TODO: 서버로 responseJson 전송
+            }
+
+            is PasswordCredential -> {
+                val username = credential.id
+                val password = credential.password
+                // TODO: 서버로 username과 password 전송
+            }
+
+            is CustomCredential -> {
+                if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+                    try {
+                        val googleIdTokenCredential = GoogleIdTokenCredential
+                            .createFrom(credential.data)
+
+                        // TODO: 서버로 토큰 전송
+                        val idToken = googleIdTokenCredential.idToken
+                        Log.d(TAG, "Google ID Token: $idToken")
+
+                    } catch (e: GoogleIdTokenParsingException) {
+                        Log.e(TAG, "Invalid google id token response", e)
+                    }
+                } else {
+                    Log.e(TAG, "Unexpected type of credential")
+                }
+            }
+
+            else -> {
+                Log.e(TAG, "Unexpected type of credential")
+            }
+        }
+    }
+
+    private fun handleFailure(e: GetCredentialException) {
+        Log.e(TAG, "Error getting credential", e)
+        // TODO: 에러 처리 (예: 사용자에게 토스트 메시지 표시)
+        Toast.makeText(this, "로그인 실패: ${e.message}", Toast.LENGTH_SHORT).show()
     }
 
     // 오버레이 권한 요청 함수
