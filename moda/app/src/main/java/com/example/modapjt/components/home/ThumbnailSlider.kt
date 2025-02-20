@@ -78,25 +78,29 @@ fun ThumbnailSlider(
             modifier = Modifier
                 .fillMaxWidth()
                 .pointerInput(Unit) {
-                    detectHorizontalDragGestures(
-                        onDragStart = { dragOffset = 0f },
-                        onDragEnd = {
-                            when {
-                                dragOffset > dragThreshold -> {
-                                    targetIndex = if (currentIndex == 0) totalItems - 1 else currentIndex - 1
-                                    currentIndex = targetIndex
+                    // thumbnails 크기가 5보다 작으면 드래그 비활성화
+                    if (thumbnails?.size == 5) {
+                        detectHorizontalDragGestures(
+                            onDragStart = { dragOffset = 0f },
+                            onDragEnd = {
+                                val listSize = thumbnails?.size ?: defaultOnboardingImages.size
+                                when {
+                                    dragOffset > dragThreshold -> {
+                                        targetIndex = if (currentIndex == 0) listSize - 1 else currentIndex - 1
+                                        currentIndex = targetIndex
+                                    }
+                                    dragOffset < -dragThreshold -> {
+                                        targetIndex = (currentIndex + 1) % listSize
+                                        currentIndex = targetIndex
+                                    }
                                 }
-                                dragOffset < -dragThreshold -> {
-                                    targetIndex = (currentIndex + 1) % totalItems
-                                    currentIndex = targetIndex
-                                }
+                                dragOffset = 0f
+                            },
+                            onHorizontalDrag = { _, dragAmount ->
+                                dragOffset += dragAmount
                             }
-                            dragOffset = 0f
-                        },
-                        onHorizontalDrag = { _, dragAmount ->
-                            dragOffset += dragAmount
-                        }
-                    )
+                        )
+                    }
                 }
         ) {
             AnimatedContent(

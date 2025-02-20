@@ -33,12 +33,29 @@ fun YouTubePlayer(videoId: String, modifier: Modifier = Modifier, isTopVideo: Bo
     }
 
     // 생명주기 관리 추가
-    DisposableEffect(Unit) {
-        // 리소스가 필요할 때만 추가하기
-        (context as? androidx.lifecycle.LifecycleOwner)?.lifecycle?.addObserver(youTubePlayerView)
+//    DisposableEffect(Unit) {
+//        // 리소스가 필요할 때만 추가하기
+//        (context as? androidx.lifecycle.LifecycleOwner)?.lifecycle?.addObserver(youTubePlayerView)
+//
+//        onDispose {
+//            youTubePlayerView.release()  // 재생 종료 후 리소스를 해제
+//        }
+//    }
+
+    DisposableEffect(youTubePlayerView) {
+        val lifecycleOwner = context as? androidx.lifecycle.LifecycleOwner
+        lifecycleOwner?.lifecycle?.addObserver(youTubePlayerView)
 
         onDispose {
-            youTubePlayerView.release()  // 재생 종료 후 리소스를 해제
+            try {
+                // 라이프사이클 옵저버 제거
+                lifecycleOwner?.lifecycle?.removeObserver(youTubePlayerView)
+                // release() 호출 전에 약간의 지연을 줘서 리소스가 적절히 정리되도록 함
+                youTubePlayerView.release()
+            } catch (e: Exception) {
+                // release 과정에서 발생할 수 있는 예외 처리
+                e.printStackTrace()
+            }
         }
     }
 

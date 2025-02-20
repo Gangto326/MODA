@@ -45,7 +45,7 @@ fun TodayContentSection(
 
         HomeSmallTitle(
             title = "오늘의 컨텐츠",
-            description = " | 해당 컨텐츠에 대한 설명"
+            description = "| 오늘의 당신을 위한 컨텐츠"
         )
 
         // SearchItem을 ThumbnailItem으로 변환

@@ -40,7 +40,7 @@ fun ImageSection(
 
         HomeSmallTitle(
             title = "이미지 보고가세요",
-            description = "| 해당 컨텐츠들에 대한 설명"
+            description = "| 오늘의 추천 이미지 모음"
         )
 
         // ImageListComponent 대신 ImageList 직접 사용
