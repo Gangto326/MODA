@@ -55,7 +55,6 @@ fun BlogBig(
                 shape = RoundedCornerShape(8.dp)
             )
             .padding(8.dp) // 테두리와 내용 사이 간격
-            .clickable(onClick = onClick)
     ) {
         // 상단 영역 (블로그 플랫폼 아이콘 + 제목)
         Row(

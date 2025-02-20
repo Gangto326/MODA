@@ -429,22 +429,63 @@ fun newCardListScreen(
                                                         )
                                                     }
                                                 } else { // 선택 모드일 때
-                                                    BlogSelectionItem(
-                                                        title = card.title,
-                                                        description = card.thumbnailContent ?: "",
-                                                        imageUrl = card.thumbnailUrl ?: "",
-                                                        isMine = card.isMine,
-                                                        keywords = card.keywords,
-                                                        isSelected = selectedCardIds.contains(card.cardId),
-                                                        onClick = {
-                                                            haptics.performHapticFeedback(
-                                                                HapticFeedbackType.TextHandleMove
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .padding(horizontal = 16.dp, vertical = 8.dp)  // Surface와 동일한 padding 적용
+                                                            .clip(RoundedCornerShape(8.dp))
+                                                    ) {
+                                                        BlogSelectionItem(
+
+                                                            title = card.title,
+                                                            description = card.thumbnailContent
+                                                                ?: "",
+                                                            imageUrl = card.thumbnailUrl ?: "",
+                                                            isMine = card.isMine,
+                                                            keywords = card.keywords,
+                                                            isSelected = selectedCardIds.contains(
+                                                                card.cardId
+                                                            ),
+                                                            onClick = {
+                                                                haptics.performHapticFeedback(
+                                                                    HapticFeedbackType.TextHandleMove
+                                                                )
+                                                                selectionViewModel.toggleCardSelection(
+                                                                    card
+                                                                )
+                                                            }
+                                                        )
+
+                                                        if (selectedCardIds.contains(card.cardId)) {
+                                                            Box(
+                                                                modifier = Modifier
+                                                                    .matchParentSize()
+                                                                    .background(
+                                                                        Color.Black.copy(
+                                                                            alpha = 0.5f
+                                                                        )
+                                                                    )
                                                             )
-                                                            selectionViewModel.toggleCardSelection(
-                                                                card
-                                                            )
+                                                            if (selectedCardIds.contains(
+                                                                    card.cardId
+                                                                )
+                                                            ) {
+                                                                Image(
+                                                                    painter = painterResource(id = R.drawable.ic_s_select),
+                                                                    contentDescription = "Selected",
+                                                                    modifier = Modifier
+                                                                        .align(Alignment.BottomEnd)
+                                                                        .padding(
+                                                                            top = 16.dp,
+                                                                            end = 17.dp,
+                                                                            bottom = 12.dp
+                                                                        )
+                                                                        .size(19.dp)
+                                                                        .zIndex(2f)
+                                                                )
+                                                            }
                                                         }
-                                                    )
+                                                    }
                                                 }
                                             }
 
@@ -511,22 +552,61 @@ fun newCardListScreen(
                                                         )
                                                     }
                                                 } else { // 선택 모드일 때
-                                                    BlogSelectionItem(
-                                                        title = card.title,
-                                                        description = card.thumbnailContent ?: "",
-                                                        imageUrl = card.thumbnailUrl ?: "",
-                                                        isMine = card.isMine,
-                                                        keywords = card.keywords,
-                                                        isSelected = selectedCardIds.contains(card.cardId),
-                                                        onClick = {
-                                                            haptics.performHapticFeedback(
-                                                                HapticFeedbackType.TextHandleMove
+                                                        Box(
+                                                            modifier = Modifier
+                                                                .fillMaxWidth()
+                                                                .padding(horizontal = 16.dp, vertical = 8.dp)  // Surface와 동일한 padding 적용
+                                                                .clip(RoundedCornerShape(8.dp))
+                                                        ) {
+                                                            BlogSelectionItem(
+                                                                title = card.title,
+                                                                description = card.thumbnailContent
+                                                                    ?: "",
+                                                                imageUrl = card.thumbnailUrl ?: "",
+                                                                isMine = card.isMine,
+                                                                keywords = card.keywords,
+                                                                isSelected = selectedCardIds.contains(
+                                                                    card.cardId
+                                                                ),
+                                                                onClick = {
+                                                                    haptics.performHapticFeedback(
+                                                                        HapticFeedbackType.TextHandleMove
+                                                                    )
+                                                                    selectionViewModel.toggleCardSelection(
+                                                                        card
+                                                                    )
+                                                                }
                                                             )
-                                                            selectionViewModel.toggleCardSelection(
-                                                                card
-                                                            )
+                                                            if (selectedCardIds.contains(card.cardId)) {
+                                                                Box(
+                                                                    modifier = Modifier
+                                                                        .matchParentSize()
+                                                                        .background(
+                                                                            Color.Black.copy(
+                                                                                alpha = 0.5f
+                                                                            )
+                                                                        )
+                                                                )
+                                                                if (selectedCardIds.contains(
+                                                                        card.cardId
+                                                                    )
+                                                                ) {
+                                                                    Image(
+                                                                        painter = painterResource(id = R.drawable.ic_s_select),
+                                                                        contentDescription = "Selected",
+                                                                        modifier = Modifier
+                                                                            .align(Alignment.BottomEnd)
+                                                                            .padding(
+                                                                                top = 16.dp,
+                                                                                end = 17.dp,
+                                                                                bottom = 12.dp
+                                                                            )
+                                                                            .size(19.dp)
+                                                                            .zIndex(2f)
+                                                                    )
+                                                                }
+                                                            }
                                                         }
-                                                    )
                                                 }
                                             }
 

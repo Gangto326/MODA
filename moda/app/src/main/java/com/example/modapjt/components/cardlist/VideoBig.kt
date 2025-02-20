@@ -53,7 +53,6 @@ fun VideoBig(
                 shape = RoundedCornerShape(8.dp)
             )
             .padding(8.dp) // 테두리와 내용 사이 간격
-            .clickable(onClick = onClick)
     ) {
         // YouTubePlayer 컴포넌트
         YouTubePlayer(
