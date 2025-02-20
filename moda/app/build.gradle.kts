@@ -70,7 +70,10 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.5.3") // 네비게이션 관련
 
 // clickable : material3에서 제공하는 기능
-    implementation("androidx.compose.material3:material3:1.0.1")  // material3 관련
+    implementation("androidx.compose.material3:material3:1.2.0")  // material3 관련 | 1.0.1 -> 1.3.1
+    implementation("androidx.compose.material3:material3-window-size-class:1.1.2")
+    implementation("com.google.android.material:material:1.9.0") // 최신 Material Components 라이브러리
+
 
 // 추가
     implementation("io.coil-kt:coil-compose:2.2.2")
