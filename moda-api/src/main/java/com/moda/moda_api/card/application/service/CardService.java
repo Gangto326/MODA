@@ -86,11 +86,22 @@ public class CardService {
 	 */
 	@Transactional
 	public CompletableFuture<Boolean> createCard(String userId, String url) {
-		System.out.println(url);
-		UserId userIdObj = new UserId(userId);
 
-		String convertUrl = getVideoId(url);
-		String urlHash = UrlCache.generateHash(convertUrl);
+		UserId userIdObj = new UserId(userId);
+		System.out.println(url + "들어온 URL입니다. ");
+
+		String result;
+		try {
+			result = getVideoId(url); //만약 null이 온다면 result를 반환해
+		} catch (IllegalArgumentException e) {
+			// 유튜브 URL이지만 ID 추출 실패한 경우
+			throw new ContentExtractionException("유효하지 않은 Youtube 형식입니다.", userId, e);
+		}
+		if (result == null) {
+			result = url;
+		}
+
+		String urlHash = UrlCache.generateHash(result);
 
 		if (urlDuplicatedRepository.checkDuplicated(urlHash)) {
 			throw new DuplicateUrlException("같은 정보의 카드가 생성중입니다.", userIdObj.getValue());
@@ -155,12 +166,11 @@ public class CardService {
 	 */
 	// UrlHash가 없는 경우 새로운 것을 만들어야한다.
 	private CompletableFuture<Boolean> createNewCard(UserId userIdObj, String url, String urlHash) throws Exception {
-
+		System.out.println("요약하는 : " + url);
 		// 여기서 2가지 경우로 다시 나눠야한다.
 		// summary에서 2가지 경우로 나눠보자.
 		return summaryService.getSummary(url, userIdObj.getValue())
 			.thenApply(SummaryResultDto -> {
-
 				String thumbnailUrl;
 				if (SummaryResultDto.getThumbnailUrl() != null) {
 					thumbnailUrl = SummaryResultDto.getThumbnailUrl();
@@ -181,7 +191,7 @@ public class CardService {
 				Card card = cardFactory.create(
 					userIdObj,
 					SummaryResultDto.getCategoryId(),
-					SummaryResultDto.getTypeId(),
+					SummaryResultDto.getTypeId().equals(6) ? 2 : SummaryResultDto.getTypeId(),
 					urlHash,
 					SummaryResultDto.getTitle(),
 					SummaryResultDto.getContent(),
@@ -191,6 +201,9 @@ public class CardService {
 					SummaryResultDto.getKeywords(),
 					SummaryResultDto.getSubContent()
 				);
+
+
+
 
 				System.out.println(card.toString());
 
@@ -209,7 +222,6 @@ public class CardService {
 						.cachedSubContents(card.getSubContents())
 						.build()
 				);
-
 				// 유저별 핵심 키워드 저장 (Redis)
 				userKeywordRepository.saveKeywords(userIdObj, card.getKeywords());
 				// 핫 토픽 키워드 저장 (Redis)
@@ -548,54 +560,56 @@ public class CardService {
 			.build();
 	}
 
+	private boolean isValidYoutubeUrl(String url) {
+		if (url == null || url.trim().isEmpty()) {
+			return false;
+		}
+
+		return url.contains("youtube.com") ||
+			url.contains("youtu.be/") ||
+			url.contains("youtube.com/embed/") ||
+			url.contains("youtube.com/v/");
+	}
+
 	private String getVideoId(String url) {
+		// 1차: YouTube URL 검증
+		if (!isValidYoutubeUrl(url)) {
+			// YouTube URL이 아닌 null 반환
+			return null;
+		}
+
 		try {
-			if (url == null || url.trim().isEmpty()) {
-				return url;
-			}
-
 			String videoId = null;
-			String trimmedUrl = url.trim();
 
-			// 1. youtube.com/watch?v= 형식
-			if (trimmedUrl.contains("youtube.com/watch?v=")) {
-				videoId = trimmedUrl.split("v=")[1];
+			// URL 패턴에 따라 ID 추출
+			if (url.contains("v=")) {
+				videoId = url.split("v=")[1];
 				if (videoId.contains("&")) {
 					videoId = videoId.split("&")[0];
 				}
-			}
-			// 2. youtu.be/ 형식 (단축 URL)
-			else if (trimmedUrl.contains("youtu.be/")) {
-				videoId = trimmedUrl.split("youtu.be/")[1];
+			} else if (url.contains("youtu.be/")) {
+				videoId = url.split("youtu.be/")[1];
+				if (videoId.contains("?")) {
+					videoId = videoId.split("\\?")[0];
+				}
+			} else if (url.contains("embed/")) {
+				videoId = url.split("embed/")[1];
+				if (videoId.contains("?")) {
+					videoId = videoId.split("\\?")[0];
+				}
+			} else if (url.contains("v/")) {
+				videoId = url.split("v/")[1];
 				if (videoId.contains("?")) {
 					videoId = videoId.split("\\?")[0];
 				}
 			}
-			// 3. youtube.com/embed/ 형식 (임베드 URL)
-			else if (trimmedUrl.contains("youtube.com/embed/")) {
-				videoId = trimmedUrl.split("embed/")[1];
-				if (videoId.contains("?")) {
-					videoId = videoId.split("\\?")[0];
-				}
-			}
-			// 4. youtube.com/v/ 형식 (구버전)
-			else if (trimmedUrl.contains("youtube.com/v/")) {
-				videoId = trimmedUrl.split("v/")[1];
-				if (videoId.contains("?")) {
-					videoId = videoId.split("\\?")[0];
-				}
-			}
-
-			// videoId를 찾지 못했거나 빈 문자열인 경우 원본 URL 반환
+			// 2차: ID 추출 실패 시 예외 발생
 			if (videoId == null || videoId.trim().isEmpty()) {
-				return url;
+				throw new IllegalArgumentException("Failed to extract video ID from YouTube URL");
 			}
-
 			return videoId.trim();
 		} catch (Exception e) {
-			// 예외가 발생한 경우에도 원본 URL 반환
-			return url;
+			throw new IllegalArgumentException("Invalid YouTube URL format: " + e.getMessage(), e);
 		}
 	}
-
 }

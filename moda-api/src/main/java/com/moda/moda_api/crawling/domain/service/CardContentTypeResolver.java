@@ -16,6 +16,7 @@ public class CardContentTypeResolver {
 		"namu.wiki"
 
 	);
+
 	private static final List<String> NEWS_SITES = List.of(
 		"news.naver.com",
 		"daum.net",

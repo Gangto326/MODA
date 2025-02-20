@@ -40,7 +40,6 @@ public class LilysAiClient {
 		// return CompletableFuture.completedFuture(
 		// 	new LilysRequestIdResponse("0709fcc3-0baa-4da8-a984-841948466ca4")).join();
 
-
 		return lilysWebClient.post()
 			.uri(lilysUrl)
 			.bodyValue(createRequestBody(url))  // Http메세지 Body를 만든다.
@@ -149,37 +148,44 @@ public class LilysAiClient {
 		return requestMap;
 	}
 
+	private boolean isValidYoutubeUrl(String url) {
+		if (url == null || url.trim().isEmpty()) {
+			return false;
+		}
+
+		return url.contains("youtube.com/watch") ||
+			url.contains("youtu.be/") ||
+			url.contains("youtube.com/embed/") ||
+			url.contains("youtube.com/v/");
+	}
+
+	// 2단계: video ID 추출
 	private String getVideoId(String url) {
 		try {
-			if (url == null || url.trim().isEmpty()) {
-				throw new IllegalArgumentException("URL cannot be null or empty");
+			// 먼저 YouTube URL인지 검증
+			if (!isValidYoutubeUrl(url)) {
+				throw new IllegalArgumentException("Not a valid YouTube URL");
 			}
 
 			String videoId = null;
 
-			// 1. youtube.com/watch?v= 형식
-			if (url.contains("youtube.com/watch?v=")) {
+			// URL 패턴에 따라 ID 추출
+			if (url.contains("v=")) {
 				videoId = url.split("v=")[1];
 				if (videoId.contains("&")) {
 					videoId = videoId.split("&")[0];
 				}
-			}
-			// 2. youtu.be/ 형식 (단축 URL)
-			else if (url.contains("youtu.be/")) {
+			} else if (url.contains("youtu.be/")) {
 				videoId = url.split("youtu.be/")[1];
 				if (videoId.contains("?")) {
 					videoId = videoId.split("\\?")[0];
 				}
-			}
-			// 3. youtube.com/embed/ 형식 (임베드 URL)
-			else if (url.contains("youtube.com/embed/")) {
+			} else if (url.contains("embed/")) {
 				videoId = url.split("embed/")[1];
 				if (videoId.contains("?")) {
 					videoId = videoId.split("\\?")[0];
 				}
-			}
-			// 4. youtube.com/v/ 형식 (구버전)
-			else if (url.contains("youtube.com/v/")) {
+			} else if (url.contains("v/")) {
 				videoId = url.split("v/")[1];
 				if (videoId.contains("?")) {
 					videoId = videoId.split("\\?")[0];

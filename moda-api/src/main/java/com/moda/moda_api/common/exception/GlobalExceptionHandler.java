@@ -61,15 +61,15 @@ public class GlobalExceptionHandler {
 		return ApiResponse.error(e.getMessage());
 	}
 
+	@ExceptionHandler(UnprocessableContentException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ApiResponse<Void> handleUnprocessableContentException(UnprocessableContentException e) {
 		log.error("Content cannot be processed: {}", e.getMessage());
-
 		try {
 			notificationService.sendErrorNotification(e.getUserId(), e.getMessage());
 		} catch (Exception ex) {
 			log.error("Failed to send FCM notification", ex);
 		}
-
 		return ApiResponse.error(e.getMessage());
 	}
 }

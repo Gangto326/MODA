@@ -60,7 +60,7 @@ public class EmailService {
             인증번호: %s
             해당 인증번호를 MODA 사이트에 입력하여 인증하여 주시기 바랍니다.
             감사합니다.
-            PLANe 팀
+            MODA 팀
             """, code);
 	}
 
