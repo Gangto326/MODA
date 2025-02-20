@@ -166,9 +166,10 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
     val timelineHeaders = remember(cardDetail.content) {
         val timeStamps = cardDetail.subContents
             .mapNotNull { it.toFloatOrNull() }
-            .filter { it > 0 }
+            .filter { it >= 0 }
 
-        // timeStamps가 비어있으면 빈 리스트 반환
+        println("타임스탬프: $timeStamps")
+
         if (timeStamps.isEmpty()) {
             return@remember emptyList()
         }
@@ -176,21 +177,30 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
         val contentLines = cardDetail.content.split("\n")
         var currentOffset = 0
 
-        contentLines.mapIndexedNotNull { index, line ->
+        // 헤더만 찾아서 리스트로 만듦
+        val headers = contentLines.mapIndexedNotNull { index, line ->
             if (line.trimStart().startsWith("#")) {
-                val timeStamp =
-                    timeStamps.getOrNull(index % timeStamps.size) ?: return@mapIndexedNotNull null
+                Pair(index, line)
+            } else null
+        }
+
+        // 헤더 수와 타임스탬프 수가 같은지 확인
+        if (headers.size != timeStamps.size) {
+            println("Warning: Headers count (${headers.size}) doesn't match timestamps count (${timeStamps.size})")
+        }
+
+        // 순서대로 매칭
+        headers.mapIndexed { headerIndex, (lineIndex, line) ->
+            val timeStamp = timeStamps.getOrNull(headerIndex)
+            if (timeStamp != null) {
                 HeaderInfo(
                     text = line.trimStart('#').trim(),
-                    lineIndex = index,
+                    lineIndex = lineIndex,
                     timeStamp = timeStamp,
                     offset = currentOffset
                 )
-            } else {
-                currentOffset += line.length + 1  // +1 for newline
-                null
-            }
-        }
+            } else null
+        }.filterNotNull()
     }
 
 
@@ -632,8 +642,9 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
 
 
 private fun formatTimeStamp(seconds: Float): String {
-    val minutes = (seconds / 60).toInt()
-    val remainingSeconds = (seconds % 60).toInt()
+    val totalSeconds = seconds.toInt()
+    val minutes = totalSeconds / 60
+    val remainingSeconds = totalSeconds % 60
     return String.format("%02d:%02d", minutes, remainingSeconds)
 }
 
