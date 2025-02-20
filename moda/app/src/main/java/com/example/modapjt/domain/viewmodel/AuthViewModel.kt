@@ -177,8 +177,6 @@ class AuthViewModel(private val tokenManager: TokenManager) : ViewModel() {
                             }
                         }
 
-
-
                         _loginState.value = _loginState.value.copy(isLoading = false, error = null)
                         onLoginSuccess() // 여기에 콜백 실행 추가
                     } else {
