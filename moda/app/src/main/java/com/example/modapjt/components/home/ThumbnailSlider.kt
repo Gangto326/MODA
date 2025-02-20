@@ -34,6 +34,7 @@ fun ThumbnailSlider(
     var dragOffset by remember { mutableStateOf(0f) }
 //    val dragThreshold = 100f
 
+    println(thumbnails?.size)
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp.value
     val dragThreshold = screenWidth * 0.4f // 화면 너비의 40%를 임계값으로 설정
 
@@ -49,6 +50,10 @@ fun ThumbnailSlider(
         "https://a805bucket.s3.ap-northeast-2.amazonaws.com/onboarding/onboarding5.jpg"
     )
 
+    val totalItems by remember(thumbnails) {
+        mutableStateOf(thumbnails?.size ?: defaultOnboardingImages.size)
+    }
+
     // 홈 화면에서 API 자동 호출
 //    LaunchedEffect(Unit) {
 //        viewModel.loadSearchData()
@@ -58,13 +63,11 @@ fun ThumbnailSlider(
     LaunchedEffect(currentIndex) {
         while (true) {
             delay(4000)
-            val totalItems = if (thumbnails?.isEmpty() == true) {
-                defaultOnboardingImages.size
-            } else {
-                thumbnails?.size ?: defaultOnboardingImages.size
+            println(totalItems)
+            if (totalItems > 1) {
+                targetIndex = (currentIndex + 1) % totalItems
+                currentIndex = targetIndex
             }
-            targetIndex = (currentIndex + 1) % totalItems
-            currentIndex = targetIndex
         }
     }
 
@@ -78,11 +81,6 @@ fun ThumbnailSlider(
                     detectHorizontalDragGestures(
                         onDragStart = { dragOffset = 0f },
                         onDragEnd = {
-                            val totalItems = if (thumbnails?.isEmpty() == true) {
-                                defaultOnboardingImages.size
-                            } else {
-                                thumbnails?.size ?: defaultOnboardingImages.size
-                            }
                             when {
                                 dragOffset > dragThreshold -> {
                                     targetIndex = if (currentIndex == 0) totalItems - 1 else currentIndex - 1
@@ -116,41 +114,58 @@ fun ThumbnailSlider(
                 },
                 label = "thumbnail_slider"
             ) { index ->
-                if (thumbnails?.isEmpty() == true) {
-                    TopThumbnail(
-                        imageUrl = defaultOnboardingImages[index],
-                        title = "온보딩 이미지 ${index + 1}",
-                        content = "환영합니다!",
-                        currentIndex = index,
-                        totalItems = defaultOnboardingImages.size,
-                        onClick = { /* 온보딩 이미지는 클릭 동작 없음 */ }
-                    )
-                } else {
-                    thumbnails?.let { thumbnails ->
-                        if (thumbnails.isNotEmpty()) {
-                            val currentItem = thumbnails[index]
-                            TopThumbnail(
-                                imageUrl = currentItem.thumbnailUrl ?: "https://example.com/default.jpg",
-                                title = currentItem.title,
-                                content = currentItem.thumbnailContent,
-                                currentIndex = index,
-                                totalItems = thumbnails.size,
-                                onClick = {
-                                    navController.navigate("cardDetail/${currentItem.cardId}")
-                                }
-                            )
-                        }
+                when {
+                    thumbnails == null || thumbnails.isEmpty() -> {
+                        TopThumbnail(
+                            imageUrl = defaultOnboardingImages[index],
+                            title = "온보딩 이미지 ${index + 1}",
+                            content = "환영합니다!",
+                            currentIndex = index,
+                            totalItems = defaultOnboardingImages.size,
+                            onClick = { /* 온보딩 이미지는 클릭 동작 없음 */ }
+                        )
+                    }
+
+                    thumbnails.size == 1 -> {
+                        // 아이템이 1개일 때는 그냥 첫 번째 아이템 표시
+                        val currentItem = thumbnails[0]
+                        TopThumbnail(
+                            imageUrl = currentItem.thumbnailUrl
+                                ?: "https://example.com/default.jpg",
+                            title = currentItem.title,
+                            content = currentItem.thumbnailContent,
+                            currentIndex = 0,
+                            totalItems = 1,
+                            onClick = {
+                                navController.navigate("cardDetail/${currentItem.cardId}")
+                            }
+                        )
+                    }
+
+                    else -> {
+                        val currentItem = thumbnails[index]
+                        TopThumbnail(
+                            imageUrl = currentItem.thumbnailUrl
+                                ?: "https://example.com/default.jpg",
+                            title = currentItem.title,
+                            content = currentItem.thumbnailContent,
+                            currentIndex = index,
+                            totalItems = thumbnails.size,
+                            onClick = {
+                                navController.navigate("cardDetail/${currentItem.cardId}")
+                            }
+                        )
                     }
                 }
             }
         }
 
         // ThumbnailIndicator 표시
-        val totalItems = if (thumbnails?.isEmpty() == true) {
-            defaultOnboardingImages.size
-        } else {
-            thumbnails?.size ?: defaultOnboardingImages.size
-        }
+//        val totalItems = if (thumbnails?.isEmpty() == true) {
+//            defaultOnboardingImages.size
+//        } else {
+//            thumbnails?.size ?: defaultOnboardingImages.size
+//        }
         ThumbnailIndicator(
             currentIndex = currentIndex,
             totalItems = totalItems
