@@ -154,5 +154,6 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.10.0")
 
     implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation("com.squareup.okhttp3:okhttp-urlconnection:4.12.0")  // JavaNetCookieJar 포함
 
 }

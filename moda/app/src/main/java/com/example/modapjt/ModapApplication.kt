@@ -5,6 +5,9 @@ import com.example.modapjt.data.AppDatabase
 import com.example.modapjt.data.CaptureRepository
 import com.example.modapjt.data.api.RetrofitInstance
 import com.example.modapjt.data.storage.TokenManager
+import java.net.CookieHandler
+import java.net.CookieManager
+import java.net.CookiePolicy
 
 //class ModapApplication : Application() {
 //    val database by lazy { AppDatabase.getDatabase(this) }
@@ -17,6 +20,10 @@ class ModapApplication : Application() {
 
         // TokenManager 초기화
         val tokenManager = TokenManager(applicationContext)
+
+        CookieManager(PersistentCookieStore(applicationContext), CookiePolicy.ACCEPT_ALL).also {
+            CookieHandler.setDefault(it)
+        }
 
         // RetrofitInstance 초기화
         RetrofitInstance.initialize(tokenManager)

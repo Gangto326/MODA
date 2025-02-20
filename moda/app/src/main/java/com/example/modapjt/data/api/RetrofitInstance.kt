@@ -1,11 +1,13 @@
 package com.example.modapjt.data.api
 
-import com.example.modapjt.data.cookie.ApplicationCookieJar
 import com.example.modapjt.data.storage.TokenManager
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.converter.scalars.ScalarsConverterFactory // ✅ ScalarsConverterFactory 추가
+import retrofit2.converter.scalars.ScalarsConverterFactory
+import java.net.CookieHandler
+import okhttp3.JavaNetCookieJar
+import java.net.CookieManager
 
 
 object RetrofitInstance {
@@ -26,10 +28,11 @@ object RetrofitInstance {
         return OkHttpClient.Builder()
             .followRedirects(true)  // 쿠키 처리를 위해 필요
             .followSslRedirects(true)  // HTTPS 리다이렉트 허용
-            .cookieJar(ApplicationCookieJar)  // 쿠키 자동 관리 추가
+            .cookieJar(JavaNetCookieJar(CookieHandler.getDefault() as CookieManager))
             .addInterceptor(TokenInterceptor(tokenManager))
             .build()
     }
+
     // Retrofit 인스턴스 생성을 위한 함수
     private fun createRetrofit(): Retrofit {
         return Retrofit.Builder()

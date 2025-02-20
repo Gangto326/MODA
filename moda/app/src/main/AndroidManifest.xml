@@ -60,9 +60,6 @@
         </activity>
 
 
-
-
-
         <!-- 오버레이 서비스 추가 -->
         <service
             android:name=".toktok.overlay.OverlayService"
