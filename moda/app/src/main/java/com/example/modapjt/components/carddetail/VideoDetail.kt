@@ -1,281 +1,35 @@
-////
-////import android.os.Build
-////import androidx.annotation.RequiresApi
-////import androidx.compose.foundation.layout.Box
-////import androidx.compose.foundation.layout.Column
-////import androidx.compose.foundation.layout.fillMaxSize
-////import androidx.compose.foundation.layout.fillMaxWidth
-////import androidx.compose.foundation.layout.height
-////import androidx.compose.foundation.layout.padding
-////import androidx.compose.foundation.lazy.LazyColumn
-////import androidx.compose.material3.Button
-////import androidx.compose.material3.MaterialTheme
-////import androidx.compose.material3.Text
-////import androidx.compose.runtime.Composable
-////import androidx.compose.ui.Modifier
-////import androidx.compose.ui.platform.LocalUriHandler
-////import androidx.compose.ui.unit.dp
-////import com.example.modapjt.components.video.YouTubePlayer
-////import com.example.modapjt.domain.model.CardDetail
-////import com.example.modapjt.utils.extractYouTubeVideoId
-////import java.time.LocalDateTime
-////import java.time.format.DateTimeFormatter
-////
-/////**
-//// * 동영상 컨텐츠의 상세 내용을 보여주는 화면 컴포저블
-//// * 유튜브 플레이어와 영상 관련 정보를 표시
-//// *
-//// * @param cardDetail 표시할 동영상 컨텐츠의 상세 정보를 담은 객체
-//// */
-////@RequiresApi(Build.VERSION_CODES.O)
-////@Composable
-////fun VideoDetailScreen(cardDetail: CardDetail) {
-////
-////    val uriHandler = LocalUriHandler.current
-////    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-////    val formattedDate = LocalDateTime.parse(cardDetail.createdAt).format(formatter)
-////
-////    Box(modifier = Modifier.fillMaxSize()) {
-////        // 고정된 영상 플레이어
-////        Column {
-////            // 유튜브 URL에서 비디오 ID를 추출하여 플레이어 표시
-////            val videoId = extractYouTubeVideoId(cardDetail.originalUrl)
-////            if (!videoId.isNullOrEmpty()) {
-////                YouTubePlayer(
-////                    videoId = videoId,
-////                    modifier = Modifier
-////                        .fillMaxWidth()
-////                        .height(200.dp)
-////                )
-////            }
-////
-////            // 스크롤 가능한 콘텐츠
-////            LazyColumn(
-////                modifier = Modifier
-////                    .fillMaxWidth()
-////                    .padding(16.dp)
-////            ) {
-////                item {
-////                    // 동영상 제목
-////                    Text(
-////                        text = cardDetail.title,
-////                        style = MaterialTheme.typography.headlineMedium,
-////                        modifier = Modifier.padding(bottom = 8.dp)
-////                    )
-////
-////                    // 동영상 관련 키워드
-////                    val limitedKeywords = cardDetail.keywords.take(3).joinToString(", ")
-////                    Text(
-////                        text = "키워드: $limitedKeywords",
-////                        style = MaterialTheme.typography.bodyLarge,
-////                        modifier = Modifier.padding(vertical = 4.dp)
-////                    )
-////
-////                    // 동영상 설명
-//////                    Text(
-//////                        text = cardDetail.content,
-//////                        style = MaterialTheme.typography.bodyLarge,
-//////                        modifier = Modifier.padding(vertical = 8.dp)
-//////                    )
-////                    MarkdownText(
-////                        markdown = cardDetail.content,
-////                        modifier = Modifier.padding(vertical = 8.dp)
-////                    )
-////
-////                    // 원본 동영상 링크 -> URL 버튼
-////                    Button(
-////                        onClick = { uriHandler.openUri(cardDetail.originalUrl) },
-////                        modifier = Modifier.padding(vertical = 8.dp)
-////                    ) {
-////                        Text("원본 영상 보기")
-////                    }
-////
-////
-////                    // 동영상 타임라인 정보
-////                    Text(
-////                        text = "타임라인: ${cardDetail.subContents.joinToString(", ")}",
-////                        style = MaterialTheme.typography.bodyLarge,
-////                        modifier = Modifier.padding(vertical = 8.dp)
-////                    )
-////
-////                    // 동영상 업로드 날짜
-////                    Text(
-////                        text = "생성 날짜: $formattedDate",
-////                        style = MaterialTheme.typography.bodySmall,
-////                        modifier = Modifier.padding(top = 8.dp)
-////                    )
-////                }
-////            }
-////        }
-////    }
-////}
-//
-//
-//import android.os.Build
-//import androidx.annotation.RequiresApi
-//import androidx.compose.foundation.layout.Arrangement
-//import androidx.compose.foundation.layout.Box
-//import androidx.compose.foundation.layout.Column
-//import androidx.compose.foundation.layout.ExperimentalLayoutApi
-//import androidx.compose.foundation.layout.FlowRow
-//import androidx.compose.foundation.layout.fillMaxSize
-//import androidx.compose.foundation.layout.fillMaxWidth
-//import androidx.compose.foundation.layout.height
-//import androidx.compose.foundation.layout.padding
-//import androidx.compose.foundation.lazy.LazyColumn
-//import androidx.compose.material3.AssistChip
-//import androidx.compose.material3.Button
-//import androidx.compose.material3.MaterialTheme
-//import androidx.compose.material3.Text
-//import androidx.compose.runtime.Composable
-//import androidx.compose.runtime.getValue
-//import androidx.compose.runtime.mutableStateOf
-//import androidx.compose.runtime.remember
-//import androidx.compose.runtime.setValue
-//import androidx.compose.ui.Modifier
-//import androidx.compose.ui.platform.LocalUriHandler
-//import androidx.compose.ui.unit.dp
-//import com.example.modapjt.components.video.YouTubePlayerTime
-//import com.example.modapjt.domain.model.CardDetail
-//import com.example.modapjt.utils.extractYouTubeVideoId
-//import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
-//import java.time.LocalDateTime
-//import java.time.format.DateTimeFormatter
-//
-///**
-// * 동영상 컨텐츠의 상세 내용을 보여주는 화면 컴포저블
-// * 유튜브 플레이어와 영상 관련 정보를 표시
-// *
-// * @param cardDetail 표시할 동영상 컨텐츠의 상세 정보를 담은 객체
-// */
-//@OptIn(ExperimentalLayoutApi::class)
-//@RequiresApi(Build.VERSION_CODES.O)
-//@Composable
-//fun VideoDetailScreen(cardDetail: CardDetail) {
-//    var player by remember { mutableStateOf<YouTubePlayer?>(null) }
-//    val uriHandler = LocalUriHandler.current
-//    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-//    val formattedDate = LocalDateTime.parse(cardDetail.createdAt).format(formatter)
-//
-//    // 타임라인 데이터 추출 (3번째 요소부터 마지막까지)
-//    val timelineData = cardDetail.subContents
-//        .drop(2)  // 첫 두 개의 항목 제외
-//        .mapNotNull { it.toFloatOrNull() }  // 숫자로 변환 가능한 것만 필터링
-//
-//    Box(modifier = Modifier.fillMaxSize()) {
-//        Column {
-//            val videoId = extractYouTubeVideoId(cardDetail.originalUrl)
-//            if (!videoId.isNullOrEmpty()) {
-//                YouTubePlayerTime(
-//                    videoId = videoId,
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .height(200.dp),
-//                    onPlayerReady = { youtubePlayer ->
-//                        player = youtubePlayer
-//                    }
-//                )
-//            }
-//
-//            LazyColumn(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(16.dp)
-//            ) {
-//                item {
-//                    // 동영상 제목
-//                    Text(
-//                        text = cardDetail.title,
-//                        style = MaterialTheme.typography.headlineMedium,
-//                        modifier = Modifier.padding(bottom = 8.dp)
-//                    )
-//
-//                    // 동영상 관련 키워드
-//                    val limitedKeywords = cardDetail.keywords.take(3).joinToString(", ")
-//                    Text(
-//                        text = "키워드: $limitedKeywords",
-//                        style = MaterialTheme.typography.bodyLarge,
-//                        modifier = Modifier.padding(vertical = 4.dp)
-//                    )
-//
-//                    // 동영상 설명
-//                    MarkdownText(
-//                        markdown = cardDetail.content,
-//                        modifier = Modifier.padding(vertical = 8.dp)
-//                    )
-//
-//                    // 원본 동영상 링크 -> URL 버튼
-//                    Button(
-//                        onClick = { uriHandler.openUri(cardDetail.originalUrl) },
-//                        modifier = Modifier.padding(vertical = 8.dp)
-//                    ) {
-//                        Text("원본 영상 보기")
-//                    }
-//
-//                    // 타임라인 섹션
-//                    Text(
-//                        text = "타임라인:",
-//                        style = MaterialTheme.typography.bodyLarge,
-//                        modifier = Modifier.padding(vertical = 8.dp)
-//                    )
-//
-//                    FlowRow(
-//                        modifier = Modifier.padding(vertical = 4.dp),
-//                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-//                        verticalArrangement = Arrangement.spacedBy(8.dp)
-//                    ) {
-//                        timelineData.forEach { timeStamp ->
-//                            AssistChip(
-//                                onClick = {
-//                                    player?.seekTo(timeStamp.toFloat())
-//                                },
-//                                label = {
-//                                    Text(formatTimeStamp(timeStamp))
-//                                }
-//                            )
-//                        }
-//                    }
-//
-//                    // 동영상 업로드 날짜
-//                    Text(
-//                        text = "생성 날짜: $formattedDate",
-//                        style = MaterialTheme.typography.bodySmall,
-//                        modifier = Modifier.padding(top = 8.dp)
-//                    )
-//                }
-//            }
-//        }
-//    }
-//}
-//
-//// 시간을 포맷팅하는 함수
-//private fun formatTimeStamp(seconds: Float): String {
-//    val minutes = (seconds / 60).toInt()
-//    val remainingSeconds = (seconds % 60).toInt()
-//    return String.format("%02d:%02d", minutes, remainingSeconds)
-//}
-
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -285,12 +39,16 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -299,13 +57,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
@@ -315,9 +81,13 @@ import com.example.modapjt.domain.model.CardDetail
 import com.example.modapjt.domain.viewmodel.SearchViewModel
 import com.example.modapjt.utils.extractYouTubeVideoId
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import kotlin.math.PI
+import kotlin.math.roundToInt
+import kotlin.math.sin
 
 
 // 헤더 정보를 저장하는 데이터 클래스
@@ -329,6 +99,7 @@ private data class HeaderInfo(
 )
 
 
+@ExperimentalMaterial3Api
 @OptIn(ExperimentalLayoutApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -339,6 +110,57 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
     val uriHandler = LocalUriHandler.current
     val scrollState = rememberLazyListState()
     val scope = rememberCoroutineScope()
+
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp
+
+    val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+
+    // 상단 고정 아이템 개수 (카테고리, 제목, 키워드, 구분선)
+    val headerItemCount = 4
+
+    // 키워드 List
+    val limitedKeywords = cardDetail.keywords
+
+    // 마크다운 콘텐츠를 섹션으로 분리
+    val sections = remember(cardDetail.content) {
+        splitMarkdownIntoSections(cardDetail.content)
+    }
+
+    // 현재 활성화된 섹션 인덱스 추적
+    val activeIndex = remember(listState.firstVisibleItemIndex, listState.layoutInfo) {
+        calculateActiveIndex(listState, headerItemCount)
+    }
+
+    var isExpanded by remember { mutableStateOf(false) }
+    var selectedIndex by remember { mutableStateOf(0) }
+
+    // 화면 크기에 따른 동적 패딩 계산
+    val horizontalPadding = (screenWidth * 0.04f).dp  // 화면 너비의 4%
+    val verticalPadding = (screenWidth * 0.03f).dp    // 화면 너비의 3%
+
+    // 화면 크기에 따른 글자 크기 스케일 계산
+    val fontScale = when {
+        screenWidth > 600 -> 0.65f  // 태블릿
+        screenWidth > 400 -> 0.65f  // 일반 폰
+        else -> 0.45f              // 작은 폰
+    }
+
+    fun scrollToSection(index: Int) {
+        coroutineScope.launch {
+            val targetIndex = index + headerItemCount
+            val viewportHeight = listState.layoutInfo.viewportEndOffset
+            val itemOffset = (viewportHeight * 0.01).toInt()
+
+            listState.animateScrollToItem(
+                index = targetIndex,
+                scrollOffset = -itemOffset
+            )
+        }
+    }
 
     // 타임라인 데이터와 마크다운 헤더 매칭
     val timelineHeaders = remember(cardDetail.content) {
@@ -356,7 +178,8 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
 
         contentLines.mapIndexedNotNull { index, line ->
             if (line.trimStart().startsWith("#")) {
-                val timeStamp = timeStamps.getOrNull(index % timeStamps.size) ?: return@mapIndexedNotNull null
+                val timeStamp =
+                    timeStamps.getOrNull(index % timeStamps.size) ?: return@mapIndexedNotNull null
                 HeaderInfo(
                     text = line.trimStart('#').trim(),
                     lineIndex = index,
@@ -400,23 +223,25 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
                 )
             }
 
-            // 스크롤 가능한 콘텐츠
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
+
+            Box(
+                modifier = Modifier.fillMaxSize()
             ) {
-                item {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                    ) {
+                // 📜 본문 내용
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    contentPadding = PaddingValues(bottom = 20.dp)
+                ) {
+                    item {
                         // 카테고리와 날짜
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(top = 16.dp),
+                                .padding(horizontal = horizontalPadding)
+                                .padding(top = 16.dp)
+                                .padding(horizontal = 1.dp),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
@@ -443,19 +268,23 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
                                 color = MaterialTheme.colorScheme.onSecondary
                             )
                         }
+                    }
 
-                        // 제목
+                    // 제목
+                    item {
                         Text(
                             text = cardDetail.title,
                             style = MaterialTheme.typography.headlineMedium,
                             color = MaterialTheme.colorScheme.onPrimary,
                             modifier = Modifier.padding(vertical = 8.dp)
+                                .padding(horizontal = horizontalPadding)
                         )
 
                         // 채널 정보
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .padding(horizontal = horizontalPadding)
                                 .padding(vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -480,12 +309,18 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
                                 modifier = Modifier.padding(start = 8.dp)
                             )
                         }
+                        Spacer(modifier = Modifier.height(10.dp))
+                    }
 
-                        // 키워드와 공유/타임라인 버튼
+
+                    // 🔥 키워드 간격 적용
+                    item {
+                        // 키워드와 공유버튼
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 8.dp)
+                                .padding(horizontal = horizontalPadding),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             FlowRow(
                                 modifier = Modifier.weight(1f),
@@ -495,11 +330,14 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
                                 cardDetail.keywords.take(3).forEach { keyword ->
                                     Surface(
                                         shape = RoundedCornerShape(20.dp),
-                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.3f)),
+                                        border = BorderStroke(
+                                            1.dp,
+                                            MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.3f)
+                                        ),
                                         color = Color.Transparent,
                                         modifier = Modifier
-                                            .padding(end = 8.dp, bottom = 8.dp)
-                                            .clickable (
+                                            .padding(end = 8.dp, bottom = 16.dp)
+                                            .clickable(
                                                 indication = null, // 클릭 효과 제거
                                                 interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
                                             ) {
@@ -510,7 +348,10 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
                                     ) {
                                         Text(
                                             text = keyword,
-                                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                            modifier = Modifier.padding(
+                                                horizontal = 12.dp,
+                                                vertical = 6.dp
+                                            ),
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = MaterialTheme.colorScheme.onSecondary
                                         )
@@ -525,6 +366,7 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
                                     Icon(
                                         imageVector = Icons.Default.List,
                                         contentDescription = "Timeline",
+                                        modifier = Modifier.padding(bottom = 16.dp),
                                         tint = if (showTimeline) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSecondary
                                     )
                                 }
@@ -532,93 +374,254 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
 
                             IconButton(onClick = { uriHandler.openUri(cardDetail.originalUrl) }) {
                                 Icon(
-                                   painter = painterResource(R.drawable.ic_s_origin_link),
+                                    painter = painterResource(R.drawable.ic_s_origin_link),
                                     contentDescription = "Share",
-                                    tint = MaterialTheme.colorScheme.onSecondary
+                                    modifier = Modifier.padding(bottom = 16.dp),
+                                    tint = Color.Unspecified
                                 )
                             }
                         }
+                    }
 
+                    item {
                         Divider(
-                            modifier = Modifier.fillMaxWidth(),
-                            color = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.3f),
-                            thickness = 1.dp
-                        )
-
-                        // 본문 내용
-                        MarkdownText(
-                            markdown = cardDetail.content,
-                            modifier = Modifier.padding(vertical = 16.dp),
-                            keywords = cardDetail.keywords,
-                            onKeywordClick = { keyword ->
-                                searchViewModel.onKeywordClick(keyword)
-                            }
+                            color = MaterialTheme.colorScheme.onSecondary,
+                            thickness = 6.dp,
+                            modifier = Modifier.fillMaxWidth()
                         )
                     }
-                }
-            }
-        }
 
-        // 타임라인 오버레이
-        if (showTimeline) {
-            Surface(
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .width(250.dp)
-                    .padding(end = 8.dp)
-                    .clickable(
-                        enabled = false,
-                        indication = null, // 클릭 효과 제거
-                        interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
-                    ) {},
-                color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.9f),
-                shape = RoundedCornerShape(8.dp),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.3f))
-            ) {
-                Column(
-                    modifier = Modifier.padding(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Text(
-                        text = "목차",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(bottom = 8.dp),
-                        color = MaterialTheme.colorScheme.secondary
-                    )
-
-                    timelineHeaders.forEach { header ->
-                        Row(
+                    items(sections.withIndex().toList()) { (index, section) ->
+                        Column(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable (
-                                    indication = null, // 클릭 효과 제거
-                                    interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
-                                ) {
-                                    player?.seekTo(header.timeStamp)
-                                    scope.launch {
-                                        // 스크롤 위치 계산 개선
-                                        scrollState.scrollToItem(0, header.offset)
-                                    }
-                                    showTimeline = false
+                                .padding(horizontal = horizontalPadding)
+                                .padding(vertical = 8.dp)
+                        ) {
+                            // 섹션 제목 추출
+                            val sectionTitle = getSectionTitle(section)
+
+                            ShakingTitle(
+                                text = sectionTitle,
+                                isActive = index == activeIndex,
+                                isFirst = index == 0,
+                                isExpanded = isExpanded,
+                                keywords = limitedKeywords,
+                                modifier = Modifier
+                                    .padding(horizontal = 6.dp)
+                                    .padding(bottom = 14.dp)
+                            )
+
+                            MarkdownText(
+                                markdown = section,
+                                modifier = Modifier.padding(end = 4.dp),
+                                keywords = limitedKeywords,
+                                onKeywordClick = { keyword ->
+                                    searchViewModel.onKeywordClick(keyword)
                                 }
-                                .padding(vertical = 4.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                            )
+                        }
+                    }
+                    item {
+                        Spacer(modifier = Modifier.height(44.dp))
+                    }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .padding(end = 16.dp)
+                        .pointerInput(Unit) {
+                            detectTapGestures(
+                                onLongPress = {
+                                    isExpanded = true
+                                }
+                            )
+                        }
+                ) {
+
+                    var sliderPosition by remember { mutableStateOf(selectedIndex.toFloat()) }
+                    // sliderPosition이 변경될 때마다 타이머를 재설정하는 로직 추가
+                    var lastInteractionTime by remember { mutableStateOf(0L) }
+
+                    // isExpanded 상태가 변경될 때 호출되는 함수
+                    fun onExpandStateChanged(expanded: Boolean) {
+                        isExpanded = expanded
+                        if (expanded) {
+                            // 슬라이더가 나타날 때 activeIndex 위치로 설정
+                            sliderPosition = activeIndex.toFloat()
+                            selectedIndex = activeIndex
+                        }
+                    }
+
+                    // 1.5초 후 자동으로 닫히는 effect
+                    LaunchedEffect(sliderPosition) {
+                        lastInteractionTime = System.currentTimeMillis()
+
+                        while (isExpanded) {
+                            delay(100) // 100ms 간격으로 체크
+                            val currentTime = System.currentTimeMillis()
+                            if (currentTime - lastInteractionTime >= 1500) { // 1.5초
+                                isExpanded = false
+                                break
+                            }
+                        }
+                    }
+
+                    if (!isExpanded) {
+                        // 기본 목차 버튼들
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            horizontalAlignment = Alignment.End
+                        ) {
+                            sections.forEachIndexed { index, _ ->
+                                Box(
+                                    modifier = Modifier
+                                        .size(8.dp)
+                                        .background(
+                                            color = if (index == activeIndex) {
+                                                Color(0xFFFFCD69)
+                                            } else {
+                                                MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                                            },
+                                            shape = CircleShape
+                                        )
+                                )
+                            }
+                        }
+                    } else {
+                        // 내부 Box에서 회전 처리
+                        Box(
+                            modifier = Modifier
+                                .zIndex(1f)
+                                .rotate(90f)
+                                .width(150.dp)
+                                .height(60.dp)
+                                .offset(y = (screenWidth - 480).dp)  // 부모 Box 내에서 중앙 정렬
+                        ) {
+                            Slider(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .width(150.dp)
+                                    .offset(x = (2).dp),
+                                value = sliderPosition,
+                                onValueChange = { newValue ->
+                                    lastInteractionTime = System.currentTimeMillis()
+                                    val roundedValue = newValue.roundToInt()
+                                    if (selectedIndex != roundedValue) {
+                                        sliderPosition = newValue
+                                        selectedIndex = roundedValue
+                                        scrollToSection(selectedIndex)
+                                    }
+                                },
+                                valueRange = 0f..(sections.size - 1).toFloat(),
+                                steps = sections.size - 2,
+                                colors = SliderDefaults.colors(
+                                    thumbColor = Color(0xFFFDEEB0),
+                                    activeTrackColor = MaterialTheme.colorScheme.primary,
+                                    inactiveTrackColor = Color.Transparent
+                                ),
+                                thumb = {
+                                    SliderDefaults.Thumb(
+                                        modifier = Modifier.size(12.dp),  // thumb 크기 조정
+                                        interactionSource = remember { MutableInteractionSource() },
+                                        colors = SliderDefaults.colors(thumbColor = Color(0xFFFFCD69))
+                                    )
+                                },
+                                track = { sliderPositions ->
+                                    Canvas(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(10.dp)  // track의 높이 설정
+                                            .offset(x = (-3).dp, y = (-4).dp)
+                                    ) {
+                                        val yCenter = size.height / 2
+                                        val tickCount = (sections.size)
+                                        val tickSpacing = size.width / (tickCount - 1)
+
+                                        // 각 tick 위치에 원 그리기
+                                        for (i in 0 until tickCount) {
+                                            val x = i * tickSpacing
+                                            drawCircle(
+//                                                color = Color(0xFF000000).copy(alpha = 0.3f),
+                                                color = Color(0xFFFDEEB0),
+                                                radius = 10f,  // tick 크기 조절
+                                                center = Offset(x, yCenter)
+                                            )
+                                        }
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+
+                // 타임라인 오버레이
+                if (showTimeline) {
+                    Surface(
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .width(250.dp)
+                            .padding(end = 8.dp)
+                            .clickable(
+                                enabled = false,
+                                indication = null, // 클릭 효과 제거
+                                interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
+                            ) {},
+                        color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.9f),
+                        shape = RoundedCornerShape(8.dp),
+                        border = BorderStroke(
+                            1.dp,
+                            MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.3f)
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             Text(
-                                text = formatTimeStamp(header.timeStamp),
-                                fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.secondary,
-                                modifier = Modifier.width(48.dp)
+                                text = "목차",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(bottom = 8.dp),
+                                color = MaterialTheme.colorScheme.secondary
                             )
-                            Text(
-                                text = header.text,
-                                fontSize = 14.sp,
-                                maxLines = 1,
-                                color = MaterialTheme.colorScheme.onSecondary,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.weight(1f)
-                            )
+
+                            timelineHeaders.forEach { header ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable(
+                                            indication = null, // 클릭 효과 제거
+                                            interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
+                                        ) {
+                                            player?.seekTo(header.timeStamp)
+                                            scope.launch {
+                                                // 스크롤 위치 계산 개선
+//                                                scrollState.scrollToItem(0, header.offset)
+                                                val index = timelineHeaders.indexOf(header)
+                                                scrollToSection(index)
+                                                showTimeline = false
+                                            }
+                                        }
+                                        .padding(vertical = 4.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = formatTimeStamp(header.timeStamp),
+                                        fontSize = 12.sp,
+                                        color = MaterialTheme.colorScheme.secondary,
+                                        modifier = Modifier.width(48.dp)
+                                    )
+                                    Text(
+                                        text = header.text,
+                                        fontSize = 14.sp,
+                                        maxLines = 1,
+                                        color = MaterialTheme.colorScheme.onSecondary,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -632,4 +635,58 @@ private fun formatTimeStamp(seconds: Float): String {
     val minutes = (seconds / 60).toInt()
     val remainingSeconds = (seconds % 60).toInt()
     return String.format("%02d:%02d", minutes, remainingSeconds)
+}
+
+private fun splitMarkdownIntoSections(markdown: String): List<String> {
+    return markdown.split(Regex("(?=^#\\s)", RegexOption.MULTILINE))
+        .filter { it.isNotBlank() }
+        .map { it.trim() }
+}
+
+// 섹션에서 제목 추출하는 함수
+private fun getSectionTitle(section: String): String {
+    // 첫 번째 '#' 으로 시작하는 라인을 찾아 제목으로 사용
+    val firstLine = section.lines().firstOrNull { it.trimStart().startsWith("#") }
+    return firstLine?.replace(Regex("^#+\\s*"), "") ?: "섹션"
+}
+
+// 현재 아이템이 화면에 보이는지 확인하는 함수
+private fun isItemVisible(
+    index: Int,
+    listState: LazyListState
+): Boolean {
+    return listState.layoutInfo.visibleItemsInfo.any {
+        it.index == index
+    }
+}
+
+private fun calculateActiveIndex(
+    listState: LazyListState,
+    headerItemCount: Int
+): Int {
+    val visibleItems = listState.layoutInfo.visibleItemsInfo
+    if (visibleItems.isEmpty()) return 0
+
+    val viewportHeight = listState.layoutInfo.viewportEndOffset.toFloat() - listState.layoutInfo.viewportStartOffset.toFloat()
+    val viewportTop = listState.layoutInfo.viewportStartOffset.toFloat()
+
+    // viewport의 25%-75% 영역을 "중앙 영역"으로 정의
+    val centralZoneStart = viewportTop + (viewportHeight * 0.25f)
+    val centralZoneEnd = viewportTop + (viewportHeight * 0.75f)
+
+    // 중앙 영역에 가장 많이 포함된 아이템 찾기
+    val centralItem = visibleItems.maxByOrNull { item ->
+        val itemStart = item.offset.toFloat()
+        val itemEnd = itemStart + item.size.toFloat()
+        val overlapStart = maxOf(itemStart, centralZoneStart)
+        val overlapEnd = minOf(itemEnd, centralZoneEnd)
+        if (overlapEnd > overlapStart) overlapEnd - overlapStart else 0f
+    }
+
+    return centralItem?.let { item ->
+        (item.index - headerItemCount).coerceIn(
+            0,
+            listState.layoutInfo.totalItemsCount - headerItemCount - 1
+        )
+    } ?: 0
 }
