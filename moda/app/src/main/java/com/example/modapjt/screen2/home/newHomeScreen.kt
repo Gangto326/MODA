@@ -32,6 +32,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.modapjt.R
 import com.example.modapjt.components.bar.BottomBarComponent
 import com.example.modapjt.components.bar.HeaderBar
@@ -46,6 +49,8 @@ import com.example.modapjt.components.home.section.WeeklyKeywordSection
 import com.example.modapjt.domain.viewmodel.AuthViewModel
 import com.example.modapjt.domain.viewmodel.CategoryViewModel
 import com.example.modapjt.domain.viewmodel.SearchViewModel
+import com.airbnb.lottie.compose.*
+
 
 
 @Composable
@@ -138,10 +143,15 @@ fun newHomeScreen(
                         .height(100.dp), // 로고 크기에 맞춰 조절
                     contentAlignment = Alignment.Center // 로고 가운데 정렬
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.moda_logo), // moda_logo.png 사용
-                        contentDescription = "Moda Logo",
-                        modifier = Modifier.size(90.dp) // 원하는 크기로 조절
+                    val composition by rememberLottieComposition(LottieCompositionSpec.Asset("logo.json"))
+                    val progress by animateLottieCompositionAsState(
+                        composition,
+                        iterations = LottieConstants.IterateForever)
+
+                    LottieAnimation(
+                        composition = composition,
+                        progress = { progress },
+                        modifier = Modifier.size(120.dp) // 원하는 크기로 조절
                     )
                 }
             }

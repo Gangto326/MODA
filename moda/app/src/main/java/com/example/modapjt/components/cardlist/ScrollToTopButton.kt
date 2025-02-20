@@ -50,7 +50,7 @@ fun ScrollToTopButton(scrollState: LazyListState) {
             Box(
                 modifier = Modifier
                     .size(56.dp) // 크기 지정
-                    .background(Color.White, shape = CircleShape) // 배경을 원형으로
+                    .background(MaterialTheme.colorScheme.tertiary, shape = CircleShape) // 배경을 원형으로
                     .border(2.dp, Color.LightGray, CircleShape) // 테두리 추가
                     .clickable(
                         indication = null, // 클릭 효과 제거
