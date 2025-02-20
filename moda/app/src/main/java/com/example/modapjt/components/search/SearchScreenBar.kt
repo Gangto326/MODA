@@ -101,7 +101,7 @@ fun SearchScreenBar(
                     .weight(1f)
                     .border(
                         width = 2.dp,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         shape = RoundedCornerShape(16.dp)
                     )
                     .heightIn(min = 48.dp),
@@ -255,7 +255,7 @@ fun SearchListBar(
                     .weight(1f)
                     .border(
                         width = 2.dp,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         shape = RoundedCornerShape(16.dp)
                     )
                     .heightIn(min = 48.dp),
