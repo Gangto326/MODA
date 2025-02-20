@@ -92,7 +92,7 @@ fun newLinkUploadScreen(navController: NavController, currentRoute: String, repo
                             } else {
                                 // 실패 응답을 받으면 1분간 "카드 생성 중입니다..." 표시
                                 showWaitingMessage = true
-                                delay(60000) // ⏳ 1분(60초) 대기
+                                delay(600000) // ⏳ 1분(60초) 대기
                                 isLoading = false
                                 showWaitingMessage = false
                                 message = "❌ 저장 실패: ${result.exceptionOrNull()?.message}"

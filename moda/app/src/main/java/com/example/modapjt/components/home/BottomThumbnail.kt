@@ -30,6 +30,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImagePainter.State.Empty.painter
+import coil.compose.rememberAsyncImagePainter
 import com.example.modapjt.R
 
 
@@ -62,11 +64,17 @@ fun BottomThumbnail(
                 .background(MaterialTheme.colorScheme.onSecondary, shape = RoundedCornerShape(8.dp))
         ) {
             coil.compose.AsyncImage(
-                model = thumbnailUrl,
                 contentDescription = "Thumbnail Image",
+                model = if(type=="YOUTUBE"){
+                   "https://img.youtube.com/vi/$thumbnailUrl/0.jpg"
+                }else{
+                   thumbnailUrl
+                },
+
                 modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(8.dp)),
                 contentScale = ContentScale.Crop
             )
+
 
             // 북마크 아이콘
             Icon(
