@@ -109,6 +109,7 @@ public class AbstractExtractor {
 				.stream()
 				.map(img -> img.getAttribute("src"))
 				.filter(src -> src != null && !src.isEmpty() && isValidImageUrl(src))
+				.skip(1)  // 첫 번째 이미지를 건너뜁니다
 				.map(src -> {
 					try {
 						return imageStorageService.uploadImageFromurl(src);
