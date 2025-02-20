@@ -95,18 +95,18 @@ public class JwtFilter extends OncePerRequestFilter {
 		}
 
 		// 3. Redis 토큰 유효성 검증 (로그아웃 여부 등)
-		UserId userId = new UserId(jwtUtil.getUserId(accessToken, "AccessToken"));
-		if (!tokenService.validateAccessToken(userId, accessToken)) {
-			response.setStatus(HttpStatus.UNAUTHORIZED.value());
-			response.setContentType("application/json");
-			response.getWriter().write(objectMapper.writeValueAsString(
-				Map.of(
-					"message", "로그아웃 되었거나 유효하지 않은 토큰입니다.",
-					"code", "ACCESS_TOKEN_INVALID"  // 프론트에서 이 코드를 보고 로그인 페이지로 이동
-				)
-			));
-			return;
-		}
+		// UserId userId = new UserId(jwtUtil.getUserId(accessToken, "AccessToken"));
+		// if (!tokenService.validateAccessToken(userId, accessToken)) {
+		// 	response.setStatus(HttpStatus.UNAUTHORIZED.value());
+		// 	response.setContentType("application/json");
+		// 	response.getWriter().write(objectMapper.writeValueAsString(
+		// 		Map.of(
+		// 			"message", "로그아웃 되었거나 유효하지 않은 토큰입니다.",
+		// 			"code", "ACCESS_TOKEN_INVALID"  // 프론트에서 이 코드를 보고 로그인 페이지로 이동
+		// 		)
+		// 	));
+		// 	return;
+		// }
 		filterChain.doFilter(request, response);
 	}
 

@@ -41,7 +41,7 @@ public class PlatformExtractorFactory {
 	private static ExtractorConfig createMobileNaverBlogConfig() {
 		return ExtractorConfig.builder()
 			.pattern("m.blog.naver.com")
-			.contentSelector(".se_component_wrap.__se_component_area, .se-main-container, .post_ct")
+			.contentSelector(".se_component_wrap.__se_component_area, .se-main-container, .post_ct,.se_doc_viewer.se_body_wrap.se_theme_transparent")
 			.imageSelector(".se_mediaImage")
 			.requiresFrame(false)
 			.urlDomainType(UrlDomainType.NAVER_BLOG)
@@ -60,7 +60,7 @@ public class PlatformExtractorFactory {
 
 	private static ExtractorConfig createMobileSportsNaverConfig() {
 		return ExtractorConfig.builder()
-			.pattern(".m.sports.naver.com")
+			.pattern("m.sports.naver.com")
 			.contentSelector("._article_content")
 			.imageSelector("img")
 			.requiresFrame(false)

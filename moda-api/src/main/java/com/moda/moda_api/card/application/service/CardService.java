@@ -191,7 +191,7 @@ public class CardService {
 				Card card = cardFactory.create(
 					userIdObj,
 					SummaryResultDto.getCategoryId(),
-					SummaryResultDto.getTypeId(),
+					SummaryResultDto.getTypeId().equals(6) ? 2 : SummaryResultDto.getTypeId(),
 					urlHash,
 					SummaryResultDto.getTitle(),
 					SummaryResultDto.getContent(),
@@ -201,6 +201,9 @@ public class CardService {
 					SummaryResultDto.getKeywords(),
 					SummaryResultDto.getSubContent()
 				);
+
+
+
 
 				System.out.println(card.toString());
 

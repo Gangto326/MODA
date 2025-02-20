@@ -24,6 +24,8 @@ public class CrawlingSummaryService {
 	private final CrawlingService crawlingService;
 	private final Executor pythonExecutor;
 
+	// https://m.sports.naver.com/wfootball/article/477/0000535493
+
 	public CompletableFuture<SummaryResultDto> summarize(String url, String userId) {
 		return CompletableFuture.supplyAsync(() -> {
 				try {
@@ -70,6 +72,8 @@ public class CrawlingSummaryService {
 					CompletableFuture.supplyAsync(() ->
 						getFirstImageUrl(crawledContent.getExtractedContent().getImages())
 					);
+
+
 
 				// 3단계: 두 작업이 모두 완료되면 최종 결과 생성
 				return CompletableFuture.allOf(pythonAnalysisFuture, thumbnailUrlFuture)
