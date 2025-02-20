@@ -14,6 +14,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -299,7 +300,7 @@ fun BlogDetailScreen(cardDetail: CardDetail, navController: NavController) {
                                     ),
                                     contentDescription = if (showImage) "이미지 숨기기" else "이미지 보기",
                                     modifier = Modifier.padding(bottom = 17.dp).size(
-                                        if (showImage) 40.dp else 24.dp  // ic_not_image일 때 더 크게 표시
+                                        if (showImage) 100.dp else 24.dp  // ic_not_image일 때 더 크게 표시
                                     ),
                                     tint = Color.Unspecified
 
@@ -310,7 +311,7 @@ fun BlogDetailScreen(cardDetail: CardDetail, navController: NavController) {
                                     painter = painterResource(R.drawable.ic_s_origin_link),
                                     contentDescription = "Share",
                                     modifier = Modifier.padding(bottom = 16.dp),
-                                    tint = MaterialTheme.colorScheme.onSecondary
+                                    tint = Color.Unspecified
                                 )
                             }
                         }
@@ -522,16 +523,16 @@ private fun calculateActiveIndex(
     if (visibleItems.isEmpty()) return 0
 
 
-    // 스크롤이 끝에 도달했는지 확인
-    val lastVisibleItem = visibleItems.lastOrNull()
-
-    if (lastVisibleItem != null &&
-        lastVisibleItem.index == listState.layoutInfo.totalItemsCount - 1 &&
-        !listState.canScrollForward) {
-
-        // header의 마지막 인덱스 반환
-        return (headerItemCount - 1)
-    }
+//    // 스크롤이 끝에 도달했는지 확인
+//    val lastVisibleItem = visibleItems.lastOrNull()
+//
+//    if (lastVisibleItem != null &&
+//        lastVisibleItem.index == listState.layoutInfo.totalItemsCount - 1 &&
+//        !listState.canScrollForward) {
+//
+//        // header의 마지막 인덱스 반환
+//        return (listState.layoutInfo.totalItemsCount - headerItemCount - 1)
+//    }
 
 
     val viewportHeight = listState.layoutInfo.viewportEndOffset.toFloat() - listState.layoutInfo.viewportStartOffset.toFloat()
