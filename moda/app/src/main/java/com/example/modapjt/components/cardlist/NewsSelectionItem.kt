@@ -52,7 +52,7 @@ fun NewsSelectionItem(
     Surface (
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+//            .padding(horizontal = 16.dp, vertical = 8.dp)
             .clickable(
                 onClick = onClick,
                 indication = null, // 클릭 효과 제거
@@ -60,7 +60,7 @@ fun NewsSelectionItem(
             ),
         shape = RoundedCornerShape(8.dp),
         color = when {
-            isSelected -> Color.LightGray.copy(alpha = 0.3f)  // 선택됐을 때 색상
+//            isSelected -> Color.LightGray.copy(alpha = 0.3f)  // 선택됐을 때 색상
             !isMine -> Color.Gray
             else -> Color.White
         }
@@ -126,25 +126,6 @@ fun NewsSelectionItem(
                             modifier = Modifier.alignByBaseline()
                         )
                     }
-                }
-            }
-            if (isSelected) {
-                Surface(
-                    shape = CircleShape,
-                    color = Color(0xFF2167F3),
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(top = 16.dp, end = 17.dp, bottom = 16.dp)
-                        .size(18.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Check,
-                        contentDescription = "Selected",
-                        tint = Color.White,
-                        modifier = Modifier
-                            .padding(2.dp)
-                            .fillMaxSize()
-                    )
                 }
             }
         }

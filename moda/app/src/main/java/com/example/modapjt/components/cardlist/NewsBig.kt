@@ -52,7 +52,6 @@ fun NewsBig(
                 shape = RoundedCornerShape(8.dp)
             )
             .padding(8.dp) // 테두리와 내용 사이 간격
-            .clickable(onClick = onClick)
     ) {
         // 상단 헤더: 제목
         Text(
