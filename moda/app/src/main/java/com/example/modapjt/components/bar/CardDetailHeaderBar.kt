@@ -106,13 +106,13 @@ fun CardDetailHeaderBar(
                     expanded = showMenu,
                     onDismissRequest = { showMenu = false }
                 ) {
-                    DropdownMenuItem(
-                        text = { Text("수정하기") },
-                        onClick = {
-                            onEditClick()
-                            showMenu = false
-                        }
-                    )
+//                    DropdownMenuItem(
+//                        text = { Text("수정하기") },
+//                        onClick = {
+//                            onEditClick()
+//                            showMenu = false
+//                        }
+//                    )
                     DropdownMenuItem(
                         text = { Text("삭제하기") },
                         onClick = {
