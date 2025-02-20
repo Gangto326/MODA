@@ -175,7 +175,7 @@ fun MyPageScreen(
                         )
 
                         Spacer(modifier = Modifier.height(8.dp))
-                        Divider(color = MaterialTheme.colorScheme.onTertiary, thickness = 4.dp, modifier = Modifier.padding(horizontal = 0.dp))
+                        Divider(color = MaterialTheme.colorScheme.onTertiary, thickness = 6.dp, modifier = Modifier.padding(horizontal = 0.dp))
 
                         // "정보 통계" 제목 추가
                         Text(
@@ -210,7 +210,7 @@ fun MyPageScreen(
                                     Text(
                                         text = userStatus?.allCount ?: "0",
                                         fontSize = 20.sp,
-                                        color = Color.Blue
+                                        color = MaterialTheme.colorScheme.onSurface
                                     )
                                     Text(text = "내 정보", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSecondary)
                                 }
@@ -223,7 +223,7 @@ fun MyPageScreen(
                                     Text(
                                         text = userStatus?.bookmarkCount ?: "0",
                                         fontSize = 20.sp,
-                                        color = Color.Blue
+                                        color = MaterialTheme.colorScheme.onSurface
                                     )
                                     Text(text = "즐겨찾기", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSecondary)
                                 }
@@ -324,7 +324,7 @@ fun MyPageScreen(
                         }
                     }
                     Spacer(modifier = Modifier.height(8.dp))
-                    Divider(color = MaterialTheme.colorScheme.onTertiary, thickness = 4.dp, modifier = Modifier.padding(horizontal = 0.dp))
+                    Divider(color = MaterialTheme.colorScheme.onTertiary, thickness = 6.dp, modifier = Modifier.padding(horizontal = 0.dp))
 
                 }
 
