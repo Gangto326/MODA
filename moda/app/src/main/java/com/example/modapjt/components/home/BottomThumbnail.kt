@@ -65,7 +65,7 @@ fun BottomThumbnail(
         ) {
             coil.compose.AsyncImage(
                 contentDescription = "Thumbnail Image",
-                model = if(type=="YOUTUBE"){
+                model = if(type=="VIDEO"){
                    "https://img.youtube.com/vi/$thumbnailUrl/0.jpg"
                 }else{
                    thumbnailUrl
