@@ -310,7 +310,7 @@ fun MyPageScreen(
                                     }
                                 },
                                 modifier = Modifier.fillMaxWidth(),
-                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onPrimary)
                             ) {
                                 Text(
                                     text = when {
@@ -318,7 +318,7 @@ fun MyPageScreen(
                                         saveMode == SaveMethod.OVERLAY -> if (isOverlayActive) "오버레이 종료" else "오버레이 시작"
                                         else -> ""
                                     },
-                                    color = MaterialTheme.colorScheme.onPrimary
+                                    color = MaterialTheme.colorScheme.tertiary
                                 )
                             }
                         }
@@ -336,7 +336,7 @@ fun MyPageScreen(
                             .padding(16.dp)
                     ) {
                         SettingItem(title = "MODA 200% 활용하기") { }
-                        SettingItem(title = "공지사항") { }
+//                        SettingItem(title = "공지사항") { }
 //                        SettingItem(title = "휴지통") { }
                     }
                 }
