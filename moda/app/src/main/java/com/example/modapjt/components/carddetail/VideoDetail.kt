@@ -377,7 +377,7 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
                                     painter = painterResource(R.drawable.ic_s_origin_link),
                                     contentDescription = "Share",
                                     modifier = Modifier.padding(bottom = 16.dp),
-                                    tint = Color.Unspecified
+                                    tint = MaterialTheme.colorScheme.onPrimary
                                 )
                             }
                         }
@@ -385,7 +385,7 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
 
                     item {
                         Divider(
-                            color = MaterialTheme.colorScheme.onSecondary,
+                            color = MaterialTheme.colorScheme.onTertiary,
                             thickness = 6.dp,
                             modifier = Modifier.fillMaxWidth()
                         )

@@ -101,7 +101,7 @@ fun ImageDetailScreen(cardDetail: CardDetail, navController: NavController) {
             }
 
             Spacer(modifier = Modifier.height(8.dp))
-            Divider(color = MaterialTheme.colorScheme.onSecondary, thickness = 6.dp, modifier = Modifier.padding(horizontal = 0.dp))
+            Divider(color = MaterialTheme.colorScheme.onTertiary, thickness = 6.dp, modifier = Modifier.padding(horizontal = 0.dp))
 
 
             // 카테고리 & 날짜 추가

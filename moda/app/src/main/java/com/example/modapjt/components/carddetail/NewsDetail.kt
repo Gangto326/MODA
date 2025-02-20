@@ -281,7 +281,7 @@ fun NewsDetailScreen(cardDetail: CardDetail, navController: NavController) {
                                     imageVector = Icons.Default.Share,
                                     contentDescription = "Share",
                                     modifier = Modifier.padding(bottom = 16.dp),
-                                    tint = MaterialTheme.colorScheme.onSecondary
+                                    tint = MaterialTheme.colorScheme.onPrimary
                                 )
                             }
                         }
@@ -289,7 +289,7 @@ fun NewsDetailScreen(cardDetail: CardDetail, navController: NavController) {
 
                     item {
                         Divider(
-                            color = MaterialTheme.colorScheme.onSecondary,
+                            color = MaterialTheme.colorScheme.onTertiary,
                             thickness = 6.dp,
                             modifier = Modifier.fillMaxWidth()
                         )
