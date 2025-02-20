@@ -5,9 +5,11 @@ import android.gesture.Gesture
 import android.gesture.GestureLibraries
 import android.gesture.GestureLibrary
 import android.gesture.GestureStore
+import android.gesture.Prediction
 import android.util.Log
 import com.example.modapjt.R
 import java.io.File
+import java.util.function.Consumer
 
 class GestureManager(private val context: Context) {
     private var gestureLibrary: GestureLibrary
@@ -22,8 +24,8 @@ class GestureManager(private val context: Context) {
 
     private fun loadGestureLibrary(): GestureLibrary {
         val store = GestureStore()
-        store.sequenceType = GestureStore.SEQUENCE_INVARIANT
-        store.orientationStyle = GestureStore.ORIENTATION_INVARIANT
+        store.sequenceType = GestureStore.SEQUENCE_SENSITIVE
+        store.orientationStyle = GestureStore.ORIENTATION_SENSITIVE
 
         context.resources.openRawResource(RAW_GESTURE_FILE).use { input ->
             val tempFile = File(context.cacheDir, "temp_gestures")
@@ -32,8 +34,8 @@ class GestureManager(private val context: Context) {
             }
 
             return GestureLibraries.fromFile(tempFile).apply {
-                sequenceType = GestureStore.SEQUENCE_INVARIANT
-                orientationStyle = GestureStore.ORIENTATION_INVARIANT
+                sequenceType = GestureStore.SEQUENCE_SENSITIVE
+                orientationStyle = GestureStore.ORIENTATION_SENSITIVE
                 load()
 
                 // Raw 리소스에서 읽은 제스처 목록 로깅
@@ -47,6 +49,12 @@ class GestureManager(private val context: Context) {
 
     fun recognizeGesture(gesture: Gesture): Pair<String, Double>? {
         val predictions = gestureLibrary.recognize(gesture)
+
+        Log.d("GestureManager", "제스처 인식")
+        predictions.forEach(Consumer { prediction: Prediction ->
+            Log.d("GestureManager", "${prediction.name} ${prediction.score}")
+        })
+
         return predictions?.maxByOrNull { it.score }?.let {
             Pair(it.name, it.score)
         }

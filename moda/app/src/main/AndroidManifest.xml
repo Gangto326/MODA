@@ -73,6 +73,7 @@
         <!-- 제스처 서비스 추가 -->
         <service
             android:name=".toktok.gesture.GestureService"
+            android:foregroundServiceType="mediaProjection"
             android:enabled="true"
             android:exported="false" />
 

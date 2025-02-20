@@ -57,7 +57,6 @@ import androidx.navigation.NavController
 import com.example.modapjt.components.bar.BottomBarComponent
 import com.example.modapjt.components.bar.TitleHeaderBar
 import com.example.modapjt.components.setting.SettingItem
-import com.example.modapjt.components.user.MyPageHeader
 import com.example.modapjt.domain.viewmodel.AuthViewModel
 import com.example.modapjt.domain.viewmodel.UserViewModel
 import com.example.modapjt.toktok.gesture.GestureService
@@ -95,13 +94,29 @@ fun MyPageScreen(
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.let { data ->
+                lateinit var serviceIntent: Intent
+
                 // 권한 승인 후 서비스 시작
-                val serviceIntent = Intent(context, OverlayService::class.java)
-                    .apply {
-                        putExtra(OverlayService.EXTRA_RESULT_CODE, result.resultCode)
-                        putExtra(OverlayService.EXTRA_DATA, data)
+                when (saveMode) {
+                    SaveMethod.OVERLAY -> {
+                        serviceIntent = Intent(context, OverlayService::class.java)
+                        .apply {
+                            putExtra(OverlayService.EXTRA_RESULT_CODE, result.resultCode)
+                            putExtra(OverlayService.EXTRA_DATA, data)
+                        }
+                        OverlayStateManager.setOverlayActive(true)
                     }
-                OverlayStateManager.setOverlayActive(true)
+                    SaveMethod.GESTURE -> {
+                        serviceIntent = Intent(context, GestureService::class.java)
+                        .apply {
+                            putExtra(GestureService.EXTRA_RESULT_CODE, result.resultCode)
+                            putExtra(GestureService.EXTRA_DATA, data)
+                        }
+                        OverlayStateManager.setOverlayActive(true)
+                    }
+                    else -> { }
+                }
+
                 context.startForegroundService(serviceIntent)
 
                 // 크롬 브라우저 실행
@@ -269,18 +284,11 @@ fun MyPageScreen(
                                 onClick = {
                                     if (saveMode == SaveMethod.GESTURE) {
                                         if (!isGestureActive) {
-                                            val serviceIntent = Intent(context, GestureService::class.java)
-                                            context.startService(serviceIntent)
-                                            GestureStateManager.setOverlayActive(true)
-
-                                            // 크롬 브라우저 실행
-                                            Toast.makeText(context, "크롬 브라우저가 실행됩니다.", Toast.LENGTH_SHORT).show()
-                                            val chromeIntent = Intent(Intent.ACTION_MAIN)
-                                            chromeIntent.setPackage("com.android.chrome")
-                                            chromeIntent.addCategory(Intent.CATEGORY_APP_BROWSER)
-                                            chromeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                            context.startActivity(chromeIntent)
-                                            Log.d("OverlayService", "크롬 브라우저 실행")
+                                            try {
+                                                screenCaptureContract.launch(mediaProjectionManager.createScreenCaptureIntent())
+                                            } catch (e: Exception) {
+                                                Toast.makeText(context, "크롬 브라우저를 사용할 수 없습니다.", Toast.LENGTH_SHORT).show()
+                                            }
                                         } else {
                                             val serviceIntent = Intent(context, GestureService::class.java)
                                             context.stopService(serviceIntent)
@@ -432,7 +440,10 @@ fun CustomToggleSwitch(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
-                .background(if (saveMode == SaveMethod.OVERLAY) MaterialTheme.colorScheme.tertiary else Color.Transparent, shape = CircleShape)
+                .background(
+                    if (saveMode == SaveMethod.OVERLAY) MaterialTheme.colorScheme.tertiary else Color.Transparent,
+                    shape = CircleShape
+                )
                 .clickable(
                     indication = null, // 클릭 효과 제거
                     interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
@@ -451,7 +462,10 @@ fun CustomToggleSwitch(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
-                .background(if (saveMode == SaveMethod.GESTURE) MaterialTheme.colorScheme.tertiary else Color.Transparent, shape = CircleShape)
+                .background(
+                    if (saveMode == SaveMethod.GESTURE) MaterialTheme.colorScheme.tertiary else Color.Transparent,
+                    shape = CircleShape
+                )
                 .clickable(
                     indication = null, // 클릭 효과 제거
                     interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
