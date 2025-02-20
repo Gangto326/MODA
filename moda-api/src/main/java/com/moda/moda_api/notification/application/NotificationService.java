@@ -51,7 +51,7 @@ public class NotificationService {
 				.putData("imageUrl", imageUrl)
 				.putData("title", card.getTitle())
 				.setNotification(com.google.firebase.messaging.Notification.builder()
-					.setTitle("카드가 생성이 되었습니다. 모다모다~")
+					.setTitle("컨텐츠 저장이 완료되었습니다!")
 					.setBody(card.getTitle())
 					.build())
 				.setAndroidConfig(AndroidConfig.builder()
