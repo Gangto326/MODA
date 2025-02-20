@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,6 +38,7 @@ fun VideoItem(videoUrl: String, title: String, cardId: String, navController: Na
             .padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // VideoItem.kt 수정
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -44,10 +46,13 @@ fun VideoItem(videoUrl: String, title: String, cardId: String, navController: Na
                 .clip(RoundedCornerShape(8.dp))
                 .background(MaterialTheme.colorScheme.tertiary)
         ) {
-            YouTubePlayer(
-                videoId = videoId,
-                modifier = Modifier.fillMaxSize()
-            )
+            // key 파라미터 추가 - 이렇게 하면 videoId가 변경될 때 컴포넌트가 완전히 재구성됨
+            key(videoId) {
+                YouTubePlayer(
+                    videoId = videoId,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(10.dp))
