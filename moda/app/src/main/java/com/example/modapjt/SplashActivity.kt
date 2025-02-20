@@ -39,7 +39,7 @@ fun SplashScreenView(onTimeout: () -> Unit) {
     // 애니메이션이 끝나면 MainActivity로 이동
     LaunchedEffect(progress) {
         if (progress == 1f) { // 애니메이션이 끝나면
-            delay(500) // 약간의 딜레이 후
+            delay(0) // 약간의 딜레이 후
             onTimeout()
         }
     }
