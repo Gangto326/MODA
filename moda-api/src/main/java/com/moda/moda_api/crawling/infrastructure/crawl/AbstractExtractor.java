@@ -37,7 +37,7 @@ public class AbstractExtractor {
 	private final WebDriverService webDriverService;
 
 	// 추출하는 매서드
-	public CrawledContent extract(String url) throws TimeoutException , NoSuchElementException  {
+	public CrawledContent extract(String url) throws TimeoutException, NoSuchElementException {
 		WebDriver driver = null;
 
 		try {
@@ -63,12 +63,20 @@ public class AbstractExtractor {
 				.extractedContent(extractContent(config, driver))  // driver 전달
 				.build();
 
-		}catch (TimeoutException | NoSuchElementException e) {
+		} catch (TimeoutException | NoSuchElementException e) {
 			log.error("Failed to find element while crawling: {}", e.getMessage());
 			throw e;  // 이 예외들도 상위로 전파
 		} catch (Exception e) {
 			log.error("Failed to extract content", e);
 			throw e;  // 상위 메서드로 예외를 그대로 전달
+		} finally {
+			if (driver != null) {
+				try {
+					driver.quit();
+				} catch (Exception e) {
+					log.error("Failed to close WebDriver", e);
+				}
+			}
 		}
 	}
 
@@ -92,7 +100,6 @@ public class AbstractExtractor {
 
 			log.info("Trying to find content with selector: {}",
 				contentElement.getTagName().equals("body") ? "body" : config.getContentSelector());
-
 
 			// 텍스트 추출 - 전체 텍스트를 한 번에 가져옴
 			String text = contentElement.getText().trim();
@@ -130,12 +137,14 @@ public class AbstractExtractor {
 	private String extractTitle(WebDriver driver) {
 		return driver.getTitle();
 	}
+
 	private boolean isValidImageUrl(String url) {
 		return url.matches(".*\\.(jpg|jpeg|png|gif|webp)($|\\?.*)") &&
 			!url.contains("favicon") &&
 			!url.contains("logo") &&
 			url.length() > 10;
 	}
+
 	public List<Url> extractUrl(String url) {
 		WebDriver driver = null;
 
@@ -183,6 +192,14 @@ public class AbstractExtractor {
 		} catch (Exception e) {
 			log.error("URL 추출 중 오류 발생: {}", url, e);
 			throw new ExtractorException("URL 추출 실패", e);
+		} finally {
+			if (driver != null) {
+				try {
+					driver.quit();
+				} catch (Exception e) {
+					log.error("Failed to close WebDriver", e);
+				}
+			}
 		}
 	}
 }
