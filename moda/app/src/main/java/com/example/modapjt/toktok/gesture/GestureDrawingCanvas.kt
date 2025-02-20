@@ -68,11 +68,8 @@ fun GestureDrawingCanvas(
     val isDarkTheme = isSystemInDarkTheme()
 
     // 다크모드에 따른 색상 설정
-    val lineColor = if (isDarkTheme) {
-        Color(0xFFFFFFFF) // 다크모드: 흰색
-    } else {
-        Color(0xFF000000) // 라이트모드: 검정색
-    }
+    val lineColor = Color(0xFFFFFFFF)
+    val lineWidth = 30f
 
     Box(
         modifier = Modifier
@@ -176,7 +173,7 @@ fun GestureDrawingCanvas(
                     path = timedPath.path,
                     color = lineColor.copy(alpha = alpha.coerceIn(0f, 1f)),
                     style = Stroke(
-                        width = 13f,
+                        width = lineWidth,
                         cap = StrokeCap.Round,
                         join = StrokeJoin.Round
                     )
@@ -188,7 +185,7 @@ fun GestureDrawingCanvas(
                 path = currentPath,
                 color = lineColor,
                 style = Stroke(
-                    width = 13f,
+                    width = lineWidth,
                     cap = StrokeCap.Round,
                     join = StrokeJoin.Round
                 )
