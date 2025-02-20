@@ -68,7 +68,7 @@ cached_thumbnail_content TEXT NOT NULL,
 cached_thumbnail_url TEXT NOT NULL,
 cached_embedding VECTOR(768) NOT NULL,
 cached_keywords text[],
-cached_subcontents text[] DEFAULT ARRAY[]::text[],
+cached_sub_contents text[] DEFAULT ARRAY[]::text[],
 created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 FOREIGN KEY (type_id) REFERENCES content_type(type_id),
 FOREIGN KEY (category_id) REFERENCES category(category_id)
