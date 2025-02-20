@@ -155,4 +155,5 @@ dependencies {
 
     implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation ("com.google.accompanist:accompanist-systemuicontroller:0.32.0")
+    implementation("com.airbnb.android:lottie-compose:6.1.0") // Lottie 라이브러리
 }
