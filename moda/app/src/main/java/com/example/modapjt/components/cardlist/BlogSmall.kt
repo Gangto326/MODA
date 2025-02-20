@@ -1,5 +1,7 @@
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,6 +22,9 @@ import com.example.app.ui.theme.customTypography
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.remember
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role.Companion.Image
+import com.example.modapjt.R
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -36,18 +41,27 @@ fun BlogSmall(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(if (!isMine) MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.2f) else MaterialTheme.colorScheme.tertiary)
+            .padding(8.dp)
+            .border(
+                width = 1.dp,
+                color = if (!isMine) MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
+                else Color.Transparent,
+                shape = RoundedCornerShape(8.dp)
+            )
             .clickable(
                 onClick = onClick,
-                indication = null, // 클릭 효과 제거
-                interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
-                )
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            )
     ) {
         Row(
-            verticalAlignment = Alignment.Top // 이미지 상단에 맞춤
+            verticalAlignment = Alignment.Top,
+            modifier = Modifier.padding(8.dp)
         ) {
             Column(
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(8.dp)
             ) {
                 Text(
                     text = title,
@@ -66,7 +80,7 @@ fun BlogSmall(
                 )
             }
 
-            Spacer(modifier = Modifier.width(10.dp)) // 🔥 제목과 이미지 사이 간격 추가
+            Spacer(modifier = Modifier.width(10.dp))
 
             AsyncImage(
                 model = imageUrl,
@@ -78,30 +92,41 @@ fun BlogSmall(
             )
         }
 
-        // 🔥 키워드 간격 적용
-        FlowRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp), // ✅ 키워드 사이 간격 설정
-            verticalArrangement = Arrangement.spacedBy(4.dp) // ✅ 여러 줄일 경우 간격 조정
-        ) {
-            keywords.take(3).forEach { keyword ->
-                Text(
-                    text = "# $keyword",
-                    style = customTypography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSecondary,
+        // 키워드와 아이콘 영역
+        Box(modifier = Modifier.fillMaxWidth()) {
+            // 키워드 FlowRow
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                keywords.take(3).forEach { keyword ->
+                    Text(
+                        text = "# $keyword",
+                        style = customTypography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSecondary,
+                    )
+                }
+
+                // 남의 글(isMine=false)인 경우, 빈 공간 추가 (아이콘 공간 확보)
+                if (!isMine) {
+                    Spacer(modifier = Modifier.width(30.dp))
+                }
+            }
+
+            // 남의 글(isMine=false)인 경우에만 오른쪽 아래에 아이콘 표시
+            if (!isMine) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_other_people),
+                    contentDescription = "Other's content",
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(end = 8.dp, bottom = 8.dp)
+                        .size(20.dp)
                 )
             }
         }
-
-//        if (bookMark && isMine) {
-//            Icon(
-//                imageVector = Icons.Filled.Star,
-//                contentDescription = "즐겨찾기됨",
-//                tint = Color(0xFFFFCD69),
-//                modifier = Modifier.size(20.dp)
-//            )
-//        }
     }
 }

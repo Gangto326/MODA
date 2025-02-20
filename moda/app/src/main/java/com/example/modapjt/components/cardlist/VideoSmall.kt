@@ -32,6 +32,13 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.app.ui.theme.customTypography
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.res.painterResource
+import com.example.modapjt.R
+
 
 // VideoSmall: 동영상 컨텐츠를 가로로 표시하는 컴포저블 함수
 @OptIn(ExperimentalLayoutApi::class)
@@ -49,17 +56,22 @@ fun VideoSmall(
     Row(
         modifier = modifier
             .fillMaxWidth()
-//            .padding(vertical = 4.dp) // 비디오 컨텐츠 하나 위아래 패딩
+            .border(
+                width = 1.dp,
+                color = if (!isMine) MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f) else Color.Transparent,
+                shape = RoundedCornerShape(8.dp)
+            )
+            .padding(8.dp) // 테두리와 내용 사이 간격
             .clickable(
                 onClick = onClick,
                 indication = null, // 클릭 효과 제거
                 interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
-                )
+            )
     ) {
         // 🔹 썸네일 영역 (왼쪽)
         Box(
             modifier = Modifier
-                .width (135.dp)
+                .width(135.dp)
                 .aspectRatio(16f/9f)
                 .clip(RoundedCornerShape(8.dp))
                 .background(if (!isMine) MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.2f) else MaterialTheme.colorScheme.tertiary)
@@ -74,67 +86,66 @@ fun VideoSmall(
 
         Spacer(modifier = Modifier.width(14.dp))
 
-        // 🔹 제목 + 채널명 상단 정렬, 키워드 하단 정렬
+        // 오른쪽 정보 영역
         Column(
             modifier = Modifier
                 .weight(1f)
-                .fillMaxHeight(), // 🔥 키워드가 항상 하단 정렬되도록 Column을 전체 크기로 확장
+                .fillMaxHeight()
         ) {
-            // ✅ 제목과 채널명을 상단 고정
-            Column(
-                modifier = Modifier.fillMaxWidth(), // ✅ 제목+채널명이 전체 가로를 차지하도록 설정
-                verticalArrangement = Arrangement.Top // ✅ 제목과 채널명을 상단 정렬
-            ) {
-                Text(
-                    text = title,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    lineHeight = 20.sp,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
+            // 제목과 채널명
+            Text(
+                text = title,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onPrimary,
+                lineHeight = 20.sp,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
 
-                Text(
-                    text = thumbnailContent,
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.secondary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
+            Text(
+                text = thumbnailContent,
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.secondary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
 
-            // 🔹 키워드가 항상 하단에 위치하도록 설정
-            Spacer(modifier = Modifier.weight(1f)) // ✅ 키워드를 밀어내는 역할
+            // 키워드와 아이콘 영역
+            Box(modifier = Modifier.fillMaxWidth()) {
+                // 키워드 FlowRow
+                FlowRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    keywords.take(3).forEach { keyword ->
+                        Text(
+                            text = "# $keyword",
+                            style = customTypography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSecondary,
+                        )
+                    }
+                    // 남의 글(isMine=false)인 경우, 빈 공간 추가 (아이콘 공간 확보)
+                    if (!isMine) {
+                        Spacer(modifier = Modifier.width(30.dp))
+                    }
+                }
 
-            FlowRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.Start), // ✅ 키워드를 왼쪽 정렬
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                keywords.forEach { keyword ->
-                    Text(
-                        text = "# $keyword",
-                        color = MaterialTheme.colorScheme.onSecondary,
-                        style = customTypography.bodySmall
+                // 남의 글(isMine=false)인 경우에만 오른쪽 아래에 아이콘 표시
+                if (!isMine) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_other_people),
+                        contentDescription = "Other's content",
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(end = 8.dp, bottom = 8.dp)
+                            .size(20.dp)
                     )
                 }
             }
         }
-
-//        // 🔹 즐겨찾기 아이콘 (오른쪽 하단 정렬)
-//        if (bookMark) {
-//            Icon(
-//                imageVector = Icons.Filled.Star,
-//                contentDescription = "즐겨찾기",
-//                tint = Color(0xFFFFD700),
-//                modifier = Modifier
-//                    .size(20.dp)
-//                    .align(Alignment.Bottom)
-//                    .padding(end = 8.dp)
-//            )
-//        }
     }
 }

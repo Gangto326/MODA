@@ -50,35 +50,38 @@ fun CategoryItem(
     val rippleAnimatable = remember { Animatable(0f) }
     val scope = rememberCoroutineScope()
 
-    val categoryNameMap = mapOf(
-        "All" to "전체",
-        "Trends" to "트렌드",
-        "Entertainment" to "오락",  // "엔터테인먼트" → "오락" 변경
-        "Finance" to "금융",
-        "Travel" to "여행",
-        "Food" to "음식",
-        "IT" to "IT",
-        "Design" to "디자인",
-        "Society" to "사회",
-        "Health" to "건강"
+// CategoryItem.kt 파일에서 categoryNameMap을 categoryIdMap으로 변경
+    val categoryIdMap = mapOf(
+        1 to "전체",
+        2 to "건강",
+        3 to "여행",
+        4 to "음식",
+        5 to "IT",
+        6 to "경제",
+        7 to "문화",
+        8 to "과학",
+        9 to "취미",
+        10 to "예술"
     )
 
+// 그리고 이 부분을 수정
+    val categoryName = categoryIdMap[category.categoryId] ?: category.category
 
-    val iconVector = when (category.category) {
-        "All" -> R.drawable.category_all
-        "Trends" -> R.drawable.category_trends
-        "Entertainment" -> R.drawable.category_entertainment
-        "Finance" -> R.drawable.category_finance
-        "Travel" -> R.drawable.category_travel
-        "Food" -> R.drawable.category_food
-        "IT" -> R.drawable.category_it
-        "Design" -> R.drawable.category_design
-        "Society" -> R.drawable.category_society
-        "Health" -> R.drawable.category_health
+
+    val iconVector = when (category.categoryId) {
+        1 -> R.drawable.cg_all
+        2 -> R.drawable.cg_health
+        3 -> R.drawable.cg_travel
+        4 -> R.drawable.cg_food
+        5 -> R.drawable.cg_it
+        6 -> R.drawable.cg_finance
+        7 -> R.drawable.cg_society
+        8 -> R.drawable.cg_science
+        9 -> R.drawable.cg_hobby
+        10 -> R.drawable.cg_art
         else -> R.drawable.category_default
     }
 
-    val categoryName = categoryNameMap[category.category] ?: category.category
     val color = if (isVisible) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondary // 검정색 <-> 연회색
     val context = LocalContext.current
 
