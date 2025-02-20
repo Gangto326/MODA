@@ -14,49 +14,47 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.modapjt.components.home.HomeSmallTitle
+import com.example.modapjt.components.home.ImageItem
+import com.example.modapjt.components.home.ImageList
 import com.example.modapjt.components.home.ImageListComponent
+import com.example.modapjt.data.dto.response.SearchItem
 import com.example.modapjt.domain.viewmodel.SearchViewModel
 
 @Composable
 fun ImageSection(
-    navController: NavController,
-    searchViewModel: SearchViewModel
+    images: List<SearchItem>,
+    navController: NavController
 ) {
-
-
-
-
-    val searchData by searchViewModel.searchData.collectAsState()
-    val images = searchData?.images.orEmpty() // 이미지 리스트 가져오기
-
     if (images.isNotEmpty()) {
-        Divider( // 구분선
+        Divider(
             color = MaterialTheme.colorScheme.onTertiary,
             thickness = 6.dp,
-
-            modifier = Modifier
-//            .padding(horizontal = 0.dp)
-//            .background(Color.Green) // ✅ Divider 배경색 (초록)
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(
             modifier = Modifier
                 .height(16.dp)
-                .fillMaxWidth() // ✅ 가로 전체 영역을 차지하도록 설정
-//            .background(Color.Blue) // ✅ 두 번째 Spacer 배경색 (파랑)
+                .fillMaxWidth()
         )
-
 
         HomeSmallTitle(
             title = "이미지 보고가세요",
             description = "| 해당 컨텐츠들에 대한 설명"
         )
 
-//        Spacer(modifier = Modifier.height(30.dp)) 소제목이랑 컨텐츠 사이 간격
+        // ImageListComponent 대신 ImageList 직접 사용
+        ImageList(
+            navController = navController,
+            images = images.map {
+                ImageItem(
+                    cardId = it.cardId,
+                    thumbnailUrl = it.thumbnailUrl ?: "",
+                    bookmark = it.bookmark ?: false
+                )
+            }
+        )
 
-        ImageListComponent(navController, searchViewModel)
         Spacer(modifier = Modifier.height(30.dp))
-
-
     }
 }

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -17,16 +18,27 @@ import androidx.navigation.NavController
 import com.example.modapjt.components.home.FirstKeywordList
 import com.example.modapjt.components.home.HomeSmallTitle
 import com.example.modapjt.components.home.WeeklyKeywordList
+import com.example.modapjt.data.dto.response.KeywordSearchResponse
+import com.example.modapjt.data.dto.response.SearchItem
 import com.example.modapjt.domain.viewmodel.SearchViewModel
 
 @Composable
 fun WeeklyKeywordSection(
-    homeKeywordViewModel: SearchViewModel,
-    navController: NavController,
-    searchViewModel: SearchViewModel
+    topKeywords: List<String>,  // homeKeywordViewModel.topKeywords
+    selectedKeyword: String?,
+    keywordSearchData: List<KeywordSearchResponse>,  // searchViewModel.keywordSearchData
+    onKeywordSelected: (String) -> Unit,
+    navController: NavController
 ) {
-    val topKeywords by homeKeywordViewModel.topKeywords.collectAsState()
-    val keywordSearchData by searchViewModel.keywordSearchData.collectAsState()
+//    val topKeywords by homeKeywordViewModel.topKeywords.collectAsState()
+//    val keywordSearchData by searchViewModel.keywordSearchData.collectAsState()
+
+    // 첫 진입 시 첫 번째 키워드 선택
+    LaunchedEffect(topKeywords) {
+        if (topKeywords.isNotEmpty() && selectedKeyword == null) {
+            onKeywordSelected(topKeywords.first())
+        }
+    }
 
     val shouldShowTitle = topKeywords.isNotEmpty() || keywordSearchData.isNotEmpty()
 
@@ -43,7 +55,11 @@ fun WeeklyKeywordSection(
 
     if (topKeywords.isNotEmpty()) {
 
-        WeeklyKeywordList(homeKeywordViewModel)
+        WeeklyKeywordList(
+            keywords = topKeywords,
+            selectedKeyword = selectedKeyword,
+            onKeywordSelected = onKeywordSelected
+        )
         Spacer(
             modifier = Modifier
                 .height(20.dp)
@@ -54,9 +70,10 @@ fun WeeklyKeywordSection(
 
     if (keywordSearchData.isNotEmpty()) {
 
-
-
-        FirstKeywordList(navController, searchViewModel)
+        FirstKeywordList(
+            keywords = keywordSearchData,
+            navController = navController
+        )
         Spacer(
             modifier = Modifier
                 .height(30.dp)
@@ -64,6 +81,4 @@ fun WeeklyKeywordSection(
                 .fillMaxWidth()  // ✅ 가로 전체를 차지하도록 설정
         )
     }
-
-
 }

@@ -30,16 +30,18 @@ import com.example.modapjt.domain.viewmodel.SearchViewModel
 
 @Composable
 fun WeeklyKeywordList(
-    homeKeywordViewModel: SearchViewModel = viewModel(),
+    keywords: List<String>,
+    selectedKeyword: String?,
+    onKeywordSelected: (String) -> Unit
 ) {
-    val topKeywords by homeKeywordViewModel.topKeywords.collectAsState()
-    val selectedKeyword by homeKeywordViewModel.selectedKeyword.collectAsState()
-
-    LaunchedEffect(topKeywords) {
-        if (topKeywords.isNotEmpty() && selectedKeyword == null) {
-            homeKeywordViewModel.updateKeywordAndFetchData(topKeywords.first())
-        }
-    }
+//    val topKeywords by homeKeywordViewModel.topKeywords.collectAsState()
+//    val selectedKeyword by homeKeywordViewModel.selectedKeyword.collectAsState()
+//
+//    LaunchedEffect(topKeywords) {
+//        if (topKeywords.isNotEmpty() && selectedKeyword == null) {
+//            homeKeywordViewModel.updateKeywordAndFetchData(topKeywords.first())
+//        }
+//    }
 
     Column(
         modifier = Modifier
@@ -52,7 +54,7 @@ fun WeeklyKeywordList(
                 .horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            topKeywords.forEach { keyword ->
+            keywords.forEach { keyword ->
                 val isSelected = keyword == selectedKeyword
                 Box(
                     modifier = Modifier
@@ -70,7 +72,7 @@ fun WeeklyKeywordList(
                             indication = null, // 클릭 효과 제거
                             interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
                         ) {
-                            homeKeywordViewModel.updateKeywordAndFetchData(keyword)
+                            onKeywordSelected(keyword)
                         },
                     contentAlignment = Alignment.Center
                 ) {
