@@ -35,7 +35,7 @@ fun ThumbnailIndicator(currentIndex: Int, totalItems: Int) {
                 modifier = Modifier
                     .size(if (index == currentIndex) selectedSize else defaultSize) // 크기 조정
                     .background(
-                        if (index == currentIndex) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
+                        if (index == currentIndex) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onTertiary,
                         CircleShape
                     )
             )
