@@ -335,9 +335,12 @@ fun MyPageScreen(
                             .fillMaxWidth()
                             .padding(16.dp)
                     ) {
-                        SettingItem(title = "MODA 200% 활용하기") { }
-//                        SettingItem(title = "공지사항") { }
-//                        SettingItem(title = "휴지통") { }
+                        SettingItem(
+                            title = "MODA 200% 활용하기",
+                            onClick = {
+                                navController.navigate("tutorial")
+                            }
+                        )
                     }
                 }
 

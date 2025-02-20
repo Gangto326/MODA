@@ -23,7 +23,7 @@ fun OverlayIcon(
     val coroutineScope = rememberCoroutineScope()
 
     Image(
-        painter = painterResource(R.drawable.icon_round),
+        painter = painterResource(R.drawable.ic_logo_yellow),
         contentDescription = "Overlay Icon",
         modifier = modifier
             .fillMaxSize()
