@@ -61,7 +61,7 @@ fun WeeklyKeywordList(
                         .let {
                             // 선택된 키워드에 배경색 추가
                             if (isSelected) {
-                                it.background(MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(50))
+                                it.background(MaterialTheme.colorScheme.onPrimary, shape = RoundedCornerShape(50))
                             } else {
                                 // 선택되지 않은 키워드는 테두리만 추가
                                 it.border(1.dp, MaterialTheme.colorScheme.onSecondary, shape = RoundedCornerShape(50))
