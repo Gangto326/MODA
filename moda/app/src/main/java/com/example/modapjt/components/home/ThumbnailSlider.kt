@@ -27,6 +27,7 @@ fun ThumbnailSlider(
 //    navController: NavController,
     thumbnails: List<SearchItem>?,  // viewModel 대신 데이터만 받도록 수정
     navController: NavController,
+
     onLoadData: () -> Unit = {}
 ) {
 //    val searchData by viewModel.searchData.collectAsState()
@@ -53,7 +54,7 @@ fun ThumbnailSlider(
     val totalItems by remember(thumbnails) {
         mutableStateOf(thumbnails?.size ?: defaultOnboardingImages.size)
     }
-
+    val video123 = "VIDEO"
     // 홈 화면에서 API 자동 호출
 //    LaunchedEffect(Unit) {
 //        viewModel.loadSearchData()
@@ -122,7 +123,8 @@ fun ThumbnailSlider(
                             content = "환영합니다!",
                             currentIndex = index,
                             totalItems = defaultOnboardingImages.size,
-                            onClick = { /* 온보딩 이미지는 클릭 동작 없음 */ }
+                            onClick = { /* 온보딩 이미지는 클릭 동작 없음 */ },
+                            type = video123
                         )
                     }
 
@@ -136,9 +138,11 @@ fun ThumbnailSlider(
                             content = currentItem.thumbnailContent,
                             currentIndex = 0,
                             totalItems = 1,
+                            type = currentItem.type?: "",
                             onClick = {
                                 navController.navigate("cardDetail/${currentItem.cardId}")
                             }
+
                         )
                     }
 
@@ -151,6 +155,7 @@ fun ThumbnailSlider(
                             content = currentItem.thumbnailContent,
                             currentIndex = index,
                             totalItems = thumbnails.size,
+                            type = currentItem.type?: "",
                             onClick = {
                                 navController.navigate("cardDetail/${currentItem.cardId}")
                             }

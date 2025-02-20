@@ -42,7 +42,8 @@ fun TopThumbnail(
     content: String?,
     currentIndex: Int, // ✅ 부모에서 전달받은 현재 페이지 인덱스
     totalItems: Int, // ✅ 부모에서 전달받은 전체 아이템 수
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    type: String
 ) {
 
     Box(
@@ -55,7 +56,12 @@ fun TopThumbnail(
             ) { onClick() } // 클릭 이벤트 처리
     ) {
         Image(
-            painter = rememberAsyncImagePainter(model = imageUrl),
+            painter = rememberAsyncImagePainter(
+            model = if(type=="VIDEO"){
+                "https://img.youtube.com/vi/$imageUrl/0.jpg"
+            }else{
+                imageUrl
+            },),
             contentDescription = "Thumbnail Image",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.FillWidth // 이미지가 가로 크기에 맞게 꽉 채워짐
