@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -41,7 +42,7 @@ fun VideoItem(videoUrl: String, title: String, cardId: String, navController: Na
                 .fillMaxWidth()
                 .aspectRatio(16 / 9f)
                 .clip(RoundedCornerShape(8.dp))
-                .background(Color(0xFFC4C4C4))
+                .background(MaterialTheme.colorScheme.tertiary)
         ) {
             YouTubePlayer(
                 videoId = videoId,
@@ -55,7 +56,7 @@ fun VideoItem(videoUrl: String, title: String, cardId: String, navController: Na
             text = title,
             fontSize = 14.sp,
             lineHeight = 22.sp,
-            color = Color(0xFF2B2826),
+            color = MaterialTheme.colorScheme.onPrimary,
             fontWeight = FontWeight.Bold,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,

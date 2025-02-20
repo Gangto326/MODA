@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -58,7 +59,7 @@ fun BottomThumbnail(
             modifier = Modifier
                 .height(120.dp)
                 .fillMaxWidth()
-                .background(Color.LightGray, shape = RoundedCornerShape(8.dp))
+                .background(MaterialTheme.colorScheme.onSecondary, shape = RoundedCornerShape(8.dp))
         ) {
             coil.compose.AsyncImage(
                 model = thumbnailUrl,
@@ -85,6 +86,7 @@ fun BottomThumbnail(
         Text(
             text = title,
             fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onPrimary,
             fontWeight = FontWeight.Bold,
             maxLines = 2,  // ✅ 최대 2줄 표시
             overflow = TextOverflow.Ellipsis,  // ✅ 2줄 초과 시 ... 처리
@@ -114,6 +116,7 @@ fun BottomThumbnail(
 
             Icon(
                 painter = icon,
+                tint = MaterialTheme.colorScheme.onPrimary,
                 contentDescription = "Type Icon",
                 modifier = Modifier.size(16.dp)
             )
@@ -121,7 +124,7 @@ fun BottomThumbnail(
             Text(
                 text = "${getTypeText(type)} | ${keywords.take(3).joinToString(" ")}",
                 fontSize = 12.sp,
-                color = Color(0xFFBAADA4),
+                color = MaterialTheme.colorScheme.onSecondary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.padding(start = 4.dp)

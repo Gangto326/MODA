@@ -203,7 +203,7 @@ fun MarkdownText(
     markdown: String,
     modifier: Modifier = Modifier,
     keywords: List<String>,
-    color: Color = MaterialTheme.colorScheme.onSurface,
+    color: Color = MaterialTheme.colorScheme.secondary,
     onKeywordClick: (String) -> Unit
 ) {
     val parser = remember { Parser.builder().build() }

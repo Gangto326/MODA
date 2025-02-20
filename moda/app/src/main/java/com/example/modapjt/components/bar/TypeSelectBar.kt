@@ -56,6 +56,7 @@ fun TypeSelectBar( // 상단 타입 선택 바
     Row(
         modifier = modifier
             .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.tertiary)
 //            .background(Color.White) // 수정완료
             .padding(horizontal = 16.dp, vertical = 10.dp), // 수정완료( 상단 타입 선택바 세로 길이 )
         horizontalArrangement = Arrangement.SpaceBetween,

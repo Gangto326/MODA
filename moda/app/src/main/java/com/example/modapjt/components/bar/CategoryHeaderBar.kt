@@ -30,6 +30,7 @@ fun CategoryHeaderBar(modifier: Modifier = Modifier, categoryName: String, navCo
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.tertiary)
             .height(56.dp) , // 높이 설정
 //            .background(Color.White),  // 배경색 설정
         contentAlignment = Alignment.Center

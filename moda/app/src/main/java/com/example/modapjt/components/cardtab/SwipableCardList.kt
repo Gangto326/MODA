@@ -174,7 +174,7 @@ fun <T : Any> SwipableCardList(
                                 .align(Alignment.CenterEnd)
                                 .width(80.dp)
                                 .height(80.dp)
-                                .background(Color.Red, shape = RoundedCornerShape(8.dp)),
+                                .background(MaterialTheme.colorScheme.onError, shape = RoundedCornerShape(8.dp)),
                             contentAlignment = Alignment.Center
                         ) {
                             TextButton(
@@ -197,7 +197,7 @@ fun <T : Any> SwipableCardList(
                             ) {
                                 Text(
                                     "삭제",
-                                    color = Color.White,
+                                    color = MaterialTheme.colorScheme.tertiary,
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Bold
                                 )
