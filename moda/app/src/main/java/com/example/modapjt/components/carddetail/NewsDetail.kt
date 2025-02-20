@@ -61,6 +61,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -69,6 +70,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
+import com.example.modapjt.R
 import com.example.modapjt.components.carddetail.ImageSlider
 import com.example.modapjt.domain.model.CardDetail
 import com.example.modapjt.domain.viewmodel.SearchViewModel
@@ -153,13 +155,13 @@ fun NewsDetailScreen(cardDetail: CardDetail, navController: NavController) {
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
 
-            // 🔘 이미지 토글 버튼
-            Button(
-                onClick = { showImage = !showImage },
-                modifier = Modifier.padding(8.dp)
-            ) {
-                org.commonmark.node.Text(if (showImage) "이미지 숨기기" else "이미지 보기")
-            }
+//            // 🔘 이미지 토글 버튼
+//            Button(
+//                onClick = { showImage = !showImage },
+//                modifier = Modifier.padding(8.dp)
+//            ) {
+//                org.commonmark.node.Text(if (showImage) "이미지 숨기기" else "이미지 보기")
+//            }
 
 
             // 🖼 이미지 슬라이더 (토글에 따라 표시)
@@ -275,7 +277,24 @@ fun NewsDetailScreen(cardDetail: CardDetail, navController: NavController) {
 
                                 }
                             }
+                            // 🔘 이미지 토글 버튼
+                            // 🖼️ 이미지 토글 아이콘
+                            IconButton(
+                                onClick = { showImage = !showImage },
+//                                modifier = Modifier.padding(8.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(
+                                        id = if (showImage) R.drawable.ic_not_image else R.drawable.ic_a_image
+                                    ),
+                                    contentDescription = if (showImage) "이미지 숨기기" else "이미지 보기",
+                                    modifier = Modifier.padding(bottom = 17.dp).size(
+                                        if (showImage) 100.dp else 24.dp  // ic_not_image일 때 더 크게 표시
+                                    ),
+                                    tint = Color.Unspecified
 
+                                )
+                            }
                             IconButton(onClick = { uriHandler.openUri(cardDetail.originalUrl) }) {
                                 Icon(
                                     imageVector = Icons.Default.Share,
