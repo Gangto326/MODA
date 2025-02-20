@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.modapjt.R
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,14 +41,13 @@ fun NotMineCardDetailHeaderBar(
         title = {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.Medium
-                ),
-                color = Color(0xFF2B2826)
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onPrimary
             )
         },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-            containerColor = Color.White
+            containerColor = MaterialTheme.colorScheme.tertiary
         )
     )
 }
