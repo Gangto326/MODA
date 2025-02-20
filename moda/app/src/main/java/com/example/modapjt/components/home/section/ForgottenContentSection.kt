@@ -40,7 +40,7 @@ fun ForgottenContentSection(
 
         HomeSmallTitle(
             title = "잊고있던 컨텐츠",
-            description = "| 해당 컨텐츠들에 대한 설명"
+            description = "| 추억이 담긴 나의 컨텐츠"
         )
 
         // ForgottenContentItem 컴포넌트의 내용을 직접 구현

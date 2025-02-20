@@ -193,6 +193,9 @@ fun newBookMarkCardListScreen(
 
                             when (selectedCategory) {
                                 "전체" -> {
+                                    if (state.images.isEmpty() && !loadingMore) {
+                                        item { EmptyMessage3("저장된 즐겨찾기가 없습니다") }
+                                    } else
                                     item {
                                         AllTabCard(
                                             navController = navController, // NavController 전달
