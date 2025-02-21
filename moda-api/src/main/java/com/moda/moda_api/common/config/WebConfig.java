@@ -9,13 +9,20 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-                .allowedMethods(
-                        "GET",
-                        "POST",
-                        "PUT",
-                        "DELETE",
-                        "PATCH"
-                )
+                .allowedOrigins("https://i12a805.p.ssafy.io")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH")
                 .allowedHeaders("Content-Type");
+
+        registry.addMapping("/v3/api-docs/**")
+                .allowedOrigins("https://i12a805.p.ssafy.io")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
+                .maxAge(3600);
+
+        registry.addMapping("/swagger-ui/**")
+                .allowedOrigins("https://i12a805.p.ssafy.io")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
+                .maxAge(3600);
     }
 }

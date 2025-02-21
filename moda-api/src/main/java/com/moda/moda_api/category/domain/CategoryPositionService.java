@@ -10,6 +10,9 @@ import java.util.stream.Collectors;
 
 @Component
 public class CategoryPositionService {
+
+
+
     /**
      * sourcePosition과 targetPosition의 대소관계를 비교하여
      * 변경 대상인 item의 position을 +1 또는 -1 처리

@@ -1,20 +1,20 @@
 package com.moda.moda_api.search.application.service;
 
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
+import com.moda.moda_api.card.domain.*;
+import com.moda.moda_api.user.domain.User;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.moda.moda_api.card.domain.CardContentType;
 import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.common.pagination.SliceRequestDto;
 import com.moda.moda_api.common.pagination.SliceResponseDto;
@@ -34,6 +34,10 @@ import lombok.RequiredArgsConstructor;
 public class SearchService {
 	private final CardSearchRepository cardSearchRepository;
 	private final CardSearchDtoMapper cardSearchDtoMapper;
+	private final CardRepository cardRepository;
+	private final UserKeywordRepository userKeywordRepository;
+	private final VideoCreatorRepository videoCreatorRepository;
+	private final ExecutorService executorService;
 
 	/**
 	 * 검색어와 가장 일치하는 사용자의 게시글들의 모든 핵심 키워드 리스트를 가져옵니다.
@@ -89,7 +93,7 @@ public class SearchService {
 	/**
 	 * 사용자의 요청에 맞는 콘텐츠가 보일 메인 페이지 데이터를 반환합니다.
 	 *
-	 * 1(Img)의 경우는 10개, 다른 콘텐츠(2, 3, 4)의 경우 5개의 최적 컨텐츠를 반환.
+	 * 4(Img)의 경우는 10개, 다른 콘텐츠(1, 2, 3)의 경우 5개의 최적 컨텐츠를 반환.
 	 * @param userId
 	 * @param query
 	 * @return
@@ -100,8 +104,8 @@ public class SearchService {
 		UserId userIdObj = new UserId(userId);
 		List<Integer> targetTypes = List.of(1, 2, 3, 4);
 
-		// IMG(1) 타입은 10개
-		Map<Integer, Integer> typeSizes = Map.of(1, 10, 2, 5, 3, 5, 4, 5);
+		// IMG(4) 타입은 10개
+		Map<Integer, Integer> typeSizes = Map.of(1, 10, 2, 10, 3, 10, 4, 15);
 
 		// 쿼리 기준 검색인 경우
 		if (categoryId == 0L) {
@@ -128,13 +132,13 @@ public class SearchService {
 			CategoryId categoryIdObj = new CategoryId(categoryId);
 
 			// 각 타입별 검색을 비동기로 실행
-			List<CompletableFuture<Map.Entry<CardContentType, List<CardDocument>>>> futures = executeAsyncSearchesByCategory(
+			List<CompletableFuture<Map.Entry<CardContentType, List<Card>>>> futures = executeAsyncSearchesByCategory(
 				userIdObj, categoryIdObj, targetTypes, typeSizes);
 
 			// 모든 비동기 작업이 완료되면 결과 합치기. topScores 메타데이터는 null입니다.
 			return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
 				.thenApply(v -> {
-					Map<CardContentType, List<CardDocumentListResponse>> results = processSearchResults(futures, "",
+					Map<CardContentType, List<CardDocumentListResponse>> results = processCardResults(futures, "",
 						userIdObj);
 
 					return SearchResultByCardList.builder()
@@ -155,7 +159,7 @@ public class SearchService {
 		UserId userIdObj = new UserId(userId);
 
 		PageRequest pageRequest = PageRequest.of(0, 5);
-		List<CardDocument> cardDocumentList = cardSearchRepository.searchByKeyword(userIdObj, keyword, pageRequest);
+		List<CardDocument> cardDocumentList = cardSearchRepository.searchByKeyword(userIdObj, keyword, Arrays.asList(1, 2, 3), pageRequest);
 
 		return cardDocumentList.stream()
 			.map(cardDocument -> cardSearchDtoMapper.toListResponse(cardDocument, keyword, userIdObj))
@@ -194,8 +198,53 @@ public class SearchService {
 				typeId, userIdObj, searchText, sliceRequestDto.toPageable()
 			);
 
+			List<CardDocument> content = null;
+
+			if (typeId != 4) {  // 이미지가 아닌 경우만 실행
+				// title 기준으로 그룹화하고 owner 우선 선택 (중복 제거)
+				content = cardDocuments.getContent().stream()
+						.collect(Collectors.groupingBy(CardDocument::getTitle))
+						.values()
+						.stream()
+						.map(sameGroupDocs -> sameGroupDocs.stream()
+								.filter(doc -> doc.isOwnedBy(userIdObj))
+								.findFirst()
+								.orElseGet(() -> sameGroupDocs.get(0)))
+						.collect(Collectors.toList());
+
+				// score 기준으로 정렬
+				content.sort((doc1, doc2) -> Float.compare(
+						doc2.getScore() != null ? doc2.getScore() : Float.MIN_VALUE,
+						doc1.getScore() != null ? doc1.getScore() : Float.MIN_VALUE
+				));
+
+			} else { // 이미지의 경우 ThumbnailUrl로 판단
+				content = cardDocuments.getContent().stream()
+						.collect(Collectors.groupingBy(CardDocument::getThumbnailUrl))
+						.values()
+						.stream()
+						.map(sameGroupDocs -> sameGroupDocs.stream()
+								.filter(doc -> doc.isOwnedBy(userIdObj))
+								.findFirst()
+								.orElseGet(() -> sameGroupDocs.get(0)))
+						.collect(Collectors.toList());
+
+				// score 기준으로 정렬
+				content.sort((doc1, doc2) -> Float.compare(
+						doc2.getScore() != null ? doc2.getScore() : Float.MIN_VALUE,
+						doc1.getScore() != null ? doc1.getScore() : Float.MIN_VALUE
+				));
+			}
+
+			// 필터링된 content로 새로운 Slice 생성
+			Slice<CardDocument> filteredSlice = new SliceImpl<>(
+					content,
+					cardDocuments.getPageable(),
+					cardDocuments.hasNext()
+			);
+
 			return SliceResponseDto.of(
-				cardDocuments.map(cardDocument -> cardSearchDtoMapper.toListResponse(
+					filteredSlice.map(cardDocument -> cardSearchDtoMapper.toListResponse(
 					cardDocument, searchText, userIdObj)
 				)
 			);
@@ -204,10 +253,11 @@ public class SearchService {
 		// 카테고리 기준 검색인 경우
 		else {
 			CategoryId categoryIdObj = new CategoryId(categoryId);
-
-			Slice<CardDocument> cardDocuments = cardSearchRepository.searchByCategoryAndType(
-				typeId, categoryIdObj, userIdObj, sliceRequestDto.toPageable()
-			);
+			Slice<CardDocument> cardDocuments = categoryIdObj.equals(CategoryId.all())
+					// 카테고리가 ALL인 경우
+					? cardSearchRepository.searchByAllCategoryAndType(typeId, userIdObj, sliceRequestDto.toPageable())
+					// 카테고리가 지정된 경우
+					: cardSearchRepository.searchByCategoryAndType(typeId, categoryIdObj, userIdObj, sliceRequestDto.toPageable());
 
 			return SliceResponseDto.of(
 				cardDocuments.map(cardDocument -> cardSearchDtoMapper.toListResponse(
@@ -231,15 +281,55 @@ public class SearchService {
 		return targetTypes.stream()
 			.map(typeId -> CompletableFuture.supplyAsync(() -> {
 				// 각 타입별 가져올 갯수를 PageRequest로 생성
-				PageRequest pageRequest = PageRequest.of(0, typeSizes.get(typeId));
+				PageRequest pageRequest = PageRequest.of(
+						0, typeSizes.get(typeId), Sort.by(Sort.Direction.DESC, "createdAt")
+				);
 
 				// 타입별 데이터 가져오기
 				Slice<CardDocument> results = cardSearchRepository.searchComplex(
 					typeId, userId, searchText, pageRequest);
+
+				List<CardDocument> content;
+
+				if (typeId != 4) {  // 이미지가 아닌 경우만 실행
+					// title 기준으로 그룹화하고 owner 우선 선택 (중복 제거)
+					content = results.getContent().stream()
+							.collect(Collectors.groupingBy(CardDocument::getTitle))
+							.values()
+							.stream()
+							.map(sameGroupDocs -> sameGroupDocs.stream()
+									.filter(doc -> doc.isOwnedBy(userId))
+									.findFirst()
+									.orElseGet(() -> sameGroupDocs.get(0)))
+							.collect(Collectors.toList());
+
+					// score 기준으로 정렬
+					content.sort((doc1, doc2) -> Float.compare(
+							doc2.getScore() != null ? doc2.getScore() : Float.MIN_VALUE,
+							doc1.getScore() != null ? doc1.getScore() : Float.MIN_VALUE
+					));
+
+				} else { // 이미지의 경우 ThumbnailUrl로 판단
+					content = results.getContent().stream()
+							.collect(Collectors.groupingBy(CardDocument::getThumbnailUrl))
+							.values()
+							.stream()
+							.map(sameGroupDocs -> sameGroupDocs.stream()
+									.filter(doc -> doc.isOwnedBy(userId))
+									.findFirst()
+									.orElseGet(() -> sameGroupDocs.get(0)))
+							.collect(Collectors.toList());
+
+					// score 기준으로 정렬
+					content.sort((doc1, doc2) -> Float.compare(
+							doc2.getScore() != null ? doc2.getScore() : Float.MIN_VALUE,
+							doc1.getScore() != null ? doc1.getScore() : Float.MIN_VALUE
+					));
+				}
+
 				return Map.entry(
 					CardContentType.from(typeId),
-					results.getContent().stream()
-						.toList()
+						content
 				);
 			}))
 			.toList();
@@ -253,17 +343,23 @@ public class SearchService {
 	 * @param typeSizes
 	 * @return
 	 */
-	private List<CompletableFuture<Map.Entry<CardContentType, List<CardDocument>>>> executeAsyncSearchesByCategory(
+	private List<CompletableFuture<Map.Entry<CardContentType, List<Card>>>> executeAsyncSearchesByCategory(
 		UserId userId, CategoryId categoryId, List<Integer> targetTypes, Map<Integer, Integer> typeSizes) {
 
 		return targetTypes.stream()
 			.map(typeId -> CompletableFuture.supplyAsync(() -> {
 				// 각 타입별 가져올 갯수를 PageRequest로 생성
-				PageRequest pageRequest = PageRequest.of(0, typeSizes.get(typeId));
+				PageRequest pageRequest = PageRequest.of(
+						0, typeSizes.get(typeId), Sort.by(Sort.Direction.DESC, "createdAt")
+				);
 
 				// 타입별 카테고리 기준 데이터 가져오기
-				Slice<CardDocument> results = cardSearchRepository.searchByCategoryAndType(
-					typeId, categoryId, userId, pageRequest);
+				Slice<Card> results = categoryId.equals(CategoryId.all())
+						// 카테고리가 ALL인 경우
+						? cardRepository.findByTypeIdAndUserId(typeId, userId, pageRequest)
+						// 카테고리가 지정된 경우
+						: cardRepository.findByTypeIdAndCategoryIdAndUserId(typeId, categoryId, userId, pageRequest);
+
 				return Map.entry(
 					CardContentType.from(typeId),
 					results.getContent().stream()
@@ -297,6 +393,29 @@ public class SearchService {
 	}
 
 	/**
+	 * 검색 결과를 처리합니다.
+	 * @param futures
+	 * @param searchText
+	 * @return
+	 */
+	private Map<CardContentType, List<CardDocumentListResponse>> processCardResults(
+			List<CompletableFuture<Map.Entry<CardContentType, List<Card>>>> futures,
+			String searchText, UserId userId) {
+
+		return futures.stream()
+				.map(CompletableFuture::join)
+				.filter(entry -> !entry.getValue().isEmpty())
+
+				// 각 ContentType별 cardList를 Key: Value 형식으로 매핑
+				.collect(Collectors.toMap(
+						Map.Entry::getKey,
+						entry -> entry.getValue().stream()
+								.map(card -> cardSearchDtoMapper.toListResponse(card, userId))
+								.collect(Collectors.toList())
+				));
+	}
+
+	/**
 	 * 각 List내의 컨텐츠 중 최고 점수를 추출합니다.
 	 * @param results
 	 * @return
@@ -308,11 +427,279 @@ public class SearchService {
 			.filter(entry -> !entry.getValue().isEmpty())
 
 			// 각 타입별 리스트의 0번째 게시글의 점수를 비교하여 우선순위 metaData를 생성
+				.filter(entry -> entry.getValue().get(0).getScore() != null)
 			.map(entry -> SearchTypeScore.builder()
 				.contentType(entry.getKey())
 				.score(entry.getValue().get(0).getScore())
 				.build())
 			.sorted(Comparator.comparing(SearchTypeScore::getScore).reversed())
 			.toList();
+	}
+
+
+	/**
+	 * 사용자의 첫 화면(메인 페이지) 접속 시 보여질 사용자 맞춤 데이터를 전부 가져옵니다.
+	 * @param userId
+	 * @return
+	 */
+	public CompletableFuture<Map<String, List<CardDocumentListResponse>>> getMainPage(String userId) {
+		UserId userIdObj = new UserId(userId);
+
+		/**
+		 * 상단 썸네일
+		 *
+		 * 썸네일 화면의 조회수 오름차순 5개 컨텐츠 조회
+		 */
+		// 이미지를 제외한 콘텐츠만 가져오기 위한 타입 리스트
+		List<Integer> typeIds = List.of(1, 2, 3);
+		
+		Pageable pageable = PageRequest.of(
+				0,  // 첫 번째 페이지 (0부터 시작)
+				5,  // 페이지당 5개 항목
+				Sort.by("viewCount").ascending()  // viewCount 기준 오름차순 정렬
+		);
+		
+		CompletableFuture<List<Card>> thumbnailFuture = CompletableFuture
+				.supplyAsync(() -> cardRepository.findByUserIdAndTypeIdIn(
+						userIdObj, typeIds, pageable), executorService)
+				.orTimeout(2, TimeUnit.SECONDS)
+				.exceptionally(ex -> Collections.emptyList());
+
+		/**
+		 * 이번주 주요 키워드
+		 *
+		 * 주요 키워드 기준 조회수가 적은 5개의 컨텐츠 조회
+		 */
+		Pageable keywordsPageable = PageRequest.of(
+				0,  // 첫 번째 페이지 (0부터 시작)
+				5,  // 페이지당 5개 항목
+				Sort.by("viewCount").ascending()  // viewCount 기준 오름차순 정렬
+		);
+		
+		// 가장 높은 순위의 하나의 키워드만 가져오기
+		List<String> keywords = userKeywordRepository.getTopKeywords(userIdObj, 1);
+		
+		CompletableFuture<List<CardDocument>> keywordsFuture = CompletableFuture
+				.supplyAsync(() -> {
+					if (keywords.isEmpty()) {
+						return Collections.emptyList();
+					}
+					return cardSearchRepository.searchByKeyword(userIdObj, keywords.get(0), typeIds, keywordsPageable);
+				});
+
+		/**
+		 * 오늘의 컨텐츠
+		 *
+		 * 최근 한 달 컨텐츠 조회
+		 * 한 달 내의 비디오, 블로그, 뉴스 콘텐츠 중 10개를 "랜덤"으로 가져옵니다.
+		 */
+		LocalDateTime endDate = LocalDateTime.now();
+		LocalDateTime startDate = endDate.minusMonths(1);
+
+		Pageable toDaysPage = PageRequest.of(
+				0,  // 첫 번째 페이지 (0부터 시작)
+				10  // 페이지당 10개 항목
+		);
+		CompletableFuture<List<Card>> toDaysFuture = CompletableFuture
+				.supplyAsync(() -> cardRepository.findRandomCards(
+						userIdObj, startDate, endDate, typeIds, toDaysPage
+				), executorService)
+				.orTimeout(2, TimeUnit.SECONDS)
+				.exceptionally(ex -> Collections.emptyList());
+
+		/**
+		 * 영상 추천 컨텐츠
+		 *
+		 * RDBMS의 키워드 배열 중 0번째에 들어있는 유튜버의 이름을 가져옵니다. -> Redis에 적용
+		 * 
+		 * Redis에 저장된 해당 유저의 키워드를 가져옵니다.
+		 * 이후 해당 키워드와 일치하는 모든 영상을 가져옵니다.
+		 */
+		Pageable videosPage = PageRequest.of(
+				0,  // 첫 번째 페이지 (0부터 시작)
+				5  // 페이지당 10개 항목
+		);
+		
+		// Redis에서 user별 크리에이터 정보를 가져옵니다.
+		String creator = videoCreatorRepository.getCreatorByUserId(userIdObj);
+		
+		CompletableFuture<List<CardDocument>> videosFuture = CompletableFuture
+				.supplyAsync(() -> cardSearchRepository.searchByKeywordOnlyVideo(
+						userIdObj, creator, videosPage
+				), executorService)
+				.orTimeout(2, TimeUnit.SECONDS)
+				.exceptionally(ex -> Collections.emptyList());
+
+		/**
+		 * 이미지 추천 컨텐츠
+		 *
+		 * 조회수 순서로 20개를 가져옵니다.
+		 * 이후 createAt 순으로 정렬합니다.
+		 */
+		Pageable imgsPage = PageRequest.of(
+				0,  // 첫 번째 페이지 (0부터 시작)
+				20,  // 페이지당 20개 항목
+				Sort.by("viewCount").ascending()  // viewCount 기준 오름차순 정렬
+		);
+
+		CompletableFuture<List<Card>> imgsFuture = CompletableFuture
+				.supplyAsync(() -> cardRepository.findByUserIdAndTypeIdIn(
+						userIdObj, List.of(4), imgsPage
+				).stream()
+						// 가져온 20개의 이미지 데이터를 생성일 기준으로 재정렬
+						.sorted(Comparator.comparing(Card::getCreatedAt))
+						.collect(Collectors.toList()), executorService)
+				.orTimeout(2, TimeUnit.SECONDS)
+				.exceptionally(ex -> Collections.emptyList());
+
+		/**
+		 * 잊고 있던 컨텐츠
+		 *
+		 * 조회수가 '0'인 컨텐츠를 가져옵니다.
+		 * 이후 createAt 순으로 정렬합니다.
+		 */
+		Pageable forgetPage = PageRequest.of(
+				0,  // 첫 번째 페이지 (0부터 시작)
+				10  // 페이지당 10개 항목
+		);
+
+		CompletableFuture<List<Card>> forgetFuture = CompletableFuture
+				.supplyAsync(() -> cardRepository.findByUserIdAndViewCountAndTypeIdIn(
+								userIdObj, 0, typeIds, forgetPage
+						).stream()
+						// 가져온 20개의 이미지 데이터를 생성일 기준으로 재정렬
+						.sorted(Comparator.comparing(Card::getCreatedAt))
+						.collect(Collectors.toList()), executorService)
+				.orTimeout(2, TimeUnit.SECONDS)
+				.exceptionally(ex -> Collections.emptyList());
+
+		return CompletableFuture.allOf(
+				thumbnailFuture,
+				keywordsFuture,
+				toDaysFuture,
+				videosFuture,
+				imgsFuture,
+				forgetFuture
+		).thenApply(value -> {
+			Map<String, List<CardDocumentListResponse>> result = new HashMap<>();
+
+			// 각 Future의 결과를 매핑
+			result.put("thumbnails", cardSearchDtoMapper.toCardListResponse(thumbnailFuture.join(), userIdObj));
+			result.put("keywords", cardSearchDtoMapper.toDocumentListResponse(keywordsFuture.join(), userIdObj));
+			result.put("todays", cardSearchDtoMapper.toCardListResponse(toDaysFuture.join(), userIdObj));
+			result.put("videos", cardSearchDtoMapper.toDocumentListResponse(videosFuture.join(), userIdObj));
+			result.put("images", cardSearchDtoMapper.toCardListResponse(imgsFuture.join(), userIdObj));
+			result.put("forgotten", cardSearchDtoMapper.toCardListResponse(forgetFuture.join(), userIdObj));
+			return result;
+		});
+	}
+
+	/**
+	 * 사용자가 즐겨찾기한 콘텐츠가 보일 즐겨찾기 메인 페이지 데이터를 반환합니다.
+	 *
+	 * 4(Img)의 경우는 10개, 다른 콘텐츠(1, 2, 3)의 경우 5개의 최적 컨텐츠를 반환.
+	 * @param userId
+	 * @return
+	 */
+	public CompletableFuture<SearchResultByCardList> searchByBookmarkMainPage(String userId) {
+		UserId userIdObj = new UserId(userId);
+		List<Integer> targetTypes = List.of(1, 2, 3, 4);
+
+		// IMG(4) 타입은 10개
+		Map<Integer, Integer> typeSizes = Map.of(1, 5, 2, 5, 3, 5, 4, 10);
+
+		// 각 타입별 검색을 비동기로 실행
+		List<CompletableFuture<Map.Entry<CardContentType, List<CardDocumentListResponse>>>> futures = executeAsyncSearchesByBookmark(
+				userIdObj, targetTypes, typeSizes);
+
+		// 모든 비동기 작업이 완료되면 결과 합치기 및 메타데이터 생성
+		return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+				.thenApply(v -> {
+					Map<CardContentType, List<CardDocumentListResponse>> results = futures.stream()
+							.map(CompletableFuture::join)
+							.collect(Collectors.toMap(
+									Map.Entry::getKey,
+									Map.Entry::getValue
+							));
+
+					return SearchResultByCardList.builder()
+							.contentResults(results)
+							.topScores(null)
+							.build();
+				});
+	}
+
+	/**
+	 * 비동기로 즐겨찾기한 카드에 대해 검색을 실행합니다.
+	 * @param userId
+	 * @return
+	 */
+	private List<CompletableFuture<Map.Entry<CardContentType, List<CardDocumentListResponse>>>> executeAsyncSearchesByBookmark(
+			UserId userId, List<Integer> targetTypes, Map<Integer, Integer> typeSizes) {
+
+		return targetTypes.stream()
+				.map(typeId -> CompletableFuture.supplyAsync(() -> {
+					// 각 타입별 가져올 갯수를 PageRequest로 생성
+					PageRequest pageRequest = PageRequest.of(
+							0,
+							typeSizes.get(typeId),
+							Sort.by(Sort.Direction.DESC, "createdAt")
+					);
+
+					// 타입별 데이터 가져오기
+					Slice<Card> results = cardRepository
+							.findByUserIdAndBookmarkTrueAndTypeIdAndDeletedAtIsNull(
+									userId,
+									typeId,
+									pageRequest
+							);
+
+					List<CardDocumentListResponse> responseList = cardSearchDtoMapper.toCardListResponse(
+							results.getContent(),
+							userId
+					);
+
+					return Map.entry(
+							CardContentType.from(typeId),
+							responseList
+					);
+				}))
+				.toList();
+	}
+
+	/**
+	 * 즐겨찾기한 카드 중 해당 콘텐츠 타입과 일치하는 카드를 가져옵니다.
+	 * @param userId
+	 * @param typeId
+	 * @param page
+	 * @param size
+	 * @param sortBy
+	 * @param sortDirection
+	 * @return
+	 */
+	public SliceResponseDto<CardDocumentListResponse> searchByBookmark(
+			String userId, Integer typeId,
+			Integer page, Integer size, String sortBy, String sortDirection) {
+		UserId userIdObj = new UserId(userId);
+
+		// Slice 값 생성
+		SliceRequestDto sliceRequestDto = SliceRequestDto.builder()
+				.page(page)
+				.size(size)
+				.sortBy(sortBy)
+				.sortDirection(sortDirection)
+				.build();
+
+		// 타입별 데이터 가져오기
+		Slice<Card> results = cardRepository
+				.findByUserIdAndBookmarkTrueAndTypeIdAndDeletedAtIsNull(
+						userIdObj,
+						typeId,
+						sliceRequestDto.toPageable()
+				);
+
+		return SliceResponseDto.of(
+				results.map(card -> cardSearchDtoMapper.toListResponse(card, userIdObj))
+		);
 	}
 }

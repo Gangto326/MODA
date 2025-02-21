@@ -1,7 +1,6 @@
 package com.moda.moda_api.summary.infrastructure.api;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,14 +11,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.moda.moda_api.crawling.infrastructure.crawl.TitleExtractor;
 import com.moda.moda_api.summary.exception.SummaryProcessingException;
 import com.moda.moda_api.summary.infrastructure.dto.LilysRequestIdResponse;
 import com.moda.moda_api.summary.infrastructure.dto.LilysSummary;
 import com.moda.moda_api.summary.infrastructure.dto.TitleAndContent;
 import com.moda.moda_api.summary.infrastructure.mapper.JsonMapper;
-import com.moda.moda_api.summary.infrastructure.service.TitleExtractor;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,38 +34,36 @@ public class LilysAiClient {
 	@Value("${lilys.ai.api.url}")
 	private String lilysUrl;
 
-	public CompletableFuture<LilysRequestIdResponse> getRequestId(String url) {
+	public LilysRequestIdResponse getRequestId(String url) {
 		System.out.println(url);
 
-		return CompletableFuture.completedFuture(
-			new LilysRequestIdResponse("066b5e4a-c460-4023-8130-9446eb2c4f9f")
-		);
+		// return CompletableFuture.completedFuture(
+		// 	new LilysRequestIdResponse("0709fcc3-0baa-4da8-a984-841948466ca4")).join();
 
-		// return lilysWebClient.post()
-		// 	.uri(lilysUrl)
-		// 	.bodyValue(createRequestBody(url))  // Http메세지 Body를 만든다.
-		// 	.retrieve()  // 받을 준비가 됨.
-		// 	.bodyToMono(LilysRequestIdResponse.class)  // 응답 본문을 LilysAiResponse 클래스의 객체로 변환
-		// 	.doOnError(e -> {  // 에러 처리 실패시
-		// 		log.error("Failed to get RequestId for url: {}", url, e);
-		// 		throw new SummaryProcessingException("Failed to get RequestId from Lilys AI", e);
-		// 	})
-		// 	.switchIfEmpty(Mono.error(  // 아무것도 없을 시
-		// 		new SummaryProcessingException("Received empty response from Lilys AI service")
-		// 	))
-		// 	.toFuture();
+		return lilysWebClient.post()
+			.uri(lilysUrl)
+			.bodyValue(createRequestBody(url))  // Http메세지 Body를 만든다.
+			.retrieve()  // 받을 준비가 됨.
+			.bodyToMono(LilysRequestIdResponse.class)  // 응답 본문을 LilysAiResponse 클래스의 객체로 변환
+			.doOnError(e -> {  // 에러 처리 실패시
+				log.error("Failed to get RequestId for url: {}", url, e);
+				throw new SummaryProcessingException("Failed to get RequestId from Lilys AI", e);
+			})
+			.switchIfEmpty(Mono.error(  // 아무것도 없을 시
+				new SummaryProcessingException("Received empty response from Lilys AI service")
+			))
+			.block();
 	}
 
-	public CompletableFuture<LilysSummary> getSummaryResults(String requestId, String url) {
+	public LilysSummary getSummaryResults(String requestId, String url) {
+		System.out.println("getSummaryResults requestId : " + requestId);
+		System.out.println("getSummaryResults url : " + url);
 
 		// 첫 번째 Future: summaryNote 가져오기
 		CompletableFuture<JsonNode> contentFuture = getResult(requestId, "summaryNote");
 
 		// 두 번째 Future: shortSummary 가져오기
 		CompletableFuture<JsonNode> thumbnailFuture = getResult(requestId, "shortSummary");
-
-		// 세 번째 Future: title 가져오기
-		CompletableFuture<String> titleFuture = titleExtractor.extractTitle(url);
 
 		// 확인용 출력
 		contentFuture.thenAccept(json -> {
@@ -77,43 +73,29 @@ public class LilysAiClient {
 			log.info("Received thumbnail data: {}", json);
 		});
 
+		CompletableFuture.allOf(contentFuture, thumbnailFuture).join();
 
-		// 모든 Future를 조합하여 하나의 CardSummaryResponse 생성
-		return CompletableFuture.allOf(contentFuture, thumbnailFuture, titleFuture)
-			.thenApply(v -> {
+		try {
+			JsonNode content = contentFuture.get();
+			JsonNode thumbnail = thumbnailFuture.get();
 
-				List<TitleAndContent> mainContent = new ArrayList<>();
-				String[] timeStamps = new String[0];
-				try {
-					mainContent = jsonMapper.processSummaryNote(contentFuture.join());
-					timeStamps = jsonMapper.extractTimestamps(contentFuture.join());
-				} catch (JsonProcessingException e) {
-					e.printStackTrace();
-				}
+			List<TitleAndContent> mainContent = jsonMapper.processSummaryNote(content);
+			String[] timeStamps = jsonMapper.extractTimestamps(content);
+			String thumbnailContent = thumbnail.path("data").path("data").path("summary").toString();
+			String thumbnailUrl = getVideoId(url);
 
-				String thumbnailContent = thumbnailFuture.join().path("data").path("data").path("summary").toString();
-				String title = titleFuture.join();
-				String thumbnailUrl = getVideoId(url);
+			System.out.println(mainContent.toString());
 
-				System.out.println(title);
-				System.out.println(thumbnailContent);
-				System.out.println(thumbnailUrl);
-				System.out.println(mainContent);
-				//만약 mainContent가 없으면 error가 난다.
-				return LilysSummary.builder()
-					.contents(mainContent)
-					.thumbnailContent(thumbnailContent)
-					.thumbnailUrl(thumbnailUrl)
-					.title(title)
-					.typeId(1)
-					.timeStamp(timeStamps)
-					.build();
-			})
-			.exceptionally(e -> {
-				log.error("조합하는 과정에서 에러가 발생, requestId: {}", requestId, e);
-				throw new SummaryProcessingException("Failed to combine summary results", e);
-			});
-
+			return LilysSummary.builder()
+				.contents(mainContent)
+				.thumbnailContent(thumbnailContent)
+				.thumbnailUrl(thumbnailUrl)
+				.typeId(1)
+				.timeStamp(timeStamps)
+				.build();
+		} catch (Exception e) {
+			throw new SummaryProcessingException("Failed to combine summary results", e);
+		}
 	}
 
 	// 일단 blogPost를 던져놓고 status가 뭔지 파악하는 함수
@@ -166,16 +148,57 @@ public class LilysAiClient {
 		return requestMap;
 	}
 
-	private String getVideoId(String url) {
-		try {
-			if (url.contains("youtube.com/watch?v=")) {
-				String videoId = url.split("v=")[1].split("&")[0];  // 파라미터 제거
-				return videoId;
-			}
-			throw new IllegalArgumentException("Not a YouTube URL");
-		} catch (Exception e) {
-			throw new IllegalArgumentException("Invalid YouTube URL format", e);
+	private boolean isValidYoutubeUrl(String url) {
+		if (url == null || url.trim().isEmpty()) {
+			return false;
 		}
+
+		return url.contains("youtube.com/watch") ||
+			url.contains("youtu.be/") ||
+			url.contains("youtube.com/embed/") ||
+			url.contains("youtube.com/v/");
 	}
 
+	// 2단계: video ID 추출
+	private String getVideoId(String url) {
+		try {
+			// 먼저 YouTube URL인지 검증
+			if (!isValidYoutubeUrl(url)) {
+				throw new IllegalArgumentException("Not a valid YouTube URL");
+			}
+
+			String videoId = null;
+
+			// URL 패턴에 따라 ID 추출
+			if (url.contains("v=")) {
+				videoId = url.split("v=")[1];
+				if (videoId.contains("&")) {
+					videoId = videoId.split("&")[0];
+				}
+			} else if (url.contains("youtu.be/")) {
+				videoId = url.split("youtu.be/")[1];
+				if (videoId.contains("?")) {
+					videoId = videoId.split("\\?")[0];
+				}
+			} else if (url.contains("embed/")) {
+				videoId = url.split("embed/")[1];
+				if (videoId.contains("?")) {
+					videoId = videoId.split("\\?")[0];
+				}
+			} else if (url.contains("v/")) {
+				videoId = url.split("v/")[1];
+				if (videoId.contains("?")) {
+					videoId = videoId.split("\\?")[0];
+				}
+			}
+
+			if (videoId == null || videoId.trim().isEmpty()) {
+				throw new IllegalArgumentException("Could not extract video ID from URL");
+			}
+
+			return videoId.trim();
+		} catch (Exception e) {
+			throw new IllegalArgumentException("Invalid YouTube URL format: " + e.getMessage(), e);
+		}
+	}
 }

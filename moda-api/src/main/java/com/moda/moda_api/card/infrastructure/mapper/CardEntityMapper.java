@@ -1,12 +1,15 @@
 package com.moda.moda_api.card.infrastructure.mapper;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.moda.moda_api.card.domain.Card;
 import com.moda.moda_api.card.domain.CardId;
 import com.moda.moda_api.card.domain.EmbeddingVector;
+import com.moda.moda_api.card.infrastructure.entity.CardDtoEntity;
 import com.moda.moda_api.card.infrastructure.entity.CardEntity;
+import com.moda.moda_api.card.infrastructure.entity.UrlCacheEntity;
 import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.user.domain.UserId;
 import org.springframework.stereotype.Component;
@@ -27,6 +30,8 @@ public class CardEntityMapper {
                 .embedding(card.getEmbedding().getValues())
                 .viewCount(card.getViewCount())
                 .keywords(card.getKeywords())
+                .subContents(card.getSubContents())
+                .bookmark(card.getBookmark())
                 .createdAt(card.getCreatedAt())
                 .updatedAt(card.getUpdatedAt())
                 .deletedAt(card.getDeletedAt())
@@ -34,12 +39,21 @@ public class CardEntityMapper {
     }
 
     public Card toDomain(CardEntity entity) {
+
+        UrlCacheEntity urlCache = entity.hasUrlCache() ? entity.getUrlCache() : null;
+
         return Card.builder()
                 .cardId(new CardId(entity.getCardId()))
                 .userId(new UserId(entity.getUserId()))
                 .categoryId(new CategoryId(entity.getCategoryId()))
                 .typeId(entity.getTypeId())
                 .urlHash(entity.getUrlHash())
+//                .originalUrl(entity.getUrlCache().getOriginalUrl())
+                .originalUrl(
+                        urlCache != null
+                                ? urlCache.getOriginalUrl()
+                                : null
+                )
                 .title(entity.getTitle())
                 .content(entity.getContent())
                 .thumbnailContent(entity.getThumbnailContent())
@@ -47,9 +61,29 @@ public class CardEntityMapper {
                 .embedding(new EmbeddingVector(entity.getEmbedding()))
                 .viewCount(entity.getViewCount())
                 .keywords(entity.getKeywords())
+                .subContents(entity.getSubContents())
+                .bookmark(entity.getBookmark())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .deletedAt(entity.getDeletedAt())
+                .build();
+    }
+
+    public Card toDomainByCardList(CardEntity entity) {
+
+        return Card.builder()
+                .cardId(new CardId(entity.getCardId()))
+                .userId(new UserId(entity.getUserId()))
+                .categoryId(new CategoryId(entity.getCategoryId()))
+                .typeId(entity.getTypeId())
+                .title(entity.getTitle())
+                .content(entity.getContent())
+                .thumbnailContent(entity.getThumbnailContent())
+                .thumbnailUrl(entity.getThumbnailUrl())
+                .embedding(new EmbeddingVector(entity.getEmbedding()))
+                .keywords(entity.getKeywords())
+                .bookmark(entity.getBookmark())
+                .createdAt(entity.getCreatedAt())
                 .build();
     }
 
@@ -59,4 +93,26 @@ public class CardEntityMapper {
             .collect(Collectors.toList());
     }
 
+    public Card toDomain(CardDtoEntity dto) {
+        return Card.builder()
+                .cardId(new CardId(dto.getCardId()))
+                .userId(new UserId(dto.getUserId()))
+                .categoryId(new CategoryId(dto.getCategoryId()))
+                .typeId(dto.getTypeId())
+                .urlHash(dto.getUrlHash())
+                .originalUrl(dto.getOriginalUrl())
+                .title(dto.getTitle())
+                .content(dto.getContent())
+                .thumbnailContent(dto.getThumbnailContent())
+                .thumbnailUrl(dto.getThumbnailUrl())
+                .embedding(new EmbeddingVector(dto.getEmbedding()))
+                .viewCount(dto.getViewCount())
+                .keywords(dto.getKeywords())
+                .subContents(dto.getSubContents())
+                .bookmark(dto.getBookmark())
+                .createdAt(dto.getCreatedAt())
+                .updatedAt(dto.getUpdatedAt())
+                .deletedAt(dto.getDeletedAt())
+                .build();
+    }
 }

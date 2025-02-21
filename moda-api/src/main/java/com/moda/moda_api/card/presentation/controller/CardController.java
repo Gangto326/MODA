@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -20,14 +21,18 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.moda.moda_api.card.application.response.CardDetailResponse;
 import com.moda.moda_api.card.application.response.CardListResponse;
+import com.moda.moda_api.card.application.response.CardMainResponse;
+import com.moda.moda_api.card.application.response.HotTopicResponse;
+import com.moda.moda_api.card.application.response.UserCardStatsResponse;
 import com.moda.moda_api.card.application.service.CardService;
-import com.moda.moda_api.card.application.service.ImageValidService;
+import com.moda.moda_api.card.presentation.request.CardBookmarkRequest;
 import com.moda.moda_api.card.presentation.request.CardRequest;
 import com.moda.moda_api.card.presentation.request.MoveCardRequest;
 import com.moda.moda_api.card.presentation.request.UpdateCardRequest;
 import com.moda.moda_api.common.annotation.UserId;
 import com.moda.moda_api.common.pagination.SliceResponseDto;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -37,13 +42,12 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api/card")
 public class CardController {
 	private final CardService cardService;
-	private final ImageValidService imageValidService;
 
 	// Json으로 날라올 때
 	@PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
 	public CompletableFuture<ResponseEntity<Boolean>> createCard(
 		@UserId String userId,
-		@RequestBody CardRequest cardRequest
+		@RequestBody @Valid CardRequest cardRequest
 	) {
 		return cardService.createCard(userId, cardRequest.getUrl())
 			.thenApply(ResponseEntity::ok)
@@ -62,15 +66,6 @@ public class CardController {
 			return CompletableFuture.completedFuture(
 				ResponseEntity.badRequest().body(false)
 			);
-		}
-
-		// 각 파일 검증
-		for (MultipartFile file : files) {
-			if (imageValidService.validateFile(file)) {
-				return CompletableFuture.completedFuture(
-					ResponseEntity.badRequest().body(false)
-				);
-			}
 		}
 
 		return CompletableFuture.supplyAsync(() -> {
@@ -133,5 +128,38 @@ public class CardController {
 	) {
 		Boolean result = cardService.updateCardBoard(userId, request);
 		return ResponseEntity.ok(result);
+	}
+
+	@PostMapping("/bookmark")
+	public ResponseEntity<Boolean> cardBookmark(
+			@UserId String userId,
+			@RequestBody CardBookmarkRequest request
+	) {
+		Boolean result = cardService.cardBookmark(userId, request);
+		return ResponseEntity.ok(result);
+	}
+
+	@GetMapping("/main")
+	public ResponseEntity<CardMainResponse> getMainKeywords(
+			@UserId String userId
+	) {
+		CardMainResponse response = cardService.getMainKeywords(userId);
+		return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("/hot-topic")
+	public ResponseEntity<List<HotTopicResponse>> getHotTopics(
+			@RequestParam(defaultValue = "10") Integer limit
+	) {
+		List<HotTopicResponse> responseList = cardService.getHotTopics(limit);
+		return ResponseEntity.ok(responseList);
+	}
+
+	@GetMapping("/status")
+	public ResponseEntity<UserCardStatsResponse> getUserCardStat(@UserId String userId){
+
+		UserCardStatsResponse userCardStats = cardService.getUserCardStats(userId);
+
+		return ResponseEntity.ok(userCardStats);
 	}
 }

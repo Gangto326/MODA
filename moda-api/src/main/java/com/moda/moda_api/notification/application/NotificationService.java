@@ -5,10 +5,14 @@ import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
+import com.google.firebase.messaging.AndroidConfig;
+import com.google.firebase.messaging.AndroidNotification;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.MessagingErrorCode;
+import com.moda.moda_api.card.domain.Card;
+import com.moda.moda_api.card.domain.CardContentType;
 import com.moda.moda_api.notification.domain.Notification;
 import com.moda.moda_api.notification.domain.NotificationType;
 import com.moda.moda_api.notification.infrastructure.NotificationRepository;
@@ -25,41 +29,90 @@ public class NotificationService {
 	private final FirebaseMessaging firebaseMessaging;
 	private final NotificationRepository notificationRepository;
 
-	// 알림 저장 및 FCM 전송
-	@Transactional
-	public void sendNotification(String userId, NotificationType type, String contentId, String content) {
-		// 1. 알림 저장
-		saveNotification(userId, type, contentId, content);
-		// 2. FCM 발송
-		sendFCMNotification(userId, type, content);
-	}
-
-	// 알림 저장
-	private Notification saveNotification(String userId, NotificationType type, String contentId, String content) {
-		Notification notification = Notification.builder()
-			.userId(userId)
-			.type(type)
-			.contentId(contentId)
-			.content(content)
-			.build();
-		return notificationRepository.save(notification);
-	}
-
 	// FCM 발송
-	private void sendFCMNotification(String userId, NotificationType type, String content) {
+	@Transactional
+	public void sendFCMNotification(String userId, NotificationType type, Card card) {
+		// 유저 토큰 가져오기.
+		Set<String> tokens = fcmTokenService.getUserTokens(userId);
+		String imageUrl = card.getTypeId().equals(1) ?
+			String.format("https://img.youtube.com/vi/%s/default.jpg", card.getThumbnailUrl()) : card.getThumbnailUrl();
+
+		System.out.println("userId : " + userId);
+		System.out.println("NotificationType : " + type);
+		System.out.println();
+		System.out.println(imageUrl);
+		tokens.forEach(System.out::println);
+
+		System.out.println(imageUrl);
+		tokens.forEach(token -> {
+			Message message = Message.builder()
+				.setToken(token)
+				.putData("cardId", String.valueOf(card.getCardId().getValue()))  // cardId를 문자열로 명확히 전달
+				.putData("imageUrl", imageUrl)
+				.putData("title", card.getTitle())
+				.setNotification(com.google.firebase.messaging.Notification.builder()
+					.setTitle("컨텐츠 저장이 완료되었습니다!")
+					.setBody(card.getTitle())
+					.build())
+				.setAndroidConfig(AndroidConfig.builder()
+					.setTtl(3600 * 1000)
+					.setPriority(AndroidConfig.Priority.HIGH)
+					.setNotification(AndroidNotification.builder()
+						.setColor("#FFFFFF")
+						.setIcon("ic_logo")
+						.setImage(imageUrl)  // **이미지 URL 추가**
+						.setClickAction("OPEN_ACTIVITY")
+						.setDefaultVibrateTimings(true)
+						.setDefaultSound(true)
+						.setNotificationCount(1)
+						.setVisibility(AndroidNotification.Visibility.PUBLIC)
+						.build())
+					.build())
+				.build();
+			try {
+				System.out.println("메시지 전송 시도: " + token);
+				String response = firebaseMessaging.send(message);
+				System.out.println("전송 성공. Response: " + response);
+			} catch (FirebaseMessagingException e) {
+				System.out.println("전송 실패. 에러: " + e.getMessage());
+				e.printStackTrace();
+				handleFCMException(e, token);
+			}
+		});
+	}
+
+	@Transactional
+	public void sendErrorNotification(String userId, String errorMessage) {
+		// 유저 토큰 가져오기
 		Set<String> tokens = fcmTokenService.getUserTokens(userId);
 
 		tokens.forEach(token -> {
-			try {
-				Message message = Message.builder()
-					.setToken(token)
-					.setNotification(com.google.firebase.messaging.Notification.builder()
-						.setTitle(type.getDescription())
-						.setBody(content)
+			Message message = Message.builder()
+				.setToken(token)
+				.setNotification(com.google.firebase.messaging.Notification.builder()
+					.setTitle(errorMessage)
+					.build())
+				.setAndroidConfig(AndroidConfig.builder()
+					.setTtl(3600 * 1000)
+					.setPriority(AndroidConfig.Priority.HIGH)
+					.setNotification(AndroidNotification.builder()
+						.setColor("#FFFFFF")
+						.setIcon("ic_logo")
+						.setClickAction("OPEN_ACTIVITY")
+						.setDefaultVibrateTimings(true)
+						.setDefaultSound(true)
+						.setNotificationCount(1)
+						.setVisibility(AndroidNotification.Visibility.PUBLIC)
 						.build())
-					.build();
-				firebaseMessaging.send(message);
+					.build())
+				.build();
+			try {
+				System.out.println("크롤링 실패 알림 전송 시도: " + token);
+				String response = firebaseMessaging.send(message);
+				System.out.println("전송 성공. Response: " + response);
 			} catch (FirebaseMessagingException e) {
+				System.out.println("전송 실패. 에러: " + e.getMessage());
+				e.printStackTrace();
 				handleFCMException(e, token);
 			}
 		});

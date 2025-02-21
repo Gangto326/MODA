@@ -1,15 +1,10 @@
 package com.moda.moda_api.common.config;
 
-import java.net.URI;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import reactor.netty.http.client.HttpClient;
 
@@ -19,8 +14,10 @@ public class WebClientConfig {
 	@Value("${lilys.ai.api.key}")
 	private String lilysApiKey;
 
-	@Value("${PythonAI.api.url}")
+	@Value("${PYTHON_AI_API_URL}")
 	private String pythonURL;
+
+	private String youtubeUrl = "https://www.googleapis.com/youtube/v3";
 
 	@Bean("googleWebClient")
 	public WebClient googleCustomSearchWebClient(WebClient.Builder builder) {
@@ -42,6 +39,14 @@ public class WebClientConfig {
 	public WebClient pythonWebClient(WebClient.Builder builder) {
 		return builder.baseUrl(pythonURL)
 			.clientConnector(new ReactorClientHttpConnector(HttpClient.create().followRedirect(true)))
+			.build();
+	}
+
+	@Bean("youtubeWebClient")
+	public WebClient youtubeWebClient(WebClient.Builder builder) {
+		return builder
+			.baseUrl(youtubeUrl) // 유튜브 API 기본 URL
+			.defaultHeader("Content-Type", "application/json")
 			.build();
 	}
 }

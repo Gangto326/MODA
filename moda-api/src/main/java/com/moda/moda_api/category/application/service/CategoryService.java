@@ -4,6 +4,7 @@ import com.moda.moda_api.category.application.mapper.CategoryDtoMapper;
 import com.moda.moda_api.category.application.response.CategoryListResponse;
 import com.moda.moda_api.category.domain.*;
 import com.moda.moda_api.category.exception.TargetNotFoundException;
+import com.moda.moda_api.category.infrastructure.entity.CategoryOrderEntiy;
 import com.moda.moda_api.category.presentation.request.UpdateCategoryPositionRequest;
 import com.moda.moda_api.user.domain.UserId;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -94,4 +96,31 @@ public class CategoryService {
         // 카테고리 저장
         categoryOrderRepository.saveAll(categoryList);
     }
+
+    @Transactional
+    public void initCategoryPosition(String userId) {
+        UserId userIdObj = new UserId(userId);
+
+        // 이미 생성된 카테고리가 있는지 확인
+        List<Category> existingCategories = categoryOrderRepository.findByUserId(userIdObj);
+        if (!existingCategories.isEmpty()) {
+            return;
+        }
+
+        List<CategoryOrderEntiy> categoryOrderEntities = new ArrayList<>();
+
+        for (long position = 1L; position <= 10L; position++) {
+            CategoryOrderEntiy categoryOrder = CategoryOrderEntiy.builder()
+                .categoryId(position)  // Long 타입으로 직접 설정
+                .userId(userId)       // String 타입으로 직접 설정
+                .position((int)position)
+                .build();
+
+            categoryOrderEntities.add(categoryOrder);
+        }
+
+        // CategoryOrderEntity를 직접 저장
+        categoryOrderRepository.saveAllEntities(categoryOrderEntities);
+    }
+
 }

@@ -54,8 +54,7 @@ public class ImageStorageService {
 				.contentType("image/jpeg")
 				.build();
 
-			s3Client.putObject(request,
-				RequestBody.fromBytes(imageData));
+			s3Client.putObject(request, RequestBody.fromBytes(imageData));
 
 			// URL 생성 (key에 파일명 포함)
 			return String.format("https://%s.s3.ap-northeast-2.amazonaws.com/%s",
@@ -70,8 +69,20 @@ public class ImageStorageService {
 	// 이미지 외부 url로 부터 이미지 다운로드
 	public byte[] downloadImageFromUrl(String imageUrl) {
 		try {
-			URL url = new URL(imageUrl);
+			String modifiedUrl = imageUrl;
+			if (imageUrl.contains("_blur")) {
+				// _blur 제거 후 type 파라미터 변경
+				modifiedUrl = imageUrl.replace("_blur", "")
+					.substring(0, imageUrl.indexOf("type=")) + "type=w800";
+			}
+
+			URL url = new URL(modifiedUrl);
+
+			System.out.println(modifiedUrl);
 			HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+			connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
+			connection.setInstanceFollowRedirects(true);
+
 			connection.setRequestMethod("GET");
 
 			// 이미지 다운로드
@@ -91,6 +102,13 @@ public class ImageStorageService {
 			log.error("이미지 다운로드 실패  URL: {}", e.getMessage());
 			throw new RuntimeException("이미지 다운로드 실패 URL", e);
 		}
+	}
+
+	private String getExtension(String filename) {
+		return Optional.ofNullable(filename)
+			.filter(f -> f.contains("."))
+			.map(f -> "." + f.substring(f.lastIndexOf(".") + 1))
+			.orElse(".jpg");
 	}
 
 	public String uploadMultipartFile(MultipartFile file) {
@@ -120,10 +138,4 @@ public class ImageStorageService {
 		}
 	}
 
-	private String getExtension(String filename) {
-		return Optional.ofNullable(filename)
-			.filter(f -> f.contains("."))
-			.map(f -> "." + f.substring(f.lastIndexOf(".") + 1))
-			.orElse(".jpg");
-	}
 }

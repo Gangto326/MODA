@@ -5,9 +5,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.elasticsearch.annotations.Query;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
+import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 
 import java.util.List;
 
+
+@EnableElasticsearchRepositories
 public interface CardSearchJpaRepository extends ElasticsearchRepository<CardDocumentEntity, String> {
 
     /**

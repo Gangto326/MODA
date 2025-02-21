@@ -11,11 +11,23 @@
     },
     "title": {
       "type": "text",
-      "analyzer": "korean"
+      "analyzer": "korean",
+      "fields": {
+        "ngram": {
+          "type": "text",
+          "analyzer": "ngram_analyzer"
+        }
+      }
     },
     "content": {
       "type": "text",
-      "analyzer": "korean"
+      "analyzer": "korean",
+      "fields": {
+        "ngram": {
+          "type": "text",
+          "analyzer": "ngram_analyzer"
+        }
+      }
     },
     "thumbnailContent": {
       "type": "text",
@@ -25,10 +37,17 @@
       "type": "keyword"
     },
     "keywords": {
-      "type": "keyword"
-    },
-    "subcontents": {
-      "type": "text"
+      "type": "text",
+      "fields": {
+        "keyword": {
+          "type": "keyword"
+        },
+        "ngram": {
+          "type": "text",
+          "analyzer": "ngram_analyzer",
+          "search_analyzer": "ngram_analyzer"
+        }
+      }
     },
     "titleCompletion": {
       "type": "text",
@@ -43,6 +62,9 @@
     "embedding": {
       "type": "dense_vector",
       "dims": 768
+    },
+    "bookmark": {
+      "type": "boolean"
     },
     "createdAt": {
       "type": "date",

@@ -1,6 +1,7 @@
 package com.moda.moda_api.card.domain;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import com.moda.moda_api.card.exception.InvalidCardContentException;
 import com.moda.moda_api.card.exception.InvalidCardTitleException;
@@ -26,6 +27,7 @@ public class Card {
     private CategoryId categoryId;
     private Integer typeId;
     private String urlHash;
+    private String originalUrl;
     private String title;
     private String content;
     private String thumbnailContent;
@@ -40,12 +42,19 @@ public class Card {
     private Integer viewCount = 0;
 
     @Builder.Default
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private Boolean bookmark = false;
+
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
 
 
     public void changeContent(String content) {
         validateContent(content);
         this.content = content;
+    }
+
+    public void setBookmark(Boolean bookmark) {
+        this.bookmark = bookmark;
     }
 
     public void moveCategory(CategoryId categoryId) {
@@ -74,7 +83,11 @@ public class Card {
 
     public void validateOwnership(UserId userId) {
         if (!this.userId.equals(userId)) {
-            throw new UnauthorizedException("권한이 존재하지 않습니다.");
+            throw new UnauthorizedException("권한이 존재하지 않습니다.", "UNAUTHORIZED_ACCESS");
         }
+    }
+
+    public Boolean isOwnedBy(UserId currentUserId) {
+        return this.userId.equals(currentUserId);
     }
 }

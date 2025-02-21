@@ -1,9 +1,11 @@
 pipeline {
     agent any
 
-    environment {
-        COMPOSE_PROJECT_NAME = "backend"
-        DOCKER_USER = ""
+    when {
+        anyOf {
+            branch 'main'
+            branch 'backend'
+        }
     }
 
     stages {
