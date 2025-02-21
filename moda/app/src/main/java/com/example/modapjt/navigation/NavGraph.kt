@@ -11,6 +11,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.NavGraphBuilder
 import com.example.modapjt.presentation.auth.signup.SignUpScreen
 import com.example.modapjt.presentation.auth.signup.SignUpViewModel
 import androidx.navigation.NavHostController
@@ -35,6 +37,7 @@ import com.example.modapjt.screen2.newCardListScreen
 import com.example.modapjt.screen2.search.NewSearchScreen
 import com.example.modapjt.screen2.search.oldSearchScreen
 import com.example.modapjt.screen2.user.MyPageScreen
+import com.example.modapjt.screen2.user.TutorialOnboardingScreen
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
@@ -79,6 +82,7 @@ fun NavGraph(
         navController = navController,
 //        startDestination = "home"
         startDestination = if (isLoggedIn) "home" else "login" // 위의 주석 부분 대신 추가
+
     ) {
         // 추가
 //        composable("login") {
@@ -258,6 +262,16 @@ fun NavGraph(
                 onNavigateBack = { navController.navigateUp() },
                 navController = navController
 
+            )
+        }
+
+        // tutorial 라우트 직접 추가
+        composable("tutorial") {
+            TutorialOnboardingScreen(
+                navController = navController,
+                onFinish = {
+                    navController.popBackStack()
+                }
             )
         }
 
