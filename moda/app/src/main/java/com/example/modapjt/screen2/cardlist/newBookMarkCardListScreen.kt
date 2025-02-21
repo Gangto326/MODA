@@ -193,7 +193,8 @@ fun newBookMarkCardListScreen(
 
                             when (selectedCategory) {
                                 "전체" -> {
-                                    if (state.images.isEmpty() && !loadingMore) {
+                                    if (state.images.isEmpty() && state.blogs.isEmpty() &&
+                                        state.videos.isEmpty() && state.news.isEmpty()) {
                                         item { EmptyMessage3("저장된 즐겨찾기가 없습니다") }
                                     } else
                                     item {
