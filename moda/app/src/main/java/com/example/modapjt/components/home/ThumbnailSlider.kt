@@ -51,9 +51,16 @@ fun ThumbnailSlider(
         "https://a805bucket.s3.ap-northeast-2.amazonaws.com/onboarding/onboarding5.jpg"
     )
 
-    val totalItems by remember(thumbnails) {
-        mutableStateOf(thumbnails?.size ?: defaultOnboardingImages.size)
+    // totalItems 계산 로직 수정
+    val currentList = remember(thumbnails) {
+        when {
+            thumbnails == null || thumbnails.isEmpty() -> defaultOnboardingImages
+            else -> thumbnails
+        }
     }
+
+    val totalItems = currentList.size
+
     val video123 = "ONBOARD"
     // 홈 화면에서 API 자동 호출
 //    LaunchedEffect(Unit) {
@@ -64,7 +71,7 @@ fun ThumbnailSlider(
     LaunchedEffect(currentIndex) {
         while (true) {
             delay(4000)
-            println(totalItems)
+            println("Total Items: $totalItems, Current Index: $currentIndex")
             if (totalItems > 1) {
                 targetIndex = (currentIndex + 1) % totalItems
                 currentIndex = targetIndex
