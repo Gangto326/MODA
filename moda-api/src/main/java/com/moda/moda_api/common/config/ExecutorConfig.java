@@ -11,6 +11,6 @@ public class ExecutorConfig {
 
     @Bean
     public ExecutorService executorService() {
-        return Executors.newFixedThreadPool(9);
+        return Executors.newFixedThreadPool(100);
     }
 }
