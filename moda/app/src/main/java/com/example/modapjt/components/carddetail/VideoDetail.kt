@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -575,7 +576,7 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
                         modifier = Modifier
                             .align(Alignment.CenterEnd)
                             .width(250.dp)  // 가로 길이 고정
-                            .height(300.dp) // 세로 길이 제한 (스크롤 가능하도록)
+                            .heightIn(min = 60.dp, max = 100.dp)
                             .padding(end = 8.dp)
                     ) {
                         LazyColumn(
