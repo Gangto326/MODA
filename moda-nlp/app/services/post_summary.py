@@ -17,7 +17,6 @@ class PostSummary:
     def __init__(self, origin_content: str):
         self.models = [
             'anpigon/qwen2.5-7b-instruct-kowiki',
-            'kwangsuklee/Qwen2.5-14B-Gutenberg-1e-Delta.Q5_K_M',
             'qwen2.5',
             'hf.co/Bllossom/llama-3.2-Korean-Bllossom-3B-gguf-Q4_K_M'
         ]

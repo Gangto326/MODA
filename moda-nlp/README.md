@@ -10,9 +10,14 @@
 2. poetry install
 
 ## 공통
-1. pip install ollama, py-hanspell-aideer
+1. pip install ollama py-hanspell-aideer
 
 # 프로젝트 실행 방법
+0. 올라마 실행
+   - CUDA_VISIBLE_DEVICES=0 OLLAMA_NUM_PARALLEL=4 OLLAMA_MAX_LOADED_MODELS=4 OLLAMA_CUDA=1 nohup ollama serve &
+   - tail -f nohup.out
+
+
 1. 루트 디렉토리에서 cmd 실행
 2. 가상환경 진입
    - win: .venv\Scripts\activate.bat
