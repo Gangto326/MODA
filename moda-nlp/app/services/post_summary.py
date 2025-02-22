@@ -1,4 +1,5 @@
 import json
+import time
 
 import googletrans
 import ollama
@@ -70,13 +71,33 @@ class PostSummary:
     def chat(self,
              messages,
              model: str,
-             format = None):
-        response = ollama.chat(
-            model = model,
-            messages = messages,
-            format = format
-        )
-        return response['message']['content']
+             format = None,
+             max_retries: int = 3,
+             current_retry: int = 0):
+        try:
+            response = ollama.chat(
+                model=model,
+                messages=messages,
+                format=format
+            )
+            return response['message']['content']
+        except Exception as e:
+            print(f"올라마 에러 발생 (시도 {current_retry + 1}/{max_retries}): {e}")
+
+            # 최대 재시도 횟수를 초과하지 않았다면 재귀적으로 다시 시도
+            if current_retry < max_retries:
+                print(f"3초 후 재시도합니다...")
+                time.sleep(3)  # 잠시 대기 후 재시도
+                return self.chat(
+                    messages=messages,
+                    model=model,
+                    format=format,
+                    max_retries=max_retries,
+                    current_retry=current_retry + 1
+                )
+            else:
+                print("최대 재시도 횟수를 초과했습니다.")
+                raise
 
     #category를 선택하는 함수
     def choose_category(self, idxModel: int):
