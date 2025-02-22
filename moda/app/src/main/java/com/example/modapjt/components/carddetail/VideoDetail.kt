@@ -8,6 +8,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,6 +32,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -46,7 +48,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -60,6 +61,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key.Companion.F
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -88,6 +90,7 @@ import java.time.format.DateTimeFormatter
 import kotlin.math.PI
 import kotlin.math.roundToInt
 import kotlin.math.sin
+import androidx.compose.material3.Text as Text
 
 
 // 헤더 정보를 저장하는 데이터 클래스
@@ -567,46 +570,38 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
 
                 // 타임라인 오버레이
                 if (showTimeline) {
+
                     Surface(
                         modifier = Modifier
                             .align(Alignment.CenterEnd)
-                            .width(250.dp)
+                            .width(250.dp)  // 가로 길이 고정
+                            .height(300.dp) // 세로 길이 제한 (스크롤 가능하도록)
                             .padding(end = 8.dp)
-                            .clickable(
-                                enabled = false,
-                                indication = null, // 클릭 효과 제거
-                                interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
-                            ) {},
-                        color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.9f),
-                        shape = RoundedCornerShape(8.dp),
-                        border = BorderStroke(
-                            1.dp,
-                            MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.3f)
-                        )
                     ) {
-                        Column(
-                            modifier = Modifier.padding(12.dp),
+                        LazyColumn(
+                            modifier = Modifier.fillMaxHeight(),
                             verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
-                            Text(
-                                text = "목차",
-                                style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.padding(bottom = 8.dp),
-                                color = MaterialTheme.colorScheme.secondary
-                            )
+                            item {
+                                Text(
+                                    text = "목차",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    modifier = Modifier.padding(bottom = 8.dp),
+                                    color = MaterialTheme.colorScheme.secondary
+                                )
+                            }
 
-                            timelineHeaders.forEach { header ->
+                            items(timelineHeaders) { header ->
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
+                                        .horizontalScroll(rememberScrollState()) // 가로 스크롤 가능하도록 추가
                                         .clickable(
-                                            indication = null, // 클릭 효과 제거
-                                            interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
+                                            indication = null,
+                                            interactionSource = remember { MutableInteractionSource() }
                                         ) {
                                             player?.seekTo(header.timeStamp)
                                             scope.launch {
-                                                // 스크롤 위치 계산 개선
-//                                                scrollState.scrollToItem(0, header.offset)
                                                 val index = timelineHeaders.indexOf(header)
                                                 scrollToSection(index)
                                                 showTimeline = false
@@ -625,15 +620,18 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
                                     Text(
                                         text = header.text,
                                         fontSize = 14.sp,
-                                        maxLines = 1,
+                                        maxLines = Int.MAX_VALUE,  // 여러 줄 허용
+                                        overflow = TextOverflow.Clip, // 말줄임 없이 전체 표시
                                         color = MaterialTheme.colorScheme.onSecondary,
-                                        overflow = TextOverflow.Ellipsis,
-                                        modifier = Modifier.weight(1f)
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .horizontalScroll(rememberScrollState()) // 제목이 길 경우 가로 스크롤
                                     )
                                 }
                             }
                         }
                     }
+
                 }
             }
         }
@@ -694,7 +692,7 @@ private fun calculateActiveIndex(
         if (overlapEnd > overlapStart) overlapEnd - overlapStart else 0f
     }
 
-    return centralItem?.let { item ->
+    return centralItem?.let { item ->F
         (item.index - headerItemCount).coerceIn(
             0,
             listState.layoutInfo.totalItemsCount - headerItemCount - 1
