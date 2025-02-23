@@ -152,7 +152,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
         // UserId에 대한 term 쿼리 매칭
         boolQuery.must(Query.of(query -> query
                 .term(term -> term
-                        .field("userId")
+                        .field("userId.keyword")
                         .value(userId.getValue())
                 )));
 
@@ -245,7 +245,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                 // userId에 대한 must 조건 매칭
                 .must(Query.of(query -> query
                             .term(term -> term
-                                    .field("userId")
+                                    .field("userId.keyword")
                                     .value(userId.getValue())
                             )
                 ));
