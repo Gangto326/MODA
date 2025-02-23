@@ -1,19 +1,11 @@
 package com.example.modapjt.toktok.gesture
 
 import android.annotation.SuppressLint
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.PixelFormat
-import android.hardware.display.DisplayManager
-import android.hardware.display.VirtualDisplay
-import android.media.ImageReader
-import android.media.projection.MediaProjection
-import android.media.projection.MediaProjectionManager
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
@@ -45,7 +37,6 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.setViewTreeLifecycleOwner
@@ -55,6 +46,9 @@ import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.example.modapjt.data.repository.CardRepository
 import com.example.modapjt.toktok.BrowserAccessibilityService
+import com.example.modapjt.toktok.MediaProjectionManager
+import com.example.modapjt.toktok.NotificationHelper
+import com.example.modapjt.toktok.NotificationHelper.Companion.NOTIFICATION_ID
 import com.example.modapjt.toktok.ScreenCaptureManager
 import com.example.modapjt.toktok.ScreenCaptureManager.capturedBitmap
 import kotlinx.coroutines.CoroutineScope
@@ -96,12 +90,6 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
     // 화면 크기 관련 변수들
     private val screenWidth by lazy { resources.displayMetrics.widthPixels }
     private val screenHeight by lazy { resources.displayMetrics.heightPixels }
-    private val screenDensity by lazy { resources.displayMetrics.densityDpi }
-
-    // 화면 캡처를 위한 MediaProjection 관련 변수들
-    private var mediaProjection: MediaProjection? = null
-    private var virtualDisplay: VirtualDisplay? = null
-    private var imageReader: ImageReader? = null
 
     // Bradcast를 받기 위한 수신기
     private val receiver = object : BroadcastReceiver() {
@@ -112,6 +100,9 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
             }
         }
     }
+
+    private lateinit var mediaProjectionManager: MediaProjectionManager
+    private lateinit var notificationHelper: NotificationHelper
 
     @RequiresApi(Build.VERSION_CODES.S)
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
@@ -127,11 +118,14 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
         registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
 
         //오버레이 화면 등록
+        mediaProjectionManager = MediaProjectionManager(this)
+        notificationHelper = NotificationHelper(this)
+
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         setupGestureView()
         startForeground(
             NOTIFICATION_ID,
-            createNotification()
+            notificationHelper.createNotification()
         )
 
         Log.d("GestureService", "제스처 서비스 시작됨")
@@ -183,77 +177,10 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
             val data = it.getParcelableExtra<Intent>(EXTRA_DATA)
 
             if (resultCode != 0 && data != null) {
-                startProjection(resultCode, data)
+                mediaProjectionManager.startProjection(resultCode, data)
             }
         }
         return START_NOT_STICKY
-    }
-
-    /**
-     * 포그라운드 서비스를 위한 알림 생성
-     */
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun createNotification(): Notification {
-        val channelId = "screen_capture_service"
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        // Create notification channel
-        val channel = NotificationChannel(
-            channelId,
-            "모다",
-            NotificationManager.IMPORTANCE_DEFAULT
-        )
-        notificationManager.createNotificationChannel(channel)
-
-        return NotificationCompat.Builder(this, channelId)
-            .setContentTitle("모다")
-            .setContentText("화면 캡처 기능을 활성화하였습니다.")
-            .setSmallIcon(android.R.drawable.ic_menu_camera)
-            .build()
-    }
-
-    /**
-     * MediaProjection을 시작하여 화면 캡처 기능 초기화
-     */
-    private fun startProjection(resultCode: Int, data: Intent) {
-        val mediaProjectionManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
-        mediaProjection = mediaProjectionManager.getMediaProjection(resultCode, data)
-
-        // Register callback before starting capture
-        mediaProjection?.registerCallback(object : MediaProjection.Callback() {
-            override fun onStop() {
-                virtualDisplay?.release()
-                mediaProjection = null
-            }
-        }, null)
-
-        setupVirtualDisplay()
-    }
-
-    /**
-     * 가상 디스플레이 설정 및 이미지 캡처 리스너 등록
-     */
-    private fun setupVirtualDisplay() {
-        imageReader?.close()  // 기존 ImageReader 정리
-        imageReader = ImageReader.newInstance(
-            screenWidth, screenHeight,
-            PixelFormat.RGBA_8888, 2  // 버퍼 크기를 2로 증가
-        )
-
-        virtualDisplay = mediaProjection?.createVirtualDisplay(
-            "ScreenCapture",
-            screenWidth, screenHeight, screenDensity,
-            DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
-            imageReader?.surface, null, null
-        )
-
-        imageReader?.setOnImageAvailableListener({ reader ->
-            val image = reader.acquireLatestImage()
-
-            image?.use {
-                ScreenCaptureManager.saveImage(image)
-            }
-        }, null)
     }
 
     @RequiresApi(Build.VERSION_CODES.S)
@@ -496,11 +423,7 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
         // BroadcastReceiver 해제
         unregisterReceiver(receiver)
 
-        imageReader?.close()
-        imageReader = null
-        virtualDisplay?.release()
-        mediaProjection?.stop()
-        ScreenCaptureManager.clearCapturedBitmap()
+        mediaProjectionManager.release()
 
         if (captureView?.isAttachedToWindow == true) {
             windowManager?.removeView(captureView)
@@ -516,7 +439,6 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
     }
 
     companion object {
-        private const val NOTIFICATION_ID = 1
         const val EXTRA_RESULT_CODE = "extra_result_code"
         const val EXTRA_DATA = "extra_data"
     }
