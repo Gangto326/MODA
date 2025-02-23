@@ -112,8 +112,7 @@ public class LilysSummaryService {
 	private String[] getKeyWords(AIAnalysisResponseDTO aiAnalysis, YoutubeAPIResponseDTO youtubeAPI) {
 		return Stream.of(
 				new String[] {youtubeAPI.getChannelTitle()},
-				aiAnalysis.getKeywords(),
-				youtubeAPI.getTags()
+				aiAnalysis.getKeywords()
 			)
 			.flatMap(Stream::of)
 			.toArray(String[]::new);
