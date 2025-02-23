@@ -14,15 +14,19 @@ import android.view.Gravity
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.EaseInOutCirc
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -34,6 +38,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -44,6 +49,10 @@ import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.modapjt.data.repository.CardRepository
 import com.example.modapjt.toktok.BrowserAccessibilityService
 import com.example.modapjt.toktok.MediaProjectionManager
@@ -84,12 +93,17 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
     private val _isCapturedState = MutableStateFlow(false)
     private val isCapturedState = _isCapturedState.asStateFlow()
 
+    //완료 애니메이션 표시 여부
+    private val _isAnimatedState = MutableStateFlow(false)
+    private val isAnimatedState = _isAnimatedState.asStateFlow()
+
     // 애니메이션 관련 설정
     private val duration = if (_isCapturedState.value) 1 else 1000
 
     // 화면 크기 관련 변수들
     private val screenWidth by lazy { resources.displayMetrics.widthPixels }
     private val screenHeight by lazy { resources.displayMetrics.heightPixels }
+    private val iconSize by lazy { screenWidth / 5 }
 
     // Bradcast를 받기 위한 수신기
     private val receiver = object : BroadcastReceiver() {
@@ -226,7 +240,7 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
                 val offsetX by animateFloatAsState(
                     targetValue =
                     if (isCaptured)
-                        (screenWidth / 2).toFloat()
+                        ((screenWidth - iconSize) / 2).toFloat()
                     else
                         0f,
                     animationSpec = tween(
@@ -238,7 +252,7 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
                 val offsetY by animateFloatAsState(
                     targetValue =
                     if (isCaptured)
-                        screenHeight.toFloat()
+                        (screenHeight - iconSize * 2).toFloat()
                     else
                         0f,
                     animationSpec = tween(
@@ -251,8 +265,7 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
                     Box(
                         modifier = Modifier.offset {
                             IntOffset(offsetX.roundToInt(), offsetY.roundToInt())
-                        },
-                        contentAlignment = Alignment.Center
+                        }
                     ) {
                         capturedBitmap?.let { bmp ->
                             Image(
@@ -268,6 +281,43 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
                                 contentScale = ContentScale.Crop
                             )
                         }
+                    }
+                }
+
+                val isAnimated by isAnimatedState.collectAsState()
+                val composition by rememberLottieComposition(LottieCompositionSpec.Asset("logo.json"))
+                val progress by animateLottieCompositionAsState(
+                    composition = composition,
+                    isPlaying = isAnimated,  // isAnimated 상태에 따라 재생/정지
+                    restartOnPlay = true,    // 재생 시 처음부터 시작
+                    iterations = 1           // 한 번만 재생
+                )
+
+                LaunchedEffect(progress) {
+                    if (progress >= 1f && isAnimated) {
+                        withContext(Dispatchers.Main) {
+                            _isAnimatedState.value = false
+                        }
+                        Log.d("GestureService", "애니메이션 종료")
+                    }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .offset { IntOffset(0, -iconSize * 2) },
+                    contentAlignment = Alignment.BottomCenter
+                ) {
+                    AnimatedVisibility(
+                        visible = isAnimated,
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
+                        LottieAnimation(
+                            composition = composition,
+                            progress = { progress },
+                            modifier = Modifier
+                                .size(with(LocalDensity.current) { iconSize.toDp() })
+                        )
                     }
                 }
             }
@@ -355,6 +405,7 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
                 withContext(Dispatchers.Main) {
                     ScreenCaptureManager.captureBitmap() // 현재 화면을 캡처
                     _isCapturedState.value = true
+                    _isAnimatedState.value = true
                     delay(duration.toLong())
                     _isCapturedState.value = false
                     delay(duration.toLong())

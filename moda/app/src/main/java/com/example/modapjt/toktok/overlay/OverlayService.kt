@@ -103,7 +103,6 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
     // 화면 크기 관련 변수들
     private val screenWidth by lazy { resources.displayMetrics.widthPixels }
     private val screenHeight by lazy { resources.displayMetrics.heightPixels }
-    private val screenDensity by lazy { resources.displayMetrics.densityDpi }
     private val iconSize by lazy { screenWidth / 6 }
 
     private lateinit var mediaProjectionManager: MediaProjectionManager
