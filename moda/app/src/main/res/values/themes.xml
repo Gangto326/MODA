@@ -11,6 +11,8 @@
 
     <!-- 스플래시 테마 -->
     <style name="Theme.Splash" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@android:color/white</item>
+        <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
     </style>
 </resources>
