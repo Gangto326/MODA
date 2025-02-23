@@ -300,21 +300,21 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
 
             //제스처 이름이 circle이 포함하는 경우, 전체 url 저장
             if (gesture.first.contains("circle")) {
-                if (gesture.second < 6) {
-                    Toast.makeText(context, "원을 더 정확하게 그려주세요.", Toast.LENGTH_SHORT)
-                        .show()
-                    return
-                }
+//                if (gesture.second < 6) {
+//                    Toast.makeText(context, "원을 더 정확하게 그려주세요.", Toast.LENGTH_SHORT)
+//                        .show()
+//                    return
+//                }
 
-                captureImage()
-                Log.d("GestureService", "이미지 캡처")
+                captureUrl()
+                Log.d("GestureService", "URL 캡처")
             }
 
             //제스처 이름이 check를 포함하는 경우, 해당 이미지 저장
             if (gesture.first.contains("check")) {
 
-                captureUrl()
-                Log.d("GestureService", "URL 캡처")
+                captureImage()
+                Log.d("GestureService", "이미지 캡처")
             }
         } finally {
             closeDoubleTap()
