@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -183,10 +185,12 @@ fun SearchSuggestions(
                     Image(
                         painter = painterResource(id = R.drawable.ic_a_search),
                         contentDescription = "Search Icon",
+                        colorFilter = if (isSystemInDarkTheme()) ColorFilter.tint(Color.White) else null,
                         modifier = Modifier
                             .size(16.dp)
                             .padding(end = 8.dp)
                     )
+
 
                     Text(
                         text = suggestion,

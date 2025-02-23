@@ -48,6 +48,7 @@ import com.example.modapjt.domain.model.LoginState
 import com.example.modapjt.domain.viewmodel.AuthViewModel
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
@@ -136,11 +137,14 @@ fun LoginScreen(
         }
 
         Icon(
-            painter = painterResource(id = R.drawable.ic_logo),
+            painter = painterResource(
+                id = if (isSystemInDarkTheme()) R.drawable.ic_d_logo else R.drawable.ic_logo
+            ),
             contentDescription = "Logo",
             modifier = Modifier.size(80.dp),
             tint = Color.Unspecified // 원본 이미지 색상 유지
         )
+
 
         OutlinedTextField(
             singleLine = true,// 한줄 입력으로 제한

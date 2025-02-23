@@ -6,6 +6,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.Interaction
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -39,6 +40,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -218,8 +220,10 @@ fun SearchScreenBar(
                         Image(
                             painter = painterResource(id = R.drawable.ic_a_search),
                             contentDescription = "Search Icon",
+                            colorFilter = if (isSystemInDarkTheme()) ColorFilter.tint(Color.White) else null,
                             modifier = Modifier.size(20.dp)
                         )
+
                     }
                 }
             }
@@ -370,8 +374,10 @@ fun SearchListBar(
                         Image(
                             painter = painterResource(id = R.drawable.ic_a_search),
                             contentDescription = "Search Icon",
+                            colorFilter = if (isSystemInDarkTheme()) ColorFilter.tint(Color.White) else null,
                             modifier = Modifier.size(20.dp)
                         )
+
                     }
                 }
             }

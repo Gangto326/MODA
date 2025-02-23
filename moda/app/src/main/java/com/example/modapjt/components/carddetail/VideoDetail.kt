@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -58,10 +59,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.Key.Companion.F
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -214,6 +217,8 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .graphicsLayer(alpha = if (showTimeline) 0.3f else 1f) // 투명도 조절
+                    .background(if (showTimeline) Color.Black.copy(alpha = 0.5f) else Color.Transparent)// 반투명 배경 추가
                     .clickable(
                         indication = null, // 클릭 효과 제거
                         interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
@@ -245,7 +250,8 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
                 LazyColumn(
                     state = listState,
                     modifier = Modifier
-                        .fillMaxSize(),
+                        .fillMaxSize()
+                        .blur(if (showTimeline) 4.dp else 0.dp), // 블러 효과 적용
                     contentPadding = PaddingValues(bottom = 20.dp)
                 ) {
                     item {
@@ -378,7 +384,7 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
                             if (timelineHeaders.isNotEmpty()) {
                                 IconButton(onClick = { showTimeline = !showTimeline }) {
                                     Icon(
-                                        imageVector = Icons.Default.List,
+                                        painter = painterResource(id = R.drawable.ic_index),
                                         contentDescription = "Timeline",
                                         modifier = Modifier.padding(bottom = 16.dp),
                                         tint = if (showTimeline) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSecondary
@@ -576,18 +582,20 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
                         modifier = Modifier
                             .align(Alignment.CenterEnd)
                             .width(250.dp)  // 가로 길이 고정
-                            .heightIn(min = 60.dp, max = 100.dp)
-                            .padding(end = 8.dp)
+                            .wrapContentHeight()  // 높이를 내용에 맞게 자동 조정
+                            .padding(horizontal = 12.dp, vertical = 12.dp) // 패딩 추가 (양옆 & 위아래)
+                            .clickable { /* 목차 클릭은 아무 동작 안 함 (닫히지 않음) */ },
+                        shape = RoundedCornerShape(16.dp)
                     ) {
                         LazyColumn(
-                            modifier = Modifier.fillMaxHeight(),
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                            modifier = Modifier.wrapContentHeight(), // 높이 자동 조정
+                            verticalArrangement = Arrangement.spacedBy(4.dp) // 간격 늘리기
                         ) {
                             item {
                                 Text(
                                     text = "목차",
                                     style = MaterialTheme.typography.titleMedium,
-                                    modifier = Modifier.padding(bottom = 8.dp),
+                                    modifier = Modifier.padding(start = 12.dp, top = 8.dp, end = 12.dp, bottom = 8.dp),
                                     color = MaterialTheme.colorScheme.secondary
                                 )
                             }
@@ -596,19 +604,20 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .horizontalScroll(rememberScrollState()) // 가로 스크롤 가능하도록 추가
+                                        .horizontalScroll(rememberScrollState()) // ✅ 가로 스크롤 유지
                                         .clickable(
                                             indication = null,
-                                            interactionSource = remember { MutableInteractionSource() }
-                                        ) {
-                                            player?.seekTo(header.timeStamp)
+                                            interactionSource = remember { MutableInteractionSource() },
+
+                                        ){
+                                            player?.seekTo(header.timeStamp) // ✅ 클릭 시 해당 시간으로 이동
                                             scope.launch {
                                                 val index = timelineHeaders.indexOf(header)
                                                 scrollToSection(index)
                                                 showTimeline = false
                                             }
                                         }
-                                        .padding(vertical = 4.dp),
+                                        .padding(8.dp), // ✅ Row 내부 패딩 추가
                                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
@@ -616,23 +625,25 @@ fun VideoDetailScreen(cardDetail: CardDetail, navController: NavController) {
                                         text = formatTimeStamp(header.timeStamp),
                                         fontSize = 12.sp,
                                         color = MaterialTheme.colorScheme.secondary,
-                                        modifier = Modifier.width(48.dp)
+                                        modifier = Modifier
+                                            .width(48.dp)
+                                            .padding(end = 4.dp) // ✅ 시간 텍스트 오른쪽 패딩 추가
                                     )
                                     Text(
                                         text = header.text,
                                         fontSize = 14.sp,
-                                        maxLines = Int.MAX_VALUE,  // 여러 줄 허용
-                                        overflow = TextOverflow.Clip, // 말줄임 없이 전체 표시
+                                        maxLines = 1,  // ✅ 한 줄만 표시 (여러 줄 방지)
+                                        overflow = TextOverflow.Clip, // ✅ 말줄임 없이 전체 표시
                                         color = MaterialTheme.colorScheme.onSecondary,
                                         modifier = Modifier
                                             .weight(1f)
-                                            .horizontalScroll(rememberScrollState()) // 제목이 길 경우 가로 스크롤
+                                            .horizontalScroll(rememberScrollState()) // ✅ 가로 스크롤 유지
+                                            .padding(start = 4.dp) // ✅ 제목 왼쪽 패딩 추가
                                     )
                                 }
                             }
                         }
                     }
-
                 }
             }
         }

@@ -7,6 +7,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -65,19 +66,36 @@ fun CategoryItem(
 
     // 활성화 상태에 따라 다른 아이콘 사용
     val iconVector = if (isVisible) {
-        // 활성화된 경우 cg_c_ 접두사 아이콘 사용
-        when (category.categoryId) {
-            1 -> R.drawable.cg_c_all
-            2 -> R.drawable.cg_c_health
-            3 -> R.drawable.cg_c_travel
-            4 -> R.drawable.cg_c_food
-            5 -> R.drawable.cg_c_it
-            6 -> R.drawable.cg_c_finance
-            7 -> R.drawable.cg_c_society
-            8 -> R.drawable.cg_c_science
-            9 -> R.drawable.cg_c_hobby
-            10 -> R.drawable.cg_c_art
-            else -> R.drawable.category_default
+        //다크모드라면
+        if (isSystemInDarkTheme()) {
+            when (category.categoryId) {
+                1 -> R.drawable.cg_d_all
+                2 -> R.drawable.cg_d_health
+                3 -> R.drawable.cg_d_travel
+                4 -> R.drawable.cg_d_food
+                5 -> R.drawable.cg_d_it
+                6 -> R.drawable.cg_d_finance
+                7 -> R.drawable.cg_d_society
+                8 -> R.drawable.cg_d_science
+                9 -> R.drawable.cg_d_hobby
+                10 -> R.drawable.cg_d_art
+                else -> R.drawable.category_default
+            }
+            //다크모드가 아니라면
+        } else {
+            when (category.categoryId) {
+                1 -> R.drawable.cg_c_all
+                2 -> R.drawable.cg_c_health
+                3 -> R.drawable.cg_c_travel
+                4 -> R.drawable.cg_c_food
+                5 -> R.drawable.cg_c_it
+                6 -> R.drawable.cg_c_finance
+                7 -> R.drawable.cg_c_society
+                8 -> R.drawable.cg_c_science
+                9 -> R.drawable.cg_c_hobby
+                10 -> R.drawable.cg_c_art
+                else -> R.drawable.category_default
+            }
         }
     } else {
         // 비활성화된 경우 cg_ 접두사 아이콘 사용
@@ -95,6 +113,8 @@ fun CategoryItem(
             else -> R.drawable.category_default
         }
     }
+
+
 
     // 비활성화 때 사용할 색상 정의
     val inactiveColor = MaterialTheme.colorScheme.onSecondary
@@ -152,10 +172,18 @@ fun CategoryItem(
                 .size(36.dp)
                 .padding(bottom = 2.dp)
         )
+
+        val textColor = when {
+            !isVisible -> inactiveColor
+            isSystemInDarkTheme() -> Color.White
+            else -> Color.LightGray
+        }
+
+
         Text(
             text = categoryName,
             fontSize = 12.sp,
-            color = if (!isVisible) inactiveColor else Color.Black,
+            color = textColor,  // 여기 적용
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )

@@ -3,6 +3,7 @@ package com.example.modapjt.components.home
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -75,12 +76,16 @@ fun BottomThumbnail(
                 contentScale = ContentScale.Crop
             )
 
+            // 아이콘 다크모드 변경
+            val iconResource = if (bookmark) {
+                if (isSystemInDarkTheme()) R.drawable.ic_d_bookmark else R.drawable.ic_bookmark_filled
+            } else {
+                R.drawable.ic_bookmark_outline
+            }
 
             // 북마크 아이콘
             Icon(
-                painter = painterResource(
-                    if (bookmark==true) R.drawable.ic_bookmark_filled else R.drawable.ic_bookmark_outline
-                ),
+                painter = painterResource(iconResource),
                 contentDescription = "Bookmark Icon",
                 tint = if (bookmark==true) Color.Unspecified else Color.Transparent,
                 modifier = Modifier

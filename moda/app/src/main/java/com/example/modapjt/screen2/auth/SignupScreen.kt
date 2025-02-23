@@ -50,6 +50,7 @@ import androidx.navigation.NavController
 import com.example.modapjt.R
 import com.example.modapjt.domain.model.SignUpEvent
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
@@ -115,10 +116,12 @@ fun SignUpScreen(
             Spacer(modifier = Modifier.height(30.dp))
 
             Icon(
-                painter = painterResource(id = R.drawable.ic_logo),
+                painter = painterResource(
+                    id = if (isSystemInDarkTheme()) R.drawable.ic_d_logo else R.drawable.ic_logo
+                ),
                 contentDescription = "Logo",
                 modifier = Modifier.size(80.dp),
-                tint = Color.Unspecified
+                tint = Color.Unspecified // 원본 이미지 색상 유지
             )
 
             Spacer(modifier = Modifier.height(20.dp))

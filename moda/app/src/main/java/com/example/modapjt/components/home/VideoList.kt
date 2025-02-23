@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -68,7 +69,9 @@ fun VideoList(navController: NavController, videos: List<VideoItemData>) {
         ) {
             // ◀ 이전 버튼 (ic_left 아이콘 적용)
             Image(
-                painter = painterResource(id = R.drawable.ic_left),
+                painter = painterResource(
+                    id = if (isSystemInDarkTheme()) R.drawable.ic_d_youtube_left else R.drawable.ic_left
+                ),
                 contentDescription = "이전 페이지",
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
@@ -107,7 +110,9 @@ fun VideoList(navController: NavController, videos: List<VideoItemData>) {
 
             // ▶ 다음 버튼 (ic_right 아이콘 적용)
             Image(
-                painter = painterResource(id = R.drawable.ic_right),
+                painter = painterResource(
+                    id = if (isSystemInDarkTheme()) R.drawable.ic_d_youtube_right else R.drawable.ic_right
+                ),
                 contentDescription = "다음 페이지",
                 contentScale = ContentScale.Fit,
                 modifier = Modifier

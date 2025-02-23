@@ -1,6 +1,7 @@
 package com.example.modapjt.components.bar
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -74,6 +75,13 @@ fun CardDetailHeaderBar(
             color = MaterialTheme.colorScheme.onPrimary
         )
 
+        //북마크 색상 다크모드
+        val iconResource = if (isBookmarked) {
+            if (isSystemInDarkTheme()) R.drawable.ic_d_bookmark else R.drawable.ic_bookmark_filled
+        } else {
+            R.drawable.ic_bookmark_outline
+        }
+
         // 오른쪽 액션 버튼들
         Row(
             modifier = Modifier
@@ -82,11 +90,11 @@ fun CardDetailHeaderBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = androidx.compose.foundation.layout.Arrangement.End
         ) {
+
+
             IconButton(onClick = onBookmarkClick) {
                 Icon(
-                    painter = painterResource(
-                        if (isBookmarked) R.drawable.ic_bookmark_filled else R.drawable.ic_bookmark_outline
-                    ),
+                    painter = painterResource(iconResource),
                     contentDescription = if (isBookmarked) "즐겨찾기 해제" else "즐겨찾기",
                     tint = Color.Unspecified,
                     modifier = Modifier.size(24.dp)
