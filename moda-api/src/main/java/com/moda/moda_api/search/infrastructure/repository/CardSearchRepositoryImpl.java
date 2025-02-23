@@ -365,7 +365,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                 ))
                 .must(Query.of(query -> query
                         .term(term -> term
-                                .field("userId")
+                                .field("userId.keyword")
                                 .value(userId.getValue())
                                 .boost(1000.0f)
                         )
@@ -395,7 +395,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                 ))
                 .must(Query.of(query -> query
                         .term(term -> term
-                                .field("userId")
+                                .field("userId.keyword")
                                 .value(userId.getValue())
                                 .boost(1000.0f)
                         )
