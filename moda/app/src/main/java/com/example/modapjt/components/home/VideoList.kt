@@ -92,18 +92,18 @@ fun VideoList(navController: NavController, videos: List<VideoItemData>) {
                     Text(
                         text = "${currentIndex + 1}",
                         fontSize = 14.sp,
-                        color = Color(0xFF665F5B), // 현재 페이지 숫자 색상
+                        color = if (isSystemInDarkTheme()) Color.White else Color(0xFF665F5B), // 다크모드일 때 흰색으로 강조
                         fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
                     )
                     Text(
                         text = " / ",
                         fontSize = 14.sp,
-                        color = Color(0xFFBAADA4) // 구분자 색상
+                        color = if (isSystemInDarkTheme()) Color.Gray else Color(0xFFBAADA4) // 다크모드일 때 회색으로 변경
                     )
                     Text(
                         text = "${videos.size}",
                         fontSize = 14.sp,
-                        color = Color(0xFFBAADA4) // 전체 페이지 숫자 색상
+                        color = if (isSystemInDarkTheme()) Color.Gray else Color(0xFFBAADA4) // 다크모드일 때 회색으로 변경
                     )
                 }
             }
