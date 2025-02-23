@@ -22,8 +22,8 @@ fun VideoListComponent(navController: NavController, viewModel: SearchViewModel)
         listOf(
             VideoItemData(
                 cardId = "default",
-                videoUrl = "jWQx2f-CErU",
-                title = "Default Video"
+                videoUrl = "PRpeWTudJls",
+                title = "나만의 포탈 사이트 '모다'"
             )
         )
     } else {
