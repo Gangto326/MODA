@@ -103,7 +103,7 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
     // 화면 크기 관련 변수들
     private val screenWidth by lazy { resources.displayMetrics.widthPixels }
     private val screenHeight by lazy { resources.displayMetrics.heightPixels }
-    private val iconSize by lazy { screenWidth / 5 }
+    private val iconSize by lazy { screenWidth / 5 * 2 }
 
     // Bradcast를 받기 위한 수신기
     private val receiver = object : BroadcastReceiver() {
@@ -240,7 +240,7 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
                 val offsetX by animateFloatAsState(
                     targetValue =
                     if (isCaptured)
-                        ((screenWidth - iconSize) / 2).toFloat()
+                        ((screenWidth) / 2).toFloat()
                     else
                         0f,
                     animationSpec = tween(
@@ -252,7 +252,7 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
                 val offsetY by animateFloatAsState(
                     targetValue =
                     if (isCaptured)
-                        (screenHeight - iconSize * 2).toFloat()
+                        (screenHeight - iconSize).toFloat()
                     else
                         0f,
                     animationSpec = tween(
@@ -285,7 +285,7 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
                 }
 
                 val isAnimated by isAnimatedState.collectAsState()
-                val composition by rememberLottieComposition(LottieCompositionSpec.Asset("logo.json"))
+                val composition by rememberLottieComposition(LottieCompositionSpec.Asset("check.json"))
                 val progress by animateLottieCompositionAsState(
                     composition = composition,
                     isPlaying = isAnimated,  // isAnimated 상태에 따라 재생/정지
@@ -304,7 +304,7 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
 
                 Box(
                     modifier = Modifier
-                        .offset { IntOffset(0, -iconSize * 2) },
+                        .offset { IntOffset(0, -iconSize) },
                     contentAlignment = Alignment.BottomCenter
                 ) {
                     AnimatedVisibility(
@@ -316,7 +316,7 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
                             composition = composition,
                             progress = { progress },
                             modifier = Modifier
-                                .size(with(LocalDensity.current) { iconSize.toDp() })
+                                .size(with(LocalDensity.current) { (iconSize).toDp() })
                         )
                     }
                 }
