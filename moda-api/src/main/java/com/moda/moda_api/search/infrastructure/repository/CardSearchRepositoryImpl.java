@@ -273,7 +273,7 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
         return searchByKeyword(userId, keyword, Collections.singletonList(1), pageable);
     }
 
-    /**
+     /**
      * 콘텐츠 타입별 유저 및 쿼리 맞춤 검색
      * @param typeId
      * @param userId
@@ -310,14 +310,6 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                                 // 검색어는 키워드, 제목, 콘텐츠 순으로 가중치 차등 지급
                                 .multiMatch(multiMatch -> multiMatch
                                         .query(searchText)
-//                                                .fields(
-//                                                        "keywords^0.2",
-//                                                        "keywords.ngram^0.25",
-//                                                        "title^0.7",
-//                                                        "title.ngram^0.3",
-//                                                        "content^0.3",
-//                                                        "content.ngram^0.003"
-//                                                )
                                                 .fields(
                                                         "title^3",
                                                         "title.ngram^1.5",
@@ -328,6 +320,9 @@ public class CardSearchRepositoryImpl implements CardSearchRepository {
                                                 )
                                                 .type(TextQueryType.BestFields)
                                                 .operator(Operator.Or)
+                                                .fuzziness("AUTO")
+                                                .prefixLength(1)
+                                                .maxExpansions(50)
                                 )
                         ))
                         .minimumShouldMatch("1")
