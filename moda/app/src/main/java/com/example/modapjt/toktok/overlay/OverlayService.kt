@@ -1,16 +1,7 @@
 package com.example.modapjt.toktok.overlay
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.content.Context
 import android.content.Intent
 import android.graphics.PixelFormat
-import android.hardware.display.DisplayManager
-import android.hardware.display.VirtualDisplay
-import android.media.ImageReader
-import android.media.projection.MediaProjection
-import android.media.projection.MediaProjectionManager
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
@@ -45,7 +36,6 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.setViewTreeLifecycleOwner
@@ -55,6 +45,8 @@ import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.example.modapjt.data.repository.CardRepository
 import com.example.modapjt.toktok.BrowserAccessibilityService
+import com.example.modapjt.toktok.MediaProjectionManager
+import com.example.modapjt.toktok.NotificationHelper
 import com.example.modapjt.toktok.ScreenCaptureManager
 import com.example.modapjt.toktok.ScreenCaptureManager.capturedBitmap
 import kotlinx.coroutines.CoroutineScope
@@ -111,13 +103,10 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
     // 화면 크기 관련 변수들
     private val screenWidth by lazy { resources.displayMetrics.widthPixels }
     private val screenHeight by lazy { resources.displayMetrics.heightPixels }
-    private val screenDensity by lazy { resources.displayMetrics.densityDpi }
     private val iconSize by lazy { screenWidth / 6 }
 
-    // 화면 캡처를 위한 MediaProjection 관련 변수들
-    private var mediaProjection: MediaProjection? = null
-    private var virtualDisplay: VirtualDisplay? = null
-    private var imageReader: ImageReader? = null
+    private lateinit var mediaProjectionManager: MediaProjectionManager
+    private lateinit var notificationHelper: NotificationHelper
 
     /**
      * 서비스가 생성될 때 호출되는 함수
@@ -127,12 +116,18 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
     override fun onCreate() {
         super.onCreate()
         savedStateRegistryController.performRestore(null)
+
+        //오버레이 화면 등록
+        mediaProjectionManager = MediaProjectionManager(this)
+        notificationHelper = NotificationHelper(this)
+
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         setupOverlayView()
         startForeground(
             NOTIFICATION_ID,
-            createNotification()
+            notificationHelper.createNotification()
         )
+
         Log.d("OverlayService", "오버레이 서비스 시작됨")
     }
 
@@ -147,77 +142,10 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
             val data = it.getParcelableExtra<Intent>(EXTRA_DATA)
 
             if (resultCode != 0 && data != null) {
-                startProjection(resultCode, data)
+                mediaProjectionManager.startProjection(resultCode, data)
             }
         }
         return START_NOT_STICKY
-    }
-
-    /**
-     * 포그라운드 서비스를 위한 알림 생성
-     */
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun createNotification(): Notification {
-        val channelId = "screen_capture_service"
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        // Create notification channel
-        val channel = NotificationChannel(
-            channelId,
-            "모다",
-            NotificationManager.IMPORTANCE_DEFAULT
-        )
-        notificationManager.createNotificationChannel(channel)
-
-        return NotificationCompat.Builder(this, channelId)
-            .setContentTitle("모다")
-            .setContentText("화면 캡처 기능을 활성화하였습니다.")
-            .setSmallIcon(android.R.drawable.ic_menu_camera)
-            .build()
-    }
-
-    /**
-     * MediaProjection을 시작하여 화면 캡처 기능 초기화
-     */
-    private fun startProjection(resultCode: Int, data: Intent) {
-        val mediaProjectionManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
-        mediaProjection = mediaProjectionManager.getMediaProjection(resultCode, data)
-
-        // Register callback before starting capture
-        mediaProjection?.registerCallback(object : MediaProjection.Callback() {
-            override fun onStop() {
-                virtualDisplay?.release()
-                mediaProjection = null
-            }
-        }, null)
-
-        setupVirtualDisplay()
-    }
-
-    /**
-     * 가상 디스플레이 설정 및 이미지 캡처 리스너 등록
-     */
-    private fun setupVirtualDisplay() {
-        imageReader?.close()  // 기존 ImageReader 정리
-        imageReader = ImageReader.newInstance(
-            screenWidth, screenHeight,
-            PixelFormat.RGBA_8888, 2  // 버퍼 크기를 2로 증가
-        )
-
-        virtualDisplay = mediaProjection?.createVirtualDisplay(
-            "ScreenCapture",
-            screenWidth, screenHeight, screenDensity,
-            DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
-            imageReader?.surface, null, null
-        )
-
-        imageReader?.setOnImageAvailableListener({ reader ->
-            val image = reader.acquireLatestImage()
-
-            image?.use {
-                ScreenCaptureManager.saveImage(image)
-            }
-        }, null)
     }
 
     /**
@@ -548,11 +476,7 @@ class OverlayService : LifecycleService(), SavedStateRegistryOwner {
     }
 
     override fun onDestroy() {
-        imageReader?.close()
-        imageReader = null
-        virtualDisplay?.release()
-        mediaProjection?.stop()
-        ScreenCaptureManager.clearCapturedBitmap()
+        mediaProjectionManager.release()
 
         try {
             if (overlayView?.isAttachedToWindow == true) {

@@ -1,19 +1,11 @@
 package com.example.modapjt.toktok.gesture
 
 import android.annotation.SuppressLint
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.PixelFormat
-import android.hardware.display.DisplayManager
-import android.hardware.display.VirtualDisplay
-import android.media.ImageReader
-import android.media.projection.MediaProjection
-import android.media.projection.MediaProjectionManager
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
@@ -22,15 +14,19 @@ import android.view.Gravity
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.EaseInOutCirc
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -42,10 +38,10 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.setViewTreeLifecycleOwner
@@ -53,8 +49,15 @@ import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.modapjt.data.repository.CardRepository
 import com.example.modapjt.toktok.BrowserAccessibilityService
+import com.example.modapjt.toktok.MediaProjectionManager
+import com.example.modapjt.toktok.NotificationHelper
+import com.example.modapjt.toktok.NotificationHelper.Companion.NOTIFICATION_ID
 import com.example.modapjt.toktok.ScreenCaptureManager
 import com.example.modapjt.toktok.ScreenCaptureManager.capturedBitmap
 import kotlinx.coroutines.CoroutineScope
@@ -90,18 +93,17 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
     private val _isCapturedState = MutableStateFlow(false)
     private val isCapturedState = _isCapturedState.asStateFlow()
 
+    //완료 애니메이션 표시 여부
+    private val _isAnimatedState = MutableStateFlow(false)
+    private val isAnimatedState = _isAnimatedState.asStateFlow()
+
     // 애니메이션 관련 설정
     private val duration = if (_isCapturedState.value) 1 else 1000
 
     // 화면 크기 관련 변수들
     private val screenWidth by lazy { resources.displayMetrics.widthPixels }
     private val screenHeight by lazy { resources.displayMetrics.heightPixels }
-    private val screenDensity by lazy { resources.displayMetrics.densityDpi }
-
-    // 화면 캡처를 위한 MediaProjection 관련 변수들
-    private var mediaProjection: MediaProjection? = null
-    private var virtualDisplay: VirtualDisplay? = null
-    private var imageReader: ImageReader? = null
+    private val iconSize by lazy { screenWidth / 5 * 2 }
 
     // Bradcast를 받기 위한 수신기
     private val receiver = object : BroadcastReceiver() {
@@ -112,6 +114,9 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
             }
         }
     }
+
+    private lateinit var mediaProjectionManager: MediaProjectionManager
+    private lateinit var notificationHelper: NotificationHelper
 
     @RequiresApi(Build.VERSION_CODES.S)
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
@@ -127,11 +132,14 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
         registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
 
         //오버레이 화면 등록
+        mediaProjectionManager = MediaProjectionManager(this)
+        notificationHelper = NotificationHelper(this)
+
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         setupGestureView()
         startForeground(
             NOTIFICATION_ID,
-            createNotification()
+            notificationHelper.createNotification()
         )
 
         Log.d("GestureService", "제스처 서비스 시작됨")
@@ -183,77 +191,10 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
             val data = it.getParcelableExtra<Intent>(EXTRA_DATA)
 
             if (resultCode != 0 && data != null) {
-                startProjection(resultCode, data)
+                mediaProjectionManager.startProjection(resultCode, data)
             }
         }
         return START_NOT_STICKY
-    }
-
-    /**
-     * 포그라운드 서비스를 위한 알림 생성
-     */
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun createNotification(): Notification {
-        val channelId = "screen_capture_service"
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        // Create notification channel
-        val channel = NotificationChannel(
-            channelId,
-            "모다",
-            NotificationManager.IMPORTANCE_DEFAULT
-        )
-        notificationManager.createNotificationChannel(channel)
-
-        return NotificationCompat.Builder(this, channelId)
-            .setContentTitle("모다")
-            .setContentText("화면 캡처 기능을 활성화하였습니다.")
-            .setSmallIcon(android.R.drawable.ic_menu_camera)
-            .build()
-    }
-
-    /**
-     * MediaProjection을 시작하여 화면 캡처 기능 초기화
-     */
-    private fun startProjection(resultCode: Int, data: Intent) {
-        val mediaProjectionManager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
-        mediaProjection = mediaProjectionManager.getMediaProjection(resultCode, data)
-
-        // Register callback before starting capture
-        mediaProjection?.registerCallback(object : MediaProjection.Callback() {
-            override fun onStop() {
-                virtualDisplay?.release()
-                mediaProjection = null
-            }
-        }, null)
-
-        setupVirtualDisplay()
-    }
-
-    /**
-     * 가상 디스플레이 설정 및 이미지 캡처 리스너 등록
-     */
-    private fun setupVirtualDisplay() {
-        imageReader?.close()  // 기존 ImageReader 정리
-        imageReader = ImageReader.newInstance(
-            screenWidth, screenHeight,
-            PixelFormat.RGBA_8888, 2  // 버퍼 크기를 2로 증가
-        )
-
-        virtualDisplay = mediaProjection?.createVirtualDisplay(
-            "ScreenCapture",
-            screenWidth, screenHeight, screenDensity,
-            DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
-            imageReader?.surface, null, null
-        )
-
-        imageReader?.setOnImageAvailableListener({ reader ->
-            val image = reader.acquireLatestImage()
-
-            image?.use {
-                ScreenCaptureManager.saveImage(image)
-            }
-        }, null)
     }
 
     @RequiresApi(Build.VERSION_CODES.S)
@@ -299,7 +240,7 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
                 val offsetX by animateFloatAsState(
                     targetValue =
                     if (isCaptured)
-                        (screenWidth / 2).toFloat()
+                        ((screenWidth) / 2).toFloat()
                     else
                         0f,
                     animationSpec = tween(
@@ -311,7 +252,7 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
                 val offsetY by animateFloatAsState(
                     targetValue =
                     if (isCaptured)
-                        screenHeight.toFloat()
+                        (screenHeight - iconSize).toFloat()
                     else
                         0f,
                     animationSpec = tween(
@@ -324,8 +265,7 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
                     Box(
                         modifier = Modifier.offset {
                             IntOffset(offsetX.roundToInt(), offsetY.roundToInt())
-                        },
-                        contentAlignment = Alignment.Center
+                        }
                     ) {
                         capturedBitmap?.let { bmp ->
                             Image(
@@ -341,6 +281,43 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
                                 contentScale = ContentScale.Crop
                             )
                         }
+                    }
+                }
+
+                val isAnimated by isAnimatedState.collectAsState()
+                val composition by rememberLottieComposition(LottieCompositionSpec.Asset("check.json"))
+                val progress by animateLottieCompositionAsState(
+                    composition = composition,
+                    isPlaying = isAnimated,  // isAnimated 상태에 따라 재생/정지
+                    restartOnPlay = true,    // 재생 시 처음부터 시작
+                    iterations = 1           // 한 번만 재생
+                )
+
+                LaunchedEffect(progress) {
+                    if (progress >= 1f && isAnimated) {
+                        withContext(Dispatchers.Main) {
+                            _isAnimatedState.value = false
+                        }
+                        Log.d("GestureService", "애니메이션 종료")
+                    }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .offset { IntOffset(0, -iconSize) },
+                    contentAlignment = Alignment.BottomCenter
+                ) {
+                    AnimatedVisibility(
+                        visible = isAnimated,
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
+                        LottieAnimation(
+                            composition = composition,
+                            progress = { progress },
+                            modifier = Modifier
+                                .size(with(LocalDensity.current) { (iconSize).toDp() })
+                        )
                     }
                 }
             }
@@ -373,21 +350,21 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
 
             //제스처 이름이 circle이 포함하는 경우, 전체 url 저장
             if (gesture.first.contains("circle")) {
-                if (gesture.second < 6) {
-                    Toast.makeText(context, "원을 더 정확하게 그려주세요.", Toast.LENGTH_SHORT)
-                        .show()
-                    return
-                }
+//                if (gesture.second < 6) {
+//                    Toast.makeText(context, "원을 더 정확하게 그려주세요.", Toast.LENGTH_SHORT)
+//                        .show()
+//                    return
+//                }
 
-                captureImage()
-                Log.d("GestureService", "이미지 캡처")
+                captureUrl()
+                Log.d("GestureService", "URL 캡처")
             }
 
             //제스처 이름이 check를 포함하는 경우, 해당 이미지 저장
             if (gesture.first.contains("check")) {
 
-                captureUrl()
-                Log.d("GestureService", "URL 캡처")
+                captureImage()
+                Log.d("GestureService", "이미지 캡처")
             }
         } finally {
             closeDoubleTap()
@@ -428,6 +405,7 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
                 withContext(Dispatchers.Main) {
                     ScreenCaptureManager.captureBitmap() // 현재 화면을 캡처
                     _isCapturedState.value = true
+                    _isAnimatedState.value = true
                     delay(duration.toLong())
                     _isCapturedState.value = false
                     delay(duration.toLong())
@@ -496,11 +474,7 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
         // BroadcastReceiver 해제
         unregisterReceiver(receiver)
 
-        imageReader?.close()
-        imageReader = null
-        virtualDisplay?.release()
-        mediaProjection?.stop()
-        ScreenCaptureManager.clearCapturedBitmap()
+        mediaProjectionManager.release()
 
         if (captureView?.isAttachedToWindow == true) {
             windowManager?.removeView(captureView)
@@ -516,7 +490,6 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
     }
 
     companion object {
-        private const val NOTIFICATION_ID = 1
         const val EXTRA_RESULT_CODE = "extra_result_code"
         const val EXTRA_DATA = "extra_data"
     }
