@@ -3,6 +3,7 @@ package com.example.modapjt.screen2.auth
 import android.view.ViewTreeObserver
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -133,10 +134,12 @@ fun FindPasswordScreen(
         Spacer(modifier = Modifier.height(30.dp))
 
         Icon(
-            painter = painterResource(id = R.drawable.ic_logo),
+            painter = painterResource(
+                id = if (isSystemInDarkTheme()) R.drawable.ic_d_logo else R.drawable.ic_logo
+            ),
             contentDescription = "Logo",
             modifier = Modifier.size(80.dp),
-            tint = Color.Unspecified
+            tint = Color.Unspecified // 원본 이미지 색상 유지
         )
 
         Spacer(modifier = Modifier.height(32.dp))

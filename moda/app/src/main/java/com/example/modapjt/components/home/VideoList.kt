@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -68,7 +69,9 @@ fun VideoList(navController: NavController, videos: List<VideoItemData>) {
         ) {
             // ◀ 이전 버튼 (ic_left 아이콘 적용)
             Image(
-                painter = painterResource(id = R.drawable.ic_left),
+                painter = painterResource(
+                    id = if (isSystemInDarkTheme()) R.drawable.ic_d_youtube_left else R.drawable.ic_left
+                ),
                 contentDescription = "이전 페이지",
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
@@ -89,25 +92,27 @@ fun VideoList(navController: NavController, videos: List<VideoItemData>) {
                     Text(
                         text = "${currentIndex + 1}",
                         fontSize = 14.sp,
-                        color = Color(0xFF665F5B), // 현재 페이지 숫자 색상
+                        color = if (isSystemInDarkTheme()) Color.White else Color(0xFF665F5B), // 다크모드일 때 흰색으로 강조
                         fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
                     )
                     Text(
                         text = " / ",
                         fontSize = 14.sp,
-                        color = Color(0xFFBAADA4) // 구분자 색상
+                        color = if (isSystemInDarkTheme()) Color.Gray else Color(0xFFBAADA4) // 다크모드일 때 회색으로 변경
                     )
                     Text(
                         text = "${videos.size}",
                         fontSize = 14.sp,
-                        color = Color(0xFFBAADA4) // 전체 페이지 숫자 색상
+                        color = if (isSystemInDarkTheme()) Color.Gray else Color(0xFFBAADA4) // 다크모드일 때 회색으로 변경
                     )
                 }
             }
 
             // ▶ 다음 버튼 (ic_right 아이콘 적용)
             Image(
-                painter = painterResource(id = R.drawable.ic_right),
+                painter = painterResource(
+                    id = if (isSystemInDarkTheme()) R.drawable.ic_d_youtube_right else R.drawable.ic_right
+                ),
                 contentDescription = "다음 페이지",
                 contentScale = ContentScale.Fit,
                 modifier = Modifier

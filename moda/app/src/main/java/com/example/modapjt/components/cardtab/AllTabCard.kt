@@ -2,6 +2,7 @@
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -294,6 +296,9 @@ private fun SectionHeader(title: String) {
         verticalAlignment = Alignment.CenterVertically, // 아이콘과 텍스트를 세로 중앙 정렬
         horizontalArrangement = Arrangement.Start // 텍스트는 왼쪽 정렬
     ) {
+
+
+
         // 섹션별 아이콘 추가
         val iconResId = when (title) {
             "이미지" -> R.drawable.ic_a_image // 이미지 섹션 아이콘
@@ -303,14 +308,18 @@ private fun SectionHeader(title: String) {
             else -> null
         }
 
-        // 아이콘이 있을 경우, 아이콘을 왼쪽에 추가
+        // 다크모드일 때 아이콘 색 변경
+        val iconTint = if (isSystemInDarkTheme()) Color.White else Color.Unspecified
+
+        // 아이콘이 있을 경우 추가 (중복 제거 & 크기 조정)
         iconResId?.let {
-            Image(
+            Icon(
                 painter = painterResource(id = it),
-                contentDescription = "$title 아이콘",
+                contentDescription = title,
+                tint = iconTint,
                 modifier = Modifier
-                    .size(24.dp) // 아이콘 크기 조정
-                    .padding(end = 6.dp) // 아이콘과 텍스트 간의 간격
+                    .size(24.dp) // 동영상 아이콘 크기 줄이기
+                    .padding(end = 6.dp) // 텍스트와의 간격 조정
             )
         }
 

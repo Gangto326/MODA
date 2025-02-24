@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
@@ -80,11 +82,17 @@ fun ImageThumbnail(image: ImageItem, navController: NavController) {
                 .background(Color.White, shape = RoundedCornerShape(12.dp)) // ✅ 내부도 라운딩 맞추기
         )
 
+
+        //다크모드 색상 추가
+        val iconResource = if (image.bookmark) {
+            if (isSystemInDarkTheme()) R.drawable.ic_d_bookmark else R.drawable.ic_bookmark_filled
+        } else {
+            R.drawable.ic_bookmark_outline
+        }
+
         // 🔹 북마크 아이콘 추가 (북마크 여부에 따라 다른 아이콘 표시)
         androidx.compose.material3.Icon(
-            painter = androidx.compose.ui.res.painterResource(
-                if (image.bookmark) R.drawable.ic_bookmark_filled else R.drawable.ic_bookmark_outline
-            ),
+            painter = painterResource(iconResource),
             contentDescription = "Bookmark Icon", // 접근성을 위한 설명
             tint = if (image.bookmark) Color.Unspecified else Color.Transparent, // ✅ 북마크된 경우 오렌지 색상 적용
             modifier = Modifier

@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -101,12 +102,13 @@ private fun CategoryTab(
     onClick: () -> Unit
 ) {
     val iconResId = when (title) {
-        "이미지" -> R.drawable.ic_s_image
-        "동영상" -> R.drawable.ic_s_youtube
-        "블로그" -> R.drawable.ic_s_blog
-        "뉴스" -> R.drawable.ic_s_news
+        "이미지" -> if (isSystemInDarkTheme()) R.drawable.ic_d_image else R.drawable.ic_s_image
+        "동영상" -> if (isSystemInDarkTheme()) R.drawable.ic_d_youtube else R.drawable.ic_s_youtube
+        "블로그" -> if (isSystemInDarkTheme()) R.drawable.ic_d_blog else R.drawable.ic_s_blog
+        "뉴스" -> if (isSystemInDarkTheme()) R.drawable.ic_d_news else R.drawable.ic_s_news
         else -> null
     }
+
 
     var rowWidth by remember { mutableStateOf(0) } // 🔥 Row 전체 너비 저장
     val density = LocalDensity.current // 🔥 DP 변환을 위한 density 객체

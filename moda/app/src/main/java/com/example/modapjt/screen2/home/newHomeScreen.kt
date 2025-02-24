@@ -8,6 +8,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -57,6 +58,7 @@ import com.example.modapjt.domain.viewmodel.AuthViewModel
 import com.example.modapjt.domain.viewmodel.CategoryViewModel
 import com.example.modapjt.domain.viewmodel.SearchViewModel
 import com.airbnb.lottie.compose.*
+import com.google.android.material.color.utilities.MaterialDynamicColors.background
 import okhttp3.internal.wait
 
 
@@ -148,12 +150,14 @@ fun newHomeScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color.White)
+                        .background(if (isSystemInDarkTheme()) Color.Black else Color.White)
                         .clipToBounds() // 🔥 배경 영역을 벗어나지 않도록 자름
                     .height(70.dp), // 로고 크기에 맞춰 조절
                     contentAlignment = Alignment.Center // 로고 가운데 정렬
                 ) {
-                    val composition by rememberLottieComposition(LottieCompositionSpec.Asset("logo.json"))
+                    val composition by rememberLottieComposition(
+                        LottieCompositionSpec.Asset(if (isSystemInDarkTheme()) "logo_Dark_line.json" else "logo.json")
+                    )
                     val progress by animateLottieCompositionAsState(
                         composition,
                         iterations = LottieConstants.IterateForever)
