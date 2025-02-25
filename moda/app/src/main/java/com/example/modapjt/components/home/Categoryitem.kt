@@ -176,7 +176,7 @@ fun CategoryItem(
         val textColor = when {
             !isVisible -> inactiveColor
             isSystemInDarkTheme() -> Color.White
-            else -> Color.LightGray
+            else -> Color.Black
         }
 
 
