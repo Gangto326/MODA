@@ -252,7 +252,7 @@ class GestureService : LifecycleService(), SavedStateRegistryOwner {
                 val offsetY by animateFloatAsState(
                     targetValue =
                     if (isCaptured)
-                        (screenHeight - iconSize).toFloat()
+                        (screenHeight - iconSize * 1.5).toFloat()
                     else
                         0f,
                     animationSpec = tween(
