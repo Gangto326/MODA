@@ -23,6 +23,7 @@ public class CrawlingSummaryService {
 	private final PythonAnalysisService pythonAnalysisService;
 	private final CrawlingService crawlingService;
 	private final Executor pythonExecutor;
+	private final Executor crawlingExecutor;
 
 	public CompletableFuture<SummaryResultDto> summarize(String url, String userId) {
 		return CompletableFuture.supplyAsync(() -> {
@@ -33,7 +34,7 @@ public class CrawlingSummaryService {
 				} catch (Exception e) {
 					throw new ContentExtractionException(userId, "요약 할 수 없는 사이트입니다." + url, e);
 				}
-			}).exceptionally(throwable -> {
+			}, crawlingExecutor).exceptionally(throwable -> {
 				if (throwable.getCause() instanceof ContentExtractionException) {
 					throw (ContentExtractionException)throwable.getCause();
 				}
@@ -68,8 +69,8 @@ public class CrawlingSummaryService {
 
 				CompletableFuture<String> thumbnailUrlFuture =
 					CompletableFuture.supplyAsync(() ->
-						getFirstImageUrl(crawledContent.getExtractedContent().getImages())
-					);
+						getFirstImageUrl(crawledContent.getExtractedContent().getImages()),
+						crawlingExecutor);
 
 				// 3단계: 두 작업이 모두 완료되면 최종 결과 생성
 				return CompletableFuture.allOf(pythonAnalysisFuture, thumbnailUrlFuture)
