@@ -2,6 +2,7 @@ package com.moda.moda_api.card.presentation.controller;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -42,6 +43,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api/card")
 public class CardController {
 	private final CardService cardService;
+	private final Executor crawlingExecutor;
 
 	// Json으로 날라올 때
 	@PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -76,7 +78,7 @@ public class CardController {
 				log.error("Failed to create images", e);
 				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
 			}
-		});
+		}, crawlingExecutor);
 	}
 
 	@GetMapping("")

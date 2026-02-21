@@ -280,6 +280,7 @@ public class SearchService {
 
 		return targetTypes.stream()
 			.map(typeId -> CompletableFuture.supplyAsync(() -> {
+
 				// 각 타입별 가져올 갯수를 PageRequest로 생성
 				PageRequest pageRequest = PageRequest.of(
 						0, typeSizes.get(typeId), Sort.by(Sort.Direction.DESC, "createdAt")
@@ -331,7 +332,7 @@ public class SearchService {
 					CardContentType.from(typeId),
 						content
 				);
-			}))
+			}, executorService))
 			.toList();
 	}
 
@@ -365,7 +366,7 @@ public class SearchService {
 					results.getContent().stream()
 						.toList()
 				);
-			}))
+			}, executorService))
 			.toList();
 	}
 
@@ -485,7 +486,7 @@ public class SearchService {
 						return Collections.emptyList();
 					}
 					return cardSearchRepository.searchByKeyword(userIdObj, keywords.get(0), typeIds, keywordsPageable);
-				});
+				}, executorService);
 
 		/**
 		 * 오늘의 컨텐츠
@@ -663,7 +664,7 @@ public class SearchService {
 							CardContentType.from(typeId),
 							responseList
 					);
-				}))
+				}, executorService))
 				.toList();
 	}
 
