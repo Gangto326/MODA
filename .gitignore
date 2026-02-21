@@ -1,0 +1,19 @@
+# OS
+.DS_Store
+
+# IDE
+.idea/
+
+# Analysis & Planning docs (local only)
+API.md
+CLAUDE.md
+COMMONPOOL_ANALYSIS.md
+CRAWLING_ARCHITECTURE.md
+HANDOFF.md
+HOT_FIX.md
+HOT_FIX_PLAN.md
+ISSUE_ANALYSIS.md
+PLAN.md
+RETROSPECTIVE.md
+TRANSACTIONAL_ANALYSIS.md
+HOT_FIX_LOG.md
