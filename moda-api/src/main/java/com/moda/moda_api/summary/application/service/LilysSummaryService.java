@@ -35,11 +35,12 @@ public class LilysSummaryService {
 	private static final Duration POLLING_INTERVAL = Duration.ofSeconds(200);
 	private final YoutubeApiClient youtubeApiClient;
 	private final Executor pythonExecutor;
+	private final Executor youtubeExecutor;
 
 
 	@Transactional
 	public CompletableFuture<SummaryResultDto> summarize(String url, String userId) {
-		return CompletableFuture.supplyAsync(() -> lilysWebClient.getRequestId(url))
+		return CompletableFuture.supplyAsync(() -> lilysWebClient.getRequestId(url), youtubeExecutor)
 			.thenCompose(requestId -> {
 				// RequestId를 받은 후 waitForCompletion 실행하고 완료될 때까지 대기
 				return waitForCompletion(requestId.getRequestId())
@@ -48,8 +49,8 @@ public class LilysSummaryService {
 			.thenCompose(requestId -> {
 				// waitForCompletion이 완전히 완료된 후에만 getSummaryResults 실행
 				return CompletableFuture.supplyAsync(() ->
-					lilysWebClient.getSummaryResults(requestId.getRequestId(), url)
-				);
+					lilysWebClient.getSummaryResults(requestId.getRequestId(), url),
+					youtubeExecutor);
 			})
 			.thenCompose(lilysSummary -> {
 				// getSummaryResults 완료 후 병렬로 실행 가능한 작업들
@@ -82,8 +83,8 @@ public class LilysSummaryService {
 
 				CompletableFuture<YoutubeAPIResponseDTO> youtubeApiFuture =
 					CompletableFuture.supplyAsync(() ->
-						youtubeApiClient.getVideoData(lilysSummary.getThumbnailUrl())
-					);
+						youtubeApiClient.getVideoData(lilysSummary.getThumbnailUrl()),
+						youtubeExecutor);
 
 				// 두 작업이 모두 완료될 때까지 대기 후 결과 조합
 				return CompletableFuture.allOf(aiAnalysisFuture, youtubeApiFuture)
@@ -150,7 +151,7 @@ public class LilysSummaryService {
 					log.info("Summary is still pending. Will retry in 15 seconds. Attempt: {}", attempt + 1);
 					return CompletableFuture.supplyAsync(
 						() -> checkStatusWithRetry(requestId, attempt + 1),
-						CompletableFuture.delayedExecutor(15, TimeUnit.SECONDS)
+						CompletableFuture.delayedExecutor(15, TimeUnit.SECONDS, youtubeExecutor)
 					).thenCompose(future -> future);
 				}
 				return CompletableFuture.failedFuture(
