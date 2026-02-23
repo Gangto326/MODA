@@ -1,6 +1,4 @@
-from typing import List
-
-def make_analyze_prompt(base64_image: List[str]):
+def make_analyze_prompt():
     return [
         {
             'role': 'system',
@@ -23,12 +21,11 @@ Explain everything clearly so anyone can follow along, while still pointing out 
         },
         {
             'role': 'user',
-            'content': 'What do you see in this image?',
-            'images': base64_image
+            'content': 'What do you see in this image?'
         }
     ]
 
-def make_category_prompt(content: str, base64_image: List[str]):
+def make_category_prompt(content: str):
     return [
         {
             'role': 'system',
@@ -40,12 +37,11 @@ def make_category_prompt(content: str, base64_image: List[str]):
 Don't say anything else and just tell me the categories.
 ['Trends', 'Entertainment', 'Finance', 'Travel', 'Food', 'IT', 'Design', 'Society', 'Health']
 
-{content}''',
-            'images': base64_image
+{content}'''
         }
     ]
 
-def make_keywords_content_prompt(content: str, base64_image: List[str]):
+def make_keywords_content_prompt(content: str):
     return [
         {
             'role': 'system',
@@ -61,7 +57,6 @@ def make_keywords_content_prompt(content: str, base64_image: List[str]):
             'content': f'''You are an expert at extracting the most important key keywords from images.
 Please extract the 3-5 most important key keywords from the following image and content
 
-{content}''',
-            'images': base64_image
+{content}'''
         }
     ]

@@ -1,24 +1,23 @@
 import asyncio
-import base64
 import json
 
 import googletrans
-import ollama
 import requests
 
 from app.constants.category import categories_name
 from app.constants.image_prompt import make_analyze_prompt, make_category_prompt, make_keywords_content_prompt
 from app.schemas.image import ImageResponse
 from app.services.embedding import Embedding
+from app.services.llm_client import LLMClient, CategoryResponse, KeywordResponse
 
 
 class ImageAnalyze:
     MAX_CATEGORY_TRIES = 10
-    MODEL = 'llama3.2-vision'
 
     def __init__(self, url: str):
         self.url = url
-        self.base64_image = []
+        self.image_bytes = b''
+        self.llm = LLMClient()
         self.embedder = Embedding()
         self.category = ''
 
@@ -29,7 +28,7 @@ class ImageAnalyze:
 
     #ImageAnalyze 객체가 실행되면 가장 먼저 실행되는 함수
     async def execute(self):
-        self.encode_base64()
+        self.download_image()
         await self.analyze_image()
         self.choose_category()
         await self.make_keywords()
@@ -44,51 +43,36 @@ class ImageAnalyze:
             embedding_vector=self.embedding_vector
         )
 
-    #ollama 채팅을 진행하는 함수
-    def chat(self,
-             messages,
-             model: str = MODEL,
-             format = None):
-        response = ollama.chat(
-            model = model,
-            messages = messages,
-            format = format
-        )
-        return response['message']['content']
+    #url에서 이미지를 다운로드하는 함수
+    def download_image(self):
+        self.image_bytes = requests.get(self.url).content
 
-    #url을 base64로 인코딩하는 함수
-    def encode_base64(self):
-        self.base64_image = [base64.b64encode(requests.get(self.url).content).decode()]
-
-    #base64_image를 통해 이미지를 분석하는 함수
+    #이미지를 분석하는 함수
     async def analyze_image(self):
-        model = self.MODEL
-        messages = make_analyze_prompt(self.base64_image)
-        format = None
+        messages = make_analyze_prompt()
 
-        response =  self.chat(model = model, messages = messages, format = format)
+        response = self.llm.chat_with_image(
+            system=messages[0]['content'],
+            user=messages[1]['content'],
+            image_bytes=self.image_bytes
+        )
         self.content = await self.translate_text(response)
 
         print(f'이미지 내용:\n{self.content}')
 
     #category를 선택하는 함수
     def choose_category(self):
-        model = self.MODEL
-        messages = make_category_prompt(self.content, self.base64_image)
-        format = {
-            'type': 'object',
-            'properties': {
-                'category': {
-                    'type': 'string'
-                }
-            },
-            'required': ['category']
-        }
+        messages = make_category_prompt(self.content)
 
         find_category = False
         attempt_count = 0
         while attempt_count < self.MAX_CATEGORY_TRIES:
-            response = self.chat(model = model, messages = messages, format = format)
+            response = self.llm.chat_with_image_json(
+                system=messages[0]['content'],
+                user=messages[1]['content'],
+                image_bytes=self.image_bytes,
+                schema=CategoryResponse
+            )
 
             for idx, category in enumerate(categories_name()):
                 if category.lower() in response.lower():
@@ -110,22 +94,14 @@ class ImageAnalyze:
 
     #keywords를 생성하는 함수
     async def make_keywords(self):
-        model = self.MODEL
-        messages = make_keywords_content_prompt(self.content, self.base64_image)
-        format = {
-            'type': 'object',
-            'properties': {
-                'keyword': {
-                    'type': 'array',
-                    'items': {
-                        'type': 'string'
-                    }
-                }
-            },
-            'required': ['keyword']
-        }
+        messages = make_keywords_content_prompt(self.content)
 
-        response = self.chat(model = model, messages = messages, format = format)
+        response = self.llm.chat_with_image_json(
+            system=messages[0]['content'],
+            user=messages[1]['content'],
+            image_bytes=self.image_bytes,
+            schema=KeywordResponse
+        )
         self.keywords = json.loads(response)['keyword']
         self.keywords = await asyncio.gather(*[self.translate_text(keyword) for keyword in self.keywords])
 
