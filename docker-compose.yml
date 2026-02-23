@@ -1,23 +1,12 @@
 version: '3'
 
 services:
-  selenium-server:
-    image: seleniarm/standalone-chromium
-    container_name: selenium-server
-    ports:
-     - "4444:4444"
-    environment:
-     - SE_OPTS=--session-timeout 2592000
-    networks:
-     - mynetwork 
   moda-api:
     build: ./moda-api
     image: jongwon990806/moda-api:latest
-    depends_on:
-      - selenium-server
     container_name: moda-api
     ports:
-      - "8080:8080"  
+      - "8080:8080"
     env_file:
       - ./moda-api/.env
     networks:
@@ -26,4 +15,3 @@ services:
 networks:
   mynetwork:
     driver: bridge
-  
