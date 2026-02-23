@@ -11,6 +11,7 @@ import java.util.stream.LongStream;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.moda.moda_api.card.application.mapper.CardDtoMapper;
@@ -77,6 +78,7 @@ public class CardService {
 	private final NotificationService notificationService;
 	private final UserRepository userRepository;
 	private final UrlDuplicatedRepository urlDuplicatedRepository;
+	private final TransactionTemplate transactionTemplate;
 
 	/**
 	 * URL을 입력 받고 새로운 카드 생성 후 알맞은 보드로 이동합니다.
@@ -212,27 +214,32 @@ public class CardService {
 
 				System.out.println(card.toString());
 
-				urlCacheRepository.save(
-					UrlCache.builder()
-						.urlHash(urlHash)
-						.categoryId(card.getCategoryId())
-						.typeId(card.getTypeId())
-						.cachedTitle(card.getTitle())
-						.cachedContent(card.getContent())
-						.originalUrl(url)
-						.cachedThumbnailContent(card.getThumbnailContent())
-						.cachedThumbnailUrl(card.getThumbnailUrl())
-						.cachedEmbedding(card.getEmbedding())
-						.cachedKeywords(card.getKeywords())
-						.cachedSubContents(card.getSubContents())
-						.build()
-				);
-				// 유저별 핵심 키워드 저장 (Redis)
-				userKeywordRepository.saveKeywords(userIdObj, card.getKeywords());
-				// 핫 토픽 키워드 저장 (Redis)
-				hotTopicRepository.incrementKeywordScore(card.getKeywords());
-				cardRepository.save(card);
-				cardSearchRepository.save(card);
+				transactionTemplate.execute(status -> {
+					urlCacheRepository.save(
+						UrlCache.builder()
+							.urlHash(urlHash)
+							.categoryId(card.getCategoryId())
+							.typeId(card.getTypeId())
+							.cachedTitle(card.getTitle())
+							.cachedContent(card.getContent())
+							.originalUrl(url)
+							.cachedThumbnailContent(card.getThumbnailContent())
+							.cachedThumbnailUrl(card.getThumbnailUrl())
+							.cachedEmbedding(card.getEmbedding())
+							.cachedKeywords(card.getKeywords())
+							.cachedSubContents(card.getSubContents())
+							.build()
+					);
+					// 유저별 핵심 키워드 저장 (Redis)
+					userKeywordRepository.saveKeywords(userIdObj, card.getKeywords());
+					// 핫 토픽 키워드 저장 (Redis)
+					hotTopicRepository.incrementKeywordScore(card.getKeywords());
+					cardRepository.save(card);
+					cardSearchRepository.save(card);
+					return null;
+				});
+
+				// 트랜잭션 커밋 성공 후 알림 전송 — 롤백 시 알림 미전송
 				notificationService.sendFCMNotification(userIdObj.getValue(), NotificationType.card, card);
 				return true;
 			});
