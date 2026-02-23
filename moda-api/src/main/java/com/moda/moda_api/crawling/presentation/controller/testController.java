@@ -1,6 +1,7 @@
 package com.moda.moda_api.crawling.presentation.controller;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class testController {
 
 	private final CrawlingService crawlerService;
+	private final Executor crawlingExecutor;
 
 	@PostMapping("/crawl")
 	public CompletableFuture<ResponseEntity<CrawledContent>> crawlUrl(@RequestBody @Valid CardRequest cardRequest) {
@@ -34,7 +36,7 @@ public class testController {
 			} catch (Exception e) {
 				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
 			}
-		});
+		}, crawlingExecutor);
 	}
 
 

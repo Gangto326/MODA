@@ -1,5 +1,7 @@
 package com.moda.moda_api.summary.presentation;
 
+import java.util.concurrent.CompletableFuture;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,7 +20,7 @@ public class YoutubeApiTestController {
 	private final YoutubeApiClient youtubeApiClient;
 
 	@GetMapping("/video/{videoId}")
-	public YoutubeAPIResponseDTO testVideoApi(@PathVariable String videoId) {
+	public CompletableFuture<YoutubeAPIResponseDTO> testVideoApi(@PathVariable String videoId) {
 		return youtubeApiClient.getVideoData(videoId);
 	}
 }

@@ -1,8 +1,10 @@
 package com.moda.moda_api.summary.infrastructure.api;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -25,26 +27,29 @@ public class YoutubeApiClient {
 	@Value("${youtube.api.key}")
 	private String youtubeApiKey;
 
-	public YoutubeAPIResponseDTO getVideoData(String videoId) {
+	public CompletableFuture<YoutubeAPIResponseDTO> getVideoData(String videoId) {
 		log.info("유튜브 분석하기직전");
 
-		JsonNode videoData = getVideoInfo(videoId);
-		JsonNode channelData = getChannelData(extractChannelId(videoData));
-
-		return YoutubeAPIResponseDTO.builder()
-			.title(extractVideoTitle(videoData)) // 추가된 부분
-			.tags(extractTags(videoData))
-			.description(extractDescription(videoData))
-			.channelTitle(extractChannelTitle(channelData))
-			.channelThumbnailUrl(extractChannelThumbnailUrl(channelData))
-			.build();
+		return getVideoInfo(videoId)
+			.thenCompose(videoData ->
+				getChannelData(extractChannelId(videoData))
+					.thenApply(channelData ->
+						YoutubeAPIResponseDTO.builder()
+							.title(extractVideoTitle(videoData))
+							.tags(extractTags(videoData))
+							.description(extractDescription(videoData))
+							.channelTitle(extractChannelTitle(channelData))
+							.channelThumbnailUrl(extractChannelThumbnailUrl(channelData))
+							.build()
+					)
+			);
 	}
 
 	private String extractVideoTitle(JsonNode videoData) {
 		return videoData.path("items").get(0).path("snippet").path("title").asText();
 	}
 
-	private JsonNode getVideoInfo(String videoId) {
+	private CompletableFuture<JsonNode> getVideoInfo(String videoId) {
 		return youtubeWebClient
 			.get()
 			.uri(uriBuilder -> uriBuilder
@@ -55,10 +60,11 @@ public class YoutubeApiClient {
 				.build())
 			.retrieve()
 			.bodyToMono(JsonNode.class)
-			.block();
+			.timeout(Duration.ofSeconds(15))
+			.toFuture();
 	}
 
-	private JsonNode getChannelData(String channelId) {
+	private CompletableFuture<JsonNode> getChannelData(String channelId) {
 		return youtubeWebClient
 			.get()
 			.uri(uriBuilder -> uriBuilder
@@ -69,7 +75,8 @@ public class YoutubeApiClient {
 				.build())
 			.retrieve()
 			.bodyToMono(JsonNode.class)
-			.block();
+			.timeout(Duration.ofSeconds(15))
+			.toFuture();
 	}
 
 	private String[] extractTags(JsonNode videoData) {

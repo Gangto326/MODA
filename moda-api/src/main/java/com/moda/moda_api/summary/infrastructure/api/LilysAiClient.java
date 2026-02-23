@@ -1,6 +1,7 @@
 package com.moda.moda_api.summary.infrastructure.api;
 
 import java.net.URI;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,68 +35,52 @@ public class LilysAiClient {
 	@Value("${lilys.ai.api.url}")
 	private String lilysUrl;
 
-	public LilysRequestIdResponse getRequestId(String url) {
-		System.out.println(url);
-
-		// return CompletableFuture.completedFuture(
-		// 	new LilysRequestIdResponse("0709fcc3-0baa-4da8-a984-841948466ca4")).join();
+	public CompletableFuture<LilysRequestIdResponse> getRequestId(String url) {
+		log.info("Requesting Lilys AI requestId for url: {}", url);
 
 		return lilysWebClient.post()
 			.uri(lilysUrl)
-			.bodyValue(createRequestBody(url))  // Http메세지 Body를 만든다.
-			.retrieve()  // 받을 준비가 됨.
-			.bodyToMono(LilysRequestIdResponse.class)  // 응답 본문을 LilysAiResponse 클래스의 객체로 변환
-			.doOnError(e -> {  // 에러 처리 실패시
-				log.error("Failed to get RequestId for url: {}", url, e);
-				throw new SummaryProcessingException("Failed to get RequestId from Lilys AI", e);
-			})
-			.switchIfEmpty(Mono.error(  // 아무것도 없을 시
+			.bodyValue(createRequestBody(url))
+			.retrieve()
+			.bodyToMono(LilysRequestIdResponse.class)
+			.doOnError(e -> log.error("Failed to get RequestId for url: {}", url, e))
+			.switchIfEmpty(Mono.error(
 				new SummaryProcessingException("Received empty response from Lilys AI service")
 			))
-			.block();
+			.timeout(Duration.ofSeconds(30))
+			.toFuture();
 	}
 
-	public LilysSummary getSummaryResults(String requestId, String url) {
-		System.out.println("getSummaryResults requestId : " + requestId);
-		System.out.println("getSummaryResults url : " + url);
+	public CompletableFuture<LilysSummary> getSummaryResults(String requestId, String url) {
+		log.info("getSummaryResults requestId: {}, url: {}", requestId, url);
 
-		// 첫 번째 Future: summaryNote 가져오기
 		CompletableFuture<JsonNode> contentFuture = getResult(requestId, "summaryNote");
-
-		// 두 번째 Future: shortSummary 가져오기
 		CompletableFuture<JsonNode> thumbnailFuture = getResult(requestId, "shortSummary");
 
-		// 확인용 출력
-		contentFuture.thenAccept(json -> {
-			log.info("Received blogPost data: {}", json);
-		});
-		thumbnailFuture.thenAccept(json -> {
-			log.info("Received thumbnail data: {}", json);
-		});
+		return CompletableFuture.allOf(contentFuture, thumbnailFuture)
+			.thenApply(v -> {
+				try {
+					JsonNode content = contentFuture.join();
+					JsonNode thumbnail = thumbnailFuture.join();
 
-		CompletableFuture.allOf(contentFuture, thumbnailFuture).join();
+					List<TitleAndContent> mainContent = jsonMapper.processSummaryNote(content);
+					String[] timeStamps = jsonMapper.extractTimestamps(content);
+					String thumbnailContent = thumbnail.path("data").path("data").path("summary").toString();
+					String thumbnailUrl = getVideoId(url);
 
-		try {
-			JsonNode content = contentFuture.get();
-			JsonNode thumbnail = thumbnailFuture.get();
+					log.info("Summary results processed: {}", mainContent);
 
-			List<TitleAndContent> mainContent = jsonMapper.processSummaryNote(content);
-			String[] timeStamps = jsonMapper.extractTimestamps(content);
-			String thumbnailContent = thumbnail.path("data").path("data").path("summary").toString();
-			String thumbnailUrl = getVideoId(url);
-
-			System.out.println(mainContent.toString());
-
-			return LilysSummary.builder()
-				.contents(mainContent)
-				.thumbnailContent(thumbnailContent)
-				.thumbnailUrl(thumbnailUrl)
-				.typeId(1)
-				.timeStamp(timeStamps)
-				.build();
-		} catch (Exception e) {
-			throw new SummaryProcessingException("Failed to combine summary results", e);
-		}
+					return LilysSummary.builder()
+						.contents(mainContent)
+						.thumbnailContent(thumbnailContent)
+						.thumbnailUrl(thumbnailUrl)
+						.typeId(1)
+						.timeStamp(timeStamps)
+						.build();
+				} catch (Exception e) {
+					throw new SummaryProcessingException("Failed to combine summary results", e);
+				}
+			});
 	}
 
 	// 일단 blogPost를 던져놓고 status가 뭔지 파악하는 함수

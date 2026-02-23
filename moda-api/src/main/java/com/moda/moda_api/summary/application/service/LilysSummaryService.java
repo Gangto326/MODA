@@ -1,6 +1,5 @@
 package com.moda.moda_api.summary.application.service;
 
-import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -28,27 +27,22 @@ public class LilysSummaryService {
 	private final LilysAiClient lilysWebClient;
 	private final PythonAnalysisService pythonAnalysisService;
 	private static final int MAX_ATTEMPTS = 100;
-	private static final Duration POLLING_INTERVAL = Duration.ofSeconds(200);
+	private static final long POLLING_INTERVAL_SECONDS = 15;
 	private final YoutubeApiClient youtubeApiClient;
 	private final Executor youtubeExecutor;
 
 
 	@Transactional
 	public CompletableFuture<SummaryResultDto> summarize(String url, String userId) {
-		return CompletableFuture.supplyAsync(() -> lilysWebClient.getRequestId(url), youtubeExecutor)
-			.thenCompose(requestId -> {
-				// RequestId를 받은 후 waitForCompletion 실행하고 완료될 때까지 대기
-				return waitForCompletion(requestId.getRequestId())
-					.thenApply(status -> requestId);
-			})
-			.thenCompose(requestId -> {
-				// waitForCompletion이 완전히 완료된 후에만 getSummaryResults 실행
-				return CompletableFuture.supplyAsync(() ->
-					lilysWebClient.getSummaryResults(requestId.getRequestId(), url),
-					youtubeExecutor);
-			})
+		return lilysWebClient.getRequestId(url)
+			.thenCompose(requestId ->
+				waitForCompletion(requestId.getRequestId())
+					.thenApply(status -> requestId)
+			)
+			.thenCompose(requestId ->
+				lilysWebClient.getSummaryResults(requestId.getRequestId(), url)
+			)
 			.thenCompose(lilysSummary -> {
-				// getSummaryResults 완료 후 병렬로 실행 가능한 작업들
 				CompletableFuture<AIAnalysisResponseDTO> aiAnalysisFuture =
 					pythonAnalysisService.youtubeAnalyze(lilysSummary.getContents())
 						.exceptionally(e -> {
@@ -59,18 +53,14 @@ public class LilysSummaryService {
 						});
 
 				CompletableFuture<YoutubeAPIResponseDTO> youtubeApiFuture =
-					CompletableFuture.supplyAsync(() ->
-						youtubeApiClient.getVideoData(lilysSummary.getThumbnailUrl()),
-						youtubeExecutor);
+					youtubeApiClient.getVideoData(lilysSummary.getThumbnailUrl());
 
-				// 두 작업이 모두 완료될 때까지 대기 후 결과 조합
 				return CompletableFuture.allOf(aiAnalysisFuture, youtubeApiFuture)
 					.thenApply(v -> {
 						AIAnalysisResponseDTO aiAnalysis = aiAnalysisFuture.join();
 						YoutubeAPIResponseDTO youtubeAPI = youtubeApiFuture.join();
 						String[] keywords = getKeyWords(aiAnalysis, youtubeAPI);
 						String[] subContents = getSubContents(lilysSummary, youtubeAPI);
-
 
 						return SummaryResultDto.builder()
 							.typeId(lilysSummary.getTypeId())
@@ -115,7 +105,7 @@ public class LilysSummaryService {
 		if (attempt >= MAX_ATTEMPTS) {
 			return CompletableFuture.failedFuture(
 				new SummaryProcessingException(
-					"Processing timed out after " + (MAX_ATTEMPTS * POLLING_INTERVAL.getSeconds()) + " seconds")
+					"Processing timed out after " + (MAX_ATTEMPTS * POLLING_INTERVAL_SECONDS) + " seconds")
 			);
 		}
 
