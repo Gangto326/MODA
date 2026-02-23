@@ -66,7 +66,7 @@ class YoutubeProcess:
             for idx, category in enumerate(categories_name()):
                 if category.lower() in response.lower():
                     find_category = True
-                    self.category_id = idx
+                    self.category_id = idx + 1
                     self.category = category
                     break
 
@@ -76,8 +76,8 @@ class YoutubeProcess:
             attempt_count += 1
 
         if attempt_count == self.MAX_CATEGORY_TRIES:
-            self.category_id = 0
-            self.category = 'ALL'
+            self.category_id = 1
+            self.category = 'All'
 
         print(f'카테고리: {self.category}')
 
