@@ -3,12 +3,9 @@ package com.moda.moda_api.common.config;
 import java.util.Arrays;
 
 import org.openqa.selenium.PageLoadStrategy;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 
 @Configuration
 public class WebDriverConfig {
@@ -37,9 +34,4 @@ public class WebDriverConfig {
 		return options;
 	}
 
-	@Bean
-	@Scope("prototype")
-	public WebDriver webDriver(ChromeOptions chromeOptions) {
-		return new ChromeDriver(chromeOptions);
-	}
 }

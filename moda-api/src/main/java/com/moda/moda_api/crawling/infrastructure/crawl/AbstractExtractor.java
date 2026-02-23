@@ -41,7 +41,7 @@ public class AbstractExtractor {
 		WebDriver driver = null;
 
 		try {
-			driver = webDriverService.getDriver();
+			driver = webDriverService.createDriver();
 
 			ExtractorConfig config = extractorFactory.getConfig(url);
 			System.out.println(config.getPattern());
@@ -70,13 +70,7 @@ public class AbstractExtractor {
 			log.error("Failed to extract content", e);
 			throw e;  // 상위 메서드로 예외를 그대로 전달
 		} finally {
-			if (driver != null) {
-				try {
-					driver.quit();
-				} catch (Exception e) {
-					log.error("Failed to close WebDriver", e);
-				}
-			}
+			webDriverService.quitDriver(driver);
 		}
 	}
 
@@ -150,7 +144,7 @@ public class AbstractExtractor {
 		WebDriver driver = null;
 
 		try {
-			driver = webDriverService.getDriver();
+			driver = webDriverService.createDriver();
 
 			ExtractorConfig config = extractorFactory.getConfig(url);
 
@@ -194,13 +188,7 @@ public class AbstractExtractor {
 			log.error("URL 추출 중 오류 발생: {}", url, e);
 			throw new ExtractorException("URL 추출 실패", e);
 		} finally {
-			if (driver != null) {
-				try {
-					driver.quit();
-				} catch (Exception e) {
-					log.error("Failed to close WebDriver", e);
-				}
-			}
+			webDriverService.quitDriver(driver);
 		}
 	}
 }
