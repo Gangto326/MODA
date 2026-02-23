@@ -1,20 +1,19 @@
 import json
 from typing import List
 
-import ollama
-
 from app.constants.category import categories_name
 from app.constants.youtube_prompt import make_category_prompt, make_keywords_content_prompt, make_process_prompt
 from app.schemas.youtube import YoutubeResponse, TitleAndContent
 from app.services.embedding import Embedding
+from app.services.llm_client import LLMClient, CategoryResponse, KeywordResponse
 
 
 class YoutubeProcess:
     MAX_CATEGORY_TRIES = 10
-    MODEL = 'qwen2.5'
 
     def __init__(self, origin_paragraph: List[TitleAndContent]):
         self.origin_content = json.dumps([p.model_dump() for p in origin_paragraph], ensure_ascii=False)
+        self.llm = LLMClient()
         self.embedder = Embedding()
         self.category = ''
 
@@ -39,47 +38,30 @@ class YoutubeProcess:
             embedding_vector=self.embedding_vector
         )
 
-    #ollama 채팅을 진행하는 함수
-    def chat(self,
-             messages,
-             model: str = MODEL,
-             format = None):
-        response = ollama.chat(
-            model = model,
-            messages = messages,
-            format = format
-        )
-        return response['message']['content']
-
     #origin_paragraph의 데이터를 처리하는 함수
     def process_paragraph(self):
-        model = self.MODEL
         messages = make_process_prompt(self.origin_content)
-        format = None
 
-        response = self.chat(model = model, messages = messages, format = format)
+        response = self.llm.chat(
+            system=messages[0]['content'],
+            user=messages[1]['content']
+        )
         self.content = str(response).removeprefix("```markdown\n").removesuffix("```")
 
         print(f'처리된 내용:\n{self.content}')
 
     #category를 선택하는 함수
     def choose_category(self):
-        model = self.MODEL
         messages = make_category_prompt(self.content)
-        format = {
-            'type': 'object',
-            'properties': {
-                'category': {
-                    'type': 'string'
-                }
-            },
-            'required': ['category']
-        }
 
         find_category = False
         attempt_count = 0
         while attempt_count < self.MAX_CATEGORY_TRIES:
-            response = self.chat(model = model, messages = messages, format = format)
+            response = self.llm.chat_json(
+                system=messages[0]['content'],
+                user=messages[1]['content'],
+                schema=CategoryResponse
+            )
 
             for idx, category in enumerate(categories_name()):
                 if category.lower() in response.lower():
@@ -101,22 +83,13 @@ class YoutubeProcess:
 
     #keywords를 생성하는 함수
     def make_keywords(self):
-        model = self.MODEL
         messages = make_keywords_content_prompt(self.content)
-        format = {
-            'type': 'object',
-            'properties': {
-                'keyword': {
-                    'type': 'array',
-                    'items': {
-                        'type': 'string'
-                    }
-                }
-            },
-            'required': ['keyword']
-        }
 
-        response = self.chat(model = model, messages = messages, format = format)
+        response = self.llm.chat_json(
+            system=messages[0]['content'],
+            user=messages[1]['content'],
+            schema=KeywordResponse
+        )
         self.keywords = json.loads(response)['keyword']
         self.keywords = [keyword for keyword in self.keywords if keyword in self.content]
 
