@@ -26,4 +26,9 @@ public class UrlDuplicatedRepositoryImpl implements UrlDuplicatedRepository {
 		String savedUrl = urlDuplicatedTemplate.opsForValue().get(key);
 		return url.equals(savedUrl);
 	}
+
+	public void urlDuplicatedDelete(String url) {
+		String key = URL_KEY + url;
+		urlDuplicatedTemplate.delete(key);
+	}
 }

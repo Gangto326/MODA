@@ -118,9 +118,16 @@ public class CardService {
 				try {
 					return createNewCard(userIdObj, url, urlHash);
 				} catch (Exception e) {
+					urlDuplicatedRepository.urlDuplicatedDelete(urlHash);
 					e.printStackTrace();
 					log.error("Card creation failed", e);
 					throw new ContentExtractionException("컨텐츠를 추출할 수 없는 사이트입니다.", userId, e);
+				}
+			})
+			.whenComplete((success, throwable) -> {
+				if (throwable != null) {
+					urlDuplicatedRepository.urlDuplicatedDelete(urlHash);
+					log.error("Async card creation failed, urlHash cleaned up: {}", urlHash, throwable);
 				}
 			});
 	}
