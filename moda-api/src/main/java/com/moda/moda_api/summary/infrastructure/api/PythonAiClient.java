@@ -1,7 +1,7 @@
 package com.moda.moda_api.summary.infrastructure.api;
 
+import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -21,31 +21,34 @@ public class PythonAiClient {
 	private final WebClient pythonWebClient;
 
 
-	public AIAnalysisResponseDTO articleAnalysis(AiArticleRequestDTO aiArticleRequestDTO) {
+	public CompletableFuture<AIAnalysisResponseDTO> articleAnalysis(AiArticleRequestDTO aiArticleRequestDTO) {
 		return pythonWebClient.post()
 			.uri("summary/post")
 			.bodyValue(aiArticleRequestDTO)
 			.retrieve()
 			.bodyToMono(AIAnalysisResponseDTO.class)
-			.block();
+			.timeout(Duration.ofSeconds(30))
+			.toFuture();
 	}
 
-	public AIAnalysisResponseDTO youtubeAnalysis(AiYoutubeRequestDTO aiYoutubeRequestDTO) {
+	public CompletableFuture<AIAnalysisResponseDTO> youtubeAnalysis(AiYoutubeRequestDTO aiYoutubeRequestDTO) {
 		return pythonWebClient.post()
 			.uri("summary/youtube")
 			.bodyValue(aiYoutubeRequestDTO)
 			.retrieve()
 			.bodyToMono(AIAnalysisResponseDTO.class)
-			.block();
+			.timeout(Duration.ofSeconds(30))
+			.toFuture();
 	}
 
-	public AIAnalysisResponseDTO imageAnalysis(AiImageRequestDTO aiImageRequestDTO) {
+	public CompletableFuture<AIAnalysisResponseDTO> imageAnalysis(AiImageRequestDTO aiImageRequestDTO) {
 		return pythonWebClient.post()
 			.uri("summary/image")
 			.bodyValue(aiImageRequestDTO)
 			.retrieve()
 			.bodyToMono(AIAnalysisResponseDTO.class)
-			.block();
+			.timeout(Duration.ofSeconds(30))
+			.toFuture();
 	}
 
 }

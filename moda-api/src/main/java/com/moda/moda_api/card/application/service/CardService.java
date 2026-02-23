@@ -235,44 +235,34 @@ public class CardService {
 	public Boolean createImages(String userId, List<MultipartFile> multipartFiles) {
 		UserId userIdObj = new UserId(userId);
 
-		List<Card> cards = multipartFiles.stream()
+		List<CompletableFuture<Card>> cardFutures = multipartFiles.stream()
 			.map(file -> {
 				try {
 					String s3Url = imageStorageService.uploadMultipartFile(file);
-					String urlHash = UrlCache.generateHash(s3Url);
 
-					// 실제 AI 분석
-					AIAnalysisResponseDTO aiAnalysisResponseDTO = pythonAiClient.imageAnalysis(
-						new AiImageRequestDTO(s3Url));
-
-					// AI Test생성
-					// AIAnalysisResponseDTO aiAnalysisResponseDTO = AIAnalysisResponseDTO.builder()
-					// 	.keywords(new String[] {"3차"})
-					// 	.embeddingVector(new EmbeddingVector(null))
-					// 	.categoryId(new CategoryId(3L))
-					// 	.content("AIContnet")
-					// 	.thumbnailContent("abcd")
-					// 	.build();
-
-					return Card.builder()
-						.cardId(new CardId(UUID.randomUUID().toString()))
-						.userId(userIdObj)
-						.categoryId(aiAnalysisResponseDTO.getCategoryId())
-						.typeId(4) // 이미지 타입
-						.urlHash(null)
-						.title("ImageTitle")
-						.content(aiAnalysisResponseDTO.getContent())
-						.thumbnailContent(aiAnalysisResponseDTO.getThumbnailContent())
-						.thumbnailUrl(s3Url)
-						.embedding(aiAnalysisResponseDTO.getEmbeddingVector())
-						.keywords(aiAnalysisResponseDTO.getKeywords())
-						.subContents(null)
-						.build();
-
+					return pythonAiClient.imageAnalysis(new AiImageRequestDTO(s3Url))
+						.thenApply(aiAnalysisResponseDTO -> Card.builder()
+							.cardId(new CardId(UUID.randomUUID().toString()))
+							.userId(userIdObj)
+							.categoryId(aiAnalysisResponseDTO.getCategoryId())
+							.typeId(4) // 이미지 타입
+							.urlHash(null)
+							.title("ImageTitle")
+							.content(aiAnalysisResponseDTO.getContent())
+							.thumbnailContent(aiAnalysisResponseDTO.getThumbnailContent())
+							.thumbnailUrl(s3Url)
+							.embedding(aiAnalysisResponseDTO.getEmbeddingVector())
+							.keywords(aiAnalysisResponseDTO.getKeywords())
+							.subContents(null)
+							.build());
 				} catch (Exception e) {
 					throw new RuntimeException("Failed to process image", e);
 				}
 			})
+			.collect(Collectors.toList());
+
+		List<Card> cards = cardFutures.stream()
+			.map(CompletableFuture::join)
 			.collect(Collectors.toList());
 
 		cards.forEach(System.out::println);

@@ -1,11 +1,9 @@
 package com.moda.moda_api.summary.application.service;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executor;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import com.moda.moda_api.common.exception.ContentExtractionException;
 import com.moda.moda_api.common.exception.UnprocessableContentException;
@@ -22,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 public class CrawlingSummaryService {
 	private final PythonAnalysisService pythonAnalysisService;
 	private final CrawlingService crawlingService;
-	private final Executor pythonExecutor;
 	private final Executor crawlingExecutor;
 
 	public CompletableFuture<SummaryResultDto> summarize(String url, String userId) {
@@ -44,28 +41,14 @@ public class CrawlingSummaryService {
 				log.info(crawledContent.getExtractedContent().getText());
 				// 2단계: Python 분석과 이미지 URL 가져오기를 병렬로 실행
 				CompletableFuture<AIAnalysisResponseDTO> pythonAnalysisFuture =
-					CompletableFuture.supplyAsync(() -> {
-						try {
-							return pythonAnalysisService.articleAnalyze(
-								crawledContent.getExtractedContent().getText()
-							);
-						} catch (Exception e) {
-							throw new UnprocessableContentException(
-								userId,
-								"해당 게시물은 요약 할 수 없는 컨텐츠입니다. 다른 영상을 시도해 주세요"
-							);
-						}
-					},pythonExecutor);
-
-				// CompletableFuture<AIAnalysisResponseDTO> pythonAnalysisFuture = CompletableFuture.completedFuture(
-				// 	AIAnalysisResponseDTO.builder()
-				// 		.categoryId(new CategoryId(2L))  // null 허용
-				// 		.keywords(new String[]{"새로운 test"})
-				// 		.thumbnailContent("새로운 test")
-				// 		.content(crawledContent.getExtractedContent().getText())
-				// 		.embeddingVector(new EmbeddingVector(null))
-				// 		.build()
-				// );
+					pythonAnalysisService.articleAnalyze(
+						crawledContent.getExtractedContent().getText()
+					).exceptionally(e -> {
+						throw new UnprocessableContentException(
+							userId,
+							"해당 게시물은 요약 할 수 없는 컨텐츠입니다. 다른 영상을 시도해 주세요"
+						);
+					});
 
 				CompletableFuture<String> thumbnailUrlFuture =
 					CompletableFuture.supplyAsync(() ->

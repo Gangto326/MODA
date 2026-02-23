@@ -10,17 +10,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @Configuration
 public class AsyncConfig {
 
-	@Bean("pythonExecutor")
-	public Executor pythonExecutor() {
-		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-		executor.setCorePoolSize(10);
-		executor.setMaxPoolSize(20);
-		executor.setQueueCapacity(500);
-		executor.setThreadNamePrefix("Python-");
-		executor.initialize();
-		return executor;
-	}
-
 	@Bean("crawlingExecutor")
 	public Executor crawlingExecutor() {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();

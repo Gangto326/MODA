@@ -2,17 +2,13 @@ package com.moda.moda_api.summary.application.service;
 
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import com.moda.moda_api.category.domain.CategoryId;
 import com.moda.moda_api.common.exception.UnprocessableContentException;
 import com.moda.moda_api.summary.application.dto.SummaryResultDto;
 import com.moda.moda_api.summary.exception.SummaryProcessingException;
@@ -34,7 +30,6 @@ public class LilysSummaryService {
 	private static final int MAX_ATTEMPTS = 100;
 	private static final Duration POLLING_INTERVAL = Duration.ofSeconds(200);
 	private final YoutubeApiClient youtubeApiClient;
-	private final Executor pythonExecutor;
 	private final Executor youtubeExecutor;
 
 
@@ -55,31 +50,13 @@ public class LilysSummaryService {
 			.thenCompose(lilysSummary -> {
 				// getSummaryResults 완료 후 병렬로 실행 가능한 작업들
 				CompletableFuture<AIAnalysisResponseDTO> aiAnalysisFuture =
-					CompletableFuture.supplyAsync(() -> {
-						try {
-							return pythonAnalysisService.youtubeAnalyze(
-								lilysSummary.getContents()
-							);
-						}
-						catch (Exception e) {
+					pythonAnalysisService.youtubeAnalyze(lilysSummary.getContents())
+						.exceptionally(e -> {
 							throw new UnprocessableContentException(
 								userId,
 								"해당 영상은 요약 할 수 없는 컨텐츠입니다. 다른 영상을 시도해 주세요"
 							);
-						}
-					},pythonExecutor);
-
-				// CompletableFuture<AIAnalysisResponseDTO> aiAnalysisFuture = CompletableFuture.completedFuture(
-				// 	AIAnalysisResponseDTO.builder()
-				// 		.categoryId(new CategoryId(2L))  // null 허용
-				// 		.keywords(new String[] {"박종원_02_16~02_17_Test"})
-				// 		.thumbnailContent("박종원_02_16~02_17_Test")
-				// 		.content(lilysSummary.getContents().stream()
-				// 			.map(content -> content.getTitle() + ": " + content.getContent())
-				// 			.collect(Collectors.joining("\n")))
-				// 		.embeddingVector(null)
-				// 		.build()
-				// );
+						});
 
 				CompletableFuture<YoutubeAPIResponseDTO> youtubeApiFuture =
 					CompletableFuture.supplyAsync(() ->
