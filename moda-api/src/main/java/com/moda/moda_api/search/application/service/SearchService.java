@@ -457,7 +457,8 @@ public class SearchService {
 		Pageable pageable = PageRequest.of(
 				0,  // 첫 번째 페이지 (0부터 시작)
 				5,  // 페이지당 5개 항목
-				Sort.by("viewCount").ascending()  // viewCount 기준 오름차순 정렬
+				Sort.by("viewCount").ascending()
+						.and(Sort.by("createdAt").descending())
 		);
 		
 		CompletableFuture<List<Card>> thumbnailFuture = CompletableFuture
@@ -540,7 +541,8 @@ public class SearchService {
 		Pageable imgsPage = PageRequest.of(
 				0,  // 첫 번째 페이지 (0부터 시작)
 				20,  // 페이지당 20개 항목
-				Sort.by("viewCount").ascending()  // viewCount 기준 오름차순 정렬
+				Sort.by("viewCount").ascending()
+						.and(Sort.by("createdAt").descending())
 		);
 
 		CompletableFuture<List<Card>> imgsFuture = CompletableFuture
@@ -561,7 +563,8 @@ public class SearchService {
 		 */
 		Pageable forgetPage = PageRequest.of(
 				0,  // 첫 번째 페이지 (0부터 시작)
-				10  // 페이지당 10개 항목
+				10, // 페이지당 10개 항목
+				Sort.by("createdAt").ascending()
 		);
 
 		CompletableFuture<List<Card>> forgetFuture = CompletableFuture

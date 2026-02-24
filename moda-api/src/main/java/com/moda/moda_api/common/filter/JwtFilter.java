@@ -51,7 +51,7 @@ public class JwtFilter extends OncePerRequestFilter {
 			"/api/auth/password-change-check",
 			"/api/user/reset-password",
 			"/api/test/crawl",
-			"/api/card"
+			"/api/card/hot-topic"
 		};
 
 		String path = request.getRequestURI();
