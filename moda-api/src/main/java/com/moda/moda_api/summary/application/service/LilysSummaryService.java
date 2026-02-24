@@ -6,10 +6,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import com.moda.moda_api.card.domain.UrlCache;
 import com.moda.moda_api.common.exception.UnprocessableContentException;
 import com.moda.moda_api.summary.application.dto.SummaryResultDto;
+import com.moda.moda_api.summary.domain.LilysRequestIdRepository;
 import com.moda.moda_api.summary.exception.SummaryProcessingException;
 import com.moda.moda_api.summary.infrastructure.api.LilysAiClient;
 import com.moda.moda_api.summary.infrastructure.api.YoutubeApiClient;
@@ -26,21 +27,38 @@ import lombok.extern.slf4j.Slf4j;
 public class LilysSummaryService {
 	private final LilysAiClient lilysWebClient;
 	private final PythonAnalysisService pythonAnalysisService;
-	private static final int MAX_ATTEMPTS = 100;
-	private static final long POLLING_INTERVAL_SECONDS = 15;
 	private final YoutubeApiClient youtubeApiClient;
 	private final Executor youtubeExecutor;
+	private final LilysRequestIdRepository requestIdRepository;
 
+	private static final int MAX_ATTEMPTS = 100;
+	private static final long POLLING_INTERVAL_SECONDS = 15;
 
-	@Transactional
 	public CompletableFuture<SummaryResultDto> summarize(String url, String userId) {
-		return lilysWebClient.getRequestId(url)
+		String urlHash = UrlCache.generateHash(url);
+
+		// 기존 requestId 확인 (이전 요청 실패 시 Redis에 남아있음)
+		CompletableFuture<String> requestIdFuture = requestIdRepository.findByUrlHash(urlHash)
+			.map(existingId -> {
+				log.info("Reusing existing requestId from Redis: {} for url: {}", existingId, url);
+				return CompletableFuture.completedFuture(existingId);
+			})
+			.orElseGet(() ->
+				lilysWebClient.getRequestId(url)
+					.thenApply(response -> {
+						String reqId = response.getRequestId();
+						requestIdRepository.save(urlHash, reqId);
+						log.info("Saved new requestId to Redis: {} for url: {}", reqId, url);
+						return reqId;
+					})
+			);
+
+		return requestIdFuture
 			.thenCompose(requestId ->
-				waitForCompletion(requestId.getRequestId())
-					.thenApply(status -> requestId)
+				waitForCompletion(requestId).thenApply(status -> requestId)
 			)
 			.thenCompose(requestId ->
-				lilysWebClient.getSummaryResults(requestId.getRequestId(), url)
+				lilysWebClient.getSummaryResults(requestId, url)
 			)
 			.thenCompose(lilysSummary -> {
 				CompletableFuture<AIAnalysisResponseDTO> aiAnalysisFuture =
@@ -74,6 +92,14 @@ public class LilysSummaryService {
 							.subContent(subContents)
 							.build();
 					});
+			})
+			.whenComplete((result, ex) -> {
+				if (ex == null) {
+					requestIdRepository.delete(urlHash);
+					log.info("Deleted requestId from Redis after successful completion for url: {}", url);
+				} else {
+					log.warn("Request failed for url: {}. requestId preserved in Redis for retry.", url);
+				}
 			});
 	}
 
@@ -105,7 +131,8 @@ public class LilysSummaryService {
 		if (attempt >= MAX_ATTEMPTS) {
 			return CompletableFuture.failedFuture(
 				new SummaryProcessingException(
-					"Processing timed out after " + (MAX_ATTEMPTS * POLLING_INTERVAL_SECONDS) + " seconds")
+					"Processing timed out after " + (MAX_ATTEMPTS * POLLING_INTERVAL_SECONDS)
+					+ " seconds. requestId: " + requestId)
 			);
 		}
 
