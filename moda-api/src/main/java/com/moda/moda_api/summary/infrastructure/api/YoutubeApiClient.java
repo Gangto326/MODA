@@ -1,6 +1,5 @@
 package com.moda.moda_api.summary.infrastructure.api;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -60,7 +59,6 @@ public class YoutubeApiClient {
 				.build())
 			.retrieve()
 			.bodyToMono(JsonNode.class)
-			.timeout(Duration.ofSeconds(15))
 			.toFuture();
 	}
 
@@ -75,7 +73,6 @@ public class YoutubeApiClient {
 				.build())
 			.retrieve()
 			.bodyToMono(JsonNode.class)
-			.timeout(Duration.ofSeconds(15))
 			.toFuture();
 	}
 

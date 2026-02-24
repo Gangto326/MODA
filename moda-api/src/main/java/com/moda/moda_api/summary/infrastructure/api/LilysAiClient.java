@@ -1,7 +1,6 @@
 package com.moda.moda_api.summary.infrastructure.api;
 
 import java.net.URI;
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +46,6 @@ public class LilysAiClient {
 			.switchIfEmpty(Mono.error(
 				new SummaryProcessingException("Received empty response from Lilys AI service")
 			))
-			.timeout(Duration.ofSeconds(30))
 			.toFuture();
 	}
 
