@@ -1,11 +1,11 @@
+import asyncio
 import json
 
 from app.constants.category import categories_name
-from app.constants.post_prompt import make_summary_prompt, make_keywords_content_prompt, \
-    make_thumbnail_content_prompt, make_category_prompt
+from app.constants.post_prompt import make_summary_prompt, make_keywords_and_thumbnail_prompt, make_category_prompt
 from app.schemas.post import PostResponse
 from app.services.embedding import Embedding
-from app.services.llm_client import LLMClient, CategoryResponse, KeywordResponse
+from app.services.llm_client import LLMClient, CategoryResponse, KeywordAndThumbnailResponse
 
 
 class PostSummary:
@@ -25,11 +25,10 @@ class PostSummary:
 
     #PostSummary 객체가 실행되면 가장 먼저 실행되는 함수
     async def execute(self):
-        self.choose_category()
-        self.summary_content()
-        self.make_keywords()
-        self.make_thumbnail_content()
-        self.make_embedding_vector()
+        await asyncio.to_thread(self.choose_category)
+        await asyncio.to_thread(self.summary_content)
+        await asyncio.to_thread(self.make_keywords_and_thumbnail)
+        await asyncio.to_thread(self.make_embedding_vector)
 
     #Response 형태로 만들어주는 함수
     def get_response(self) -> PostResponse:
@@ -86,30 +85,20 @@ class PostSummary:
 
         print(f'요약본:\n{self.content}')
 
-    #keywords를 생성하는 함수
-    def make_keywords(self):
-        messages = make_keywords_content_prompt(self.content)
+    #keywords와 thumbnail_content를 통합 생성하는 함수
+    def make_keywords_and_thumbnail(self):
+        messages = make_keywords_and_thumbnail_prompt(self.content)
 
         response = self.llm.chat_json(
             system=messages[0]['content'],
             user=messages[1]['content'],
-            schema=KeywordResponse
+            schema=KeywordAndThumbnailResponse
         )
-        self.keywords = json.loads(response)['keyword']
-        self.keywords = [keyword for keyword in self.keywords if keyword in self.content]
+        parsed = json.loads(response)
+        self.keywords = [kw for kw in parsed['keyword'] if kw in self.content]
+        self.thumbnail_content = parsed['thumbnail_content']
 
         print(f'키워드: {self.keywords}')
-
-    # thumbnail_content를 생성하는 함수
-    def make_thumbnail_content(self):
-        messages = make_thumbnail_content_prompt(self.content)
-
-        response = self.llm.chat(
-            system=messages[0]['content'],
-            user=messages[1]['content']
-        )
-        self.thumbnail_content = response
-
         print(f'썸네일 요약본: {self.thumbnail_content}')
 
     #embeeding_vector를 생성하는 함수

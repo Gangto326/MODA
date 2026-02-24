@@ -20,12 +20,20 @@ class KeywordResponse(BaseModel):
     keyword: List[str]
 
 
+class KeywordAndThumbnailResponse(BaseModel):
+    keyword: List[str]
+    thumbnail_content: str
+
+
 class LLMClient:
     MODEL = 'gemini-2.0-flash'
     EMBEDDING_MODEL = 'gemini-embedding-001'
 
     def __init__(self):
-        self.client = genai.Client(api_key=GEMINI_API_KEY)
+        self.client = genai.Client(
+            api_key=GEMINI_API_KEY,
+            http_options=types.HttpOptions(timeout=30_000)
+        )
 
     def chat(self, system: str, user: str) -> str:
         response = self.client.models.generate_content(

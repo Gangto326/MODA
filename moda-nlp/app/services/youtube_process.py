@@ -1,3 +1,4 @@
+import asyncio
 import json
 from typing import List
 
@@ -24,10 +25,10 @@ class YoutubeProcess:
 
     #YoutubeProcess 객체가 실행되면 가장 먼저 실행되는 함수
     async def execute(self):
-        self.process_paragraph()
-        self.choose_category()
-        self.make_keywords()
-        self.make_embedding_vector()
+        await asyncio.to_thread(self.process_paragraph)
+        await asyncio.to_thread(self.choose_category)
+        await asyncio.to_thread(self.make_keywords)
+        await asyncio.to_thread(self.make_embedding_vector)
 
     #Response 형태로 만들어주는 함수
     def get_response(self) -> YoutubeResponse:

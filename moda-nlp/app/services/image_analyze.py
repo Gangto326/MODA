@@ -28,11 +28,11 @@ class ImageAnalyze:
 
     #ImageAnalyze 객체가 실행되면 가장 먼저 실행되는 함수
     async def execute(self):
-        self.download_image()
+        await asyncio.to_thread(self.download_image)
         await self.analyze_image()
-        self.choose_category()
+        await asyncio.to_thread(self.choose_category)
         await self.make_keywords()
-        self.make_embedding_vector()
+        await asyncio.to_thread(self.make_embedding_vector)
 
     #Response 형태로 만들어주는 함수
     def get_response(self) -> ImageResponse:
@@ -51,7 +51,8 @@ class ImageAnalyze:
     async def analyze_image(self):
         messages = make_analyze_prompt()
 
-        response = self.llm.chat_with_image(
+        response = await asyncio.to_thread(
+            self.llm.chat_with_image,
             system=messages[0]['content'],
             user=messages[1]['content'],
             image_bytes=self.image_bytes
@@ -96,7 +97,8 @@ class ImageAnalyze:
     async def make_keywords(self):
         messages = make_keywords_content_prompt(self.content)
 
-        response = self.llm.chat_with_image_json(
+        response = await asyncio.to_thread(
+            self.llm.chat_with_image_json,
             system=messages[0]['content'],
             user=messages[1]['content'],
             image_bytes=self.image_bytes,
