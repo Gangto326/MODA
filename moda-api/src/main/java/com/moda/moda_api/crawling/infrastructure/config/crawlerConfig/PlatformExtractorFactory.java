@@ -24,7 +24,6 @@ public class PlatformExtractorFactory {
 		configs.add(createDesktopBrunchConfig());
 		configs.add(createDesktopNaverBlogConfig());
 		configs.add(createDesktopTistoryConfig());
-		configs.add(createNaverNewsConfig());
 		configs.add(createVelogConfig());
 		configs.add(createDaumNewsConfig());
 		configs.add(createGoogleSearchConfig());
@@ -105,7 +104,7 @@ public class PlatformExtractorFactory {
 	private static ExtractorConfig createNaverNewsConfig() {
 		return ExtractorConfig.builder()
 			.pattern("n.news.naver.com")
-			.contentSelector("#newsct_article")
+			.contentSelector("#dic_area, #newsct_article")
 			.imageSelector("#img1")
 			.requiresFrame(false)
 			.urlDomainType(UrlDomainType.NAVER_NEWS)

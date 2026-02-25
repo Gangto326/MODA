@@ -52,6 +52,7 @@ public class JwtFilter extends OncePerRequestFilter {
 			"/api/user/reset-password",
 			"/api/test/crawl",
 			"/api/card/hot-topic",
+			"/actuator",
 			// TODO: 로컬 테스트 전용 — 배포 시 아래 4줄 삭제할 것
 			"/api/card",
 			"/api/category",

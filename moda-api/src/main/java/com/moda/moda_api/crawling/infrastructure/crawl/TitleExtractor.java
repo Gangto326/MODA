@@ -36,7 +36,7 @@ public class TitleExtractor {
 			try {
 				log.info("Extracting title for: {}", url);
 
-				driver = webDriverService.createDriver();
+				driver = webDriverService.borrowDriver();
 				driver.get(url);
 
 				WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
@@ -60,7 +60,7 @@ public class TitleExtractor {
 				log.error("Failed to extract title from URL: {}", url, e);
 				return "";
 			} finally {
-				webDriverService.quitDriver(driver);
+				webDriverService.returnDriver(driver);
 			}
 		}, crawlingExecutor);
 	}

@@ -64,6 +64,16 @@ dependencies {
 
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
+    // Monitoring: Actuator + Prometheus
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+
+    // WebDriver pooling
+    implementation 'org.apache.commons:commons-pool2:2.12.0'
+
+    // Jsoup for lightweight SSR crawling
+    implementation 'org.jsoup:jsoup:1.17.2'
+
 }
 
 tasks.named('test') {

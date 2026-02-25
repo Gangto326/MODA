@@ -17,3 +17,6 @@ PLAN.md
 RETROSPECTIVE.md
 TRANSACTIONAL_ANALYSIS.md
 HOT_FIX_LOG.md
+
+# Firebase credentials
+moda-api/src/main/resources/moda-app-42206-1eed8-firebase-adminsdk-fbsvc-afe1ab8721.json

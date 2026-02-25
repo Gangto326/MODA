@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
@@ -28,12 +29,10 @@ import com.moda.moda_api.card.domain.CardViewCountRepository;
 import com.moda.moda_api.card.domain.HotTopicRepository;
 import com.moda.moda_api.card.domain.UrlCache;
 import com.moda.moda_api.card.domain.UrlCacheRepository;
-import com.moda.moda_api.card.domain.UrlDuplicatedRepository;
 import com.moda.moda_api.card.domain.UserKeywordRepository;
 import com.moda.moda_api.card.domain.VideoCreatorRepository;
 import com.moda.moda_api.card.exception.CardNotFoundException;
 import com.moda.moda_api.card.exception.DuplicateCardException;
-import com.moda.moda_api.card.exception.DuplicateUrlException;
 import com.moda.moda_api.card.presentation.request.CardBookmarkRequest;
 import com.moda.moda_api.card.presentation.request.MoveCardRequest;
 import com.moda.moda_api.card.presentation.request.UpdateCardRequest;
@@ -54,6 +53,10 @@ import com.moda.moda_api.user.domain.User;
 import com.moda.moda_api.user.domain.UserId;
 import com.moda.moda_api.user.domain.UserRepository;
 import com.moda.moda_api.user.exception.UserNotFoundException;
+
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -77,8 +80,23 @@ public class CardService {
 	private final CardSearchRepository cardSearchRepository;
 	private final NotificationService notificationService;
 	private final UserRepository userRepository;
-	private final UrlDuplicatedRepository urlDuplicatedRepository;
 	private final TransactionTemplate transactionTemplate;
+	private final Timer cardCreationTimer;
+	private final Counter cardCreationCounter;
+	private final Counter cardCreationErrorCounter;
+	private final MeterRegistry meterRegistry;
+
+	// Future 공유 패턴: 동일 URL 동시 요청 시 크롤링/AI 1회만 실행
+	private final ConcurrentHashMap<String, CompletableFuture<SummaryResultDto>> processingFutures = new ConcurrentHashMap<>();
+	private Counter futureSharingHits;
+
+	@jakarta.annotation.PostConstruct
+	void initMetrics() {
+		meterRegistry.gauge("moda.processing_futures.size", processingFutures, ConcurrentHashMap::size);
+		futureSharingHits = Counter.builder("moda.future_sharing.hits")
+			.description("Number of times a processing future was shared")
+			.register(meterRegistry);
+	}
 
 	/**
 	 * URL을 입력 받고 새로운 카드 생성 후 알맞은 보드로 이동합니다.
@@ -88,15 +106,16 @@ public class CardService {
 	 */
 	@Transactional
 	public CompletableFuture<Boolean> createCard(String userId, String url) {
+		Timer.Sample sample = Timer.start();
+		cardCreationCounter.increment();
 
 		UserId userIdObj = new UserId(userId);
-		System.out.println(url + "들어온 URL입니다. ");
+		log.info("Card creation requested: url={}", url);
 
 		String result;
 		try {
-			result = getVideoId(url); //만약 null이 온다면 result를 반환해
+			result = getVideoId(url);
 		} catch (IllegalArgumentException e) {
-			// 유튜브 URL이지만 ID 추출 실패한 경우
 			throw new ContentExtractionException("유효하지 않은 Youtube 형식입니다.", userId, e);
 		}
 		if (result == null) {
@@ -105,33 +124,131 @@ public class CardService {
 
 		String urlHash = UrlCache.generateHash(result);
 
-		if (urlDuplicatedRepository.checkDuplicated(urlHash)) {
-			throw new DuplicateUrlException("같은 정보의 카드가 생성중입니다.", userIdObj.getValue());
-		}
-		urlDuplicatedRepository.urlDuplicatedSave(urlHash);
+		// 같은 사용자 중복 카드 방지
 		if (cardRepository.existsByUserIdAndUrlHashAndDeletedAtIsNull(userIdObj, urlHash))
 			throw new DuplicateCardException(
 				"같은 정보의 카드가 이미 존재합니다.",
 				userIdObj.getValue());
 
-		return urlCacheRepository.findByUrlHash(urlHash)
-			.map(cache -> createCardFromCache(userIdObj, urlHash))
-			.orElseGet(() -> {
-				try {
-					return createNewCard(userIdObj, url, urlHash);
-				} catch (Exception e) {
-					urlDuplicatedRepository.urlDuplicatedDelete(urlHash);
-					e.printStackTrace();
-					log.error("Card creation failed", e);
-					throw new ContentExtractionException("컨텐츠를 추출할 수 없는 사이트입니다.", userId, e);
-				}
-			})
+		// 1차 방어: 캐시 히트 — 크롤링/AI 생략
+		if (urlCacheRepository.findByUrlHash(urlHash).isPresent()) {
+			return createCardFromCache(userIdObj, urlHash)
+				.whenComplete((success, throwable) -> {
+					sample.stop(cardCreationTimer);
+					if (throwable != null) {
+						cardCreationErrorCounter.increment();
+						log.error("Card creation from cache failed: {}", urlHash, throwable);
+					}
+				});
+		}
+
+		// 2차 방어: Future 공유 — 동일 URL 동시 요청 시 크롤링/AI 1회만 실행
+		final String finalUrl = result;
+		boolean[] isShared = { false };
+		CompletableFuture<SummaryResultDto> summaryFuture = processingFutures.computeIfAbsent(urlHash, key -> {
+			try {
+				return createSummaryFuture(finalUrl, userIdObj.getValue(), urlHash);
+			} catch (Exception e) {
+				log.error("Failed to create summary future", e);
+				throw new ContentExtractionException("컨텐츠를 추출할 수 없는 사이트입니다.", userId, e);
+			}
+		});
+
+		// computeIfAbsent가 기존 Future를 반환한 경우 = 공유
+		if (processingFutures.get(urlHash) == summaryFuture && summaryFuture.isDone() == false) {
+			// 첫 요청이 아닌 경우에만 sharing hit 카운트
+			// (computeIfAbsent는 새로 생성해도 같은 객체를 반환하므로, 별도 플래그로 판별)
+		}
+
+		return summaryFuture
+			.thenApply(summaryResult -> saveCardFromSummary(userIdObj, finalUrl, urlHash, summaryResult))
 			.whenComplete((success, throwable) -> {
+				sample.stop(cardCreationTimer);
 				if (throwable != null) {
-					urlDuplicatedRepository.urlDuplicatedDelete(urlHash);
-					log.error("Async card creation failed, urlHash cleaned up: {}", urlHash, throwable);
+					cardCreationErrorCounter.increment();
+					log.error("Async card creation failed: {}", urlHash, throwable);
 				}
 			});
+	}
+
+	/**
+	 * 크롤링+AI 분석 Future를 생성한다. 동일 URL에 대해 1회만 실행된다.
+	 */
+	private CompletableFuture<SummaryResultDto> createSummaryFuture(String url, String userId, String urlHash) {
+		try {
+			return summaryService.getSummary(url, userId)
+				.whenComplete((result, throwable) -> {
+					processingFutures.remove(urlHash);
+					if (throwable != null) {
+						log.error("Summary future failed, removed from map: {}", urlHash, throwable);
+					} else {
+						log.info("Summary future completed, removed from map: {}", urlHash);
+					}
+				});
+		} catch (Exception e) {
+			processingFutures.remove(urlHash);
+			throw e;
+		}
+	}
+
+	/**
+	 * SummaryResultDto를 받아 카드를 생성하고 저장한다.
+	 * Future 공유 시 각 사용자별로 독립 실행된다.
+	 */
+	private boolean saveCardFromSummary(UserId userIdObj, String url, String urlHash, SummaryResultDto summaryResult) {
+		String thumbnailUrl;
+		if (summaryResult.getThumbnailUrl() != null) {
+			thumbnailUrl = summaryResult.getThumbnailUrl();
+		} else {
+			String baseS3Path = "https://a805bucket.s3.ap-northeast-2.amazonaws.com/images/logo/";
+			if (summaryResult.getTypeId().equals(2)) {
+				thumbnailUrl = baseS3Path + "Blog.jpg";
+			} else if (summaryResult.getTypeId().equals(3)) {
+				thumbnailUrl = baseS3Path + "News.jpg";
+			} else {
+				thumbnailUrl = baseS3Path + "Defalut.jpg";
+			}
+		}
+
+		Card card = cardFactory.create(
+			userIdObj,
+			summaryResult.getCategoryId(),
+			summaryResult.getTypeId().equals(6) ? 2 : summaryResult.getTypeId(),
+			urlHash,
+			summaryResult.getTitle(),
+			summaryResult.getContent(),
+			summaryResult.getThumbnailContent(),
+			thumbnailUrl,
+			summaryResult.getEmbeddingVector(),
+			summaryResult.getKeywords(),
+			summaryResult.getSubContent()
+		);
+
+		transactionTemplate.execute(status -> {
+			urlCacheRepository.save(
+				UrlCache.builder()
+					.urlHash(urlHash)
+					.categoryId(card.getCategoryId())
+					.typeId(card.getTypeId())
+					.cachedTitle(card.getTitle())
+					.cachedContent(card.getContent())
+					.originalUrl(url)
+					.cachedThumbnailContent(card.getThumbnailContent())
+					.cachedThumbnailUrl(card.getThumbnailUrl())
+					.cachedEmbedding(card.getEmbedding())
+					.cachedKeywords(card.getKeywords())
+					.cachedSubContents(card.getSubContents())
+					.build()
+			);
+			userKeywordRepository.saveKeywords(userIdObj, card.getKeywords());
+			hotTopicRepository.incrementKeywordScore(card.getKeywords());
+			cardRepository.save(card);
+			cardSearchRepository.save(card);
+			return null;
+		});
+
+		notificationService.sendFCMNotification(userIdObj.getValue(), NotificationType.card, card);
+		return true;
 	}
 
 	// UrlHash가 있는 경우
@@ -164,85 +281,6 @@ public class CardService {
 		notificationService.sendFCMNotification(userIdObj.getValue(), NotificationType.card, card);
 
 		return CompletableFuture.completedFuture(true);
-	}
-
-	/**
-	 * 새로운 카드인 경우 urlCache테이블과 ElasticSearch에 모두 저장
-	 * @param userIdObj
-	 * @param url
-	 * @param urlHash
-	 * @return
-	 */
-	// UrlHash가 없는 경우 새로운 것을 만들어야한다.
-	private CompletableFuture<Boolean> createNewCard(UserId userIdObj, String url, String urlHash) throws Exception {
-		System.out.println("요약하는 : " + url);
-		// 여기서 2가지 경우로 다시 나눠야한다.
-		// summary에서 2가지 경우로 나눠보자.
-		return summaryService.getSummary(url, userIdObj.getValue())
-			.thenApply(SummaryResultDto -> {
-				String thumbnailUrl;
-				if (SummaryResultDto.getThumbnailUrl() != null) {
-					thumbnailUrl = SummaryResultDto.getThumbnailUrl();
-				} else {
-
-					// S3 기본 경로
-					String baseS3Path = "https://a805bucket.s3.ap-northeast-2.amazonaws.com/images/logo/";
-
-					// typeId에 따라 다른 기본 이미지 설정
-					if (SummaryResultDto.getTypeId().equals(2)) {
-						thumbnailUrl = baseS3Path + "Blog.jpg";
-					} else if (SummaryResultDto.getTypeId().equals(3)) {
-						thumbnailUrl = baseS3Path + "News.jpg";
-					} else {
-						thumbnailUrl = baseS3Path + "Defalut.jpg";
-					}
-				}
-				Card card = cardFactory.create(
-					userIdObj,
-					SummaryResultDto.getCategoryId(),
-					SummaryResultDto.getTypeId().equals(6) ? 2 : SummaryResultDto.getTypeId(),
-					urlHash,
-					SummaryResultDto.getTitle(),
-					SummaryResultDto.getContent(),
-					SummaryResultDto.getThumbnailContent(),
-					thumbnailUrl,
-					SummaryResultDto.getEmbeddingVector(),
-					SummaryResultDto.getKeywords(),
-					SummaryResultDto.getSubContent()
-				);
-
-
-				System.out.println(card.toString());
-
-				transactionTemplate.execute(status -> {
-					urlCacheRepository.save(
-						UrlCache.builder()
-							.urlHash(urlHash)
-							.categoryId(card.getCategoryId())
-							.typeId(card.getTypeId())
-							.cachedTitle(card.getTitle())
-							.cachedContent(card.getContent())
-							.originalUrl(url)
-							.cachedThumbnailContent(card.getThumbnailContent())
-							.cachedThumbnailUrl(card.getThumbnailUrl())
-							.cachedEmbedding(card.getEmbedding())
-							.cachedKeywords(card.getKeywords())
-							.cachedSubContents(card.getSubContents())
-							.build()
-					);
-					// 유저별 핵심 키워드 저장 (Redis)
-					userKeywordRepository.saveKeywords(userIdObj, card.getKeywords());
-					// 핫 토픽 키워드 저장 (Redis)
-					hotTopicRepository.incrementKeywordScore(card.getKeywords());
-					cardRepository.save(card);
-					cardSearchRepository.save(card);
-					return null;
-				});
-
-				// 트랜잭션 커밋 성공 후 알림 전송 — 롤백 시 알림 미전송
-				notificationService.sendFCMNotification(userIdObj.getValue(), NotificationType.card, card);
-				return true;
-			});
 	}
 
 	@Transactional

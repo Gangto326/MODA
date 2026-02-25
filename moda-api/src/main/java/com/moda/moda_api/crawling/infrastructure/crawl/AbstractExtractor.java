@@ -39,9 +39,10 @@ public class AbstractExtractor {
 	// 추출하는 매서드
 	public CrawledContent extract(String url) throws TimeoutException, NoSuchElementException {
 		WebDriver driver = null;
+		boolean sessionCorrupted = false;
 
 		try {
-			driver = webDriverService.createDriver();
+			driver = webDriverService.borrowDriver();
 
 			ExtractorConfig config = extractorFactory.getConfig(url);
 			System.out.println(config.getPattern());
@@ -65,12 +66,17 @@ public class AbstractExtractor {
 
 		} catch (TimeoutException | NoSuchElementException e) {
 			log.error("Failed to find element while crawling: {}", e.getMessage());
-			throw e;  // 이 예외들도 상위로 전파
+			throw e;
 		} catch (Exception e) {
 			log.error("Failed to extract content", e);
-			throw e;  // 상위 메서드로 예외를 그대로 전달
+			sessionCorrupted = true;
+			throw e;
 		} finally {
-			webDriverService.quitDriver(driver);
+			if (sessionCorrupted) {
+				webDriverService.invalidateDriver(driver);
+			} else {
+				webDriverService.returnDriver(driver);
+			}
 		}
 	}
 
@@ -142,15 +148,16 @@ public class AbstractExtractor {
 
 	public List<Url> extractUrl(String url) {
 		WebDriver driver = null;
+		boolean sessionCorrupted = false;
 
 		try {
-			driver = webDriverService.createDriver();
+			driver = webDriverService.borrowDriver();
 
 			ExtractorConfig config = extractorFactory.getConfig(url);
 
-			log.info("URL: {}", url);  // URL 로깅
-			log.info("Selected Pattern: {}", config.getPattern());  // 매칭된 패턴 로깅
-			log.info("Content Selector: {}", config.getContentSelector());  // 선택자 로깅
+			log.info("URL: {}", url);
+			log.info("Selected Pattern: {}", config.getPattern());
+			log.info("Content Selector: {}", config.getContentSelector());
 
 			driver.get(url);
 
@@ -158,14 +165,11 @@ public class AbstractExtractor {
 			wait.until(webDriver -> ((JavascriptExecutor)webDriver)
 				.executeScript("return document.readyState").equals("complete"));
 
-			// 페이지 로딩을 위한 초기 대기 추가
 			Thread.sleep(1000);
-			// 그 다음 요소들을 찾음
 			List<WebElement> elements = wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(
 				By.cssSelector(config.getUrlSelector())
 			));
 
-			// 디버깅을 위한 로깅 추가
 			log.debug("셀렉터와 일치하는 요소 {}개 발견", elements.size());
 
 			return elements.stream()
@@ -178,7 +182,7 @@ public class AbstractExtractor {
 				})
 				.filter(Objects::nonNull)
 				.filter(extractedUrl -> !extractedUrl.getValue().isEmpty())
-				.distinct()  // 중복 제거
+				.distinct()
 				.collect(Collectors.toList());
 
 		} catch (InterruptedException e) {
@@ -186,9 +190,14 @@ public class AbstractExtractor {
 			throw new ExtractorException("URL 추출 중 쓰레드 중단됨", e);
 		} catch (Exception e) {
 			log.error("URL 추출 중 오류 발생: {}", url, e);
+			sessionCorrupted = true;
 			throw new ExtractorException("URL 추출 실패", e);
 		} finally {
-			webDriverService.quitDriver(driver);
+			if (sessionCorrupted) {
+				webDriverService.invalidateDriver(driver);
+			} else {
+				webDriverService.returnDriver(driver);
+			}
 		}
 	}
 }

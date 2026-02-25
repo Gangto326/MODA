@@ -117,8 +117,8 @@ public class RedisConfig {
 		return redisTemplate;
 	}
 
-	@Bean // 생성중인 url
-	public RedisTemplate<String, String> urlDuplicatedTemplate(RedisConnectionFactory redisConnectionFactory) {
+	@Bean // Lilys YouTube 요약 요청 ID 저장
+	public RedisTemplate<String, String> lilysRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
 		RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
 		redisTemplate.setConnectionFactory(redisConnectionFactory);
 		redisTemplate.setKeySerializer(new StringRedisSerializer());

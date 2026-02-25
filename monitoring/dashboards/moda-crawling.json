@@ -1,0 +1,163 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "title": "Crawling Executor - Active Threads",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "executor_active_threads{name=\"crawlingExecutor\"}",
+          "legendFormat": "active",
+          "refId": "A"
+        },
+        {
+          "expr": "executor_pool_max_threads{name=\"crawlingExecutor\"}",
+          "legendFormat": "max",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "title": "Crawling Executor - Queue Size",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 },
+      "targets": [
+        {
+          "expr": "executor_queued_tasks{name=\"crawlingExecutor\"}",
+          "legendFormat": "queued",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "title": "YouTube Executor - Active Threads",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 },
+      "targets": [
+        {
+          "expr": "executor_active_threads{name=\"youtubeExecutor\"}",
+          "legendFormat": "active",
+          "refId": "A"
+        },
+        {
+          "expr": "executor_pool_max_threads{name=\"youtubeExecutor\"}",
+          "legendFormat": "max",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "title": "WebDriver Active Sessions",
+      "type": "stat",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "moda_webdriver_sessions_active",
+          "legendFormat": "sessions",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "thresholds": { "steps": [{ "value": 0, "color": "green" }, { "value": 2, "color": "yellow" }, { "value": 4, "color": "red" }] } },
+        "overrides": []
+      }
+    },
+    {
+      "title": "Card Creation Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 8 },
+      "targets": [
+        {
+          "expr": "rate(moda_card_creation_total_total[5m])",
+          "legendFormat": "attempts",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(moda_card_creation_errors_total[5m])",
+          "legendFormat": "errors",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "ops" },
+        "overrides": []
+      }
+    },
+    {
+      "title": "Card Creation Duration (P95)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 8 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, rate(moda_card_creation_duration_seconds_bucket[5m]))",
+          "legendFormat": "P95",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.50, rate(moda_card_creation_duration_seconds_bucket[5m]))",
+          "legendFormat": "P50",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "s" },
+        "overrides": []
+      }
+    },
+    {
+      "title": "Search Executor - Active Threads",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "targets": [
+        {
+          "expr": "executor_active_threads{name=\"searchExecutorService\"}",
+          "legendFormat": "active",
+          "refId": "A"
+        },
+        {
+          "expr": "executor_pool_max_threads{name=\"searchExecutorService\"}",
+          "legendFormat": "max",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "title": "Completed Tasks (All Executors)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "targets": [
+        {
+          "expr": "rate(executor_completed_tasks_total{name=\"crawlingExecutor\"}[5m])",
+          "legendFormat": "crawling",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(executor_completed_tasks_total{name=\"youtubeExecutor\"}[5m])",
+          "legendFormat": "youtube",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(executor_completed_tasks_total{name=\"searchExecutorService\"}[5m])",
+          "legendFormat": "search",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "ops" },
+        "overrides": []
+      }
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["moda", "crawling"],
+  "templating": { "list": [] },
+  "time": { "from": "now-1h", "to": "now" },
+  "title": "MODA - Crawling Pipeline",
+  "uid": "moda-crawling"
+}

@@ -1,23 +1,18 @@
 package com.moda.moda_api.crawling.application.service;
 
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.TimeoutException;
 import org.springframework.stereotype.Service;
 
-import com.moda.moda_api.crawling.infrastructure.crawl.AbstractExtractor;
 import com.moda.moda_api.crawling.domain.model.CrawledContent;
+import com.moda.moda_api.crawling.infrastructure.crawl.CrawlingStrategyResolver;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class CrawlingService {
-	private final AbstractExtractor extractor;
+	private final CrawlingStrategyResolver strategyResolver;
 
-	// url를 통한 크롤링
-	public CrawledContent crawlByUrl(String url) throws TimeoutException, NoSuchElementException {
-		CrawledContent crawledContent = extractor.extract(url);
-		return crawledContent;
+	public CrawledContent crawlByUrl(String url) {
+		return strategyResolver.resolve(url).crawl(url);
 	}
-
 }

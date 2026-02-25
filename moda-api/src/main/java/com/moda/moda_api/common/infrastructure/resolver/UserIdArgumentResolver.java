@@ -33,8 +33,12 @@ public class UserIdArgumentResolver implements HandlerMethodArgumentResolver {
         HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
         String token = HeaderUtil.getAccessToken(request);
 
+        // TODO: 로컬 테스트 전용 — 배포 시 아래 if 블록 삭제할 것
+        if (!StringUtils.hasText(token)) {
+            return "38d8eb3c-38ce-43a7-be5b-e30d89484cb2";
+        }
+
         // 필터에서 이미 검증했으므로, 여기서는 단순히 userId만 추출
         return jwtUtil.getUserId(token, "AccessToken");
-        // return "1ef4bd1b-a842-4046-bc75-ba7b45cda1f2";
     }
 }

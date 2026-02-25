@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 @Repository
 @RequiredArgsConstructor
 public class LilysRequestIdRepositoryImpl implements LilysRequestIdRepository {
-	private final RedisTemplate<String, String> urlDuplicatedTemplate;
+	private final RedisTemplate<String, String> lilysRedisTemplate;
 
 	private static final String KEY_PREFIX = "lilys_request_id:";
 	private static final long TTL_MINUTES = 30;
@@ -21,18 +21,18 @@ public class LilysRequestIdRepositoryImpl implements LilysRequestIdRepository {
 	@Override
 	public void save(String urlHash, String requestId) {
 		String key = KEY_PREFIX + urlHash;
-		urlDuplicatedTemplate.opsForValue().set(key, requestId, TTL_MINUTES, TimeUnit.MINUTES);
+		lilysRedisTemplate.opsForValue().set(key, requestId, TTL_MINUTES, TimeUnit.MINUTES);
 	}
 
 	@Override
 	public Optional<String> findByUrlHash(String urlHash) {
 		String key = KEY_PREFIX + urlHash;
-		return Optional.ofNullable(urlDuplicatedTemplate.opsForValue().get(key));
+		return Optional.ofNullable(lilysRedisTemplate.opsForValue().get(key));
 	}
 
 	@Override
 	public void delete(String urlHash) {
 		String key = KEY_PREFIX + urlHash;
-		urlDuplicatedTemplate.delete(key);
+		lilysRedisTemplate.delete(key);
 	}
 }

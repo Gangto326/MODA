@@ -1,0 +1,326 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 2,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "title": "Request Rate (req/s)",
+      "type": "timeseries",
+      "gridPos": { "h": 7, "w": 8, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(http_server_requests_seconds_count{application=\"moda-api\"}[1m]))",
+          "legendFormat": "Total",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(http_server_requests_seconds_count{application=\"moda-api\", uri=\"/api/card\"}[1m]))",
+          "legendFormat": "Card Creation",
+          "refId": "B"
+        },
+        {
+          "expr": "sum(rate(http_server_requests_seconds_count{application=\"moda-api\", uri=~\"/api/search.*\"}[1m]))",
+          "legendFormat": "Search/Main",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "palette-classic" },
+          "custom": { "fillOpacity": 15, "lineWidth": 2, "spanNulls": true }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "title": "Response Time (P95)",
+      "type": "timeseries",
+      "gridPos": { "h": 7, "w": 8, "x": 8, "y": 0 },
+      "targets": [
+        {
+          "expr": "moda_card_creation_duration_seconds_max{application=\"moda-api\"}",
+          "legendFormat": "Card Creation (max)",
+          "refId": "A"
+        },
+        {
+          "expr": "moda_mainpage_duration_seconds_max{application=\"moda-api\"}",
+          "legendFormat": "Main Page (max)",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(http_server_requests_seconds_sum{application=\"moda-api\", uri=~\"/api/search.*\"}[1m]) / rate(http_server_requests_seconds_count{application=\"moda-api\", uri=~\"/api/search.*\"}[1m])",
+          "legendFormat": "Search (avg)",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": { "mode": "palette-classic" },
+          "custom": { "fillOpacity": 10, "lineWidth": 2, "spanNulls": true }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "title": "Error Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 7, "w": 8, "x": 16, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(http_server_requests_seconds_count{application=\"moda-api\", status=~\"5..\"}[1m])) or vector(0)",
+          "legendFormat": "5xx Errors",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(moda_card_creation_errors_total{application=\"moda-api\"}[1m])",
+          "legendFormat": "Card Errors",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "palette-classic" },
+          "custom": { "fillOpacity": 20, "lineWidth": 2, "spanNulls": true },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 0.1 }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "5xx Errors" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }]
+          }
+        ]
+      }
+    },
+    {
+      "title": "Card Creation Pipeline",
+      "type": "timeseries",
+      "gridPos": { "h": 7, "w": 8, "x": 0, "y": 7 },
+      "targets": [
+        {
+          "expr": "moda_card_creation_duration_seconds_sum{application=\"moda-api\"} / moda_card_creation_duration_seconds_count{application=\"moda-api\"}",
+          "legendFormat": "Avg Duration",
+          "refId": "A"
+        },
+        {
+          "expr": "moda_card_creation_duration_seconds_max{application=\"moda-api\"}",
+          "legendFormat": "Max Duration",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": { "mode": "palette-classic" },
+          "custom": { "fillOpacity": 10, "lineWidth": 2, "spanNulls": true }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Max Duration" },
+            "properties": [{ "id": "custom.lineStyle", "value": { "fill": "dash", "dash": [10, 10] } }]
+          }
+        ]
+      }
+    },
+    {
+      "title": "Cards & Futures",
+      "type": "stat",
+      "gridPos": { "h": 7, "w": 8, "x": 8, "y": 7 },
+      "targets": [
+        {
+          "expr": "moda_card_creation_total{application=\"moda-api\"}",
+          "legendFormat": "Created",
+          "refId": "A"
+        },
+        {
+          "expr": "moda_card_creation_errors_total{application=\"moda-api\"}",
+          "legendFormat": "Errors",
+          "refId": "B"
+        },
+        {
+          "expr": "moda_future_sharing_hits_total{application=\"moda-api\"}",
+          "legendFormat": "Future Hits",
+          "refId": "C"
+        },
+        {
+          "expr": "moda_processing_futures_size{application=\"moda-api\"}",
+          "legendFormat": "Active Futures",
+          "refId": "D"
+        },
+        {
+          "expr": "moda_webdriver_sessions_active{application=\"moda-api\"}",
+          "legendFormat": "WebDriver",
+          "refId": "E"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 3 },
+              { "color": "red", "value": 5 }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Errors" },
+            "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }]
+          }
+        ]
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "orientation": "auto"
+      }
+    },
+    {
+      "title": "Main Page Response",
+      "type": "timeseries",
+      "gridPos": { "h": 7, "w": 8, "x": 16, "y": 7 },
+      "targets": [
+        {
+          "expr": "moda_mainpage_duration_seconds_max{application=\"moda-api\"}",
+          "legendFormat": "Max",
+          "refId": "A"
+        },
+        {
+          "expr": "moda_mainpage_duration_seconds_sum{application=\"moda-api\"} / moda_mainpage_duration_seconds_count{application=\"moda-api\"}",
+          "legendFormat": "Avg",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": { "mode": "palette-classic" },
+          "custom": { "fillOpacity": 15, "lineWidth": 2, "spanNulls": true }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "title": "JVM Heap Memory",
+      "type": "timeseries",
+      "gridPos": { "h": 7, "w": 8, "x": 0, "y": 14 },
+      "targets": [
+        {
+          "expr": "sum(jvm_memory_used_bytes{application=\"moda-api\", area=\"heap\"})",
+          "legendFormat": "Heap Used (Total)",
+          "refId": "A"
+        },
+        {
+          "expr": "jvm_memory_used_bytes{application=\"moda-api\", area=\"heap\", id=\"G1 Old Gen\"}",
+          "legendFormat": "Old Gen",
+          "refId": "B"
+        },
+        {
+          "expr": "jvm_memory_used_bytes{application=\"moda-api\", area=\"heap\", id=\"G1 Eden Space\"}",
+          "legendFormat": "Eden",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "color": { "mode": "palette-classic" },
+          "custom": { "fillOpacity": 25, "lineWidth": 2, "spanNulls": true, "stacking": { "mode": "normal" } }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Heap Used (Total)" },
+            "properties": [{ "id": "custom.fillOpacity", "value": 0 }, { "id": "custom.lineWidth", "value": 3 }, { "id": "custom.stacking", "value": { "mode": "none" } }]
+          }
+        ]
+      }
+    },
+    {
+      "title": "CPU Usage",
+      "type": "timeseries",
+      "gridPos": { "h": 7, "w": 8, "x": 8, "y": 14 },
+      "targets": [
+        {
+          "expr": "process_cpu_usage{application=\"moda-api\"}",
+          "legendFormat": "Process CPU",
+          "refId": "A"
+        },
+        {
+          "expr": "system_cpu_usage{application=\"moda-api\"}",
+          "legendFormat": "System CPU",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "color": { "mode": "palette-classic" },
+          "custom": { "fillOpacity": 25, "lineWidth": 2, "spanNulls": true }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "title": "Threads & GC",
+      "type": "timeseries",
+      "gridPos": { "h": 7, "w": 8, "x": 16, "y": 14 },
+      "targets": [
+        {
+          "expr": "jvm_threads_live_threads{application=\"moda-api\"}",
+          "legendFormat": "Live Threads",
+          "refId": "A"
+        },
+        {
+          "expr": "jvm_threads_peak_threads{application=\"moda-api\"}",
+          "legendFormat": "Peak Threads",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(jvm_gc_pause_seconds_count{application=\"moda-api\"}[1m]) * 60",
+          "legendFormat": "GC/min ({{cause}})",
+          "refId": "C"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "fillOpacity": 10, "lineWidth": 2, "spanNulls": true, "axisPlacement": "auto" }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byRegexp", "options": "GC.*" },
+            "properties": [{ "id": "custom.axisPlacement", "value": "right" }, { "id": "unit", "value": "short" }]
+          }
+        ]
+      }
+    }
+  ],
+  "schemaVersion": 39,
+  "tags": ["moda"],
+  "templating": { "list": [] },
+  "time": { "from": "now-15m", "to": "now" },
+  "timepicker": { "refresh_intervals": ["5s", "10s", "30s"] },
+  "timezone": "browser",
+  "title": "MODA - Overview",
+  "uid": "moda-overview",
+  "refresh": "10s"
+}

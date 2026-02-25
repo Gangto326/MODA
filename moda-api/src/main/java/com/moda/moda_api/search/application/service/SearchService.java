@@ -26,6 +26,8 @@ import com.moda.moda_api.search.domain.CardDocument;
 import com.moda.moda_api.search.domain.CardSearchRepository;
 import com.moda.moda_api.user.domain.UserId;
 
+import io.micrometer.core.instrument.Timer;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -38,6 +40,7 @@ public class SearchService {
 	private final UserKeywordRepository userKeywordRepository;
 	private final VideoCreatorRepository videoCreatorRepository;
 	private final ExecutorService executorService;
+	private final Timer mainPageTimer;
 
 	/**
 	 * 검색어와 가장 일치하는 사용자의 게시글들의 모든 핵심 키워드 리스트를 가져옵니다.
@@ -444,6 +447,7 @@ public class SearchService {
 	 * @return
 	 */
 	public CompletableFuture<Map<String, List<CardDocumentListResponse>>> getMainPage(String userId) {
+		Timer.Sample sample = Timer.start();
 		UserId userIdObj = new UserId(userId);
 
 		/**
@@ -594,6 +598,7 @@ public class SearchService {
 			result.put("videos", cardSearchDtoMapper.toDocumentListResponse(videosFuture.join(), userIdObj));
 			result.put("images", cardSearchDtoMapper.toCardListResponse(imgsFuture.join(), userIdObj));
 			result.put("forgotten", cardSearchDtoMapper.toCardListResponse(forgetFuture.join(), userIdObj));
+			sample.stop(mainPageTimer);
 			return result;
 		});
 	}

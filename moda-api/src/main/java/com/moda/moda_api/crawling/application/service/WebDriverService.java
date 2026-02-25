@@ -1,10 +1,7 @@
 package com.moda.moda_api.crawling.application.service;
 
-import java.time.Duration;
-
+import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -14,24 +11,44 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 public class WebDriverService {
-	private final ChromeOptions chromeOptions;
+	private final GenericObjectPool<WebDriver> webDriverPool;
 
-	public WebDriver createDriver() {
-		ChromeDriver driver = new ChromeDriver(chromeOptions);
-		driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30));
-		driver.manage().timeouts().scriptTimeout(Duration.ofSeconds(15));
-		log.info("Created new WebDriver session: {}", driver.getSessionId());
-		return driver;
+	public WebDriver borrowDriver() {
+		try {
+			WebDriver driver = webDriverPool.borrowObject();
+			log.info("WebDriver borrowed (active: {}, idle: {})",
+				webDriverPool.getNumActive(), webDriverPool.getNumIdle());
+			return driver;
+		} catch (Exception e) {
+			log.error("Failed to borrow WebDriver from pool: {}", e.getMessage());
+			throw new RuntimeException("WebDriver pool exhausted or creation failed", e);
+		}
 	}
 
-	public void quitDriver(WebDriver driver) {
+	public void returnDriver(WebDriver driver) {
 		if (driver == null) {
 			return;
 		}
 		try {
-			driver.quit();
+			webDriverPool.returnObject(driver);
+			log.info("WebDriver returned (active: {}, idle: {})",
+				webDriverPool.getNumActive(), webDriverPool.getNumIdle());
 		} catch (Exception e) {
-			log.warn("WebDriver quit failed (session may already be closed): {}", e.getMessage());
+			log.warn("Failed to return WebDriver to pool, invalidating: {}", e.getMessage());
+			invalidateDriver(driver);
+		}
+	}
+
+	public void invalidateDriver(WebDriver driver) {
+		if (driver == null) {
+			return;
+		}
+		try {
+			webDriverPool.invalidateObject(driver);
+			log.info("WebDriver invalidated (active: {}, idle: {})",
+				webDriverPool.getNumActive(), webDriverPool.getNumIdle());
+		} catch (Exception e) {
+			log.warn("Failed to invalidate WebDriver: {}", e.getMessage());
 		}
 	}
 }

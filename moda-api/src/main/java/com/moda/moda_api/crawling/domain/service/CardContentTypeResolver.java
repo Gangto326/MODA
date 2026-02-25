@@ -12,9 +12,8 @@ public class CardContentTypeResolver {
 		"velog.io",
 		"medium.com",
 		"brunch.co.kr",
-		"m.blog.naver.com",
+		"blog.naver.com",
 		"namu.wiki"
-
 	);
 
 	private static final List<String> NEWS_SITES = List.of(

@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.moda.moda_api.card.exception.ApiResponse;
 import com.moda.moda_api.card.exception.DuplicateCardException;
-import com.moda.moda_api.card.exception.DuplicateUrlException;
 import com.moda.moda_api.notification.application.NotificationService;
 import com.moda.moda_api.notification.domain.NotificationType;
 
@@ -47,20 +46,6 @@ public class GlobalExceptionHandler {
 
 		return ApiResponse.error(e.getMessage());
 	}
-	@ExceptionHandler(DuplicateUrlException.class)
-	@ResponseStatus(HttpStatus.CONFLICT) // INTERNAL_SERVER_ERROR 대신 CONFLICT가 더 적절합니다
-	public ApiResponse<Void> handleUrlException(DuplicateUrlException  e) {
-		log.error("Content extraction failed: {}", e.getMessage());
-
-		try {
-			notificationService.sendErrorNotification(e.getUserId(), e.getMessage());
-		} catch (Exception ex) {
-			log.error("Failed to send FCM notification", ex);
-		}
-
-		return ApiResponse.error(e.getMessage());
-	}
-
 	@ExceptionHandler(UnprocessableContentException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ApiResponse<Void> handleUnprocessableContentException(UnprocessableContentException e) {
