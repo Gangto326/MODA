@@ -1,17 +1,10 @@
-import androidx.compose.foundation.Image
+@file:OptIn(ExperimentalLayoutApi::class)
+
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -20,26 +13,61 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.layout.*
+
+import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.remember
+import androidx.compose.ui.draw.clip
+
+
 
 @Composable
 fun ImageBig(
     imageUrl: String,
+    isMine: Boolean,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
-    Card(
+    AsyncImage(
+        model = imageUrl,
+        contentDescription = null,
+        contentScale = ContentScale.FillWidth, // 가로 너비에 맞추고 높이는 비율 유지
         modifier = modifier
             .fillMaxWidth()
-            .aspectRatio(1f)
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            .clip(RoundedCornerShape(12.dp)) // 둥근 모서리 적용
+            .clickable(
+                onClick = onClick,
+                indication = null, // 클릭 효과 제거
+                interactionSource = remember { MutableInteractionSource() } // 기본 효과 제거
+            )
+            .then(
+                if (!isMine) Modifier.border(2.dp, MaterialTheme.colorScheme.onError, RoundedCornerShape(12.dp)) else Modifier // isMine이 false면 빨간 테두리
+            )
+    )
+}
+
+
+@Composable
+fun ImageGrid(imageUrls: List<String>, isMine: Boolean) {
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = 100.dp), // 최소 100dp 유지하며 가변형 정렬
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(12.dp), // 좌우 패딩 추가
+        horizontalArrangement = Arrangement.spacedBy(8.dp), // 열 간격 추가
+        verticalArrangement = Arrangement.spacedBy(8.dp) // 행 간격 추가
     ) {
-        AsyncImage(
-            model = imageUrl,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
+        items(imageUrls.size) { index ->
+            ImageBig(
+                imageUrl = imageUrls[index],
+                isMine = isMine
+            )
+        }
     }
 }

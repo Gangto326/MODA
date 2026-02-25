@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<!--<resources>-->
 
-    <style name="Theme.Modapjt" parent="android:Theme.Material.Light.NoActionBar" />
+<!--    <style name="Theme.Modapjt" parent="android:Theme.Material.Light.NoActionBar" />-->
+<!--</resources>-->
+<resources>
+    <!-- 기본 앱 테마 -->
+    <style name="Theme.Modapjt" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:windowBackground">@color/white</item>
+    </style>
+
+    <!-- 스플래시 테마 -->
+    <style name="Theme.Splash" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@android:color/white</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
 </resources>

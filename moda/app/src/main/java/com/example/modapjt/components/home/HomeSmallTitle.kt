@@ -2,12 +2,14 @@ package com.example.modapjt.components.home
 
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.* // fillMaxWidth(), width() 등 포함
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.font.FontWeight
 
 @Composable
 fun HomeSmallTitle(
@@ -18,22 +20,23 @@ fun HomeSmallTitle(
     Row(
         modifier = Modifier
             .fillMaxWidth() // fillMaxWidth 적용
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
             .then(modifier), // 기존 modifier 추가
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = title,
             fontSize = 16.sp,
-            color = Color.Black
+            fontWeight = FontWeight.Black,
+            color = MaterialTheme.colorScheme.onPrimary
         )
-        Spacer(modifier = Modifier.width(8.dp)) // width 오류 해결됨
+        Spacer(modifier = Modifier.width(6.dp)) // width 오류 해결됨
         Text(
             text = description,
-            fontSize = 14.sp,
-            color = Color.DarkGray
+            fontSize = 10.sp,
+            color = MaterialTheme.colorScheme.onSecondary
         )
     }
-    Spacer(modifier = Modifier.height(8.dp))
+//    Spacer(modifier = Modifier.height(8.dp))
 
 }

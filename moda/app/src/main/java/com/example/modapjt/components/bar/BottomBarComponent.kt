@@ -1,100 +1,214 @@
 // components/home/HomeTopBar.kt
 package com.example.modapjt.components.bar
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-
+import com.example.modapjt.R
 
 
 @Composable
 fun BottomBarComponent(navController: NavController, currentRoute: String) {
-    NavigationBar {
-        NavigationBarItem(
-            icon = { Icon(Icons.Default.Home, "Home") },
-            label = { Text("홈") },
-            selected = currentRoute == "home",
-            onClick = {
-                if (currentRoute != "home") {
-                    navController.navigate("home") {
-                        popUpTo("home") { inclusive = true }
-                    }
-                }
-            }
-        )
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp.dp
+    val screenWidth = configuration.screenWidthDp.dp
 
-        NavigationBarItem(
-            icon = { Icon(Icons.Default.Favorite, "Link Upload") },
-            label = { Text("디테일테스트") },
-            selected = currentRoute == "card_detail_test", // 변경: screen3 -> link_upload
-            onClick = {
-                if (currentRoute != "card_detail_test") {
-                    navController.navigate("card_detail_test") {
-                        popUpTo("home")
-                    }
-                }
-            }
-        )
+    // 화면 높이의 비율로 계산
+    val barHeight = (screenHeight * 0.095f).coerceIn(48.dp, 80.dp)
 
-        NavigationBarItem(
-            icon = { Icon(Icons.Default.Settings, "Settings") },
-            label = { Text("설정") },
-            selected = currentRoute == "settings", // 변경: screen4 -> settings
-            onClick = {
-                if (currentRoute != "settings") {
-                    navController.navigate("settings") {
-                        popUpTo("home")
-                    }
-                }
-            }
-        )
-        // screen2/마이페이지 테스트
-        NavigationBarItem(
-            icon = { Icon(Icons.Default.AccountCircle, "My Page") },
-            label = { Text("마이페이지") },
-            selected = currentRoute == "mypage",
-            onClick = {
-                if (currentRoute != "mypage") {
-                    navController.navigate("mypage/user") { // ✅ userId 추가
-                        popUpTo("home") { inclusive = false }
-                    }
-                }
-            }
-        )
+    // 화면 크기에 따른 텍스트 크기 계산
+    val iconSize = (screenWidth * 0.05f).coerceIn(20.dp, 28.dp)
 
+    // 선택된 아이템과 선택되지 않은 아이템의 색상
+    val selectedColor = MaterialTheme.colorScheme.onPrimary // 검은색
+    val unselectedColor = MaterialTheme.colorScheme.onSecondary // 회색
 
-        // screen2/cardlist/newCardListScreen.kt 화면 테스트
-        NavigationBarItem(
-            icon = { Icon(Icons.Default.Settings, "Card List Test") },
-            label = { Text("검색바테스트") },
-            selected = currentRoute == "card_list_test",
-            onClick = {
-                if (currentRoute != "card_list_test") {
-                    navController.navigate("card_list_test") {
-                        popUpTo("home")
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.tertiary)
+    ) {
+        NavigationBar(
+            containerColor = MaterialTheme.colorScheme.tertiary,
+//            contentColor = Color(0xFF665F5B),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(barHeight)
+        ) {
+            // 홈 아이콘
+            NavigationBarItem(
+                icon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_n_home),
+                        contentDescription = "Home",
+                        modifier = Modifier.size(26.dp),
+                        tint = if (currentRoute == "home") selectedColor else unselectedColor
+                    )
+                },
+                label = {
+                    Text(
+                        "홈",
+                        fontSize = 10.sp,
+                        color = if (currentRoute == "home") selectedColor else unselectedColor
+                    )
+                },
+                selected = currentRoute == "home",
+                onClick = {
+                    if (currentRoute != "home") {
+                        navController.navigate("home") {
+                            popUpTo("home") { inclusive = true }
+                        }
                     }
-                }
-            }
-        )
+                },
+                colors = NavigationBarItemDefaults.colors(
+                    indicatorColor = Color.Transparent,
+                    selectedIconColor = Color.Unspecified,
+                    unselectedIconColor = Color.Unspecified
+                )
+            )
 
-        // screen2/linkupload/newLinkUploadScreen.kt 화면 테스트
-        NavigationBarItem(
-            icon = { Icon(Icons.Default.Settings, "File Upload Test") },
-            label = { Text("파일업로드테스트") },
-            selected = currentRoute == "file_upload_test", // 변경: screen4 -> settings
-            onClick = {
-                if (currentRoute != "file_upload_test") {
-                    navController.navigate("file_upload_test") {
-                        popUpTo("home")
+            // 즐겨찾기 아이콘
+            NavigationBarItem(
+                icon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_n_bookmark_outline),
+                        contentDescription = "즐겨찾기",
+                        modifier = Modifier.size(26.dp),
+                        tint = if (currentRoute == "bookmarkScreen") selectedColor else unselectedColor
+                    )
+                },
+                label = {
+                    Text(
+                        "즐겨찾기",
+                        fontSize = 10.sp,
+                        color = if (currentRoute == "bookmarkScreen") selectedColor else unselectedColor
+                    )
+                },
+                selected = currentRoute == "bookmarkScreen",
+                onClick = {
+                    navController.navigate("bookmarkScreen") {
+                        popUpTo("bookmarkScreen") { inclusive = true }
                     }
-                }
-            }
-        )
+                },
+                colors = NavigationBarItemDefaults.colors(
+                    indicatorColor = Color.Transparent,
+                    selectedIconColor = Color.Unspecified,
+                    unselectedIconColor = Color.Unspecified
+                )
+            )
 
+            // 링크 추가 아이콘
+            NavigationBarItem(
+                icon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_n_link),
+                        contentDescription = "링크 추가",
+                        modifier = Modifier.size(26.dp),
+                        tint = if (currentRoute == "file_upload_test") selectedColor else unselectedColor
+                    )
+                },
+                label = {
+                    Text(
+                        "링크 추가",
+                        fontSize = 10.sp,
+                        color = if (currentRoute == "file_upload_test") selectedColor else unselectedColor
+                    )
+                },
+                selected = currentRoute == "file_upload_test",
+                onClick = {
+                    if (currentRoute != "file_upload_test") {
+                        navController.navigate("file_upload_test") {
+                            popUpTo("home")
+                        }
+                    }
+                },
+                colors = NavigationBarItemDefaults.colors(
+                    indicatorColor = Color.Transparent,
+                    selectedIconColor = Color.Unspecified,
+                    unselectedIconColor = Color.Unspecified
+                )
+            )
+
+            // 검색 아이콘
+            NavigationBarItem(
+                icon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_n_search),
+                        contentDescription = "검색",
+                        modifier = Modifier.size(26.dp),
+                        tint = if (currentRoute == "afterSearch") selectedColor else unselectedColor
+                    )
+                },
+                label = {
+                    Text(
+                        "검색",
+                        fontSize = 10.sp,
+                        color = if (currentRoute == "afterSearch") selectedColor else unselectedColor
+                    )
+                },
+                selected = currentRoute == "afterSearch",
+                onClick = {
+                    if (currentRoute != "afterSearch") {
+                        navController.navigate("afterSearch") {
+                            popUpTo("home")
+                        }
+                    }
+                },
+                colors = NavigationBarItemDefaults.colors(
+                    indicatorColor = Color.Transparent,
+                    selectedIconColor = Color.Unspecified,
+                    unselectedIconColor = Color.Unspecified
+                )
+            )
+
+            // MY 아이콘
+            NavigationBarItem(
+                icon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_n_mypage),
+                        contentDescription = "My Page",
+                        modifier = Modifier.size(26.dp),
+                        tint = if (currentRoute == "mypage") selectedColor else unselectedColor
+                    )
+                },
+                label = {
+                    Text(
+                        "MY",
+                        fontSize = 10.sp,
+                        color = if (currentRoute == "mypage") selectedColor else unselectedColor
+                    )
+                },
+                selected = currentRoute == "mypage",
+                onClick = {
+                    if (currentRoute != "mypage") {
+                        navController.navigate("mypage/user") {
+                            popUpTo("home") { inclusive = false }
+                        }
+                    }
+                },
+                colors = NavigationBarItemDefaults.colors(
+                    indicatorColor = Color.Transparent,
+                    selectedIconColor = Color.Unspecified,
+                    unselectedIconColor = Color.Unspecified
+                )
+            )
+        }
     }
 }

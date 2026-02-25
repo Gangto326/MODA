@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -23,14 +24,14 @@ fun LinkAddButton(
             .fillMaxWidth() // 버튼이 화면의 가로 너비를 꽉 채우도록 설정
             .height(56.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFFFFD700) // 버튼 컬러
-            ,disabledContainerColor = Color.Gray // 버튼 비활성화시 ( 일단 : 회색 )
+            containerColor = MaterialTheme.colorScheme.onPrimary // 버튼 컬러
+            ,disabledContainerColor = MaterialTheme.colorScheme.onSecondary // 버튼 비활성화시 ( 일단 : 회색 )
         ),
         shape = RoundedCornerShape(16.dp) // 모서리 둥글게
     ) {
         Text(
             text = "링크 추가하기",
-            color = Color.Black
+            color = MaterialTheme.colorScheme.tertiary
         )
     }
 }

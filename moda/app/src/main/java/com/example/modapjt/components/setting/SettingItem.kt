@@ -1,5 +1,6 @@
 package com.example.modapjt.components.setting
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -21,19 +22,22 @@ fun SettingItem(title: String, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .clickable(onClick = onClick,
+                indication = null, // 클릭 효과 제거
+                interactionSource = remember { MutableInteractionSource() }) // 기본 효과 제거)
             .padding(vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = title,
             fontSize = 16.sp,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            color = MaterialTheme.colorScheme.onPrimary
         )
         Icon(
             imageVector = Icons.Filled.KeyboardArrowRight, // 오른쪽 이동 아이콘 추가
             contentDescription = "이동",
-            tint = Color.Gray
+            tint = MaterialTheme.colorScheme.onPrimary
         )
     }
 }

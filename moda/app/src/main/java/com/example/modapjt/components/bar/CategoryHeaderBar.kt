@@ -7,27 +7,32 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavController
+import com.example.modapjt.R
 
 @Composable
 fun CategoryHeaderBar(modifier: Modifier = Modifier, categoryName: String, navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp)  // 높이 설정
-            .background(Color.White),  // 배경색 설정
+            .background(MaterialTheme.colorScheme.tertiary)
+            .height(56.dp) , // 높이 설정
+//            .background(Color.White),  // 배경색 설정
         contentAlignment = Alignment.Center
     ) {
         // 왼쪽 뒤로가기 버튼
@@ -39,9 +44,10 @@ fun CategoryHeaderBar(modifier: Modifier = Modifier, categoryName: String, navCo
         ) {
             IconButton(onClick = { navController.popBackStack() }) {
                 Icon(
-                    imageVector = Icons.Default.ArrowBack, // ← 아이콘
+                    painter = painterResource(id = R.drawable.ic_back),
+                    modifier = Modifier.size(15.dp),
                     contentDescription = "뒤로가기",
-                    tint = Color.Black
+                    tint = MaterialTheme.colorScheme.secondary
                 )
             }
         }
@@ -51,7 +57,7 @@ fun CategoryHeaderBar(modifier: Modifier = Modifier, categoryName: String, navCo
             text = categoryName, // 선택한 카테고리 반영
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.Black
+            color = MaterialTheme.colorScheme.onPrimary
         )
     }
 }

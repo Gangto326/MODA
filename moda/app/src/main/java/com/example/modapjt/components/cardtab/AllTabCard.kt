@@ -1,165 +1,361 @@
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.example.modapjt.R
+import com.example.modapjt.data.dto.response.TopScore
 import com.example.modapjt.domain.model.Card
+import com.example.modapjt.screen2.EmptyMessage
 
 @Composable
 fun AllTabCard(
+    navController: NavController, // NavController 추가
     imageCards: List<Card>,
     videoCards: List<Card>,
     blogCards: List<Card>,
     newsCards: List<Card>,
+    topScores: List<TopScore>?, // nullable로 변경
     onImageMoreClick: () -> Unit = {},
     onVideoMoreClick: () -> Unit = {},
     onBlogMoreClick: () -> Unit = {},
     onNewsMoreClick: () -> Unit = {}
 ) {
+//    println(topScores)
+
+    // 모든 가능한 섹션 정보를 먼저 생성
+    val defaultSections = listOf(
+        SectionInfo(
+            contentType = "VIDEO",
+            title = "동영상",
+            cards = videoCards,
+            isImage = false,
+            onMoreClick = onVideoMoreClick,
+            defaultOrder = 0 // 기본 순서 지정
+        ),
+        SectionInfo(
+            contentType = "BLOG",
+            title = "블로그",
+            cards = blogCards,
+            isImage = false,
+            onMoreClick = onBlogMoreClick,
+            defaultOrder = 1
+        ),
+        SectionInfo(
+            contentType = "NEWS",
+            title = "뉴스",
+            cards = newsCards,
+            isImage = false,
+            onMoreClick = onNewsMoreClick,
+            defaultOrder = 2
+        ),
+        SectionInfo(
+            contentType = "IMG",
+            title = "이미지",
+            cards = imageCards,
+            isImage = true,
+            onMoreClick = onImageMoreClick,
+            defaultOrder = 3
+        )
+    )
+
+    // TopScore 맵 생성 (없는 경우 빈 맵)
+    val scoreMap = topScores?.associate { it.contentType to it.score } ?: emptyMap()
+
+    // 섹션 정렬
+    val sortedSections = defaultSections
+        .filter { it.cards.isNotEmpty() } // 콘텐츠가 있는 섹션만 필터링
+        .sortedWith(
+            compareByDescending<SectionInfo> { scoreMap[it.contentType] } // score 기준 정렬 (null은 가장 뒤로)
+                .thenBy { it.defaultOrder } // score가 없거나 같은 경우 기본 순서로 정렬
+        )
+
+    Column(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        sortedSections.forEachIndexed { index, section ->
+            SectionBlock(
+                title = section.title,
+                items = section.cards,
+                isImage = section.isImage,
+                onMoreClick = section.onMoreClick,
+                navController = navController
+            )
+            if (index < sortedSections.size - 1) {
+                SectionDivider()
+            }
+        }
+    }
+//    Column(
+//        modifier = Modifier
+//            .fillMaxWidth()
+////            .padding(16.dp),
+////        verticalArrangement = Arrangement.spacedBy(24.dp) // 섹션 간 간격 설정
+//    ) {
+//        // 동영상 섹션
+//        SectionBlock(
+//            title = "동영상",
+//            items = videoCards,
+//            isImage = false,
+//            onMoreClick = onVideoMoreClick,
+//            navController = navController // NavController 전달
+//        )
+//        SectionDivider() // 동영상 섹션 후 구분선
+//
+//        // 블로그 섹션
+//        SectionBlock(
+//            title = "블로그",
+//            items = blogCards,
+//            isImage = false,
+//            onMoreClick = onBlogMoreClick,
+//            navController = navController // NavController 전달
+//        )
+//        SectionDivider() // 블로그 섹션 후 구분선
+//
+//        // 뉴스 섹션
+//        SectionBlock(
+//            title = "뉴스",
+//            items = newsCards,
+//            isImage = false,
+//            onMoreClick = onNewsMoreClick,
+//            navController = navController // NavController 전달
+//        )
+//        SectionDivider() // 이미지 섹션 후 구분선
+//
+//        // 이미지 섹션
+//        SectionBlock(
+//            title = "이미지",
+//            items = imageCards,
+//            isImage = true,
+//            onMoreClick = onImageMoreClick,
+//            navController = navController // NavController 전달
+//        )
+//    }
+}
+
+private data class SectionInfo(
+    val contentType: String,
+    val title: String,
+    val cards: List<Card>,
+    val isImage: Boolean,
+    val onMoreClick: () -> Unit,
+    val defaultOrder: Int // 기본 순서 추가
+)
+
+// 각 섹션을 공통적으로 처리하는 컴포넌트
+@Composable
+fun SectionBlock(title: String, items: List<Card>, isImage: Boolean, onMoreClick: () -> Unit, navController: NavController ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
+            .padding(horizontal = 20.dp, vertical = 10.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp) // 섹션 간 간격 유지
     ) {
-        // 이미지 섹션
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            SectionHeader("이미지", onImageMoreClick)
-            if (imageCards.isEmpty()) {
-                Text(
-                    text = "저장된 이미지가 없습니다",
-                    color = Color.Gray,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp),
-                    textAlign = TextAlign.Center
-                )
+        SectionHeader(title)
+
+        if (items.isEmpty()) {
+            val message = when (title) {
+                "동영상" -> "저장된 ${title}이 없습니다"
+                else -> "저장된 ${title}가 없습니다"
+            }
+            EmptyMessage(message) // ✅ 동영상만 "이 없습니다", 나머지는 "가 없습니다"
+        }
+        else {
+            if (isImage) {
+                // 이미지 섹션 (3x2 레이아웃, 간격 8dp 적용)
+                val rows = items.take(6).chunked(3) // 3개씩 나누어 2줄 생성
+
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) { // 이미지 행(row) 간 간격 8dp 유지
+                    rows.forEach { rowItems ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp) // 이미지 간 간격 8dp 유지
+                        ) {
+                            rowItems.forEach { card ->
+                                ImageSmall(
+                                    imageUrl = card.thumbnailUrl ?: "",
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .size(100.dp),
+                                    onClick = { navController.navigate("cardDetail/${card.cardId}") }, // 클릭 시 이동
+                                    isMine = card.isMine,
+                                    bookMark = card.bookMark
+                                )
+                            }
+
+                            // 빈 공간을 채우기 위한 Spacer 추가 (3개가 안될 경우)
+                            repeat(3 - rowItems.size) {
+                                Spacer(modifier = Modifier.weight(1f))
+                            }
+                        }
+                    }
+                }
             } else {
-                Row(
-//                    modifier = Modifier.fillMaxWidth(),
-                    modifier = Modifier
-                        .horizontalScroll(rememberScrollState()), // 가로 스크롤 가능하도록 설정
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    imageCards.take(10).forEach { card ->
-                        ImageSmall(
-                            imageUrl = card.thumbnailUrl ?: "",
-//                            modifier = Modifier.weight(1f), // Row 내부에서 각 아이템이 같은 비율(1:1:1)로 공간을 차지
-                            modifier = Modifier.size(120.dp), // 크기 고정
-                            onClick = {}
-                        )
+                // 동영상, 블로그, 뉴스 섹션을 처리하는 부분
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    items.take(3).forEachIndexed { index, card ->
+                        Column {
+                            when (title) {
+                                "동영상" -> VideoSmall(
+                                    videoId = card.thumbnailUrl ?: "",
+                                    title = card.title,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    onClick = { navController.navigate("cardDetail/${card.cardId}") },
+                                    isMine = card.isMine,
+                                    bookMark = card.bookMark,
+                                    thumbnailContent = card.thumbnailContent ?: "",
+                                    keywords = card.keywords.take(3)
+                                )
+
+                                "블로그" -> BlogSmall(
+                                    title = card.title,
+                                    description = card.thumbnailContent ?: "",
+                                    imageUrl = card.thumbnailUrl ?: "",
+                                    onClick = { navController.navigate("cardDetail/${card.cardId}") },
+                                    isMine = card.isMine,
+                                    bookMark = card.bookMark,
+                                    keywords = card.keywords
+                                )
+
+                                "뉴스" -> NewsSmall(
+                                    headline = card.title,
+                                    keywords = card.keywords,
+                                    description = card.thumbnailContent ?: "",
+                                    imageUrl = card.thumbnailUrl ?: "",
+                                    onClick = { navController.navigate("cardDetail/${card.cardId}") },
+                                    isMine = card.isMine,
+                                    bookMark = card.bookMark
+                                )
+                            }
+
+                            // 🔥 마지막 아이템이 아닐 때만 Divider 추가
+                            if (index < items.take(3).size - 1) {
+                                Divider(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 20.dp), // ✅ 구분선 위에 8dp 패딩 추가
+                                    color = MaterialTheme.colorScheme.onTertiary,
+                                    thickness = 1.dp
+                                )
+                            }
+                        }
                     }
                 }
             }
+                SectionAdd("$title 더보기", onMoreClick)
         }
 
-        // 동영상 섹션
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            SectionHeader("동영상", onVideoMoreClick)
-            if (videoCards.isEmpty()) {
-                Text(
-                    text = "저장된 영상이 없습니다",
-                    color = Color.Gray,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp),
-                    textAlign = TextAlign.Center
-                )
-            } else {
-                Row(
-//                    modifier = Modifier.fillMaxWidth(),
-                    modifier = Modifier
-                        .horizontalScroll(rememberScrollState()), // 가로 스크롤 추가
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    videoCards.take(10).forEach { card ->
-                        VideoSmall(
-                            videoId = card.thumbnailUrl ?: "",
-                            title = card.title,
-//                            modifier = Modifier.weight(1f),
-                            modifier = Modifier.width(160.dp), // 가로 크기 유지
-                            onClick = {}
-                        )
-                    }
-                }
-            }
-        }
 
-        // 블로그 섹션
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            SectionHeader("블로그", onBlogMoreClick)
-            if (blogCards.isEmpty()) {
-                Text(
-                    text = "저장된 블로그가 없습니다",
-                    color = Color.Gray,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp),
-                    textAlign = TextAlign.Center
-                )
-            } else {
-                blogCards.take(2).forEach { card ->
-                    BlogSmall(
-                        title = card.title,
-                        description = card.thumbnailContent ?: "",
-                        imageUrl = card.thumbnailUrl ?: "",
-                        onClick = {}
-                    )
-                }
-            }
-        }
-
-        // 뉴스 섹션
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            SectionHeader("뉴스", onNewsMoreClick)
-            if (newsCards.isEmpty()) {
-                Text(
-                    text = "저장된 뉴스가 없습니다",
-                    color = Color.Gray,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp),
-                    textAlign = TextAlign.Center
-                )
-            } else {
-                newsCards.take(2).forEach { card ->
-                    NewsSmall(
-                        headline = card.title,
-                        keywords = card.keywords,
-                        imageUrl = card.thumbnailUrl ?: "",
-                        onClick = {}
-                    )
-                }
-            }
-        }
     }
 }
 
+// 섹션 구분선
 @Composable
-private fun SectionHeader(
-    title: String,
+fun SectionDivider() {
+    Divider(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 10.dp), // 패딩 추가
+        color = MaterialTheme.colorScheme.onTertiary,
+        thickness = 6.dp // 구분선 두께 설정
+    )
+}
+
+// ✅ 섹션 제목 컴포넌트
+@Composable
+private fun SectionHeader(title: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+//            .background(Color.Yellow) // 배경 색
+            .height(IntrinsicSize.Min), // 높이를 내부 요소에 맞춤 (불필요한 공간 제거)
+        verticalAlignment = Alignment.CenterVertically, // 아이콘과 텍스트를 세로 중앙 정렬
+        horizontalArrangement = Arrangement.Start // 텍스트는 왼쪽 정렬
+    ) {
+
+
+
+        // 섹션별 아이콘 추가
+        val iconResId = when (title) {
+            "이미지" -> R.drawable.ic_a_image // 이미지 섹션 아이콘
+            "동영상" -> R.drawable.ic_a_youtube // 동영상 섹션 아이콘
+            "블로그" -> R.drawable.ic_a_blog // 블로그 섹션 아이콘
+            "뉴스" -> R.drawable.ic_a_news // 뉴스 섹션 아이콘
+            else -> null
+        }
+
+        // 다크모드일 때 아이콘 색 변경
+        val iconTint = if (isSystemInDarkTheme()) Color.White else Color.Unspecified
+
+        // 아이콘이 있을 경우 추가 (중복 제거 & 크기 조정)
+        iconResId?.let {
+            Icon(
+                painter = painterResource(id = it),
+                contentDescription = title,
+                tint = iconTint,
+                modifier = Modifier
+                    .size(24.dp) // 동영상 아이콘 크기 줄이기
+                    .padding(end = 6.dp) // 텍스트와의 간격 조정
+            )
+        }
+
+        // 섹션 제목 텍스트
+        Text(
+            text = title,
+            color = MaterialTheme.colorScheme.onPrimary,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold // 텍스트는 굵게 설정
+        )
+    }
+}
+
+// ✅ 더보기 버튼
+@Composable
+private fun SectionAdd(
+    text: String,
     onMoreClick: () -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(44.dp)
+            .border(1.dp, MaterialTheme.colorScheme.onPrimary, shape = RoundedCornerShape(16.dp)), // 테두리 추가
+        horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = title,
-            fontSize = 16.sp
-        )
-        TextButton(onClick = onMoreClick) {
-            Text(text = "더보기")
+        TextButton(
+            onClick = onMoreClick,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = text,
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.secondary
+            )
         }
     }
 }
-
-

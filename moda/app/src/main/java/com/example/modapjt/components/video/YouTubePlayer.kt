@@ -2,7 +2,9 @@ package com.example.modapjt.components.video
 
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
@@ -19,7 +21,7 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTube
  */
 
 @Composable
-fun YouTubePlayer(videoId: String, modifier: Modifier = Modifier) {
+fun YouTubePlayer(videoId: String, modifier: Modifier = Modifier, isTopVideo: Boolean = false) {
     val context = LocalContext.current
     val youTubePlayerView = remember {
         YouTubePlayerView(context).apply {
@@ -31,11 +33,29 @@ fun YouTubePlayer(videoId: String, modifier: Modifier = Modifier) {
     }
 
     // 생명주기 관리 추가
-    DisposableEffect(Unit) {
-        (context as? androidx.lifecycle.LifecycleOwner)?.lifecycle?.addObserver(youTubePlayerView)
+//    DisposableEffect(Unit) {
+//        // 리소스가 필요할 때만 추가하기
+//        (context as? androidx.lifecycle.LifecycleOwner)?.lifecycle?.addObserver(youTubePlayerView)
+//
+//        onDispose {
+//            youTubePlayerView.release()  // 재생 종료 후 리소스를 해제
+//        }
+//    }
+
+    DisposableEffect(youTubePlayerView) {
+        val lifecycleOwner = context as? androidx.lifecycle.LifecycleOwner
+        lifecycleOwner?.lifecycle?.addObserver(youTubePlayerView)
 
         onDispose {
-            youTubePlayerView.release()
+            try {
+                // 라이프사이클 옵저버 제거
+                lifecycleOwner?.lifecycle?.removeObserver(youTubePlayerView)
+                // release() 호출 전에 약간의 지연을 줘서 리소스가 적절히 정리되도록 함
+                youTubePlayerView.release()
+            } catch (e: Exception) {
+                // release 과정에서 발생할 수 있는 예외 처리
+                e.printStackTrace()
+            }
         }
     }
 
@@ -45,11 +65,19 @@ fun YouTubePlayer(videoId: String, modifier: Modifier = Modifier) {
     ) { view ->
         view.addYouTubePlayerListener(object : AbstractYouTubePlayerListener() {
             override fun onReady(youTubePlayer: YouTubePlayer) {
-                youTubePlayer.loadVideo(videoId, 0f)
+                // 상단 비디오일 때만 자동 재생하고 음소거
+                if (isTopVideo) {
+                    youTubePlayer.loadVideo(videoId, 0f)  // 상단 비디오만 자동 재생
+                    youTubePlayer.mute()  // 음소거
+                } else {
+                    // 다른 비디오는 자동으로 재생되지 않도록 하고 멈춤
+                    youTubePlayer.cueVideo(videoId, 0f)  // 자동재생은 하지 않고 대기 상태로 유지
+                }
             }
         })
     }
 }
+
 
 
 // 추가 기능
