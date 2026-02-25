@@ -1,0 +1,55 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg15
+    container_name: moda-postgres
+    environment:
+      POSTGRES_DB: moda
+      POSTGRES_USER: a805
+      POSTGRES_PASSWORD: moda1234
+    ports:
+      - "5432:5432"
+    volumes:
+      - moda-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U a805 -d moda"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    container_name: moda-redis
+    command: redis-server --requirepass moda1234
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "moda1234", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+    container_name: moda-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    volumes:
+      - moda-esdata:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -q '\"status\":\"green\\|yellow\"'"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    # Nori 플러그인은 컨테이너 최초 실행 후 수동 설치 필요:
+    # docker exec moda-elasticsearch bin/elasticsearch-plugin install analysis-nori
+    # docker restart moda-elasticsearch
+
+volumes:
+  moda-pgdata:
+  moda-esdata:

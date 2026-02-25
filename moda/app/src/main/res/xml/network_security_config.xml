@@ -4,6 +4,7 @@
         <domain includeSubdomains="true">localhost</domain>
         <domain includeSubdomains="true">10.0.2.2</domain> <!-- 에뮬레이터용 -->
         <domain includeSubdomains="true">0.0.0.0</domain> <!-- pc ip -->
+        <domain includeSubdomains="true">192.168.0.8</domain> <!-- 로컬 테스트용 맥북 IP -->
     </domain-config>
 </network-security-config>
 

@@ -8,19 +8,20 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
+        // TODO: 로컬 테스트 전용 — 배포 시 원래 origin으로 복원할 것
         registry.addMapping("/api/**")
-                .allowedOrigins("https://i12a805.p.ssafy.io")
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH")
-                .allowedHeaders("Content-Type");
+                .allowedOrigins("*")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+                .allowedHeaders("*");
 
         registry.addMapping("/v3/api-docs/**")
-                .allowedOrigins("https://i12a805.p.ssafy.io")
+                .allowedOrigins("*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .maxAge(3600);
 
         registry.addMapping("/swagger-ui/**")
-                .allowedOrigins("https://i12a805.p.ssafy.io")
+                .allowedOrigins("*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .maxAge(3600);
