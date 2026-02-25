@@ -13,8 +13,8 @@ public class AsyncConfig {
 	@Bean("crawlingExecutor")
 	public Executor crawlingExecutor() {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-		executor.setCorePoolSize(3);
-		executor.setMaxPoolSize(5);
+		executor.setCorePoolSize(2);
+		executor.setMaxPoolSize(4);
 		executor.setQueueCapacity(50);
 		executor.setThreadNamePrefix("Crawl-");
 		executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());

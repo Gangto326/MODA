@@ -6,10 +6,13 @@ import java.util.concurrent.CompletableFuture;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.Map;
+
 import com.moda.moda_api.summary.infrastructure.dto.AIAnalysisResponseDTO;
 import com.moda.moda_api.summary.infrastructure.dto.AiArticleRequestDTO;
 import com.moda.moda_api.summary.infrastructure.dto.AiImageRequestDTO;
 import com.moda.moda_api.summary.infrastructure.dto.AiYoutubeRequestDTO;
+import com.moda.moda_api.summary.infrastructure.dto.CrawlResponseDTO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +51,16 @@ public class PythonAiClient {
 			.retrieve()
 			.bodyToMono(AIAnalysisResponseDTO.class)
 			.timeout(Duration.ofSeconds(30))
+			.toFuture();
+	}
+
+	public CompletableFuture<CrawlResponseDTO> crawlAndAnalyze(String url) {
+		return pythonWebClient.post()
+			.uri("crawl")
+			.bodyValue(Map.of("url", url))
+			.retrieve()
+			.bodyToMono(CrawlResponseDTO.class)
+			.timeout(Duration.ofSeconds(60))
 			.toFuture();
 	}
 

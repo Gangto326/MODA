@@ -12,7 +12,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.moda.moda_api.crawling.infrastructure.crawl.TitleExtractor;
 import com.moda.moda_api.summary.exception.SummaryProcessingException;
 import com.moda.moda_api.summary.infrastructure.dto.LilysRequestIdResponse;
 import com.moda.moda_api.summary.infrastructure.dto.LilysSummary;
@@ -29,7 +28,6 @@ import reactor.core.publisher.Mono;
 public class LilysAiClient {
 	private final WebClient lilysWebClient;
 	private final JsonMapper jsonMapper;
-	private final TitleExtractor titleExtractor;
 
 	@Value("${lilys.ai.api.url}")
 	private String lilysUrl;

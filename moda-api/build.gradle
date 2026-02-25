@@ -37,9 +37,6 @@ dependencies {
     implementation 'redis.clients:jedis'
     runtimeOnly 'org.postgresql:postgresql'
 
-    implementation 'org.seleniumhq.selenium:selenium-java'
-    implementation 'io.github.bonigarcia:webdrivermanager:5.6.2'
-
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -68,11 +65,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.micrometer:micrometer-registry-prometheus'
 
-    // WebDriver pooling
-    implementation 'org.apache.commons:commons-pool2:2.12.0'
-
-    // Jsoup for lightweight SSR crawling
-    implementation 'org.jsoup:jsoup:1.17.2'
 
 }
 

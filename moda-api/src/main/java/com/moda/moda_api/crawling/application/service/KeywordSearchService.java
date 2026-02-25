@@ -1,59 +1,87 @@
 package com.moda.moda_api.crawling.application.service;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.moda.moda_api.crawling.domain.model.Url;
-import com.moda.moda_api.crawling.infrastructure.crawl.AbstractExtractor;
 import com.moda.moda_api.crawling.infrastructure.repository.UrlRedisRepository;
 
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
-@RequiredArgsConstructor
+@Slf4j
 public class KeywordSearchService {
-	private final AbstractExtractor abstractExtractor;
+	private final WebClient googleWebClient;
 	private final UrlRedisRepository urlRedisRepository;
 
-	public List<Url> crawlByKeyWord(String keyword) {
-		System.out.println("검색 URL 생성 ");
-		// 1. Google 검색 URL 생성
-		String searchUrl = buildGoogleSearchUrl(keyword);
+	@Value("${google.custom.search.api.key:}")
+	private String apiKey;
 
-		System.out.println(searchUrl);
-		System.out.println("크롤링 수행");
-		// 2. 크롤링 수행
-		List<Url> crawledUrls = abstractExtractor.extractUrl(searchUrl);
+	@Value("${google.custom.search.engine.id:}")
+	private String engineId;
 
-		// 3. Redis에 저장 (keyword를 key로 사용)
-		urlRedisRepository.saveUrls(keyword, crawledUrls);
-
-		List<Url> urls = urlRedisRepository.getUrls(keyword);
-		return urls;
+	public KeywordSearchService(
+		@Qualifier("googleWebClient") WebClient googleWebClient,
+		UrlRedisRepository urlRedisRepository) {
+		this.googleWebClient = googleWebClient;
+		this.urlRedisRepository = urlRedisRepository;
 	}
 
-	private String buildGoogleSearchUrl(String keyword) {
+	public List<Url> crawlByKeyWord(String keyword) {
+		log.info("Google Custom Search API 검색: {}", keyword);
+
+		List<Url> urls = searchViaApi(keyword);
+
+		// Redis에 저장
+		urlRedisRepository.saveUrls(keyword, urls);
+		return urlRedisRepository.getUrls(keyword);
+	}
+
+	private List<Url> searchViaApi(String keyword) {
+		if (apiKey == null || apiKey.isBlank() || engineId == null || engineId.isBlank()) {
+			log.warn("Google Custom Search API 키 또는 엔진 ID 미설정 — 빈 결과 반환");
+			return Collections.emptyList();
+		}
+
 		try {
-			StringBuilder searchUrlBuilder = new StringBuilder();
+			JsonNode response = googleWebClient.get()
+				.uri(uriBuilder -> uriBuilder
+					.queryParam("key", apiKey)
+					.queryParam("cx", engineId)
+					.queryParam("q", keyword)
+					.queryParam("num", 10)
+					.queryParam("lr", "lang_ko")
+					.build())
+				.retrieve()
+				.bodyToMono(JsonNode.class)
+				.block();
 
-			// Google 검색 기본 URL
-			searchUrlBuilder.append("https://www.google.com/search");
-			searchUrlBuilder.append("?q=").append(URLEncoder.encode(keyword, "UTF-8"));
+			if (response == null || !response.has("items")) {
+				log.info("검색 결과 없음: {}", keyword);
+				return Collections.emptyList();
+			}
 
-			// 추가 매개변수
-			searchUrlBuilder.append("&num=20");  // 검색 결과 수 (최대 100)
-			searchUrlBuilder.append("&hl=ko");   // 검색 언어 설정 (한국어)
-			searchUrlBuilder.append("&safe=active"); // SafeSearch 필터
-			searchUrlBuilder.append("&start=0");  // 검색 시작 위치 (페이징)
+			List<Url> urls = StreamSupport.stream(response.get("items").spliterator(), false)
+				.map(item -> item.get("link").asText())
+				.filter(link -> link != null && !link.isEmpty())
+				.distinct()
+				.map(Url::new)
+				.collect(Collectors.toList());
 
-			return searchUrlBuilder.toString();
+			log.info("Google Custom Search 결과: {}건", urls.size());
+			return urls;
 
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException("키워드 인코딩 실패: " + keyword, e);
+		} catch (Exception e) {
+			log.error("Google Custom Search API 호출 실패: {}", e.getMessage());
+			return Collections.emptyList();
 		}
 	}
-
 }
