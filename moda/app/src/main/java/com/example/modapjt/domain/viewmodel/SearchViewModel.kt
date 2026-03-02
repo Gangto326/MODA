@@ -1,5 +1,6 @@
 package com.example.modapjt.domain.viewmodel
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -56,7 +57,21 @@ class SearchViewModel : ViewModel() {
         }
     }
 
-    // ✅ 새로고침 또는 첫 화면 진입 시 API 호출
+    // ✅ 새로고침 또는 첫 화면 진입 시 API 호출 (캐시 우선)
+    fun loadSearchData(context: Context) {
+        viewModelScope.launch {
+            try {
+                val response = repository.getSearchData(context)
+                _searchData.value = response
+                println("[SearchViewModel] 데이터 로드 완료 (캐시 우선)")
+            } catch (e: Exception) {
+                _error.value = e.message
+                println("[SearchViewModel] 오류 발생: ${e.message}")
+            }
+        }
+    }
+
+    // ✅ 기존 호환용 (context 없이)
     fun loadSearchData() {
         viewModelScope.launch {
             try {

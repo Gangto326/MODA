@@ -140,6 +140,20 @@ public class SearchController {
     }
 
     /**
+     * 메인 페이지 캐시 버전을 반환합니다.
+     * 앱에서 캐시된 버전과 비교하여 데이터 변경 여부를 판단합니다.
+     * @param userId
+     * @return
+     */
+    @GetMapping("/main/version")
+    public ResponseEntity<Map<String, String>> getMainPageVersion(
+            @UserId String userId
+    ) {
+        String version = searchService.getMainPageVersion(userId);
+        return ResponseEntity.ok(Map.of("version", version));
+    }
+
+    /**
      * 사용자의 메인 페이지에서 보여질 다양한 컨텐츠의 종합 데이터를 반환합니다.
      * @param userId
      * @return

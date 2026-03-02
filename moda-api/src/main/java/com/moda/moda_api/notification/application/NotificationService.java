@@ -50,6 +50,7 @@ public class NotificationService {
 				.putData("cardId", String.valueOf(card.getCardId().getValue()))  // cardId를 문자열로 명확히 전달
 				.putData("imageUrl", imageUrl)
 				.putData("title", card.getTitle())
+				.putData("invalidateMainCache", "true")
 				.setNotification(com.google.firebase.messaging.Notification.builder()
 					.setTitle("컨텐츠 저장이 완료되었습니다!")
 					.setBody(card.getTitle())

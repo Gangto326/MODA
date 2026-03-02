@@ -14,6 +14,7 @@ import com.bumptech.glide.Glide
 import com.example.modapjt.MainActivity
 import com.example.modapjt.R
 import com.example.modapjt.data.api.RetrofitInstance
+import com.example.modapjt.data.cache.MainPageCache
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.CoroutineScope
@@ -37,6 +38,11 @@ class MyFirebaseMessagingService : FirebaseMessagingService()  {
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
+
+        // 메인 페이지 캐시 무효화 시그널 처리
+        if (remoteMessage.data["invalidateMainCache"] == "true") {
+            MainPageCache.invalidate(this)
+        }
 
         val cardId = remoteMessage.data["cardId"]  // Extract cardId from data
         val imageUrl = remoteMessage.data["imageUrl"]  // Extract imageUrl from data

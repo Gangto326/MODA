@@ -58,6 +58,7 @@ import com.example.modapjt.domain.viewmodel.AuthViewModel
 import com.example.modapjt.domain.viewmodel.CategoryViewModel
 import com.example.modapjt.domain.viewmodel.SearchViewModel
 import com.airbnb.lottie.compose.*
+import androidx.compose.ui.platform.LocalContext
 import com.google.android.material.color.utilities.MaterialDynamicColors.background
 import okhttp3.internal.wait
 
@@ -103,9 +104,11 @@ fun newHomeScreen(
         searchData?.thumbnails ?: emptyList()
     }
 
+    val context = LocalContext.current
+
     LaunchedEffect(Unit) {
-        homeKeywordViewModel.fetchHomeKeywords() // userId 전달
-        searchViewModel.loadSearchData()
+        homeKeywordViewModel.fetchHomeKeywords()
+        searchViewModel.loadSearchData(context)
     }
 
 

@@ -167,4 +167,9 @@ public class CardRepositoryImpl implements CardRepository {
         return cardJpaRepository.countByUserIdAndBookmarkTrueAndDeletedAtIsNull(userId.getValue());
     }
 
+    @Override
+    public Optional<LocalDateTime> findLatestCreatedAtByUserId(UserId userId) {
+        return cardJpaRepository.findLatestCreatedAtByUserId(userId.getValue());
+    }
+
 }

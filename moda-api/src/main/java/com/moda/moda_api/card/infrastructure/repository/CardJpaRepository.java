@@ -130,5 +130,8 @@ public interface CardJpaRepository extends JpaRepository<CardEntity, String> {
     Long countByUserIdAndDeletedAtIsNull(String userId);
 
     Long countByUserIdAndBookmarkTrueAndDeletedAtIsNull(String userId);
+
+    @Query("SELECT MAX(c.createdAt) FROM CardEntity c WHERE c.userId = :userId AND c.deletedAt IS NULL")
+    Optional<LocalDateTime> findLatestCreatedAtByUserId(@Param("userId") String userId);
 }
 

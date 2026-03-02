@@ -20,6 +20,9 @@ interface SearchApiService {
      * 사용자 ID를 기반으로 검색 결과를 가져오는 API
      * @return 검색 결과를 포함하는 Response 객체
      */
+    @GET("api/search/main/version")
+    suspend fun getMainPageVersion(): Map<String, String>
+
     @GET("api/search/main")
     suspend fun searchMain(
 

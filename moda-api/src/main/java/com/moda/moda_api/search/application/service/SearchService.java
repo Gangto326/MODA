@@ -604,6 +604,27 @@ public class SearchService {
 	}
 
 	/**
+	 * 메인 페이지 캐시 버전을 반환합니다.
+	 * md5(userId + latestCardCreatedAt) 해시로 데이터 변경 여부를 판단합니다.
+	 */
+	public String getMainPageVersion(String userId) {
+		UserId userIdObj = new UserId(userId);
+		Optional<java.time.LocalDateTime> latestCreatedAt = cardRepository.findLatestCreatedAtByUserId(userIdObj);
+		String raw = userId + latestCreatedAt.map(Object::toString).orElse("empty");
+		try {
+			java.security.MessageDigest md = java.security.MessageDigest.getInstance("MD5");
+			byte[] digest = md.digest(raw.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+			StringBuilder sb = new StringBuilder();
+			for (byte b : digest) {
+				sb.append(String.format("%02x", b));
+			}
+			return sb.toString();
+		} catch (java.security.NoSuchAlgorithmException e) {
+			throw new RuntimeException("MD5 algorithm not available", e);
+		}
+	}
+
+	/**
 	 * 사용자가 즐겨찾기한 콘텐츠가 보일 즐겨찾기 메인 페이지 데이터를 반환합니다.
 	 *
 	 * 4(Img)의 경우는 10개, 다른 콘텐츠(1, 2, 3)의 경우 5개의 최적 컨텐츠를 반환.

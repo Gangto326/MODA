@@ -1,7 +1,9 @@
 package com.example.modapjt.data.repository
 
+import android.content.Context
 import android.util.Log
 import com.example.modapjt.data.api.SearchApiService
+import com.example.modapjt.data.cache.MainPageCache
 import com.example.modapjt.data.dto.response.HomeKeywordResponse
 import com.example.modapjt.data.dto.response.HotTopicItem
 import com.example.modapjt.data.dto.response.KeywordSearchResponse
@@ -43,9 +45,47 @@ class SearchRepository(private val api: SearchApiService) {
     }
 
     /**
-     * 검색 API를 호출하여 데이터를 가져옴
-     * @param onSuccess 성공 시 데이터를 반환하는 콜백 함수
-     * @param onFailure 실패 시 호출될 콜백 함수
+     * 메인 페이지 데이터를 캐시 우선으로 가져옵니다.
+     * 1. 캐시가 유효하면 → 서버 version 확인 → 동일하면 캐시 반환
+     * 2. 캐시 없거나 version 불일치 → 서버에서 새로 조회 → 캐시 저장
+     */
+    suspend fun getSearchData(context: Context): SearchResponse? {
+        return withContext(Dispatchers.IO) {
+            try {
+                // 캐시가 유효한 경우 version 비교
+                if (MainPageCache.isValid(context)) {
+                    val cachedVersion = MainPageCache.getVersion(context)
+                    val serverVersion = try {
+                        api.getMainPageVersion()["version"]
+                    } catch (e: Exception) {
+                        null
+                    }
+                    if (cachedVersion != null && cachedVersion == serverVersion) {
+                        Log.d("SearchRepository", "캐시 히트 (version=$cachedVersion)")
+                        return@withContext MainPageCache.load(context)
+                    }
+                }
+
+                // 캐시 미스 또는 version 불일치 → 서버 조회
+                val response = api.searchMain()
+                val version = try {
+                    api.getMainPageVersion()["version"] ?: ""
+                } catch (e: Exception) {
+                    ""
+                }
+                MainPageCache.save(context, response, version)
+                Log.d("SearchRepository", "서버에서 새로 로드 (version=$version)")
+                response
+            } catch (e: Exception) {
+                e.printStackTrace()
+                // 네트워크 실패 시 캐시 반환 (오프라인 지원)
+                MainPageCache.load(context)
+            }
+        }
+    }
+
+    /**
+     * 기존 호환용 (context 없이 호출 시 캐시 없이 직접 API 호출)
      */
     suspend fun getSearchData(): SearchResponse? {
         return try {

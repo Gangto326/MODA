@@ -51,4 +51,6 @@ public interface CardRepository {
     Long countByUserIdAndDeletedAtIsNull(UserId userId);
 
     Long countByUserIdAndBookmarkTrueAndDeletedAtIsNull(UserId userId);
+
+    Optional<LocalDateTime> findLatestCreatedAtByUserId(UserId userId);
 }
