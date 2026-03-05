@@ -3,6 +3,7 @@ package com.moda.moda_api.card.presentation.controller;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.concurrent.RejectedExecutionException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -31,6 +32,7 @@ import com.moda.moda_api.card.presentation.request.CardRequest;
 import com.moda.moda_api.card.presentation.request.MoveCardRequest;
 import com.moda.moda_api.card.presentation.request.UpdateCardRequest;
 import com.moda.moda_api.common.annotation.UserId;
+import com.moda.moda_api.common.exception.ServerBusyException;
 import com.moda.moda_api.common.pagination.SliceResponseDto;
 
 import jakarta.validation.Valid;
@@ -70,15 +72,19 @@ public class CardController {
 			);
 		}
 
-		return CompletableFuture.supplyAsync(() -> {
-			try {
-				boolean result = cardService.createImages(userId, files);
-				return ResponseEntity.ok(result);
-			} catch (Exception e) {
-				log.error("Failed to create images", e);
-				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
-			}
-		}, crawlingExecutor);
+		try {
+			return CompletableFuture.supplyAsync(() -> {
+				try {
+					boolean result = cardService.createImages(userId, files);
+					return ResponseEntity.ok(result);
+				} catch (Exception e) {
+					log.error("Failed to create images", e);
+					return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
+				}
+			}, crawlingExecutor);
+		} catch (RejectedExecutionException e) {
+			throw new ServerBusyException("요청이 많아 카드를 생성할 수 없습니다. 잠시 후 다시 시도해주세요.", userId);
+		}
 	}
 
 	@GetMapping("")

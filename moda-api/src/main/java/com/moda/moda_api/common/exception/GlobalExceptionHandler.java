@@ -57,4 +57,16 @@ public class GlobalExceptionHandler {
 		}
 		return ApiResponse.error(e.getMessage());
 	}
+
+	@ExceptionHandler(ServerBusyException.class)
+	@ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+	public ApiResponse<Void> handleServerBusyException(ServerBusyException e) {
+		log.warn("Server busy — thread pool exhausted: {}", e.getMessage());
+		try {
+			notificationService.sendErrorNotification(e.getUserId(), e.getMessage());
+		} catch (Exception ex) {
+			log.error("Failed to send FCM notification", ex);
+		}
+		return ApiResponse.error(e.getMessage());
+	}
 }
