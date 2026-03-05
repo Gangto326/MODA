@@ -45,7 +45,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api/card")
 public class CardController {
 	private final CardService cardService;
-	private final Executor crawlingExecutor;
+	private final Executor imageExecutor;
 
 	// Json으로 날라올 때
 	@PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -81,7 +81,7 @@ public class CardController {
 					log.error("Failed to create images", e);
 					return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
 				}
-			}, crawlingExecutor);
+			}, imageExecutor);
 		} catch (RejectedExecutionException e) {
 			throw new ServerBusyException("요청이 많아 카드를 생성할 수 없습니다. 잠시 후 다시 시도해주세요.", userId);
 		}

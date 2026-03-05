@@ -10,13 +10,13 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @Configuration
 public class AsyncConfig {
 
-	@Bean("crawlingExecutor")
-	public Executor crawlingExecutor() {
+	@Bean("imageExecutor")
+	public Executor imageExecutor() {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 		executor.setCorePoolSize(2);
 		executor.setMaxPoolSize(4);
 		executor.setQueueCapacity(50);
-		executor.setThreadNamePrefix("Crawl-");
+		executor.setThreadNamePrefix("Image-");
 		executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
 		executor.initialize();
 		return executor;

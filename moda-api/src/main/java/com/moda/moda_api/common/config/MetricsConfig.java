@@ -48,12 +48,12 @@ public class MetricsConfig {
 	@Bean
 	public String monitorExecutors(
 		MeterRegistry registry,
-		@Qualifier("crawlingExecutor") Executor crawlingExecutor,
+		@Qualifier("imageExecutor") Executor imageExecutor,
 		@Qualifier("youtubeExecutor") Executor youtubeExecutor,
 		ExecutorService executorService
 	) {
-		if (crawlingExecutor instanceof ThreadPoolTaskExecutor tpe) {
-			ExecutorServiceMetrics.monitor(registry, tpe.getThreadPoolExecutor(), "crawlingExecutor");
+		if (imageExecutor instanceof ThreadPoolTaskExecutor tpe) {
+			ExecutorServiceMetrics.monitor(registry, tpe.getThreadPoolExecutor(), "imageExecutor");
 		}
 		if (youtubeExecutor instanceof ThreadPoolTaskExecutor tpe) {
 			ExecutorServiceMetrics.monitor(registry, tpe.getThreadPoolExecutor(), "youtubeExecutor");
