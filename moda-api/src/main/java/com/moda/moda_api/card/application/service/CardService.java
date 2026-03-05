@@ -43,7 +43,7 @@ import com.moda.moda_api.common.pagination.SliceRequestDto;
 import com.moda.moda_api.common.pagination.SliceResponseDto;
 import com.moda.moda_api.notification.application.NotificationService;
 import com.moda.moda_api.notification.domain.NotificationType;
-import com.moda.moda_api.search.domain.CardSearchRepository;
+import com.moda.moda_api.search.application.event.CardSearchEvent;
 import com.moda.moda_api.summary.application.dto.SummaryResultDto;
 import com.moda.moda_api.summary.application.service.SummaryService;
 import com.moda.moda_api.summary.infrastructure.api.PythonAiClient;
@@ -53,6 +53,8 @@ import com.moda.moda_api.user.domain.User;
 import com.moda.moda_api.user.domain.UserId;
 import com.moda.moda_api.user.domain.UserRepository;
 import com.moda.moda_api.user.exception.UserNotFoundException;
+
+import org.springframework.context.ApplicationEventPublisher;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -77,7 +79,7 @@ public class CardService {
 	private final SummaryService summaryService;
 	private final ImageStorageService imageStorageService;
 	private final PythonAiClient pythonAiClient;
-	private final CardSearchRepository cardSearchRepository;
+	private final ApplicationEventPublisher eventPublisher;
 	private final NotificationService notificationService;
 	private final UserRepository userRepository;
 	private final TransactionTemplate transactionTemplate;
@@ -243,7 +245,7 @@ public class CardService {
 			userKeywordRepository.saveKeywords(userIdObj, card.getKeywords());
 			hotTopicRepository.incrementKeywordScore(card.getKeywords());
 			cardRepository.save(card);
-			cardSearchRepository.save(card);
+			eventPublisher.publishEvent(CardSearchEvent.save(card));
 			return null;
 		});
 
@@ -277,7 +279,7 @@ public class CardService {
 		hotTopicRepository.incrementKeywordScore(card.getKeywords());
 
 		cardRepository.save(card);
-		cardSearchRepository.save(card);
+		eventPublisher.publishEvent(CardSearchEvent.save(card));
 		notificationService.sendFCMNotification(userIdObj.getValue(), NotificationType.card, card);
 
 		return CompletableFuture.completedFuture(true);
@@ -319,7 +321,7 @@ public class CardService {
 
 		cards.forEach(System.out::println);
 		cardRepository.saveAll(cards);
-		cardSearchRepository.save(cards.get(0));
+		eventPublisher.publishEvent(CardSearchEvent.saveAll(cards));
 
 		notificationService.sendFCMNotification(userIdObj.getValue(), NotificationType.card, cards.get(0));
 
@@ -402,10 +404,8 @@ public class CardService {
 		// Card 삭제 권한 검증
 		cardsToDelete.forEach(card -> card.validateOwnership(userIdObj));
 
-		// ES에서 카드 삭제
-		cardSearchRepository.deleteAllById(cardIdList);
-
-		// 카드 삭제
+		// 카드 삭제 (PG 먼저 → AFTER_COMMIT에서 ES 삭제)
+		eventPublisher.publishEvent(CardSearchEvent.delete(cardIdList));
 		return cardRepository.deleteAll(cardsToDelete);
 	}
 
@@ -529,7 +529,7 @@ public class CardService {
 		card.setBookmark(request.getIsBookmark());
 
 		cardRepository.save(card);
-		cardSearchRepository.save(card);
+		eventPublisher.publishEvent(CardSearchEvent.save(card));
 		return true;
 	}
 
