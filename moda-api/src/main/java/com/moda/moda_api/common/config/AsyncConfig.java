@@ -22,6 +22,18 @@ public class AsyncConfig {
 		return executor;
 	}
 
+	@Bean("cardSaveExecutor")
+	public Executor cardSaveExecutor() {
+		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+		executor.setCorePoolSize(2);
+		executor.setMaxPoolSize(4);
+		executor.setQueueCapacity(100);
+		executor.setThreadNamePrefix("CardSave-");
+		executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+		executor.initialize();
+		return executor;
+	}
+
 	@Bean("youtubeExecutor")
 	public Executor youtubeExecutor() {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();

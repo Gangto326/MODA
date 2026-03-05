@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
@@ -87,6 +88,7 @@ public class CardService {
 	private final Counter cardCreationCounter;
 	private final Counter cardCreationErrorCounter;
 	private final MeterRegistry meterRegistry;
+	private final Executor cardSaveExecutor;
 
 	// Future 공유 패턴: 동일 URL 동시 요청 시 크롤링/AI 1회만 실행
 	private final ConcurrentHashMap<String, CompletableFuture<SummaryResultDto>> processingFutures = new ConcurrentHashMap<>();
@@ -163,7 +165,7 @@ public class CardService {
 		}
 
 		return summaryFuture
-			.thenApply(summaryResult -> saveCardFromSummary(userIdObj, finalUrl, urlHash, summaryResult))
+			.thenApplyAsync(summaryResult -> saveCardFromSummary(userIdObj, finalUrl, urlHash, summaryResult), cardSaveExecutor)
 			.whenComplete((success, throwable) -> {
 				sample.stop(cardCreationTimer);
 				if (throwable != null) {

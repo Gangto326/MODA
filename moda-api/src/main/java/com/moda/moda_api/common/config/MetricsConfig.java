@@ -49,11 +49,15 @@ public class MetricsConfig {
 	public String monitorExecutors(
 		MeterRegistry registry,
 		@Qualifier("imageExecutor") Executor imageExecutor,
+		@Qualifier("cardSaveExecutor") Executor cardSaveExecutor,
 		@Qualifier("youtubeExecutor") Executor youtubeExecutor,
 		ExecutorService executorService
 	) {
 		if (imageExecutor instanceof ThreadPoolTaskExecutor tpe) {
 			ExecutorServiceMetrics.monitor(registry, tpe.getThreadPoolExecutor(), "imageExecutor");
+		}
+		if (cardSaveExecutor instanceof ThreadPoolTaskExecutor tpe) {
+			ExecutorServiceMetrics.monitor(registry, tpe.getThreadPoolExecutor(), "cardSaveExecutor");
 		}
 		if (youtubeExecutor instanceof ThreadPoolTaskExecutor tpe) {
 			ExecutorServiceMetrics.monitor(registry, tpe.getThreadPoolExecutor(), "youtubeExecutor");
